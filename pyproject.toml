@@ -1,0 +1,20 @@
+[project]
+name = "lucifex"
+version = "0.0.1"
+description = "LUCiFEx: Linearized Underground Convection in FEniCSx"
+readme = "README.md"
+license-files = ["LICENSE"]
+keywords = [
+        "python",
+        "fluid dynamics",
+        "convection",
+        "finite element",
+        "fenicsx",
+        "dolfinx",
+        "time-dependent",
+        "transient",
+        "simulation"
+    ]
+
+[tool.setuptools]
+packages = ["lucifex"]

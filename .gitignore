@@ -1,0 +1,78 @@
+# simulation results
+*.npy
+*.h5
+*.xdmf
+*.xml
+*.vtk
+*.mp4
+
+# private
+_*.ipynb
+_*.py
+*_/
+
+
+# interactive
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# compiled
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.py[cdox]
+__pycache__/
+
+# distribution
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+.installed.cfg
+*.egg-info/
+*.egg
+
+# packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated
+.DS_Store
+.DS_Store?
+
+# environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# text editor
+.vscode/
+
+# unit testing
+.pytest_cache
+.coverage
