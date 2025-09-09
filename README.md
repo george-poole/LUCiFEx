@@ -149,7 +149,7 @@ dir_paths = [dir_path_0, dir_path_1, ...]
 plot_figure(dir_paths, fig_name, fig_dir)(proxy((u_name, u_type, u_file)))
 ```
 
-The `co_postprocess` decorator has a slightly different purpose, namely to combine data from an ensemble of directories into a single return value (e.g. a plot comparing data as a simulation parameter is changed). For example, we may be interested in comparing the results obtained by different choices of the finite difference operator, in which case the ensemble of simulation directories may look like
+The `co_postprocess` decorator has a slightly different purpose, namely to combine data from an ensemble of directories into a single object (e.g. a plot comparing data as a simulation parameter is changed, or a mean quantity averaged across simulations). For example, we may be interested in comparing the results obtained by different choices of the finite difference operator, in which case the ensemble of simulation directories may look like
 
 ```
 data/
