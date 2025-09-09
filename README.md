@@ -193,7 +193,7 @@ See `/demo/ipynb/` and `demo/py/`.
 
 These features remain to be implemented as part of ongoing development:
 
-+ full documentation and testing
++ further documentation and testing
 + update to latest version of `fenicsx` (currently on 0.6.0)
 + parallelisation with `mpi4py`
 
