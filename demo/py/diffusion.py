@@ -31,7 +31,7 @@ def integrand(
     write_step=1, 
     write_file='series',
     dir_base='./data',
-    dir_labels=('Lx, Nx'),
+    dir_params=('Lx, Nx'),
 )
 def diffusion_1d(
     Lx: float, 

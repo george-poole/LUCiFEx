@@ -183,8 +183,8 @@ def create_simulation(
     checkpoint_file: str = 'CHECKPOINT',
     texec_file: str = 'TEXEC',
     dir_base: str = './',
-    dir_labels: Iterable[str] | str = '',
-    dir_tag: str | None = None,
+    dir_params: Iterable[str] | str = '',
+    dir_label: str | None = None,
     dir_timestamp: bool = False,
 ):
     if petsc is None:
@@ -227,8 +227,8 @@ def create_simulation(
             checkpoint_file: str = ...,
             texec_file: str = ...,
             dir_base: str = ...,
-            dir_labels: Iterable[str] | str = ...,
-            dir_tag: str | None = ...,
+            dir_params: Iterable[str] | str = ...,
+            dir_label: str | None = ...,
             dir_timestamp: bool = ...,
         ) -> Callable[P, Simulation]:
             ...
@@ -275,8 +275,8 @@ def create_simulation(
             else:
                 assert all(i in simulation_func_params for i in kwargs)
                 return _(petsc=petsc, jit=jit, ffcx=ffcx, store_step=store_step, 
-                                write_step=write_step, dir_base=dir_base, dir_labels=dir_labels,
-                                dir_tag=dir_tag, dir_timestamp=dir_timestamp, 
+                                write_step=write_step, dir_base=dir_base, dir_params=dir_params,
+                                dir_label=dir_label, dir_timestamp=dir_timestamp, 
                         write_file=write_file, parameter_file=parameter_file, checkpoint_file=checkpoint_file, texec_file=texec_file)(*args, **kwargs)
         
         return _

@@ -8,8 +8,8 @@ def create_path(
     namespace: dict[str, Any],
     *,
     dir_base: str,
-    dir_labels: Iterable[str] | str,
-    dir_tag: str | None,
+    dir_params: Iterable[str] | str,
+    dir_label: str | None,
     dir_timestamp: bool | None,
     dir_seps: tuple[str, str] = ('|', '__'),
     mkdir: bool = False,
@@ -18,17 +18,17 @@ def create_path(
     arg_sep, tag_sep = dir_seps
     dir_path = dir_base
 
-    if isinstance(dir_labels, str):
-        dir_labels = dir_labels.split()
+    if isinstance(dir_params, str):
+        dir_params = dir_params.split()
 
-    for i, arg_name in enumerate(dir_labels):
+    for i, arg_name in enumerate(dir_params):
         if i == 0:
             dir_path = f"{dir_path}/{arg_name}={namespace[arg_name]}"
         else:
             dir_path = f"{dir_path}{arg_sep}{arg_name}={namespace[arg_name]}"
 
-    if dir_tag:
-        dir_path = f"{dir_path}{tag_sep}{dir_tag}"
+    if dir_label:
+        dir_path = f"{dir_path}{tag_sep}{dir_label}"
 
     if dir_timestamp:
         tstamp = str(datetime.datetime.now())

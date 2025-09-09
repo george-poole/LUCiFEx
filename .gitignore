@@ -6,12 +6,6 @@
 *.vtk
 *.mp4
 
-# private
-_*.ipynb
-_*.py
-*_/
-
-
 # interactive
 .ipynb_checkpoints
 profile_default/

@@ -71,7 +71,7 @@ from lucifex.sim import create_simulation
     write_step=..., 
     write_file=...,
     dir_base=...,
-    dir_labels=...,
+    dir_params=...,
 )
 def diffusion_1d(Lx: float, Nx: int, dt: float, Dfdm: FiniteDifference):
     ... # code defining solvers, time and timestep
@@ -88,7 +88,7 @@ simulation = diffusion_1d(write_step=3)(Lx, Nx, dt, Ddiff)
 # writing data every 2.0 time units
 simulation = diffusion_1d(write_step=2.0)(Lx, Nx, dt, Ddiff) 
 # writing data to directory `./data/Lx=2.0|Dt=CN`
-simulation = diffusion_1d(dir_base='./data', dir_labels=('Lx', 'Dfdm'))(Lx, Nx, dt, Ddiff) 
+simulation = diffusion_1d(dir_base='./data', dir_params=('Lx', 'Dfdm'))(Lx, Nx, dt, Ddiff) 
 ```
  
 Integration over time is then performed by the `integrate` routine
@@ -187,7 +187,7 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 ## Demos
 
-See `/demo/ipynb/` and `demo/py/`.
+See `/demo/ipynb/` and `demo/py/`. The 'A'-stream is more application-focussed with examples from fluid mechanics and porous media, whereas the 'B'-stream illustrates technical details from the `lucifex` package.
 
 ## TODO List
 
