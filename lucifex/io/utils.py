@@ -92,4 +92,4 @@ def io_array_dim(
         case (dim0, dim1):
             return dim0 * dim1
         case _:
-            raise NotImplementedError(f'Shape {shape} are not supported.')
+            raise NotImplementedError(f'I/O with shape {shape} is not supported.')

@@ -84,7 +84,7 @@ def load_mesh(
     if isinstance(comm, str):
         comm = getattr(MPI, comm)
     
-    file_path = file_path_ext(dir_path, file_name, 'xdmf')
+    file_path = file_path_ext(dir_path, file_name, 'xdmf', mkdir=False)
 
     with XDMFFile(comm, file_path, "r") as xdmf:
         msh = xdmf.read_mesh(name=name)
@@ -194,7 +194,7 @@ def load_txt_dict(
     skip: Iterable[int | str] = (),
 ) -> dict[str, Any | EllipsisType]:
 
-    file_path = file_path_ext(dir_path, file_name, 'txt')
+    file_path = file_path_ext(dir_path, file_name, 'txt', mkdir=False)
     params = {}
 
     with open(file_path, "r") as f:
@@ -222,7 +222,7 @@ def load_npz_dict(
     *,
     search: str | None = None,
 ) -> dict[str, float | np.ndarray | NumericSeries | GridSeries]:
-    file_path = file_path_ext(dir_path, file_name, 'npz')
+    file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
     d: dict[str, float | np.ndarray | dict[str, float] | dict[str | float, float | np.ndarray]] = {}
@@ -260,7 +260,7 @@ def load_figure(
     dir_path: str,
     file_name: str,
 ) -> Figure:
-    file_path = file_path_ext(dir_path, file_name, 'pickle')
+    file_path = file_path_ext(dir_path, file_name, 'pickle', mkdir=False)
     return pkl.load(file_path, 'rb')
 
 

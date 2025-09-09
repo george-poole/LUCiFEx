@@ -10,6 +10,8 @@ from dolfinx.fem import FunctionSpace, Function, Constant, Expression
 from dolfinx.mesh import Mesh
 
 from ..utils import set_fem_constant, set_fem_function, extract_mesh, fem_function_space, grid
+from ..utils.fem_utils import ScalarVectorError
+from ..utils.fem_typecasting import fem_function_components
 from ..utils.deferred import Writer
 from ..utils.fem_perturbation import Perturbation
 from ..fem import LUCiFExFunction, LUCiFExConstant, Unsolved, UnsolvedType, is_unsolved
@@ -568,11 +570,21 @@ class GridSeries(NumericSeries):
         strict: bool = False,
         jit: bool | None = None,
     ) -> Self:
-        return cls([grid(i, strict, jit) for i in u.series], 
-                   u.time_series, 
-                   grid(u.mesh, strict), 
-                   u.name,
-                )
+        match u.shape:
+            case ():
+                series = [grid(i, strict, jit) for i in u.series]
+            case (dim, ):
+                uxyz_series = [fem_function_components(('P', 1), i) for i in u.series]
+                series = [np.array([grid(j) for j in i[:dim]]) for i in uxyz_series]
+            case _:
+                raise ScalarVectorError(u)
+            
+        return cls(
+            series,
+            u.time_series,
+            grid(u.mesh, strict), 
+            u.name,
+        )
     
     @property
     def axes(self) -> tuple[np.ndarray, ...]:

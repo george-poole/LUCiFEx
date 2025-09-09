@@ -220,10 +220,13 @@ def _(
         dp0_function.x.array[:] = u.x.array[:]
         return _write(dp0_function, file_name, dir_path, t, "a", comm)
     
-    _cached_write_mesh(u.function_space.mesh, file_name, dir_path, mode)
+    if mode == 'w':
+        _write(u.function_space.mesh, file_name, dir_path, mode=mode)
+    else:
+        _cached_write_mesh(u.function_space.mesh, file_name, dir_path)
     
     if xdmf is None:
-        with XDMFFile(comm, file_path, mode) as xdmf:
+        with XDMFFile(comm, file_path, 'a') as xdmf:
             xdmf.write_function(u, t)
     else:
         xdmf.write_function(u, t)
@@ -525,9 +528,9 @@ def _cached_function_space(
     
 
 @lru_cache(maxsize=None)
-def _cached_write_mesh(mesh, file_name, dir_path, mode) -> None:
-    # for ensuring that a time-independent mesh is written once only
-    _write(mesh, file_name, dir_path, mode=mode, comm=mesh.comm)
+def _cached_write_mesh(mesh, file_name, dir_path) -> None:
+    """Ensuring that a time-independent mesh is written once only"""
+    _write(mesh, file_name, dir_path, mode='w', comm=mesh.comm)
 
 
 def clear_write_cache():

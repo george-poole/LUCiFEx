@@ -53,7 +53,7 @@ def ShapeError(
     return ValueError(f'Expected {shape}, not shape {u.ufl_shape}.')
 
 
-def VectorError(u):
+def ScalarError(u):
     return ShapeError(u, 'scalar')
 
 
@@ -191,7 +191,6 @@ def is_discontinuous_family(family: str) -> bool:
 def subspace_functions(
     f: Function,
     collapse: bool = True,
-    # TODO copy: bool = False,
 ) -> tuple[Function, ...]:
     if collapse:
         return tuple(i.collapse() for i in f.split())

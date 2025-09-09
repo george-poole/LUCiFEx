@@ -51,39 +51,115 @@ F += inner(grad(v), grad(CN(u))) * dx
 Moreover `lucifex` overloads many of `ufl`'s existing operators, such as `grad`, such that `grad(CN(u))` is equivalent to `CN(grad(u))`.
 
 
-**Simulation management**
+**Running simulations**
 
-A `Simulation` object is created from the sequence of a problems that are to solved repeatedly in a time loop. The decorator function `create_simulation` turns an appropriate user-defined function into a simulation factory.
+A simulation in `lucifex` is in effect a sequence of (linear) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`
 
 ```python
+from lucifex.sim import Simulation
+simulation = Simulation(solvers, t, dt)
+```
+
+Whilst options for writing data to disk during the course of the simulation can be configured separately, the `create_simulation` decorator provides a succinct and convenient way of doing so.
+
+```python
+from lucifex.fdm import AB2, FiniteDifference
+from lucifex.sim import create_simulation
+
 @create_simulation(
-    write_step=2,
+    # default I/O configuration specified here
+    write_step=..., 
+    write_file=...,
+    dir_base=...,
+    dir_labels=...,
 )
-def diffusion_simulation(...):
+def diffusion_1d(Lx: float, Nx: int, dt: float, Dfdm: FiniteDifference):
+    ... # code defining solvers, time and timestep
     return solvers, t, dt
 ```
 
-****
+Now given the simulation's chosen parameters `Lx, Nx, dt, Ddiff`, we can configure and create a simulation by
 
-interactive, hands-on prototyping in iPython environments
-`integrate(simulation)`
+```python
+# simulation with default I/O configuration
+simulation = diffusion_1d(Lx, Nx, dt, Ddiff)
+# writing data every 3 integration steps
+simulation = diffusion_1d(write_step=3)(Lx, Nx, dt, Ddiff) 
+# writing data every 2.0 time units
+simulation = diffusion_1d(write_step=2.0)(Lx, Nx, dt, Ddiff) 
+# writing data to directory `./data/Lx=2.0|Dt=CN`
+simulation = diffusion_1d(dir_base='./data', dir_labels=('Lx', 'Dfdm'))(Lx, Nx, dt, Ddiff) 
+```
+ 
+Integration over time is then performed by the `integrate` routine
 
-long-running, hands-off simulations from the command line
-+ many handy utilities
+```python
+from lucifex.sim import integrate
+n_stop, t_stop = 10, 2.5
+integrate(simulation, n_stop, t_stop)
+```
+
+if working in an interactive, hands-on iPython environment (ideal for demonstration, prototyping and testing purposes). In a script designed to be run from the command line, we instead have the `integrate_from_cli` routine 
+
+```python
+# `simulate .py` script
+if __name__ == "__main__":
+    simulation = integrate_from_cli(diffusion_1d)
+```
+
+which will create a command line interface from the `diffusion_1d` function into which its arguments `Lx, Nx, dt, Dfdm, ...` and arguments to the usual `integrate` function can be supplied like so
+
+```bash
+python simulate.py --Lx 2.0 --Nx 10 --n_stop 10 --t_stop 2.5
+```
 
 **Postprocessing**
 
-The decorators `postprocess` and `co_postprocess` enable calculations and plots to be made and saved from the paths of a batch or ensemble of data directories, without having to clutter the workspace with repeated `load` statements.
+The decorators `postprocess` and `co_postprocess` enable functions acting on the saved simulation data (e.g. to create a plot) to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and clutter one's script with repetitive statements. 
 
 ```python
-from lucifex.io import postprocess, proxy
+from matplotlib.figure import Figure
+from lucifex.fdm import FunctionSeries
+from lucifex.io import postprocess, proxy, load_mesh, load_function_series, write
 
 @postprocess
-def plot_figure(u):
-    ...
+def plot_figure(u: FunctionSeries) -> Figure:
+    ... # code creating figure
 
-plot_figure(data_dirs, fig_name, fig_dir)(proxy((u_name, u_type, u_file)))
+@co_postprocess
+def co_plot_figure(u: list[FunctionSeries]) -> Figure:
+    ... # code creating figure
+
+# long-hand 
+mesh = load_mesh(mesh_name, dir_path, u_file)
+u = load_function_series(u_name, dir_path, u_file, mesh)
+fig = plot_figure(u)
+write(fig, fig_name, fig_dir)
+# short-hand creating and returning figure
+figure = plot_figure(dir_name)(proxy((u_name, u_type, u_file))) 
+# short-hand creating and writing figure, then returning `None`
+plot_figure(dir_name, fig_name, fig_dir)(proxy((u_name, u_type, u_file, mesh_name)))
 ```
+
+The `postprocess` decorator furthermore enables the decorated function to act on either a single data directory, or a sequence of data directories. The latter enables the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written with the same name and to the same filename).
+
+```python
+dir_paths = [dir_path_0, dir_path_1, ...]
+# short-hand creating and writing figure in each directory
+plot_figure(dir_paths, fig_name, fig_dir)(proxy((u_name, u_type, u_file)))
+```
+
+The `co_postprocess` decorator has a slightly different purpose, namely to combine data from an ensemble of directories into a single return value (e.g. a plot comparing data as a simulation parameter is changed). For example, we may be interested in comparing the results obtained by different choices of the finite difference operator, in which case the ensemble of simulation directories may look like
+
+```
+data/
+|___Lx=1.0|Dfdm=AB1/
+|___Lx=1.0|Dfdm=AB2/
+|___Lx=1.0|Dfdm=AM1/
+|___Lx=1.0|Dfdm=AM2/
+|___Lx=1.0|Dfdm=CN/
+```
+
 
 ## Installation (macOS)
 
@@ -117,6 +193,7 @@ See `/demo/ipynb/` and `demo/py/`.
 
 These features remain to be implemented as part of ongoing development:
 
++ full documentation and testing
 + update to latest version of `fenicsx` (currently on 0.6.0)
 + parallelisation with `mpi4py`
 
@@ -126,4 +203,4 @@ These features are outside the scope of current development, but could be of int
 
 + adaptive mesh refinement
 + time-dependent meshes
-+ Runge-Kutta integration
++ time-stepping with Runge-Kutta methods

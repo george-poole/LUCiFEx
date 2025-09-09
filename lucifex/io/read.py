@@ -56,15 +56,16 @@ def read(
     u: Function | LUCiFExConstant | FunctionSeries | ConstantSeries,
     dir_path = None,
     file_name = None,
-    slc = slice(0, None),
+    *args,
+    **kwargs,
 ) -> None:
     
     if file_name is None:
         file_name = u.name
 
-    file_path = file_path_ext(dir_path, file_name, 'h5')
+    file_path = file_path_ext(dir_path, file_name, 'h5', mkdir=False)
 
-    return _read(u, file_path, slc)
+    return _read(u, file_path, *args, **kwargs)
 
 
 @singledispatch
@@ -75,15 +76,9 @@ def _read(u):
 @_read.register(np.ndarray)
 def _(
     u: np.ndarray,
-    file_path,
     *,
-    name,
     dofs: np.ndarray | None = None,
 ):
-
-    if dofs is None:
-        with h5py.File(file_path, "r") as h5:
-            dofs = _dofs_time_series(h5, name)[0][0]
 
     l = len(dofs)
     dim = io_array_dim(u.shape)
@@ -108,7 +103,12 @@ def _(
     *,
     dofs=None,
 ):
-    return _read(u.x.array, file_path, name=u.name, dofs=dofs)
+    if dofs is None:
+        dim = io_array_dim(u.ufl_shape)
+        with h5py.File(file_path, "r") as h5:
+            dofs = _dofs_time_series(h5, u.name, dim)[0][0]
+
+    return _read(u.x.array, dofs=dofs)
 
 
 @_read.register(LUCiFExConstant)
@@ -118,7 +118,9 @@ def _(
     *,
     dofs=None,
 ):
-    return _read(u.value, file_path, name=u.name, dofs=dofs)
+    with h5py.File(file_path, "r") as h5:
+        dofs = _dofs_time_series(h5, u.name, None)[0][0] # TODO or dim ?
+    return _read(u.value, dofs=dofs)
 
 
 @_read.register(ConstantSeries)
@@ -126,7 +128,7 @@ def _(
 def _(
     u: ConstantSeries | FunctionSeries,
     file_path,
-    slc: Iterable[int] | StrSlice | int,
+    slc: Iterable[int] | StrSlice | int = slice(0, None),
 ):      
     if isinstance(slc, int):
         slc = range(0, len(u.series), slc)
@@ -162,11 +164,11 @@ def _(
                 n_stop = len(h5[f"Function/{u.name}"])
             if n_step is None:
                 n_step = 1
-            n_iter = range(n_start, n_stop, n_step)
+            time_indices = range(n_start, n_stop, n_step)
         else:
-            n_iter = slc
+            time_indices = slc
         dofs_series, time_series = _dofs_time_series(h5, u.name, dim)
-        for n in n_iter:
+        for n in time_indices:
             _read(container, file_path, dofs=dofs_series[n])
             u.update(container, future)
             u.forward(time_series[n])
@@ -180,7 +182,7 @@ def _dofs_time_series(
     dim: int | None
 ) -> tuple[list[np.ndarray], list[float]]:
     """
-    `([𝐱₀, 𝐱₁, 𝐱₂, ...], [t₀, t₁, t₂, ...]`
+    `([𝐱₀, 𝐱₁, 𝐱₂, ...], [t₀, t₁, t₂, ...])`
     """
     tstr_dofs: dict[str, np.ndarray] = h5[f"Function/{u_name}"]
     t_dofs: dict[float, np.ndarray] = dict(sorted({
@@ -191,6 +193,5 @@ def _dofs_time_series(
         dofs = [x[:, 0] for x in t_dofs.values()]
     else:
         dofs = [np.array([j for i in x[:, :dim] for j in i]) for x in t_dofs.values()]
-        # dofs = [np.hstack(x[:,:dim]) for x in t_dofs.values()] NOTE this is much slower
     return dofs, t
 

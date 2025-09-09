@@ -12,7 +12,7 @@ from dolfinx.fem import (
 )
 from ufl.core.expr import Expr
 
-from .fem_typecasting import fem_function, fem_function_scalars
+from .fem_typecasting import fem_function, fem_function_components
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
 from .fem_mutation import set_fem_function
 
@@ -48,8 +48,8 @@ def dofs_indices(
         else:
             raise NotImplementedError
             # TODO does this work?
-            function_subspace, _ = function_space.sub(subspace_index).collapse()
-            return locate_dofs_geometrical(function_subspace, dof_indicator)
+            # function_subspace, _ = function_space.sub(subspace_index).collapse()
+            # return locate_dofs_geometrical(function_subspace, dof_indicator)
         
     if method == 'topological':
         tdim = function_space.mesh.topology.dim
@@ -69,12 +69,8 @@ def dofs_indices(
             )
             assert len(dofs) == 2
             return dofs
-            if ...:
-                return dofs[0]
-            else:
-                return dofs
         
-    raise ValueError(f'{method}')
+    raise ValueError(f'{method} not recognised')
 
 
 def as_spatial_indicator_func(
@@ -117,7 +113,7 @@ def dofs(
         u = fem_function(fs, u, use_cache=use_cache, reuse=False)
         return u.x.array[:]  # TODO or .vector[:] ?
     elif l2_norm and is_vector(u):
-        scalars = fem_function_scalars(fs, u, use_cache=True)
+        scalars = fem_function_components(fs, u, use_cache=True)
         scalar_dofs = np.stack([dofs(i, fs, use_cache=False) for i in scalars], axis=1)
         return np.linalg.norm(scalar_dofs, axis=1, ord=2)
     else:

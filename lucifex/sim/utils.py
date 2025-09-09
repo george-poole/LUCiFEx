@@ -44,7 +44,7 @@ def load_texec_log(
     dir_path: str,
     file_name: str,
 ) -> dict[str, list[float]]:
-    file_path = file_path_ext(dir_path, file_name, 'csv')
+    file_path = file_path_ext(dir_path, file_name, 'csv', mkdir=False)
     with open(file_path, 'r') as f:
         reader = csv.reader(f)
         for i, row in enumerate(reader):

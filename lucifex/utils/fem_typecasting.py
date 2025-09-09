@@ -53,15 +53,20 @@ def fem_function_space(
     return function_space
 
 
-def fs_from_elem(fs, u):
-    if isinstance(fs, tuple) and not isinstance(fs[0], Mesh):
+def fs_from_elem(
+    elem: tuple[str, int] | tuple[Mesh, str, int], 
+    u: Function | Expr,
+) -> tuple[Mesh, str, int]:
+    if isinstance(elem, tuple) and not isinstance(elem[0], Mesh):
         if isinstance(u, Function):
             mesh = u.function_space.mesh
         elif isinstance(u, (Expression, Expr)):
             mesh = extract_mesh(u)
         else:
             raise ValueError('Cannot deduce mesh from `u`. Provide function space as `tuple[Mesh, str, int]`')
-        fs = (mesh, *fs)
+        fs = (mesh, *elem)
+    else:
+        fs = elem
     return fs
 
 
@@ -105,7 +110,7 @@ def fem_function(
 
 
 @optional_lru_cache
-def _create_fem_function_scalars(
+def _create_fem_function_components(
     fs: FunctionSpace | tuple[Mesh, str, int], 
     names: tuple[str | None, ...],
 ) -> tuple[Function, ...]:
@@ -113,9 +118,9 @@ def _create_fem_function_scalars(
     return tuple(f)
 
 
-def fem_function_scalars(
+def fem_function_components(
     fs: tuple[Mesh, str, int] | tuple[str, int],
-    u: Function, # TODO | Expression | Expr,
+    u: Function | Expr,
     names: Iterable[str | None] | None = None,
     use_cache: bool = False,
 ) -> tuple[Function, ...]:
@@ -134,7 +139,7 @@ def fem_function_scalars(
 
     if isinstance(u, Function) and is_component_space(u.function_space):
         # e.g. vector-valued u ∈ P⨯P
-        f = _create_fem_function_scalars(use_cache=use_cache)(fs, names)
+        f = _create_fem_function_components(use_cache=use_cache)(fs, names)
         u = [ui.collapse() for ui in u.split()]
         for fi, ui in zip(f, u, strict=True):
             interpolate_fem_function(fi, ui)
@@ -142,7 +147,7 @@ def fem_function_scalars(
     else:
         # e.g. vector-valued u ∈ BDM
         u = fem_function((*fs, dim), u, use_cache=use_cache)
-        return fem_function_scalars(fs, u, names, use_cache)
+        return fem_function_components(fs, u, names, use_cache)
 
 
 def fem_constant(

@@ -16,6 +16,7 @@ from .enum_types import CellType
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
 from .mesh_utils import vertices, coordinates, axes, is_structured
+from .fem_utils import is_scalar, ScalarError
 
 
 @overload
@@ -155,6 +156,9 @@ def _(
 
     Note that this is suitable only if the mesh is structured.
     """
+    if not is_scalar(f):
+        raise ScalarError(f)
+    
     mesh = f.function_space.mesh
     x_axes = grid(use_cache=True)(mesh, strict)
     f_vertices = dofs(f, ('P', 1))
