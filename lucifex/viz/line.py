@@ -145,7 +145,7 @@ def plot_twins(
     filter_kwargs(set_axes)(ax_twin, y_label=y_label_right, **_kwargs)
 
 
-def plot_shared_axis_lines(
+def plot_lines_stack(
     f: Iterable[Function | tuple[Iterable[float], Iterable[float]]],
     x_label: str | None = None,
     y_labels: Iterable[str] | None = None,
@@ -163,6 +163,8 @@ def plot_shared_axis_lines(
         plot_line(fig, axi, fi, y_label=y_label, **plt_kwargs)
 
     set_axes(ax[0], title=title)
+    if plt_kwargs.get('tex') is not False:
+        x_label = texify(x_label)
     set_axes(ax[-1], x_label=x_label)
     fig.subplots_adjust(hspace=0)
 

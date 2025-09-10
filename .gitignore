@@ -19,7 +19,9 @@ ipython_config.py
 *.o
 *.so
 *.py[cdox]
-__pycache__/
+*__pycache__/
+*__jit__/
+*__ffcx__/
 
 # distribution
 bin/

@@ -75,7 +75,7 @@ class Series(ABC, Generic[T]):
 
         if index > index_max or index < index_min:
             raise IndexError(
-                f"Time index {index} is outside the interval [{index_min}, {index_max}]"
+                f"Time index {index} is outside the interval [{index_min}, {index_max}] permitted by order {self.order}"
             )
         elif index == self.FUTURE_INDEX:
             f = self._future
@@ -257,6 +257,8 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         def _append(t: float) -> None:
             self._series.append(self._present.copy())
             self._time_series.append(t)
+        if value is None:
+            value = lambda: False
         self._series_append = Writer(_append, value)
 
     @property

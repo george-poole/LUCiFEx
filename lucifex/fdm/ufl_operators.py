@@ -1,5 +1,4 @@
 from typing import Callable, TypeVar, Any
-import functools
 
 import ufl
 from dolfinx.fem import Function, FunctionSpace
@@ -73,14 +72,15 @@ def binary_operator(ufl_func: Callable[[T0, T1], R]):
     return _decorator
 
 
-@unary_operator(ufl.grad)
-def grad(): pass
-
 @unary_operator(ufl.div)
 def div(): pass
 
 
-@binary_operator(ufl.curl)
+@unary_operator(ufl.grad)
+def grad(): pass
+
+
+@unary_operator(ufl.curl)
 def curl(): pass
 
 

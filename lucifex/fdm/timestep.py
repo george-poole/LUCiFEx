@@ -77,7 +77,7 @@ def cfl_timestep(u, h, courant=1.0, dt_max=np.inf, dt_min=0.0, tol=1e-10):
 
 
 @singledispatch
-def _cfl_lambda_capture(velocity) -> Callable[[], float]:
+def _cfl_lambda_capture(velocity, *_, **__) -> Callable[[], float]:
     raise MultipleDispatchTypeError(velocity, _cfl_lambda_capture)
 
 
@@ -115,7 +115,7 @@ def _(velocity, h, tol):
 
 
 @overload
-def kinetic_timestep(
+def reactive_timestep(
     r: Function | Expr | LUCiFExConstant | float,
     courant: float = 1.0,
     dt_max: float = np.inf,
@@ -128,7 +128,7 @@ def kinetic_timestep(
     ...
 
 @overload
-def kinetic_timestep(
+def reactive_timestep(
     r: LUCiFExConstant | float,
     courant: float = 1.0,
     dt_max: float = np.inf,
@@ -141,18 +141,18 @@ def kinetic_timestep(
     ...
 
 
-def kinetic_timestep(r, courant = 1.0, dt_max = np.inf, dt_min = 0.0, tol = 1e-10): 
-    _lambda = _kinetic_lambda_capture(r, tol)
+def reactive_timestep(r, courant = 1.0, dt_max = np.inf, dt_min = 0.0, tol = 1e-10): 
+    _lambda = _reactive_lambda_capture(r, tol)
     return _bounded_timestep(_lambda, dt_max, dt_min, courant)
 
 
 @singledispatch
-def _kinetic_lambda_capture(reaction) -> Callable[[], float]:
+def _reactive_lambda_capture(reaction, *_, **__) -> Callable[[], float]:
     raise MultipleDispatchTypeError(reaction)
 
 
-@_kinetic_lambda_capture.register(Function)
-@_kinetic_lambda_capture.register(Expr)
+@_reactive_lambda_capture.register(Function)
+@_reactive_lambda_capture.register(Expr)
 def _(reaction, tol):
     if isinstance(reaction, Function):
         mesh = reaction.function_space.mesh
@@ -161,7 +161,7 @@ def _(reaction, tol):
     return lambda: np.min(dofs(1.0 / max_value(reaction, tol), (mesh, 'DP', 0), use_cache=True))
 
 
-@_kinetic_lambda_capture.register(LUCiFExConstant)
+@_reactive_lambda_capture.register(LUCiFExConstant)
 def _(reaction: LUCiFExConstant, tol):
     if reaction.ufl_shape == ():
         return lambda: 1.0 / max(reaction.value, tol)
@@ -169,13 +169,13 @@ def _(reaction: LUCiFExConstant, tol):
         raise ValueError('Expected a scalar reaction')
 
 
-@_kinetic_lambda_capture.register(float)
-@_kinetic_lambda_capture.register(int)
+@_reactive_lambda_capture.register(float)
+@_reactive_lambda_capture.register(int)
 def _(reaction, tol):
     return lambda: 1.0 / max(reaction, tol)
 
 
-def cflk_timestep(
+def cflr_timestep(
     u: Function | Expr | LUCiFExConstant | float,
     r: Function | Expr | LUCiFExConstant | float,
     h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
@@ -191,15 +191,69 @@ def cflk_timestep(
     `∆tCFLK = min{cK minₓ(1 / r(x)), cCFL minₓ(h(x) / |u(x)|)}` 
     """
     if cfl_courant is None:
-        return kinetic_timestep(r, k_courant, dt_max, dt_min, tol)
+        return reactive_timestep(r, k_courant, dt_max, dt_min, tol)
     if k_courant is None:
         return cfl_timestep(u, h, cfl_courant, dt_max, dt_min, tol)
     _lambda_cfl = _cfl_lambda_capture(u, h, tol)
-    _lambda_k = _kinetic_lambda_capture(r, tol)
+    _lambda_r = _reactive_lambda_capture(r, tol)
     _lambda_cflk = lambda: min(
-        k_courant * _lambda_k(), cfl_courant * _lambda_cfl()
+        k_courant * _lambda_r(), cfl_courant * _lambda_cfl()
     )
     return _bounded_timestep(_lambda_cflk, dt_max, dt_min, 1.0)
+
+
+def diffusive_timestep(
+    d: Function | Expr | LUCiFExConstant | float,
+    h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"],
+    courant: float = 1.0,
+    dt_max: float = np.inf,
+    dt_min: float = 0.0,
+    tol: float = 1e-10,
+):
+    """
+    `∆tCFL = C minₓ(h²(x) / d(x))`
+    """
+    _lambda = _diffusive_lambda_capture(d, h, tol)
+    return _bounded_timestep(_lambda, dt_max, dt_min, courant)
+
+
+@singledispatch
+def _diffusive_lambda_capture(diffusion, *_, **__) -> Callable[[], float]:
+    raise MultipleDispatchTypeError(diffusion, _diffusive_lambda_capture)
+
+
+@_diffusive_lambda_capture.register(Function)
+@_diffusive_lambda_capture.register(Expr)
+def _(diffusion, h, tol):
+    if isinstance(diffusion, Function):
+        mesh = diffusion.function_space.mesh
+    else:
+        mesh = extract_mesh(diffusion)
+    if isinstance(h, str):
+        h = cell_size_quantity(mesh, h)
+    return lambda: np.min(dofs(h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True))
+
+
+@_diffusive_lambda_capture.register(LUCiFExConstant)
+def _(diffusion: LUCiFExConstant, h, tol):
+    mesh = diffusion.mesh
+    if isinstance(h, str):
+        h = cell_size_quantity(mesh, h)
+    if isinstance(h, GeometricCellQuantity):
+        h = np.min(dofs(h, (mesh, 'DP', 0), use_cache=True))
+    if diffusion.ufl_shape == ():
+        return lambda: h**2 / max(diffusion.value, tol)
+    else:
+        return lambda: h**2 / max(np.max(diffusion.value), tol)
+
+
+@_diffusive_lambda_capture.register(float)
+@_diffusive_lambda_capture.register(int)
+def _(velocity, h, tol):
+    if not isinstance(h, (float, int)):
+        raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
+    return lambda: h**2 / max(velocity, tol)
+
 
 
 def _bounded_timestep(
@@ -211,18 +265,3 @@ def _bounded_timestep(
     if np.isclose(dt_min, dt_max):
         return dt_min
     return min(dt_max, max(dt_min, courant * _lambda()))
-
-
-# @copy_callable(ExpressionSolver[ConstantSeries, StaticConstant].from_function(cfl_timestep))
-# def cfl_timestep_solver():
-#     pass
-
-
-# @copy_callable(ExpressionSolver[ConstantSeries, StaticConstant].from_function(kinetic_timestep))
-# def kinetic_timestep_solver():
-#     pass
-
-
-# @copy_callable(ExpressionSolver[ConstantSeries, StaticConstant].from_function(cflk_timestep))
-# def cflk_timestep_solver():
-#     pass

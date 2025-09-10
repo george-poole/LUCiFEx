@@ -70,7 +70,7 @@ def mesh_boundary(
         if verify:
             for i, n in enumerate(n_boundary_entities):
                 if n == 0:
-                    raise ValueError(f'{list(boundaries.keys())[i]} is not on the mesh boundary.')
+                    raise ValueError(f"'{list(boundaries.keys())[i]}' is not on the mesh boundary.")
         if complete:
             marker_all = lambda x: np.full_like(x[0], True)
             n_total = locate_entities_boundary(mesh, dim, marker_all)

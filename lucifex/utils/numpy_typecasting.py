@@ -430,3 +430,105 @@ def as_indices(
             if indices[1] > i[-1]:
                 indices[0] -= 1
     return indices
+
+
+def cross_section(
+    fxyz: Function | tuple[np.ndarray, ...],
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    use_cache: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> tuple[np.ndarray, np.ndarray, float] | tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    
+    if fraction:
+        f_fraction = value
+        if f_fraction < 0 or f_fraction > 1:
+            raise ValueError("Fraction must be in interval [0, 1]")
+        f_value = None
+    else:
+        f_fraction = None
+        f_value = value
+
+    if not isinstance(axis, int):
+        axis_index = axis_names.index(axis)
+    else:
+        axis_index = axis
+
+    if isinstance(fxyz, Function):
+        x = grid(use_cache=True)(fxyz.function_space.mesh)
+        f_grid = grid(use_cache=use_cache)(fxyz)
+        dim = fxyz.function_space.mesh.geometry.dim
+    else:
+        f_grid = fxyz[0]
+        x = fxyz[1:]
+        dim = len(x)
+
+    if dim == 2:
+        return _cross_section_line(f_grid, x, f_fraction, f_value, axis_index)
+    elif dim == 3:
+        return _cross_section_colormap(f_grid, x, f_fraction, f_value, axis_index)
+    else:
+        raise ValueError(f'Cannot get a cross-section in d={dim}.')
+
+
+def _cross_section_line(
+    f_grid: np.ndarray,
+    xy: tuple[np.ndarray, np.ndarray],
+    y_fraction: float | None,
+    y_value: float | int | None,
+    y_index: Literal[0, 1],
+) -> tuple[np.ndarray, np.ndarray, float]:
+    
+    y_axis = xy[y_index]
+    x_axis = xy[(y_index + 1) % 2]
+
+    if y_value is not None:
+        yaxis_index = as_index(y_axis, y_value)
+    else:
+        assert y_fraction is not None
+        if np.isclose(y_fraction, 1):
+            yaxis_index = -1
+        else:
+            yaxis_index = int(y_fraction * len(y_axis))
+    y_value = y_axis[yaxis_index]
+
+    if y_index == 0:
+        y_line = f_grid[yaxis_index, :]
+    elif y_index == 1:
+        y_line = f_grid[:, yaxis_index]
+    else:
+        raise ValueError
+    
+    return x_axis, y_line, y_value
+
+
+def _cross_section_colormap(
+    f_grid: np.ndarray,
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
+    z_fraction: float | None,
+    z_value: float | int | None,
+    z_index: Literal[0, 1, 2],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    
+    z_axis = xyz[z_index]
+    x_axis = xyz[(z_index + 1) % 3]
+    y_axis = xyz[(z_index + 2) % 3]
+
+    if z_value is not None:
+        zaxis_index = as_index(z_axis, z_value)
+    else:
+        assert z_fraction is not None
+        zaxis_index = int(z_fraction * len(z_axis))
+    z_value = z_axis[zaxis_index]
+
+    if z_index == 0:
+        z_grid = f_grid[zaxis_index, :, :]
+    elif z_index == 1:
+        z_grid = f_grid[:, zaxis_index, :]
+    elif z_index == 2:
+        z_grid = f_grid[:, :, zaxis_index]
+    else:
+        raise ValueError
+
+    return x_axis, y_axis, z_grid, z_value

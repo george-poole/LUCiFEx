@@ -125,9 +125,11 @@ class FiniteDifferenceDerivative(FiniteDifference):
     def __call__(
         self, 
         u: FunctionSeries,
-        dt: ConstantSeries | Constant,
+        dt: ConstantSeries | Constant | None = None,
     ) -> Expr:
         du = super().__call__(u)
+        if dt is None:
+            return du
         if isinstance(dt, ConstantSeries):
             _dt = dt[0]
         else:

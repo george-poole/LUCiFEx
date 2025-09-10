@@ -164,9 +164,7 @@ def write(
 
 
 @singledispatch
-def _write(
-    u,
-) -> None:
+def _write(u, *_, **__) -> None:
     raise MultipleDispatchTypeError(u, _write)
 
 

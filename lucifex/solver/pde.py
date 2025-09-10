@@ -118,7 +118,7 @@ class BoundaryValueProblem:
             _create_matrix = create_matrix
 
         self._a_forms = [lhs(i) if len(i.arguments()) == 2 else None for i in forms]
-        self._a_sum_unscaled = sum([i for i in self._a_forms if i is not None])
+        self._a_sum_unscaled: Form = sum([i for i in self._a_forms if i is not None])
         if self._a_sum_unscaled == 0:
             raise RuntimeError('Variational problem with test and trial functions `v, u` must have a bilinear form `a(u,v)`.')
         self._a_sum = sum(
@@ -192,26 +192,9 @@ class BoundaryValueProblem:
                 mv.setFromOptions()
 
     @classmethod
-    def from_bilinear_form(
-        cls,
-        a: Form,
-        l: Form,
-        bcs: BoundaryConditions | None = None,
-        petsc: OptionsPETSc | dict | None = None,
-        jit: OptionsJIT | dict | None = None,
-        ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | None = None,
-        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
-        solution: Function | FunctionSeries | None = None, 
-    ):
-        forms = (a - l,)
-        bvp = cls(forms, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition=(False, False), solution=solution)
-        raise NotImplementedError
-
-    @classmethod
     def from_forms_func(
         cls,
-        forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
+        forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
         bcs: BoundaryConditions | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -481,14 +464,14 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                     return arg
 
             order = finite_difference_order(*args, *kwargs.values())
-            if order == 1:
-                forms_init = None
-                n_init = None
-            else:
+            if order > 1:
                 args_init = [_init(i) for i in args]
                 kwargs_init = {k: _init(v) for k, v in kwargs.items()}
                 forms_init = forms_func(*args_init, **kwargs_init)
                 n_init = order - 1
+            else:
+                forms_init = None
+                n_init = None
             return cls(solution, forms, forms_init, n_init, ics, bcs, petsc, jit, ffcx, 
                        dofs_corrector, cache_matrix, use_partition)
         return _create

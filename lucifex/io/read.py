@@ -69,7 +69,7 @@ def read(
 
 
 @singledispatch
-def _read(u):
+def _read(u, *_, **__):
     raise MultipleDispatchTypeError(u, _read)
 
 

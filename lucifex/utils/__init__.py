@@ -25,6 +25,7 @@ from .numpy_typecasting import (
     quadrangulation,
     vertex_to_grid_index_map,
     where_on_grid,
+    cross_section,
 )
 from .fem_perturbation import Perturbation, cubic_noise, sinusoid_noise, rescale
 from .mesh_utils import(

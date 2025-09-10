@@ -210,12 +210,12 @@ class ProjectionProblem(BoundaryValueProblem):
     def __init__(
         self, 
         solution: LUCiFExFunction | FunctionSeries,
-        expression: LUCiFExFunction | Expr,
+        expression: Function | Expr,
         bcs: BoundaryConditions | Iterable[tuple[SpatialMarker, Value] | tuple[SpatialMarker, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[LUCiFExFunction], None] | None = None,
+        dofs_corrector: Callable[[Function], None] | None = None,
     ):
 
         v = testfunction(solution)
@@ -235,19 +235,19 @@ class ProjectionProblem(BoundaryValueProblem):
     def from_function(
         cls,
         solution: Function | FunctionSeries, 
-        func_expression: Callable[P, LUCiFExFunction | Expr],
+        expression_func: Callable[P, Function | Expr],
         bcs: BoundaryConditions | Iterable[tuple[SpatialMarker, Value] | tuple[SpatialMarker, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[LUCiFExFunction], None] | None = None,
+        dofs_corrector: Callable[[Function], None] | None = None,
     ):
         """from function"""
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, func_expression(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector)
+            return cls(solution, expression_func(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector)
         return _create
         
 

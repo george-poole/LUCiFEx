@@ -47,8 +47,10 @@ def periodic_relation(m: SpatialMarker, v: SpatialMarker):
 
 class BoundaryConditions:
     """
-    For a boundary term `∫ v·g ds` in the variational formulation specify
-    a `'neumann'` boundary type and supply the expression `g`.
+    The `'neumann'` boundary type with boundary value `g` assumes a form
+    `+∫ v·g ds` for the boundary term in the variational formulation
+
+    More complicated boundary terms should instead be specified in the forms function.
     """
     def __init__(
         self,
@@ -141,8 +143,6 @@ class BoundaryConditions:
     ) -> list[Form]:
         """ Assumes a weak term of the form `∫ v·g ds` with test function `v` and
         prescribed value `g`.
-        
-        More complicated forms should be specified in the forms function.
         """
         
         v = TestFunction(function_space)

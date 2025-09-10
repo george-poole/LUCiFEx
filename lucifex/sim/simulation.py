@@ -29,7 +29,7 @@ class Simulation:
         solvers: Iterable[Solver],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        fields: Iterable[ExprSeries | Function | Constant] = (),
+        quantities: Iterable[ExprSeries | Function | Constant] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
@@ -43,7 +43,7 @@ class Simulation:
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
-        self.fields = list(fields)
+        self.quantities = list(quantities)
         self.stoppers = list(stoppers)
         self.dir_path = dir_path
         self.parameter_file = parameter_file
@@ -82,7 +82,7 @@ class Simulation:
             raise TypeError
         
     def __iter__(self):
-        for i in (self.solvers, self.t, self.dt, self.fields):
+        for i in (self.solvers, self.t, self.dt, self.quantities):
             yield i
 
     def index(self, name: str) -> int:
@@ -122,7 +122,7 @@ class Simulation:
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.series.name: s.series for s in self.solvers})
-        d.update({f.name: f for f in self.fields})
+        d.update({f.name: f for f in self.quantities})
         return d
     
     @property
