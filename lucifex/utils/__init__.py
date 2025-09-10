@@ -45,6 +45,6 @@ from .fem_mutation import (set_fem_constant, set_fem_function,
                            interpolate_fem_function, set_value)
 from .fem_typecasting import fem_constant, fem_function, fem_function_space, fem_function_components
 from .numpy_typecasting import triangulation, quadrangulation, grid, as_index, as_indices
-from .py_utils import (filter_kwargs, log_execution_time, copy_callable,
+from .py_utils import (filter_kwargs, log_texec, copy_callable,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
 from .norm import L_norm, l_norm, div_norm

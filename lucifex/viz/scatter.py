@@ -124,7 +124,7 @@ def plot_xyz_scatter(
 
 
 def marker_size_func(
-    z_data: np.ndarray, s_min: float = 10.0, s_max: float = 400.0, n: int = 1
+    z_data: np.ndarray, s_min: float = 10.0, s_max: float = 400.0, n: int = 1,
 ) -> np.ndarray:
     """
     Defining a marker size based on the point's z-value

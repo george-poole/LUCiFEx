@@ -12,8 +12,8 @@ from .utils import optional_ax, set_legend, set_axes
 def plot_bar(
     fig: Figure,
     ax: Axes, 
-    ydata: Iterable[float | Iterable[float]],
-    xtick_labels: Iterable[str] = None,
+    y_data: Iterable[float | Iterable[float]],
+    x_ticks: Iterable[str] = None,
     y_label: str | None = None,
     x_label: str | None = None,
     title: str | None = None,
@@ -26,26 +26,26 @@ def plot_bar(
 ) -> tuple[Figure, Axes]:
     set_axes(ax, x_label=x_label, y_label=y_label, title=title)
 
-    ydata = [[y] if not isinstance(y, Iterable) else y for y in ydata]
+    y_data = [[y] if not isinstance(y, Iterable) else y for y in y_data]
 
     if not isinstance(widths, Iterable):
-        widths = [widths] * len(ydata)
+        widths = [widths] * len(y_data)
     if isinstance(colors, str):
-        colors = [colors] * len(ydata)
+        colors = [colors] * len(y_data)
     if isinstance(edge_colors, str):
-        edge_colors = [edge_colors] * len(ydata)
+        edge_colors = [edge_colors] * len(y_data)
 
-    widths_block = [w * len(y) for w, y in zip(widths, ydata)]
+    widths_block = [w * len(y) for w, y in zip(widths, y_data)]
 
-    centres = [0.0] * len(ydata)
-    for i in range(1, len(ydata)):
+    centres = [0.0] * len(y_data)
+    for i in range(1, len(y_data)):
         centres[i] = (
             centres[i - 1] + pad + 0.5 * (widths_block[i] + widths_block[i - 1])
         )
-    ax.set_xticks(centres, xtick_labels)
+    ax.set_xticks(centres, x_ticks)
 
     for y, xc, w, c, ec in zip(
-        ydata, centres, widths, colors, edge_colors, strict=True
+        y_data, centres, widths, colors, edge_colors, strict=True
     ):
         r = (len(y) - 1) / 2
         x = [xc + i * w for i in np.arange(-r, r + 1)]

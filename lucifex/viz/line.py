@@ -112,7 +112,7 @@ def _(
 
 
 @optional_ax
-def plot_twins(
+def plot_twin_lines(
     ax: Axes,
     x: np.ndarray | tuple[np.ndarray, np.ndarray],
     y: tuple[np.ndarray, np.ndarray],
@@ -145,7 +145,7 @@ def plot_twins(
     filter_kwargs(set_axes)(ax_twin, y_label=y_label_right, **_kwargs)
 
 
-def plot_lines_stack(
+def plot_stacked_lines(
     f: Iterable[Function | tuple[Iterable[float], Iterable[float]]],
     x_label: str | None = None,
     y_labels: Iterable[str] | None = None,

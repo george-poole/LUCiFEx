@@ -10,11 +10,17 @@ from dolfinx.fem import Function
 from .colormap import plot_colormap, plot_contours
 
 
+def animate_line(
+    lines: Iterable[Function | tuple[np.ndarray, np.ndarray]],
+    titles: str | Iterable[str] | None = None,
+):
+    ...
+
+
 def animate_colormap(
-    cmap_series: Iterable[Function | tuple[np.ndarray, np.ndarray, np.ndarray]],
-    title_series: str | Iterable[str] | None = None,
-    contour_series: Iterable[Function] |None = None,
-    # time_slice: StrSlice | None = None,
+    cmaps: Iterable[Function | tuple[np.ndarray, np.ndarray, np.ndarray]],
+    titles: str | Iterable[str] | None = None,
+    contours: Iterable[Function] |None = None,
     axis_names: tuple[str, str] = ("x", "y"),
     colorbar: bool | tuple[float, float] = True,
     aspect: float | Literal["auto", "equal"] = "equal",
@@ -30,15 +36,15 @@ def animate_colormap(
     HTML(animation.to_html5_video())
     ```
     """
-    cmap_series = cmap_series
-    n_snapshots = len(cmap_series)
+    cmaps = cmaps
+    n_snapshots = len(cmaps)
 
-    if title_series is None or isinstance(title_series, str):
-        title_series = [title_series] * n_snapshots
-    assert len(title_series) == n_snapshots
+    if titles is None or isinstance(titles, str):
+        titles = [titles] * n_snapshots
+    assert len(titles) == n_snapshots
 
-    if contour_series is not None:
-        assert len(contour_series) == n_snapshots
+    if contours is not None:
+        assert len(contours) == n_snapshots
 
     fig, ax = subplots()
 
@@ -46,13 +52,13 @@ def animate_colormap(
         plot_colormap(
             fig,
             ax,
-            cmap_series[n],
-            title_series[n],
+            cmaps[n],
+            titles[n],
             axis_names,
             colorbar,
         )
-        if contour_series is not None:
-            plot_contours(fig, ax, contour_series[n])
+        if contours is not None:
+            plot_contours(fig, ax, contours[n])
         if x_lims:
             ax.set_xlim(x_lims)
         if y_lims:

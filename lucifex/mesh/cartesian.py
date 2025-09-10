@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Literal
 
 from mpi4py import MPI
 from dolfinx.mesh import Mesh
@@ -13,7 +13,7 @@ def rectangle_mesh(
     Nx: int,
     Ny: int,
     cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.QUADRILATERAL,
-    name: Optional[str] = None,
+    name: str | None = None,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
 ) -> Mesh:
     if not isinstance(Lx, tuple):
@@ -61,6 +61,9 @@ def box_mesh(
     Nx: int,
     Ny: int,
     Nz: int,
+    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.HEXAHEDRON,
+    name: str | None = None,
+    comm: MPI.Comm | str = MPI.COMM_WORLD,
 ) -> Mesh:
     create_box
-    ...
+    raise NotImplementedError

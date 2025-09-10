@@ -42,11 +42,14 @@ def copy_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
 
 P = ParamSpec('P')
 R = TypeVar('R')
-def log_execution_time(
+def log_texec(
     func: Callable[P, R], 
     logged: dict[str, list[float]],
     name: str | None = None, 
 ) -> Callable[P, R]:
+    """
+    Mutates `logged`
+    """
     
     if name is None:
         name = func.__name__

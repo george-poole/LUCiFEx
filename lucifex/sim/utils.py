@@ -19,7 +19,7 @@ def signature_name_collision(*callables: Iterable[Callable]) -> bool:
     return False
 
 
-def write_texec_log(
+def write_texec(
     texec_log: dict[str, list[float]],  
     dir_path: str,
     file_name: str,
@@ -40,7 +40,7 @@ def write_texec_log(
             writer.writerow(row)
 
 
-def load_texec_log(
+def load_texec(
     dir_path: str,
     file_name: str,
 ) -> dict[str, list[float]]:

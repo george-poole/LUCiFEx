@@ -13,12 +13,12 @@ from ..fdm.series import ConstantSeries
 from ..solver import Solver, EvaluationProblem, IBVP, IVP
 from ..io.write import write
 from ..io.checkpoint import write_checkpoint, read_checkpoint, reset_directory
-from ..utils import log_execution_time
+from ..utils import log_texec
 
 from ..utils.deferred import Writer, Stopper
 from .deferred import StopperFromSimulation, WriterFromSimulation
 from .simulation import create_simulation, Simulation, is_simulation_callable
-from .utils import write_texec_log, signature_name_collision
+from .utils import write_texec, signature_name_collision
 
 
 def integrate(
@@ -102,9 +102,9 @@ def integrate(
     _texec = {} if texec is True else texec if isinstance(texec, dict) else None
     if isinstance(_texec, dict):
         for s in set((*simulation.solvers, *solvers_init)):
-            s.solve = log_execution_time(s.solve, _texec, f'{s.series.name}_{s.solve.__name__}')
+            s.solve = log_texec(s.solve, _texec, f'{s.series.name}_{s.solve.__name__}')
         for w in _writers:
-            w.write = log_execution_time(w.write, _texec, f'{w.name}_{w.write.__name__}')
+            w.write = log_texec(w.write, _texec, f'{w.name}_{w.write.__name__}')
 
     while all(not s.stop(t[0]) for s in _stoppers):
         if _n < n_init:
@@ -121,7 +121,7 @@ def integrate(
     if _writers:
         write_checkpoint(series_ics, t, simulation.checkpoint_file, simulation.dir_path)
         if _texec:
-            write_texec_log(_texec, simulation.dir_path, simulation.texec_file)
+            write_texec(_texec, simulation.dir_path, simulation.texec_file)
 
 
 def integrate_from_cli(
