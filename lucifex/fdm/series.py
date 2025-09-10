@@ -375,14 +375,6 @@ class FunctionSeries(
     def ics_perturbation(self) -> tuple[LUCiFExFunction, LUCiFExFunction] | None:
         return self._ics_perturbation
 
-    @cached_property
-    def testfunction(self):
-        return TestFunction(self.function_space)
-
-    @cached_property
-    def trialfunction(self):
-        return TrialFunction(self.function_space)
-
     @property
     def dofs_series(self) -> list[np.ndarray]:
         return [i.x.array for i in self.series]

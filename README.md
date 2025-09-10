@@ -187,7 +187,7 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 ## Demos
 
-See `/demo/ipynb/` and `demo/py/`. The A-notebooks are more application-focussed with examples from fluid mechanics and porous media, whereas the B-notebooks illustrate technical details from the `lucifex` package.
+See `demo/` for notebooks and scripts. The A-notebooks are more application-focussed with examples from fluid mechanics and porous media, whereas the B-notebooks illustrate technical details from the `lucifex` package.
 
 ## TODO List
 

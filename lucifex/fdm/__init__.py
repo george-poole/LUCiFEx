@@ -7,5 +7,4 @@ from .finite_difference import (
     BDF1, BDF2, finite_difference_order, finite_difference_discretize,
 )
 from .series import FunctionSeries, ConstantSeries, Series, ExprSeries, GridSeries, NumericSeries
-from .ufl_operators import inner, dot, grad, curl, div, testfunction, trialfunction
 from .timestep import cfl_timestep, reactive_timestep, cflr_timestep, diffusive_timestep

@@ -13,7 +13,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..mesh.cartesian import CellType
 from ..utils import (is_scalar, grid, triangulation, fem_function, is_structured, 
-                     filter_kwargs, MultipleDispatchTypeError)
+                     filter_kwargs, MultipleDispatchTypeError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax
 
@@ -122,10 +122,9 @@ def _(
     mesh: Mesh | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    lagrange = ('P', 1)
-    if mesh is not None:
-        lagrange = (mesh, *lagrange)
-    func = fem_function(lagrange, expr, use_cache=use_cache)
+    if mesh is None:
+        mesh = extract_mesh(expr)
+    func = fem_function((mesh, 'P', 1), expr, use_cache=use_cache)
     return __plot_colormap(
         func,
         fig, 

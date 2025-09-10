@@ -3,11 +3,11 @@ from typing_extensions import Self
 import numpy as np
 
 from dolfinx.fem import Function, Constant, assemble_scalar, Expression
-from ufl import Form, Measure
+from ufl import Form, Measure, TestFunction, TrialFunction, inner
 from ufl.restriction import Restricted
 from ufl.core.expr import Expr
 
-from ..fdm.ufl_operators import testfunction, trialfunction, inner
+from ..fdm.ufl_operators import inner
 from ..utils import set_value, copy_callable, SpatialMarker, as_dofs_corrector
 from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
@@ -218,8 +218,8 @@ class ProjectionProblem(BoundaryValueProblem):
         dofs_corrector: Callable[[Function], None] | None = None,
     ):
 
-        v = testfunction(solution)
-        u = trialfunction(solution)
+        v = TestFunction(solution)
+        u = TrialFunction(solution)
         dx = Measure('dx')
         F_lhs = inner(v, u) * dx
         F_rhs = inner(v, expression) * dx

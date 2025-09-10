@@ -1,5 +1,5 @@
 from ufl.core.expr import Expr
-from ufl import dx, Form, grad, inner
+from ufl import dx, Form, grad, inner, TestFunction
 
 from lucifex.fem import LUCiFExConstant as Constant, LUCiFExFunction as Function
 from lucifex.fdm import DT, CN, FiniteDifference, ConstantSeries, FunctionSeries
@@ -14,7 +14,7 @@ def diffusion_forms(
     dt: Constant,
     Dfdm: FiniteDifference,
 ) -> list[Form]:
-    v = u.testfunction
+    v = TestFunction(u.function_space)
     Fdt = v * DT(u, dt) * dx
     Fdiff += inner(grad(v), grad(Dfdm(u))) * dx
     return [Fdt, Fdiff]

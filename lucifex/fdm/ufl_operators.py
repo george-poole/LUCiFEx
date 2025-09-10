@@ -90,28 +90,3 @@ def inner(): pass
 
 @binary_operator(ufl.dot)
 def dot(): pass
-
-
-R = TypeVar('R')
-def function_space_operator(ufl_func: Callable[[FunctionSpace], R]):
-    def _decorator(
-        dummy: Callable[[], None],
-    ) -> Callable[[FunctionSpace | Function | FunctionSeries], R]:
-        assert dummy() is None
-        def _inner(f):
-            if isinstance(f, FunctionSpace):
-                return ufl_func(f)
-            elif isinstance(f, (Function, FunctionSeries)):
-                return ufl_func(f.function_space)
-            else:
-                raise MultipleDispatchTypeError(f)
-        return _inner
-    return _decorator
-
-
-@function_space_operator(ufl.TestFunction)
-def testfunction(): pass
-
-
-@function_space_operator(ufl.TrialFunction)
-def trialfunction(): pass

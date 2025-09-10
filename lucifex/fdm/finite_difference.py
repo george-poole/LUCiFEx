@@ -2,6 +2,7 @@ from typing import Iterable, Any, Callable
 from typing_extensions import Self
 
 from ufl.core.expr import Expr
+from ufl import TrialFunction
 from dolfinx.fem import Function, Constant
 
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
@@ -90,7 +91,7 @@ class FiniteDifference:
         trial = self._trial if isinstance(u, FunctionSeries) else False
 
         if trial:
-            _u = lambda n: u[n] if n != u.FUTURE_INDEX else u.trialfunction
+            _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
         else:
             _u = lambda n: u[n]
 

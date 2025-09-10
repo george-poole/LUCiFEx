@@ -1,4 +1,5 @@
 import pytest
+from ufl import TrialFunction
 
 from lucifex.mesh import interval_mesh
 from lucifex.fdm import CN, FE, BE, DT, AB2, AB1, FiniteDifference, FunctionSeries, finite_difference_order
@@ -17,7 +18,7 @@ def test_unsolved(u: FunctionSeries):
 
 
 def test_crank_nicolson(u: FunctionSeries):
-    assert str(CN(u)) == str(0.5 * u.trialfunction + 0.5 * u[0])
+    assert str(CN(u)) == str(0.5 * TrialFunction(u.function_space) + 0.5 * u[0])
 
 
 def test_forward_euler(u: FunctionSeries):
@@ -25,12 +26,12 @@ def test_forward_euler(u: FunctionSeries):
 
 
 def test_backward_euler(u: FunctionSeries):
-    assert str(BE(u)) == str(1.0 * u.trialfunction)
+    assert str(BE(u)) == str(1.0 * TrialFunction(u.function_space))
 
 
 def test_time_derivative(u: FunctionSeries):
     dt = 0.01
-    assert str(DT(u, dt)) == str((1.0 * u.trialfunction + -1.0 * u[0]) / dt)
+    assert str(DT(u, dt)) == str((1.0 * TrialFunction(u.function_space) + -1.0 * u[0]) / dt)
 
 
 def test_adams_bashforth_1(u: FunctionSeries):
