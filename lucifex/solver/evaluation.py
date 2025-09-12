@@ -14,7 +14,7 @@ from ..fdm.series import ConstantSeries, FunctionSeries
 
 from .petsc import form
 from .pde import BoundaryValueProblem, OptionsPETSc, OptionsFFCX, OptionsJIT, options_dict
-from .bcs import create_marked_measure, BoundaryConditions, Value, SubspaceIndex
+from .bcs import create_enumerated_measure, BoundaryConditions, Value, SubspaceIndex
 
 
 S = TypeVar('S')
@@ -99,14 +99,14 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
             evaluation = lambda: assemble_scalar(form(integrand))
         else:
             if marker is None:
-                dx = create_marked_measure(self._measure_type, solution.mesh)(degree=quadrature_degree)
+                dx = create_enumerated_measure(self._measure_type, solution.mesh)(degree=quadrature_degree)
                 evaluation = lambda: assemble_scalar(form(integrand * dx))
             elif isinstance(marker, Measure):
                 dx = marker(degree=quadrature_degree)
                 evaluation = lambda: assemble_scalar(form(integrand * dx))
             elif isinstance(marker, (list, tuple)): #FIXME Iterable or Sequence
                 tags = list(range(len(marker)))
-                dx = lambda tag: create_marked_measure(self._measure_type, 
+                dx = lambda tag: create_enumerated_measure(self._measure_type, 
                                                 solution.mesh, 
                                                 marker, tags,
                                                 )(tag, degree=quadrature_degree)
@@ -118,7 +118,7 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
                     evaluation = lambda: tuple(assemble_scalar(form(integrand * dx(t)) for t in tags))
             else:
                 tag = 0
-                dx = create_marked_measure(self._measure_type, 
+                dx = create_enumerated_measure(self._measure_type, 
                                                 solution.mesh, 
                                                 [marker], [tag],
                                                 )(tag, degree=quadrature_degree)

@@ -170,16 +170,21 @@ class BoundaryConditions:
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
         Returns \\
-        `ds, [(0, f₀), (1, f₁), (2, f₂), ...]` if one boundary types is given \\
+        `ds, [(0, f₀), (1, f₁), (2, f₂), ...]` if one boundary type is given \\
         `ds, [(0, f₀), ...], [(1, f₁), ...]` if two boundary types given \\
         `ds, [(0, f₀), ...], [(1, f₁), ...], [(2, f₂), ...]` if three boundary types given \\
         etc.
+
+        `ds(n)` is the measure for subset for the boundary where the `n`th boundary condition.
+        
+        Given `n_total` boundary conditions, `ds(n_total)` is the measure for the subset of the boundary 
+        where no boundary conditions are applied.
         """
         
         boundary_types = [BoundaryType(i) for i in boundary_types]
 
-        tag = 0
-        tags = {b: [] for b in boundary_types}
+        num = 0
+        nums = {b: [] for b in boundary_types}
         exprs = {b: [] for b in boundary_types}
         markers = {b: [] for b in boundary_types}
 
@@ -200,36 +205,36 @@ class BoundaryConditions:
                 else:
                     g = fem_function(function_space, g, i)
 
-                tags[b].append(tag)
+                nums[b].append(num)
                 exprs[b].append(g)
                 markers[b].append(m)
-                tag += 1
+                num += 1
 
-        tags_all = [t for ts in tags.values() for t in ts]
+        nums_all = [n for ns in nums.values() for n in ns]
         markers_all = [m for ms in markers.values() for m in ms]
-        ds = create_marked_measure('ds', function_space.mesh, markers_all, tags_all)
-        tags_markers_all = [[(t, e) for t, e in zip(tags[b], exprs[b])] for b in boundary_types]
+        ds = create_enumerated_measure('ds', function_space.mesh, markers_all, nums_all)
+        nums_markers_all = [[(t, e) for t, e in zip(nums[b], exprs[b])] for b in boundary_types]
 
-        return ds, *tags_markers_all
+        return ds, *nums_markers_all
 
 
-def create_marked_measure(
+def create_enumerated_measure(
     measure: Literal['dx', 'ds', 'dS'],
     mesh: Mesh,
     markers: Iterable[SpatialMarker] = (),
-    tags: Iterable[int] | None = None,
-    tag_unmarked: int | None = None,
+    nums: Iterable[int] | None = None,
+    num_unmarked: int | None = None,
 ) -> Measure:
     if len(markers) == 0:
         return Measure(measure, domain=mesh)
     
-    if tags is None:
-        tags = list(range(len(markers)))
+    if nums is None:
+        nums = list(range(len(markers)))
 
-    if tag_unmarked is None:
-        tag_unmarked = max(tags) + 1
+    if num_unmarked is None:
+        num_unmarked = max(nums) + 1
 
-    assert tag_unmarked not in tags
+    assert num_unmarked not in nums
 
     gdim = mesh.topology.dim
     fdim = gdim - 1
@@ -238,18 +243,18 @@ def create_marked_measure(
     num_facets = facet_index_map.size_local + facet_index_map.num_ghosts
     facet_indices_sorted = np.arange(num_facets)
     facet_tags = np.arange(num_facets, dtype=np.intc)
-    facet_indices_marked = []
+    facet_indices_tagged = []
 
-    for t, m in zip(tags, markers, strict=True):
+    for t, m in zip(nums, markers, strict=True):
         m = as_spatial_indicator_func(m)
         facet_indices = locate_entities(mesh, fdim, m)
         facet_tags[facet_indices] = t
-        facet_indices_marked.extend(facet_indices)
+        facet_indices_tagged.extend(facet_indices)
 
     facet_indices_unmarked = set(facet_indices_sorted).difference(
-        facet_indices_marked
+        facet_indices_tagged
     )
-    facet_tags[list(facet_indices_unmarked)] = tag_unmarked
+    facet_tags[list(facet_indices_unmarked)] = num_unmarked
 
     mesh_tags = meshtags(mesh, fdim, facet_indices_sorted, facet_tags)
     return Measure(measure, domain=mesh, subdomain_data=mesh_tags)

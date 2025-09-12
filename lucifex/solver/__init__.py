@@ -1,4 +1,4 @@
-from .bcs import BoundaryConditions, BoundaryType, create_marked_measure
+from .bcs import BoundaryConditions, BoundaryType, create_enumerated_measure
 from .pde import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,
