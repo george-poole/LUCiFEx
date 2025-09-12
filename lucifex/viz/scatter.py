@@ -29,7 +29,7 @@ def plot_xy_scatter(
     **kwargs,
 ) -> None:
     
-    _kwargs = dict(tex=True)
+    _kwargs = dict()
     _kwargs.update(kwargs)
 
     filter_kwargs(set_axes)(ax, **_kwargs)
@@ -99,7 +99,7 @@ def plot_xyz_scatter(
     **kwargs,
 ) -> None:
     
-    _kwargs = dict(tex=True)
+    _kwargs = dict()
     _kwargs.update(kwargs)
 
     filter_kwargs(set_axes)(ax, **_kwargs)

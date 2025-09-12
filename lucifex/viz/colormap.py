@@ -124,7 +124,7 @@ def _(
 ) -> tuple[Figure, Axes]:
     if mesh is None:
         mesh = extract_mesh(expr)
-    func = fem_function((mesh, 'P', 1), expr, use_cache=use_cache)
+    func = fem_function((mesh, 'P', 1), expr, use_cache=use_cache, )
     return __plot_colormap(
         func,
         fig, 

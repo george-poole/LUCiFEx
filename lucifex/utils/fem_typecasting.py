@@ -33,6 +33,7 @@ def fem_function_space(
                     fam, deg = e
                     mixed_elements.append(FiniteElement(fam, mesh.ufl_cell(), deg))
                 elif len(e) == 3:
+                    fam, deg, dim = e
                     mixed_elements.append(VectorElement(fam, mesh.ufl_cell(), deg, dim))
                 else:
                     raise ValueError(f'{e}')
@@ -86,16 +87,23 @@ def fem_function(
     subspace_index: int | None = None,
     name: str | None = None,
     use_cache: bool = False,
-    reuse: bool = False,
+    recycle: bool = False,
 ) -> Function:
             
     fs = fs_from_elem(fs, u)
 
-    if reuse and isinstance(u, Function):
+    if recycle and isinstance(u, Function):
         if isinstance(fs, FunctionSpace) and u.function_space == fs:
             return u
-        if isinstance(fs, tuple) and is_same_element(u, *fs[1:], fs[0]):
-            return u
+        if isinstance(fs, tuple):
+            if isinstance(fs[0], Mesh):
+                mesh = fs[0]
+                _fs = fs[1:]
+            else:
+                mesh = None
+                _fs = fs
+            if is_same_element(u, *_fs, mesh=mesh):
+                return u
         
     if name is None:
         try:

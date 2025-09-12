@@ -110,7 +110,7 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = fem_function(fs, u, use_cache=use_cache, reuse=False)
+        u = fem_function(fs, u, use_cache=use_cache, recycle=False)
         return u.x.array[:]  # TODO or .vector[:] ?
     elif l2_norm and is_vector(u):
         scalars = fem_function_components(fs, u, use_cache=True)
