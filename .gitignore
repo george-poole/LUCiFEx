@@ -1,4 +1,4 @@
-# simulation results
+# data
 *.npy
 *.h5
 *.xdmf

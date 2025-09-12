@@ -146,7 +146,7 @@ def _(
     f, x, y = fxy
 
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
-    _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='x', y_label='y', aspect='equal', tex=True)
+    _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
@@ -186,7 +186,7 @@ def plot_contours(
 
     if isinstance(f, tuple):
         _plt_kwargs = dict(linestyles="solid", color="black", linewidths=LW)
-        _axs_kwargs = dict(x_label='x', y_label='y', aspect='equal', tex=True)
+        _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
         match f:
             case fxy, trigl:
                 _axs_kwargs.update(x_lims=trigl.x, y_lims=trigl.y)

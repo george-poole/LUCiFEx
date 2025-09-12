@@ -77,7 +77,7 @@ def _rectangle_triangulation(
 ) -> tuple[Figure, Axes]:
     """Suitable for structured and unstructured meshes"""
 
-    _axs_kwargs = dict(x_label="x", y_label="y",aspect='equal', tex=True)
+    _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _plt_kwargs = dict(color='black', linewidth=0.75)
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
@@ -105,7 +105,7 @@ def _rectangle_quadrangulation(
 ) -> tuple[Figure, Axes]:
     """Suitable for structured and unstructured meshes"""
 
-    _axs_kwargs = dict(x_label="x", y_label="y",aspect='equal', tex=True)
+    _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _plt_kwargs = dict(facecolor=None, edgecolor='black', linewidth=0.75)
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
@@ -140,7 +140,7 @@ def _rectangle_grid(
 ) -> tuple[Figure, Axes]:
     """Suitable only for structured meshes"""
 
-    _axs_kwargs = dict(x_label="x", y_label="y",aspect='equal', tex=True)
+    _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _plt_kwargs = dict(color='black', linewidth=0.75)
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import (
     Callable,
     ParamSpec,
@@ -136,19 +137,6 @@ def filter_kwargs(
 
     return _
 
-    #  is_variadic = lambda f: Parameter.VAR_KEYWORD in [p.kind for p in signature(func).parameters.values()]    
-    #####
-    #     excluded_names = [n for f in exclude for n in get_names(f)]
-    #     kwargs = {k: v for k, v in kwargs.items() if k not in excluded_names}
-    #     if not strict:
-    #         for p in signature(func).parameters.values():
-    #             if p.kind is p.VAR_KEYWORD:
-    #                 return func(*args, **kwargs)
-    #     kwargs = {k: v for k, v in kwargs.items() if k in get_names(func)}
-    #     return func(*args, **kwargs)
-    # return _
-
-
 
 def MultipleDispatchTypeError(arg, sd_func: Callable | None = None) -> TypeError:
     msg = f"Unexpected type {type(arg)}."
@@ -218,25 +206,14 @@ def is_slice(s: str | slice | Any) -> bool:
         return False
     
 
-# Start: TypeAlias = int
-# Stop: TypeAlias = int
-# Step: TypeAlias = int
-# def as_range(
-#     arg: tuple[Step, Stop] | tuple[Start, Step, Stop] | range | list[int],
-# ) -> list[int] | range:
-    
-#     if isinstance(arg, tuple):
-#         match arg:
-#             case step, stop:
-#                 step, stop = arg
-#                 start = 0
-
-#             case start, step, stop:
-#                 step, step, stop = arg
-
-#         return range(start, stop, step)
-    
-#     else:
-#         if not isinstance(arg, (range, list)):
-#             raise TypeError
-#         return arg
+def nested_dict(
+    order: int | None = None,
+) -> defaultdict | dict:
+    if order is None:
+        return defaultdict(nested_dict)
+    if order == 1:
+        return dict
+    if order == 2:
+        return defaultdict(dict)
+    assert order > 2
+    return nested_dict(nested_dict(order - 1))

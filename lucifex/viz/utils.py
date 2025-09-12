@@ -73,53 +73,39 @@ def set_axes(
     x_label: str | None = None,
     y_label: str | None = None,
     aspect: float | Literal['auto', 'equal'] | None = None,
-    tex: bool = False,
-) -> None:
-    # creating or overwriting existing axis labels and title
-    if tex:
-        tex_optional = lambda s: texify(s)
-    else:
-        tex_optional = lambda s: s
-        
+) -> None:        
     if x_lims is not None:
         ax.set_xlim((np.min(x_lims), np.max(x_lims)))
     if y_lims is not None:
         ax.set_ylim((np.min(y_lims), np.max(y_lims)))
     if x_label is not None:
-        ax.set_xlabel(tex_optional(x_label))
+        ax.set_xlabel(x_label)
     if y_label is not None:
-        ax.set_ylabel(tex_optional(y_label))
+        ax.set_ylabel(y_label)
     if title is not None:
-        ax.set_title(tex_optional(title))
+        ax.set_title(title)
     if aspect is not None:
         ax.set_aspect(aspect)
 
 
 def set_legend(
     ax: Axes,
-    labels: Iterable[str | float | int | None],
-    title: str | None = None,
+    legend_labels: Iterable[str | float | int | None],
+    legend_title: str | None = None,
     handles=None,
     loc="upper left",
     bbox_to_anchor=(1, 1),
     frameon=False,
-    tex: bool = True,
-) -> None:
-
-    if tex:
-        tex_optional = lambda s: texify(s)
-    else:
-        tex_optional = lambda s: s
-    
-    labels = [tex_optional(i) if isinstance(i, str) else str(i) for i in labels]
+) -> None:    
+    legend_labels = [str(i) for i in legend_labels]
     if handles is None:
-        args = (labels, )
+        args = (legend_labels, )
     else:
-        args = (handles, labels)
+        args = (handles, legend_labels)
 
     ax.legend(
         *args,
-        title=tex_optional(title),
+        title=legend_title,
         loc=loc,
         bbox_to_anchor=bbox_to_anchor,
         frameon=frameon,
@@ -169,7 +155,7 @@ TEX_SYMBOLS = (
     )
 
 
-def texify(
+def tex(
     label: str | float | int | None,
     escape: str = "/",
 ) -> str:
@@ -200,18 +186,18 @@ def texify(
     return label
 
 
-def detexify(
+def detex(
     label: str | None,
     strip_wspace: bool = True,
 ) -> str:
     if label == "" or label is None:
         return ""
     if label[0] == '$' and label[-1] == '$':
-        return detexify(label[1:-1])
+        return detex(label[1:-1])
     
     for i in TEX_SYMBOLS:
         if f'\\{i}' in label:
-            label = label.replace(f'\\{i}', 'i')
+            label = label.replace(f'\\{i}', i)
 
     if strip_wspace:
         label = label.replace(' ', '')
@@ -225,7 +211,7 @@ def exponential_notation(
     ignore: Iterable[int] = (-1, 0, 1, 2),
     tex: bool = False,
 ) -> str:
-    """Returns a TeX string representation of a number in the format `a × 10ⁿ`"""
+    """Returns a string representation of a number in the format `a × 10ⁿ`"""
     if np.isclose(number, 0):
         exponent = 0
         coeff = 0
@@ -257,7 +243,6 @@ def create_mosaic_figure(
     suptitle: str | None = None,
     figscale: float = 1.0,
     indexing: Literal['xy', 'ij', 'ji'] = 'xy',
-    tex: bool = False,
     **kwargs,
 ) -> tuple[Figure, np.ndarray]:
 
@@ -271,10 +256,8 @@ def create_mosaic_figure(
     )
 
     if suptitle:
-        if tex:
-            suptitle = texify(suptitle)
         ax: Axes = axs.flat[n_cols - 1]
-        ax.text(1.0, 1.25, texify(suptitle), horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(1.0, 1.25, suptitle, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
 
     if indexing == 'xy':
         axs = axs.T[:, ::-1]

@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler, cycler as create_cycler
 
 from ..utils import grid, MultipleDispatchTypeError, filter_kwargs
-from .utils import COLORS, LW, set_legend, optional_ax, optional_fig_ax, set_axes, texify
+from .utils import COLORS, LW, set_legend, optional_ax, optional_fig_ax, set_axes, tex
 
 
 # solid, dashed, dotted, dashdotted, dashdotdotted, loosely dashdotdotted
@@ -53,8 +53,6 @@ def plot_line(
                     ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
                     cbar = fig.colorbar(mappable, ax_cbar, shrink=0.5)
                     if legend_title:
-                        if kwargs.get('tex') is not False:
-                            legend_title = texify(legend_title)
                         cbar.set_label(legend_title, rotation=360, ha='left')
         
         _kwargs = dict(x_lims=None)
@@ -96,7 +94,7 @@ def _(
     
     x, y = xy
 
-    _kwargs = dict(x_lims=x, tex=True)
+    _kwargs = dict(x_lims=x)
     _kwargs.update(**kwargs)
 
     filter_kwargs(set_axes)(ax, **_kwargs)
@@ -139,7 +137,7 @@ def plot_twin_lines(
     ax_twin.plot(x_right, y_right, **_plt_kwargs_right)
 
     y_label_left, y_label_right = y_labels
-    _kwargs = dict(tex=True)
+    _kwargs = dict()
     _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, x, y_label=y_label_left, **_kwargs)
     filter_kwargs(set_axes)(ax_twin, y_label=y_label_right, **_kwargs)
@@ -163,8 +161,6 @@ def plot_stacked_lines(
         plot_line(fig, axi, fi, y_label=y_label, **plt_kwargs)
 
     set_axes(ax[0], title=title)
-    if plt_kwargs.get('tex') is not False:
-        x_label = texify(x_label)
     set_axes(ax[-1], x_label=x_label)
     fig.subplots_adjust(hspace=0)
 

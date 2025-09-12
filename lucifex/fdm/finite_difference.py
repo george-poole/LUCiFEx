@@ -64,9 +64,9 @@ class FiniteDifference:
     def name(self) -> str:
         return self._name
     
-    # for compatibility with `eval`
     @property
     def __name__(self) -> str: 
+        # mimicking cls.__name__
         return self.name
 
     @property
@@ -84,11 +84,13 @@ class FiniteDifference:
     def __call__(
         self,
         u: Series,
+        trial: bool | None = None,
     ) -> Expr:
         if not isinstance(u, Series):
             raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
-
-        trial = self._trial if isinstance(u, FunctionSeries) else False
+        
+        if trial is None:
+            trial = self._trial if isinstance(u, FunctionSeries) else False
 
         if trial:
             _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
@@ -101,12 +103,12 @@ class FiniteDifference:
         self,
         trial: bool,
     ) -> Self:
-        obj = FiniteDifference(self.coefficients, self.init, self.__name__)
+        obj = FiniteDifference(self.coefficients, self.init, self.name)
         obj._trial = trial
         return obj
 
     def __repr__(self) -> str:
-        return self.__name__
+        return self.name
     
 
 class FiniteDifferenceDerivative(FiniteDifference):
@@ -252,7 +254,7 @@ def BDF(
     n: int,
     init: FiniteDifference | None = None,
 ) -> FiniteDifferenceDerivative:
-    """Backward-differentiation-formulae family of `∂.../∂t` discretizations"""
+    """Backward-differentiation-formulae family for discretizations of `∂u/∂t`"""
     match n:
         case 1:
             d = DT.coefficients
@@ -282,6 +284,23 @@ def BDF(
 
 BDF1 = BDF(1)
 BDF2 = BDF(2)
+
+
+def THETA(theta: float) -> FiniteDifference:
+    """
+    `θuⁿ⁺¹ + (1 - θ)uⁿ`
+
+    `θ = 0` forward Euler \\
+    `θ = 0.5` Crank-Nicolson \\
+    `θ = 1` backward Euler
+    """
+    return FiniteDifference(
+        {
+            Series.FUTURE_INDEX: theta, 
+            Series.FUTURE_INDEX - 1: 1 - theta,
+        }, 
+        name=f'THETA{theta}',
+    )
 
 
 def finite_difference_order(*args: FiniteDifference | tuple[FiniteDifference, ...] | Any) -> int | None:

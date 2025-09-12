@@ -34,7 +34,7 @@ def plot_quiver(
     x, y = grid(use_cache=True)(f.function_space.mesh)
     fx_np = grid(fx)
     fy_np = grid(fy)
-    set_axes(ax, x, y, title, *axis_names, tex=True)
+    set_axes(ax, x, y, title, *axis_names)
     nx_arrow, ny_arrow = n_arrow
     nx_freq = int(np.ceil(len(x) / nx_arrow))
     ny_freq = int(np.ceil(len(y) / ny_arrow))

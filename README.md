@@ -187,7 +187,7 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 ## Demos
 
-See `demo/` for notebooks and scripts. The A-notebooks are more application-focussed with examples from fluid mechanics and porous media, whereas the B-notebooks illustrate technical details from the `lucifex` package.
+See `demo/` for notebooks and scripts, which are divided into three categories: *A* (application-focussed with examples of PDEs from fluid mechanics and porous media), *L* (technical details from the `lucifex` package), and *N* (numerical methods for solving time-dependent problems in fluid mechanics).
 
 ## TODO List
 

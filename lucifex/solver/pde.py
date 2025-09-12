@@ -438,7 +438,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
     ):
         """
         If the `solution` argument is not provided, it will be inferred
-        as the zeroth argument.
+        as the zeroth argument to `forms_func`.
         """
         def _create(
             *args: P.args,
