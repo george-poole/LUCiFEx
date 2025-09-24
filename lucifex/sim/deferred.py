@@ -12,24 +12,24 @@ from .simulation import Simulation
 
 T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-StopperFromSimulation: TypeAlias = Callable[[Simulation], Stopper]
+StopperFactory: TypeAlias = Callable[[Simulation], Stopper]
 
 
 @overload
-def stopper_from_series(
+def create_stopper(
     u: str,
     condition: Callable[Concatenate[T, P], bool],
-) -> Callable[P, StopperFromSimulation]:
+) -> Callable[P, StopperFactory]:
     ...
 
 @overload
-def stopper_from_series(
+def create_stopper(
     u: FunctionSeries | ConstantSeries,
     condition: Callable[Concatenate[T, P], bool],
 ) -> Callable[P, Stopper]:
     ...
 
-def stopper_from_series(
+def create_stopper(
     u: FunctionSeries | ConstantSeries | str,
     condition: Callable[Concatenate[T, P], bool],
 ):  
@@ -47,10 +47,22 @@ def stopper_from_series(
     return _inner
             
 
+def as_stopper(
+    arg: Stopper | Callable[[], bool] | StopperFactory,
+    sim: Simulation,
+) -> Stopper:
+    if isinstance(arg, Stopper):
+        return arg
+    elif is_factory(arg):
+        return arg(sim)
+    else:
+        return Stopper(arg)
+
+
 T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-WriterFromSimulation: TypeAlias = Callable[[Simulation], Writer]
-R = TypeVar('R', Writer, WriterFromSimulation)
+WriterFactory: TypeAlias = Callable[[Simulation], Writer]
+R = TypeVar('R', Writer, WriterFactory)
 
 class WriterFromStep(Generic[R], Protocol):
     def __call__(
@@ -74,34 +86,34 @@ class WriterFromParamspec(Generic[R, P],Protocol):
 
 
 @overload
-def writer_from_series(
+def create_writer(
     u: str,
-) -> WriterFromStep[WriterFromSimulation]:
+) -> WriterFromStep[WriterFactory]:
     ...
 
 @overload
-def writer_from_series(
+def create_writer(
     u: str,
     condition: Callable[Concatenate[T, P], bool],
-) -> WriterFromParamspec[WriterFromSimulation, P]:
+) -> WriterFromParamspec[WriterFactory, P]:
     ...
 
 @overload
-def writer_from_series(
+def create_writer(
     u: FunctionSeries,
 ) -> WriterFromStep[Writer]:
     ...
 
 
 @overload
-def writer_from_series(
+def create_writer(
     u: FunctionSeries,
     condition: Callable[Concatenate[T, P], bool],
 ) -> WriterFromParamspec[Writer, P]:
     ...
 
 
-def writer_from_series(
+def create_writer(
     u: FunctionSeries | str,
     condition: Callable[Concatenate[T, P], bool] | None = None,
 ):
@@ -116,7 +128,7 @@ def writer_from_series(
             def _(sim: Simulation) -> Writer:
                 if dir_path is None:
                     dir_path = sim.dir_path
-                return writer_from_series(sim[u], condition)(dir_path, file_name, *args, **kwargs)
+                return create_writer(sim[u], condition)(dir_path, file_name, *args, **kwargs)
             return _
         else:
             if condition is not None:
@@ -136,3 +148,22 @@ def writer_from_series(
         _inner.__signature__ = Signature(params)
     
     return _inner
+
+
+def as_writer(
+    arg: Writer | Callable[[], bool] | WriterFactory,
+    sim: Simulation,
+) -> Writer:
+    if isinstance(arg, Writer):
+        return arg
+    elif is_factory(arg):
+        return arg(sim)
+    else:
+        return Writer(arg)
+    
+
+def is_factory(func: Callable) -> bool:
+    assert callable(func)
+    if len(signature(func).parameters) != 1:
+        return False
+    return list(signature(func).parameters.values())[0].annotation is Simulation

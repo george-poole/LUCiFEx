@@ -5,18 +5,18 @@ from lucifex.fem import LUCiFExConstant as Constant, LUCiFExFunction as Function
 from lucifex.fdm import DT, CN, FiniteDifference, ConstantSeries, FunctionSeries
 from lucifex.mesh import interval_mesh
 from lucifex.solver import BoundaryConditions, bvp_solver, dx_solver, eval_solver
-from lucifex.sim import create_simulation
+from lucifex.sim import configure_simulation
 from lucifex.utils import maximum
 
 
-def diffusion_forms(
+def diffusion(
     u: FunctionSeries,
     dt: Constant,
     Dfdm: FiniteDifference,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     Fdt = v * DT(u, dt) * dx
-    Fdiff += inner(grad(v), grad(Dfdm(u))) * dx
+    Fdiff = inner(grad(v), grad(Dfdm(u))) * dx
     return [Fdt, Fdiff]
 
 
@@ -27,13 +27,13 @@ def integrand(
     return u ** n
 
 
-@create_simulation(
+@configure_simulation(
     write_step=1, 
     write_file='series',
     dir_base='./data',
     dir_params=('Lx, Nx'),
 )
-def diffusion_1d(
+def diffusion_simulation_1d(
     Lx: float, 
     Nx: int, 
     dt: float, 
@@ -47,7 +47,7 @@ def diffusion_1d(
         ('dirichlet', lambda x: x[0], 0.0)
         ('dirichlet', lambda x: x[0] - Lx, 0.0)
     )
-    bvp = bvp_solver(diffusion_forms, bcs)(u, dt, Dfdm)
+    bvp = bvp_solver(diffusion, bcs)(u, dt, Dfdm)
     m = ConstantSeries(mesh, "m", Dfdm.order)
     m_solver = dx_solver(m, integrand)(u[0], 2)
     uMax = ConstantSeries(mesh, "uMinMax", Dfdm.order)

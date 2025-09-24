@@ -4,40 +4,120 @@ from types import EllipsisType
 import numpy as np
 from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
-from ufl import as_matrix
+from ufl import (dx, Form, FacetNormal,
+                 as_matrix, Dx, TrialFunction, TestFunction,
+                 det, transpose,  as_matrix)
 
+from lucifex.fdm import DT, FiniteDifference
 from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
-from lucifex.mesh import MeshBoundary
+from lucifex.mesh import MeshBoundary, rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import (
-    BoundaryConditions, OptionsPETSc, eval_solver, 
-    ds_solver, dS_solver
+    BoundaryConditions, OptionsPETSc, bvp_solver, ibvp_solver, eval_solver, 
+    ds_solver, interpolation_solver
 )
-from lucifex.utils import extremum
+from lucifex.utils import extremum, is_tensor
 from lucifex.sim import Simulation
 
 
-def flux():
-    ...
+def flux(
+    c: Function,
+    u: Function | Constant,
+    d: Function,
+    Ra: Constant
+) -> tuple[Expr, Expr]:
+    flux_adv = inner(u, grad(c))
+    n = FacetNormal(c.function_space.mesh)
+    flux_diff =  (1/Ra) * inner(n, d * grad(c))
+    return flux_adv, flux_diff
 
 
-def darcy_streamfunction():
-    ...
+def darcy_streamfunction(
+    psi: FunctionSeries,
+    rho: Expr | Function,
+    k: Expr | Function | Constant | float,
+    mu: Expr | Function | Constant | float,
+) -> tuple[Form, Form]:
+    v = TestFunction(psi.function_space)
+    psi_trial = TrialFunction(psi.function_space)
+    if is_tensor(k):
+        F_lhs = -(mu / det(k)) * inner(grad(v), transpose(k) * grad(psi_trial)) * dx 
+    else:
+        F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
+    F_rhs = -v * Dx(rho, 0) * dx
+    return F_lhs, F_rhs
 
 
 def streamfunction_velocity(psi: Function) -> Expr:
-    """
-    `𝐮 = ((0, 1), (-1, 0))·∇ψ`
-    """
     return as_matrix([[0, 1], [-1, 0]]) * grad(psi)
 
 
-def advection_diffusion():
-    ...
+def advection_diffusion(
+    c: FunctionSeries,
+    dt: Constant,
+    phi: Series | Function | Expr,
+    u: FunctionSeries,
+    Ra: Constant,
+    d: Series | Function | Expr,
+    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
+    D_diff: FiniteDifference,
+    D_phi: FiniteDifference = AB1,
+    bcs: BoundaryConditions | None = None,
+) -> list[Form]:
+    v = TestFunction(c.function_space)
+
+    if isinstance(phi, Series):
+        phi = D_phi(phi)
+    if isinstance(d, Series):
+        d = D_phi(d)
+
+    F_dcdt = v * DT(c, dt) * dx
+
+    match D_adv:
+        case D_adv_u, D_adv_c:
+            adv = (1 / phi) * inner(D_adv_u[False](u), grad(D_adv_c(c)))
+        case D_adv:
+            adv = (1 / phi) * D_adv(inner(u, grad(c)))
+    F_adv = v * adv * dx
+
+    F_diff = (1/Ra) * inner(grad(v / phi), d * grad(D_diff(c))) * dx
+
+    forms = [F_dcdt, F_adv, F_diff]
+
+    if bcs is not None:
+        ds, c_neumann = bcs.boundary_data(c.function_space, 'neumann')
+        F_neumann = sum([(1 / Ra) * v * cN * ds(i) for i, cN in c_neumann])
+        forms.append(F_neumann)
+
+    return forms
+
+
+def create_rectangle_domain(
+    Lx: float,
+    Ly: float,
+    Nx: int,
+    Ny: int,
+    cell: str,
+    name: str = 'LxLy',
+    clockwise_names: tuple[str, str, str, str] = ('upper', 'right', 'lower', 'left'),
+) -> tuple[Mesh, MeshBoundary]:
+    
+    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, cell, name=name)
+    boundary = mesh_boundary(
+        mesh,
+        {
+            clockwise_names[0]: lambda x: x[1] - Ly,
+            clockwise_names[1]: lambda x: x[0] - Lx,
+            clockwise_names[2]: lambda x: x[1],
+            clockwise_names[3]: lambda x: x[0],
+        },
+    )
+
+    return mesh, boundary
 
 
 C: TypeAlias = FunctionSeries
@@ -71,7 +151,7 @@ def abstract_porous_convection(
     | tuple[FiniteDifference, FiniteDifference]
     | tuple[FiniteDifference, FiniteDifference, FiniteDifference] = AB1,
     # linear algebra
-    flow_petsc: tuple[OptionsPETSc | None, OptionsPETSc | EllipsisType | None] = (None, ...),
+    psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,
     # optional solvers
     secondary: bool = False,      
@@ -101,18 +181,20 @@ def abstract_porous_convection(
 
     # flow solvers
     psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
-    psi_solver = ...
-    u_solver = ...
+    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, rho, k, mu)
+    u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
 
     # timestep solver
     dt_solver = eval_solver(dt, cfl_timestep)(
             u[0], cfl_h, courant, dt_max, dt_min,
         ) 
 
-    # transport solvers
+    # transport solver
     c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
     c_limits = (0, 1) if c_limits is Ellipsis else c_limits
-    c_solver = ...
+    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
+        c, dt, phi, u, Ra, d, D_adv, D_diff,
+    )
 
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
 
@@ -123,7 +205,7 @@ def abstract_porous_convection(
                 eval_solver(ConstantSeries(Omega, "uMinMax", shape=(2,)), extremum)(u[0]),
                 eval_solver(ConstantSeries(Omega, "cMinMax", shape=(2,)), extremum)(c[0]),
                 eval_solver(ConstantSeries(Omega, "dtCFL"), cfl_timestep)(u[0], cfl_h),
-                ds_solver(ConstantSeries(Omega, "f", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0], Ra),
+                ds_solver(ConstantSeries(Omega, "fOmega", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0], Ra),
             ]
         )
 

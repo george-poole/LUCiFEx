@@ -172,7 +172,7 @@ class Simulation:
         return _writers
     
 
-def create_simulation(
+def configure_simulation(
     petsc: OptionsPETSc | dict | None = None,
     jit: OptionsJIT | dict | None = None,
     ffcx: OptionsFFCX | dict | None = None,
@@ -195,10 +195,10 @@ def create_simulation(
         ffcx = OptionsFFCX.default
     kwargs_default = locals().copy()
     
-    create_simulation_sig = signature(create_simulation)
-    create_simulation_params = create_simulation_sig.parameters
-    create_simulation_params_new = [Parameter(p.name, p.kind, default=kwargs_default[p.name], annotation=p.annotation) for p in create_simulation_params.values()]
-    create_simulation_sig_new = Signature(create_simulation_params_new, return_annotation=create_simulation_sig.return_annotation)
+    configure_simulation_sig = signature(configure_simulation)
+    configure_simulation_params = configure_simulation_sig.parameters
+    configure_simulation_params_new = [Parameter(p.name, p.kind, default=kwargs_default[p.name], annotation=p.annotation) for p in configure_simulation_params.values()]
+    configure_simulation_sig_new = Signature(configure_simulation_params_new, return_annotation=configure_simulation_sig.return_annotation)
 
     P = ParamSpec('P')
     def _decorator(
@@ -209,10 +209,10 @@ def create_simulation(
             | Simulation],
     ):
         
-        assert not signature_name_collision(simulation_func, create_simulation)
+        assert not signature_name_collision(simulation_func, configure_simulation)
 
         # TODO python 3.11+ typing.get_overloads a better solution?
-        setattr(create_simulation, simulation_func.__name__, create_simulation_sig_new)
+        setattr(configure_simulation, simulation_func.__name__, configure_simulation_sig_new)
         simulation_func_params = signature(simulation_func).parameters
 
         @overload
@@ -239,7 +239,7 @@ def create_simulation(
 
         @functools.wraps(simulation_func)
         def _(*args, **kwargs):
-            if not args and kwargs and all(i in create_simulation_sig.parameters for i in kwargs):
+            if not args and kwargs and all(i in configure_simulation_sig.parameters for i in kwargs):
 
                 kwargs_complete = kwargs_default.copy()
                 kwargs_complete.update(kwargs)
@@ -283,9 +283,4 @@ def create_simulation(
     
     return _decorator
 
-
-def is_simulation_callable(func: Callable) -> bool:
-    if len(signature(func).parameters) != 1:
-        return False
-    return list(signature(func).parameters.values())[0].annotation is Simulation
 
