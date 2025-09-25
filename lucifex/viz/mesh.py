@@ -22,15 +22,14 @@ def plot_mesh(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = False,
     **plt_kwargs,
 ) -> None:
     dim = mesh.geometry.dim
     match dim:
         case 1:
-            _plot_interval_mesh(ax, mesh, title, vertices, **plt_kwargs)
+            _plot_interval_mesh(ax, mesh, title, **plt_kwargs)
         case 2:
-            _plot_rectangle_mesh(ax, mesh, title, vertices, **plt_kwargs)
+            _plot_rectangle_mesh(ax, mesh, title, **plt_kwargs)
         case 3:
             raise ValueError("3D plotting not supported")
         case _:
@@ -41,7 +40,6 @@ def _plot_interval_mesh(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = True,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
     raise NotImplementedError # TODO
@@ -51,7 +49,6 @@ def _plot_rectangle_mesh(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = False,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
     cell_type = mesh.topology.cell_name()
@@ -59,11 +56,11 @@ def _plot_rectangle_mesh(
 
     match cell_type, structured:
         case CellType.TRIANGLE, True | False:
-            _rectangle_triangulation(ax, mesh, title, vertices, **plt_kwargs)
+            _rectangle_triangulation(ax, mesh, title, **plt_kwargs)
         case CellType.QUADRILATERAL, True:
-            _rectangle_grid(ax, mesh, title, vertices, **plt_kwargs)
+            _rectangle_grid(ax, mesh, title, **plt_kwargs)
         case CellType.QUADRILATERAL, False:
-            _rectangle_quadrangulation(ax, mesh, title, vertices, **plt_kwargs)
+            _rectangle_quadrangulation(ax, mesh, title, **plt_kwargs)
         case _:
             raise ValueError
 
@@ -72,7 +69,6 @@ def _rectangle_triangulation(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = False,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable for structured and unstructured meshes"""
@@ -92,15 +88,11 @@ def _rectangle_triangulation(
     )
     filter_kwargs(ax.triplot, Line2D)(trigl, **_kwargs)
 
-    if vertices:
-        _plot_vertices(ax, trigl.x, trigl.y, **_kwargs)
-
 
 def _rectangle_quadrangulation(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = False,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable for structured and unstructured meshes"""
@@ -127,15 +119,11 @@ def _rectangle_quadrangulation(
     )
     ax.add_collection(quadl)
 
-    if vertices:
-        _plot_vertices(ax, x_coordinates, y_coordinates, **_kwargs)
-
 
 def _rectangle_grid(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
-    vertices: bool = False,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable only for structured meshes"""
@@ -159,13 +147,3 @@ def _rectangle_grid(
 
     ax.vlines(x, *ylim, **_plt_kwargs)
     ax.hlines(y, *xlim, **_plt_kwargs)
-
-    if vertices:
-        x_grid, y_grid = np.meshgrid(x, y)
-        _plot_vertices(ax, x_grid, y_grid, **_kwargs)
-
-
-def _plot_vertices(
-    ax: Axes, x: np.ndarray, y: np.ndarray, **kwargs) -> None:
-    """Adds a scatter plot of mesh vertices"""
-    filter_kwargs(ax.scatter, Collection)(x, y, s=2, marker="o", **kwargs)

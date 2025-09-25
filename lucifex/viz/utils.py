@@ -1,4 +1,5 @@
 from inspect import signature
+from enum import Enum
 from typing import Callable, Iterable, ParamSpec, Concatenate, Literal
 
 import numpy as np
@@ -6,11 +7,14 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-# defaults for `matplotlib`
+
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
+
 LW = 0.75
-MS = 6.0
+MS = 4.0
+STYLES = ["-", "--", ":", "-.", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
+MARKERS = ["o", "x", "^", "d", "*"]
 COLORS = ["black", "blue", "limegreen", "red", "darkorange", "fuchsia"]
 
 

@@ -13,7 +13,7 @@ from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 
 from .petsc import form
-from .pde import BoundaryValueProblem, OptionsPETSc, OptionsFFCX, OptionsJIT, options_dict
+from .pde import BoundaryValueProblem, OptionsPETSc, OptionsFFCX, OptionsJIT
 from .bcs import create_enumerated_measure, BoundaryConditions, Value, SubspaceIndex
 
 
@@ -203,9 +203,9 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
 P = ParamSpec("P")
 class ProjectionProblem(BoundaryValueProblem):
 
-    petsc_default = OptionsPETSc.default
-    jit_default = OptionsJIT.default
-    ffcx_default = OptionsFFCX.default
+    petsc_default = OptionsPETSc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
 
     def __init__(
         self, 
@@ -254,8 +254,8 @@ class ProjectionProblem(BoundaryValueProblem):
 P = ParamSpec("P")
 class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
 
-    jit_default = OptionsJIT.default
-    ffcx_default = OptionsFFCX.default
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
 
     @classmethod
     def set_defaults(
@@ -264,9 +264,9 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
         ffcx=None,
     ):
         if jit is None:
-            jit = OptionsJIT.default
+            jit = OptionsJIT.default()
         if ffcx is None:
-            ffcx = OptionsFFCX.default
+            ffcx = OptionsFFCX.default()
         cls.jit_default = jit
         cls.ffcx_default = ffcx
 
@@ -285,8 +285,8 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
             jit = self.jit_default
         if ffcx is None:
             ffcx = self.ffcx_default
-        jit = options_dict(jit)
-        ffcx = options_dict(ffcx)
+        jit = dict(jit)
+        ffcx = dict(ffcx)
 
         if isinstance(expression, Expr):
             expression = Expression(

@@ -188,11 +188,11 @@ def configure_simulation(
     dir_timestamp: bool = False,
 ):
     if petsc is None:
-        petsc = OptionsPETSc.default
+        petsc = OptionsPETSc.default()
     if jit is None:
-        jit = OptionsJIT.default
+        jit = OptionsJIT.default()
     if ffcx is None:
-        ffcx = OptionsFFCX.default
+        ffcx = OptionsFFCX.default()
     kwargs_default = locals().copy()
     
     configure_simulation_sig = signature(configure_simulation)

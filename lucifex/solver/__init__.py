@@ -3,11 +3,13 @@ from .pde import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,
     InitialValueProblem,
+    EigenvalueProblem,
     bvp_solver,
     ibvp_solver,
     ivp_solver,
+    evp_solver,
 )
-from .options import OptionsJIT, OptionsFFCX, OptionsPETSc
+from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
 from .evaluation import (
     EvaluationProblem,
     FacetIntegrationProblem,
@@ -33,27 +35,12 @@ IBVP = InitialBoundaryValueProblem
 IVP = InitialValueProblem
 """Alias to `InitialValueProblem`"""
 
-XP = EvaluationProblem
-"""Alias to `AuxiliaryProblem`"""
-
-DX = CellIntegrationProblem
-"""Alias to `DxSolver`"""
-
-DS = FacetIntegrationProblem
-"""Alias to `DsSolver`"""
-
-PRJC = ProjectionProblem
-"""Alias to `ProjectionSolver`"""
-
-ITPL = InterpolationProblem
-"""Alias to `InterpolationSolver`"""
-
-BCS = BoundaryConditions
-"""Alias to `BoundaryConditions`"""
+EVP = EigenvalueProblem
+"""Alias to `EigenvalueProblem`"""
 
 from typing import TypeAlias
 
-PDE: TypeAlias = BVP | IBVP | IVP
+PDE: TypeAlias = BVP | IBVP | IVP | EVP
 """Alias to `BVP | IBVP | IVP`"""
 
 Solver: TypeAlias = PDE | EvaluationProblem

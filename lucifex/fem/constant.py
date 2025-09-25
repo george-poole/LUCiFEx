@@ -24,7 +24,7 @@ class LUCiFExConstant(Constant):
         self._mesh = mesh
 
         if name is None:
-            name = self.__class__.__name__
+            name =  f'c{id(self)}'
         self._name = name
 
         if value is None:

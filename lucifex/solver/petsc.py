@@ -1,4 +1,4 @@
-from typing import TypeAlias
+from typing import TypeAlias, Iterable, Literal
 from types import EllipsisType
 
 import functools
@@ -172,21 +172,55 @@ def sum_vector(
     scalings: list[float],
     bcs_fs: tuple[list[DirichletBCMetaClass], FunctionSpace] = None,
 ) -> None:
-    v_sum.zeroEntries()
+    raise NotImplementedError # TODO bcs_fs
+    # v_sum.zeroEntries()
 
-    if not v_sum.isAssembled():
-        v_sum.assemble()
+    # if not v_sum.isAssembled():
+    #     v_sum.assemble()
 
-    for vi, si in zip(v, scalings):
-        if vi is None:
-            continue
-        v_sum.axpy(PETSc.ScalarType(si), vi)
+    # for vi, si in zip(v, scalings):
+    #     if vi is None:
+    #         continue
+    #     v_sum.axpy(PETSc.ScalarType(si), vi)
 
-    v_sum.assemble()
+    # v_sum.assemble()
 
-    # TODO bcs_fs
 
-    raise NotImplementedError
+def array_matrix(
+    m: PETScMat,
+    indices: tuple[Iterable[int], Iterable[int]] | Literal["dense"] | None = "dense",
+    copy: bool = False,
+) -> PETScMat | np.ndarray:
+    if copy:
+        _m = m.copy()
+    else:
+        _m = m._matrix
+
+    if indices is None:
+        return _m
+    elif indices == "dense":
+        _m.convert("dense")
+        return _m.getDenseArray()
+    else:
+        return _m.getValues(*indices)
+    
+
+def array_vector(
+    v: PETScVec,
+    indices: int | Iterable[int] | Literal["dense"] | None = "dense",
+    copy: bool = False,   
+) -> PETScVec | np.ndarray:
+    if copy:
+        _v = v.copy()
+    else:
+        _v = v
+
+    if indices is None:
+        return _v
+    elif indices == "dense":
+        return _v.getArray()
+    else:
+        return _v.getValues(indices)
 
 
 def create_mpc_matrix(a: FormMetaClass, mpc: MultiPointConstraint):
@@ -194,38 +228,3 @@ def create_mpc_matrix(a: FormMetaClass, mpc: MultiPointConstraint):
     pattern.assemble()
     return cpp_create_matrix(mpc.function_space.mesh.comm, pattern)
 
-
-
-# from typing import Callable, ParamSpec, Concatenate
-
-# P = ParamSpec('P')
-# def petsc_cache(routine: Callable[Concatenate[PETScMat | PETScVec, FormMetaClass, P], None]):
-
-#     def _wrapper(cache: bool | EllipsisType):
-#         def _inner(mv: PETScMat | PETScVec, form: FormMetaClass, *args, **kwargs):
-#             consts_old = mv.getAttr(ATTR_CONSTANTS)
-#             coeffs_old = mv.getAttr(ATTR_COEFFICIENTS)
-#             consts_new = None
-#             coeffs_new = None
-
-#             if cache is ... or cache is True:
-#                 # TODO better as a dict?
-#                 # consts_new = {i.name: i.value.copy() for i in a.ufl_constants}
-#                 # coeffs_new = {i.name: i.x.array.copy() for i in a.ufl_coefficients}
-#                 consts_new = [i.value.copy() for i in form.ufl_constants]
-#                 coeffs_new = [i.x.array.copy() for i in form.ufl_coefficients]
-
-#             if (consts_old is None and coeffs_old is None) or not (
-#                 cache is ...
-#                 and np.isclose(consts_old, consts_new).all()
-#                 and np.isclose(coeffs_old, coeffs_new).all()
-#             ):
-#                 # first assembly or assembling again
-#                 routine(mv, form, *args, **kwargs)
-#                 mv.setAttr(ATTR_CONSTANTS, consts_new)
-#                 mv.setAttr(ATTR_COEFFICIENTS, coeffs_new)
-#             else:
-#                 # not assembling again
-#                 return
-#         return _inner
-#     return _wrapper

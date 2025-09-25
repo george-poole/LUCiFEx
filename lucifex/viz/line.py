@@ -10,14 +10,11 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from cycler import Cycler, cycler as create_cycler
+from cycler import Cycler, cycler
 
 from ..utils import grid, MultipleDispatchTypeError, filter_kwargs
-from .utils import COLORS, LW, set_legend, optional_ax, optional_fig_ax, set_axes, tex
+from .utils import COLORS, LW, MS, STYLES, MARKERS, set_legend, optional_ax, optional_fig_ax, set_axes
 
-
-# solid, dashed, dotted, dashdotted, dashdotdotted, loosely dashdotdotted
-STYLES = ["-", "--", ":", "-.", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
 
 @optional_fig_ax
 def plot_line(
@@ -28,24 +25,33 @@ def plot_line(
     | Iterable[Function | tuple[Iterable[float], Iterable[float]]],
     legend_labels: list[str | float | int] | tuple[float, float] | None = None,
     legend_title: str | None = None,
-    cycler: Cycler | Literal["black", "color"] | str | None = None,
+    cyc: Cycler | Literal["black", "color"] | str | None = None,
     **kwargs,
 ) -> None:
     if isinstance(f, (Function, tuple)):
-        _plot_line(f, ax, cycler, **kwargs)
+        _plot_line(f, ax, cyc, **kwargs)
     else:
-        if cycler is None:
-            cycler = 'black'
-        if isinstance(cycler, str):
-            if cycler == 'black':
-                cycler = create_cycler(color=["black"] * len(STYLES), linestyle=STYLES, linewidth=[LW] * len(STYLES))
-            elif cycler == "color":
-                cycler = create_cycler(color=COLORS, linestyle=["-"] * len(COLORS), linewidth=[LW] * len(COLORS))
+        if cyc is None:
+            cyc = 'black'
+        if isinstance(cyc, str):
+            if cyc == 'black':
+                ncyc = len(STYLES)
+                cyc = cycler(linestyle=STYLES, color=["black"] * ncyc, linewidth=[LW] * ncyc)
+            elif cyc == "color":
+                ncyc = len(COLORS)
+                cyc = cycler(color=COLORS, linestyle=["-"] * ncyc, linewidth=[LW] * ncyc)
+            elif cyc in ('marker', 'markerline'):
+                if cyc == 'markerline':
+                    ls = '-'
+                else:
+                    ls = '' 
+                ncyc = len(MARKERS)
+                cyc = cycler(marker=MARKERS, color=["black"] * ncyc, linewidth=[LW] * ncyc, linestyle=[ls] * ncyc, s=[MS] * ncyc)
             else:
                 if isinstance(f, (Function, tuple)):
                     raise TypeError('Colormap cycler requires argument type `f: Iterable[Function | tuple[Iterable[float], Iterable[float]]]`')
-                cmap = getattr(plt.cm, cycler)
-                cycler = create_cycler(color=cmap(np.linspace(0, 1, len(f))), linewidth=[LW] * len(f))
+                cmap = getattr(plt.cm, cyc)
+                cyc = cycler(color=cmap(np.linspace(0, 1, len(f))), linewidth=[LW] * len(f))
                 if isinstance(legend_labels, tuple):
                     assert len(legend_labels) == 2
                     mappable = ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=min(legend_labels), vmax=max(legend_labels)))
@@ -59,9 +65,9 @@ def plot_line(
         _kwargs.update(kwargs)
         for i, fi in enumerate(f):
             if i == 0:
-                _plot_line(fi, ax, cycler=cycler, **_kwargs)
+                _plot_line(fi, ax, cyc=cyc, **_kwargs)
             else:
-                _plot_line(fi, ax, cycler=Ellipsis, **_kwargs)
+                _plot_line(fi, ax, cyc=Ellipsis, **_kwargs)
 
         if legend_labels is not None and not isinstance(legend_labels, tuple):
             filter_kwargs(set_legend)(ax, legend_labels, legend_title, **_kwargs)
@@ -76,19 +82,19 @@ def _plot_line(f):
 def _(
     f: Function,
     ax: Axes,
-    cycler: Cycler | None = None,
+    cyc: Cycler | None = None,
     **kwargs,
 ) -> None:
     (x, ) = grid(f.function_space.mesh)
     f_grid  = grid(f)
-    _plot_line((x, f_grid), ax, cycler, **kwargs)
+    _plot_line((x, f_grid), ax, cyc, **kwargs)
 
 
 @_plot_line.register(tuple)
 def _(
     xy: tuple[np.ndarray, np.ndarray],
     ax: Axes,
-    cycler: Cycler | EllipsisType | None = None,
+    cyc: Cycler | EllipsisType | None = None,
     **kwargs,
 ) -> None:
     
@@ -98,14 +104,14 @@ def _(
     _kwargs.update(**kwargs)
 
     filter_kwargs(set_axes)(ax, **_kwargs)
-    if cycler is Ellipsis:
+    if cyc is Ellipsis:
         pass
-    elif cycler is None:
+    elif cyc is None:
         __kwargs = dict(linewidth=LW, color='black', linestyle="-")
         __kwargs.update(**_kwargs)
         _kwargs = __kwargs
     else:
-        ax.set_prop_cycle(cycler)
+        ax.set_prop_cycle(cyc)
     filter_kwargs(ax.plot, Line2D)(x, y, **_kwargs)
 
 

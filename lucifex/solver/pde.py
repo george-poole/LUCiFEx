@@ -10,15 +10,20 @@ from functools import partial
 
 import numpy as np
 from ufl import Form, lhs, rhs
-from dolfinx.fem import Constant, Function
+from dolfinx.mesh import Mesh
+from dolfinx.fem import Constant, Function, FunctionSpace
 from dolfinx.fem.petsc import create_matrix, create_vector
 from petsc4py import PETSc
+from slepc4py import SLEPc
 
-from ..utils import Perturbation, copy_callable, MultipleDispatchTypeError, dofs_limits_corrector
+from ..utils import Perturbation, copy_callable, MultipleDispatchTypeError, dofs_limits_corrector, fem_function_space
 from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
 
 from .bcs import BoundaryConditions
-from .options import OptionsPETSc, OptionsFFCX, OptionsJIT, options_dict
+from .options import (
+    OptionsPETSc, OptionsSLEPc,
+    OptionsFFCX, OptionsJIT, set_from_options,
+)
 from .petsc import (
     form,
     assemble_matrix,
@@ -26,6 +31,8 @@ from .petsc import (
     assemble_vector,
     sum_matrix,
     sum_vector,
+    array_matrix,
+    array_vector,
     PETScMat,
     PETScVec,
 )
@@ -33,9 +40,9 @@ from .petsc import (
 P = ParamSpec("P")
 class BoundaryValueProblem:
 
-    petsc_default = OptionsPETSc.default
-    jit_default = OptionsJIT.default
-    ffcx_default = OptionsFFCX.default
+    petsc_default = OptionsPETSc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
 
     @classmethod
     def set_defaults(
@@ -45,11 +52,11 @@ class BoundaryValueProblem:
         ffcx=None,
     ):
         if petsc is None:
-            petsc = OptionsPETSc.default
+            petsc = OptionsPETSc.default()
         if jit is None:
-            jit = OptionsJIT.default
+            jit = OptionsJIT.default()
         if ffcx is None:
-            ffcx = OptionsFFCX.default
+            ffcx = OptionsFFCX.default()
         cls.petsc_default = petsc
         cls.jit_default = jit
         cls.ffcx_default = ffcx
@@ -87,20 +94,19 @@ class BoundaryValueProblem:
             jit = self.jit_default
         if ffcx is None:
             ffcx = self.ffcx_default
+        petsc = dict(petsc)
+        jit = dict(jit)
+        ffcx = dict(ffcx)
 
-        petsc = options_dict(petsc)
-        jit = options_dict(jit)
-        ffcx = options_dict(ffcx)
-
-        forms_weak_bcs = bcs.create_weak_bcs(series.function_space)
+        forms_weak_bcs = bcs.create_weak_bcs(solution.function_space)
         forms = (*forms, *forms_weak_bcs)
         scalings = [i[0] if isinstance(i, tuple) else 1.0 for i in forms]
         self._scalings = scalings
         forms = [i[1] if isinstance(i, tuple) else i for i in forms]
 
-        self._bcs = bcs.create_strong_bcs(series.function_space)        
+        self._bcs = bcs.create_strong_bcs(solution.function_space)        
         # TODO when dof affected by more than one mpc
-        self._mpc = bcs.create_periodic_bcs(series.function_space, self._bcs)
+        self._mpc = bcs.create_periodic_bcs(solution.function_space, self._bcs)
         
         if isinstance(dofs_corrector, tuple):
             self._dofs_corrector = lambda u: dofs_limits_corrector(u, dofs_corrector)
@@ -151,33 +157,17 @@ class BoundaryValueProblem:
         self._v_sum_unscaled = create_vector(self._l_sum_unscaled_compiled)
         self._v_sum = create_vector(self._l_sum_compiled)
 
-        self._solver_sum_unscaled = PETSc.KSP().create(series.function_space.mesh.comm)
+        prefix = f"{self.__class__.__name__}_{id(self)}"
+        self._solver_sum_unscaled = PETSc.KSP().create(solution.function_space.mesh.comm)
         self._solver_sum_unscaled.setOperators(self._m_sum_unscaled)
-        self._solver_sum = PETSc.KSP().create(series.function_space.mesh.comm)
+        self._solver_sum_unscaled.setOptionsPrefix(prefix)
+        self._solver_sum = PETSc.KSP().create(solution.function_space.mesh.comm)
         self._solver_sum.setOperators(self._m_sum)
+        self._solver_sum.setOptionsPrefix(prefix)
+        set_from_options(self._solver_sum_unscaled, petsc)
+        set_from_options(self._solver_sum, petsc)
 
-        self._matrix = None
-        self._vector = None
-        self._solver = None
-        self._solution = solution
-        self._series = series
-
-        problem_prefix = f"{self.__class__.__name__}_{id(self)}"
-        self._solver_sum_unscaled.setOptionsPrefix(problem_prefix)
-        self._solver_sum.setOptionsPrefix(problem_prefix)
-
-        petsc_options = PETSc.Options()
-        petsc_options.prefixPush(problem_prefix)
-        for k, v in petsc.items():
-            petsc_options[k] = v
-        petsc_options.prefixPop()
-        self._solver_sum_unscaled.setFromOptions()
-        self._solver_sum.setFromOptions()
-
-        self._use_partition = use_partition
-        self._cache_matrix = cache_matrix
-
-        mv_structures = (
+        mv_all = (
             self._m_sum_unscaled,
             self._v_sum_unscaled,
             self._m_sum,
@@ -185,11 +175,18 @@ class BoundaryValueProblem:
             *self._m_forms,
             *self._v_forms,
         )
-
-        for mv in mv_structures:
+        for mv in mv_all:
             if mv is not None:
-                mv.setOptionsPrefix(problem_prefix)
+                mv.setOptionsPrefix(prefix)
                 mv.setFromOptions()
+
+        self._matrix = None
+        self._vector = None
+        self._solver = None
+        self._solution = solution
+        self._series = series
+        self._use_partition = use_partition
+        self._cache_matrix = cache_matrix
 
     @classmethod
     def from_forms_func(
@@ -218,8 +215,17 @@ class BoundaryValueProblem:
                     solution = args[0]
                 else:
                     solution = list(kwargs.values())[0]
-            return cls(solution, forms_func(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector,
-                       cache_matrix, use_partition)
+            return cls(
+                solution, 
+                forms_func(*args, **kwargs), 
+                bcs, 
+                petsc, 
+                jit, 
+                ffcx, 
+                dofs_corrector,
+                cache_matrix, 
+                use_partition,
+            )
         return _create
 
     def solve(
@@ -251,8 +257,8 @@ class BoundaryValueProblem:
             if not isinstance(cache_matrix, Iterable):
                 cache_matrix = [cache_matrix] * len(self._m_forms)
             [
-                assemble_matrix(m, a, self._bcs, self._mpc, cache=cache)
-                for m, a, cache in zip(self._m_forms, self._a_forms_compiled, cache_matrix, strict=True)
+                assemble_matrix(m, a, self._bcs, self._mpc, cache=c)
+                for m, a, c in zip(self._m_forms, self._a_forms_compiled, cache_matrix, strict=True)
                 if (m, a) != (None, None)
             ]
             sum_matrix(
@@ -301,50 +307,27 @@ class BoundaryValueProblem:
 
     def get_matrix(
         self,
-        indices: tuple[Iterable[int], Iterable[int]] | Literal["dense"] | None = "dense",
-        copy: bool = True,
+        indices: tuple[Iterable[int], Iterable[int]] | Literal["dense"] | None = None,
+        copy: bool = False,
     ) -> PETScMat | np.ndarray | None:
         if self._matrix is None:
             return None
-
-        if copy:
-            m = self._matrix.copy()
-        else:
-            m = self._matrix
-
-        if indices is None:
-            return m
-        elif indices == "dense":
-            m.convert("dense")
-            return m.getDenseArray()
-        else:
-            return m.getValues(*indices)
+        return array_matrix(self._matrix, indices, copy)
 
     def get_vector(
         self,
-        indices: int | Iterable[int] | Literal["dense"] | None = "dense",
-        copy: bool = True,
+        indices: int | Iterable[int] | Literal["dense"] | None = None,
+        copy: bool = False,
     ) -> PETScVec | np.ndarray | None:
         if self._vector is None:
-            return self._vector
-
-        if copy:
-            v = self._vector.copy()
-        else:
-            v = self._vector
-
-        if indices is None:
-            return v
-        elif indices == "dense":
-            return v.getArray()
-        else:
-            return v.getValues(indices)
+            return None
+        return array_vector(self._vector, indices, copy)
         
     def get_solver(self) -> PETSc.KSP | None:
         return self._solver
     
     @property
-    def cache_matrix(self) -> bool | EllipsisType | tuple[bool | EllipsisType, ...]:
+    def cache_matrix(self) -> bool | EllipsisType | Iterable[bool | EllipsisType]:
         """
         If `True`, matrix is assembled only in the first `solve` call and is subsequently cached.
         If `False`, matrix is reassembled in each `solve` call.
@@ -385,9 +368,9 @@ class BoundaryValueProblem:
 P = ParamSpec("P")
 class InitialBoundaryValueProblem(BoundaryValueProblem):
 
-    petsc_default = OptionsPETSc.default
-    jit_default = OptionsJIT.default
-    ffcx_default = OptionsFFCX.default
+    petsc_default = OptionsPETSc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
 
     def __init__(
         self,
@@ -494,11 +477,12 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         super().solve(future, overwrite, cache_matrix, use_partition)
 
 
+P = ParamSpec("P")
 class InitialValueProblem(InitialBoundaryValueProblem):
 
-    petsc_default = OptionsPETSc.default
-    jit_default = OptionsJIT.default
-    ffcx_default = OptionsFFCX.default
+    petsc_default = OptionsPETSc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
 
     def __init__(
         self,
@@ -544,6 +528,207 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         )
 
 
+class EigenvalueProblem:
+
+    slepc_default = OptionsSLEPc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
+
+    @classmethod
+    def set_defaults(
+        cls,
+        slepc=None,
+        jit=None,
+        ffcx=None,
+    ):
+        if slepc is None:
+            slepc = OptionsSLEPc.default()
+        if jit is None:
+            jit = OptionsJIT.default()
+        if ffcx is None:
+            ffcx = OptionsFFCX.default()
+        cls.slepc_default = slepc
+        cls.jit_default = jit
+        cls.ffcx_default = ffcx
+    
+    def __init__(
+        self,
+        solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int],
+        forms: tuple[Form, Form],
+        bcs: BoundaryConditions | None = None,
+        slepc: OptionsSLEPc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
+    ) -> None:
+        
+        if slepc is None:
+            slepc = self.slepc_default
+        if jit is None:
+            jit = self.jit_default
+        if ffcx is None:
+            ffcx = self.ffcx_default
+        slepc = dict(slepc)
+        jit = dict(jit)
+        ffcx = dict(ffcx)
+        
+        EPS_NEV_ATTR = 'eps_nev'
+        if isinstance(solutions, list):
+            nev = len(eigenfunctions)
+            slepc[EPS_NEV_ATTR] = nev
+            function_space = solutions[0].function_space
+            names = [i.name for i in solutions]
+            if all(isinstance(i, Function) for i in solutions):
+                eigenfunctions = solutions
+                eigenseries = [FunctionSeries(function_space, n) for n in names]
+            elif all(isinstance(i, FunctionSeries) for i in solutions):
+                eigenfunctions = [Function(function_space, name=n) for n in names]
+                eigenseries = solutions
+            else:
+                raise TypeError
+        else:
+            nev = slepc.get(EPS_NEV_ATTR, self.slepc_default.eps_nev)
+            function_space = fem_function_space(solutions)
+            eigenfunctions = [Function(function_space) for _ in range(nev)]
+            eigenseries = [FunctionSeries(function_space) for _ in range(nev)]
+        
+        if bcs is None:
+            bcs = BoundaryConditions()
+
+        self._bcs = bcs.create_strong_bcs(function_space)  
+
+        _form = partial(
+            form,
+            jit_options=jit,
+            form_compiler_options=ffcx,
+        )
+
+        form_lhs, form_rhs = forms
+        self._form_lhs_compiled = _form(form_lhs)
+        self._form_rhs_compiled = _form(form_rhs)
+        self._matrix_lhs = create_matrix(self._form_lhs_compiled)
+        self._matrix_rhs = create_matrix(self._form_rhs_compiled)
+
+        prefix = f"{self.__class__.__name__}_{id(self)}"
+        self._solver = SLEPc.EPS().create(function_space.mesh.comm)
+        self._solver.setOperators(self._matrix_lhs, self._matrix_rhs)
+        self._solver.setOptionsPrefix(prefix)
+        set_from_options(self._solver, slepc)
+
+        self._n_requested = nev
+        self._n_converged = None
+        self._eigenvalues = [None] * nev
+        self._eigenfunctions = eigenfunctions
+        self._eigenseries = eigenseries
+        self._cache_matrix = cache_matrix
+
+    @classmethod
+    def from_forms_func(
+        cls,
+        forms_func: Callable[P, tuple[Form, Form]],
+        bcs: BoundaryConditions | None = None,
+        slepc: OptionsSLEPc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
+        solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int] | None = None,
+    ):
+        def _create(
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> Self:
+            nonlocal solutions
+            if solutions is None:
+                if args:
+                    solutions = args[0]
+                else:
+                    solutions = list(kwargs.values())[0]
+                if isinstance(solutions, (Function, FunctionSeries)):
+                    solutions = solutions.function_space
+            return cls(
+                solutions,
+                forms_func(*args, **kwargs),
+                bcs, 
+                slepc,
+                jit,
+                ffcx,
+                cache_matrix,
+            )
+
+        return _create
+
+    def solve(
+        self,
+        future: bool = False,
+        overwrite: bool = False,
+        cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] | None = None,
+    ) -> None:
+        if cache_matrix is None:
+            cache_matrix = self.cache_matrix
+        if not isinstance(cache_matrix, tuple):
+            cache_matrix = (cache_matrix, cache_matrix)
+        cache_lhs, cache_rhs = cache_matrix
+
+        assemble_matrix(self._matrix_lhs, self._form_lhs_compiled, self._bcs, cache=cache_lhs)
+        assemble_matrix(self._matrix_rhs, self._form_rhs_compiled, self._bcs, cache=cache_rhs)
+
+        self._solver.setOperators(self._matrix_lhs, self._matrix_rhs)
+        self._solver.solve()
+
+        self._n_converged = self._solver.getConverged()
+        for n in range(min(self._n_converged, self._n_requested)):
+            self._eigenvalues[n] = self._solver.getEigenvalue(n)
+            self._solver.getEigenpair(n, self._eigenfunctions[n].vector)
+            self._eigenfunctions[n].x.scatter_forward()
+            self._eigenseries[n].update(self._eigenfunctions[n], future, overwrite)
+
+    def forward(self, t: float | Constant | np.ndarray) -> None:
+        for i in range(self._n_converged):
+            self._eigenseries[i].forward(t)
+
+    def get_matrices(
+        self,
+        indices: tuple[Iterable[int], Iterable[int]] | Literal["dense"] | None = None,
+        copy: bool = False,
+    ) -> tuple[PETScMat, PETScMat] | tuple[np.ndarray, np.ndarray]:
+        return (
+            array_matrix(self._matrix_lhs, indices, copy), 
+            array_matrix(self._matrix_rhs, indices, copy), 
+        )
+        
+    def get_solver(self) -> SLEPc.EPS:
+        return self._solver
+    
+    @property
+    def cache_matrix(self) -> bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType]:
+        return self._cache_matrix
+    
+    @cache_matrix.setter
+    def cache_matrix(self, value):
+        if isinstance(value, Iterable):
+            assert all(isinstance(i, (bool, EllipsisType)) for i in value)
+            value = tuple(value)
+        else:
+            assert isinstance(value, (bool, EllipsisType))
+        self._cache_matrix = value
+         
+    @property
+    def n_converged(self) -> int | None:
+        return self._n_converged
+
+    @property
+    def eigenvalues(self) -> list[float]: 
+        return self._eigenvalues
+    
+    @property
+    def eigenfunctions(self) -> list[Function]:
+        return self._eigenfunctions
+
+    @property
+    def eigenseries(self) -> list[FunctionSeries]:
+        return self._eigenseries
+        
+    
 @copy_callable(BoundaryValueProblem.from_forms_func)
 def bvp_solver():
     pass
@@ -556,41 +741,6 @@ def ibvp_solver():
 def ivp_solver():
     pass
 
-
-# P = ParamSpec('P')
-# def bvp_solver(
-#     u: Function | FunctionSeries,
-#     terms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
-#     bcs: BoundaryConditions | None = None,
-#     petsc: OptionsPETSc | dict | None = None,
-#     jit: OptionsJIT | dict | None = None,
-#     ffcx: OptionsFFCX | dict | None = None,
-# ) -> Callable[P, BoundaryValueProblem]:
-#     def _inner(*args, **kwargs):
-#         terms = terms_factory(*args, **kwargs)
-#         return BoundaryValueProblem(u, terms, bcs, petsc, jit, ffcx)
-#     return _inner
-
-
-# P = ParamSpec('P')
-# def ibvp_solver(
-#     u: Function | FunctionSeries,
-#     terms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
-#     ics: InitialConditions | Function | Constant | None = None,
-#     bcs: BoundaryConditions | None = None,
-#     petsc: OptionsPETSc | dict | None = None,
-#     jit: OptionsJIT | dict | None = None,
-#     ffcx: OptionsFFCX | dict | None = None,
-# ) -> Callable[P, BoundaryValueProblem]:
-#     def _inner(*args, **kwargs):
-#         terms = terms_factory(*args, **kwargs)
-#         term_args_init = [i.init if isinstance(i, FiniteDifference) else i for i in args]
-#         term_kwargs_init = {
-#             k: v.init if isinstance(v, FiniteDifference) else v
-#             for k, v in kwargs.items()
-#         }
-#         terms_init = terms_factory(*term_args_init, **term_kwargs_init)
-#         order = max(i.order for i in (*args, *kwargs.values()) if isinstance(i, FiniteDifference))
-#         n_init = order - 1
-#         return InitialBoundaryValueProblem(u, terms, terms_init, n_init, ics, bcs, petsc, jit, ffcx)
-#     return _inner
+@copy_callable(EigenvalueProblem.from_forms_func)
+def evp_solver():
+    pass

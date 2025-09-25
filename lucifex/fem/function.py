@@ -37,7 +37,7 @@ class LUCiFExFunction(Function):
         fs = fem_function_space(fs)
 
         if name is None:
-            name = self.__class__.__name__
+            name = f'f{id(self)}'
 
         if isinstance(x, (Function, Expression, Callable, Perturbation, int, float, UnsolvedType)):
             super().__init__(fs, None, name, dtype)
