@@ -16,7 +16,6 @@ def refine(
     redistribute: bool = True,
 ) -> None:
     assert is_simplex_mesh(mesh)
-
     marker = as_spatial_indicator_func(marker)
 
     if condition is None:

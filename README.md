@@ -25,7 +25,7 @@ $$u^n(\textbf{x})=\sum_ju_j^n\xi_j(\textbf{x})$$
 is represented by the `FunctionSeries` object
 
 ```python
-u = FunctionSeries(function_space)
+u = FunctionSeries(function_space, 'u', order, store)
 ```
 
 and its past, present and future values are accessed as
@@ -33,7 +33,7 @@ and its past, present and future values are accessed as
 u[-1], u[0], u[1]
 ```
 
-If held in memory, the full sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
+If held in memory in accordance with the `store` parameter passed to `FunctionSeries`, the full sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
 ```
 u.series
 u.time_series
@@ -41,7 +41,7 @@ u.time_series
 
 **Finite differences in time**
 
-`FiniteDifference` operators act on time-dependent quantitie to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ is written as
+`FiniteDifference` operators act on time-dependent quantitie to produce finite-difference discretizations. For example, the second-order Adams-Bashforth `AB2` discretization of $u(\textbf{x}, t)$ is written as
 ```python
 AB2(u)
 ```
@@ -115,16 +115,16 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 See `demo/` for notebooks and scripts, which are divided into three categories: `A` (application-focussed with examples of PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent problems in fluid mechanics) and `T` (technical details and testing of the `lucifex` package).
 
-## TODO List
+## Further work
 
 These features remain to be implemented as part of ongoing development:
 
-+ further documentation and testing
 + update to latest version of `fenicsx` (currently on 0.6.0)
 + parallelisation with `mpi4py`
 + utilities for `gmsh` meshes
 + nested solvers
 + nonlinear solvers
++ more documentation and testing
 
 ## What does LUCiFEx *not* do?
 
