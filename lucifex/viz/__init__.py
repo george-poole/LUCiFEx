@@ -1,6 +1,6 @@
 """ Module for creating line, colormap and scatter plots """
 
-from .anim import animate_colormap, animate_line
+from .anim import create_animation
 from .bar import plot_bar
 from .colormap import plot_colormap, plot_contours
 from .line import plot_line, plot_twin_lines, plot_stacked_lines

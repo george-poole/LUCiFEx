@@ -83,18 +83,18 @@ def _create_fem_function(
 
 def fem_function(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
-    u: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     subspace_index: int | None = None,
     name: str | None = None,
     use_cache: bool = False,
     recycle: bool = False,
 ) -> Function:
             
-    fs = fs_from_elem(fs, u)
+    fs = fs_from_elem(fs, value)
 
-    if recycle and isinstance(u, Function):
-        if isinstance(fs, FunctionSpace) and u.function_space == fs:
-            return u
+    if recycle and isinstance(value, Function):
+        if isinstance(fs, FunctionSpace) and value.function_space == fs:
+            return value
         if isinstance(fs, tuple):
             if isinstance(fs[0], Mesh):
                 mesh = fs[0]
@@ -102,18 +102,17 @@ def fem_function(
             else:
                 mesh = None
                 _fs = fs
-            if is_same_element(u, *_fs, mesh=mesh):
-                return u
+            if is_same_element(value, *_fs, mesh=mesh):
+                return value
         
     if name is None:
         try:
-            name = u.name
+            name = value.name
         except AttributeError:
             pass
 
     f = _create_fem_function(use_cache=use_cache)(fs, subspace_index, name)
-    interpolate_fem_function(f, u)
-
+    interpolate_fem_function(f, value)
     return f
 
 

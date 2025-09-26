@@ -8,7 +8,7 @@ from dolfinx.fem import Function
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import fem_function_space, Perturbation
+from ..utils import fem_function_space, SpatialPerturbation
 from .unsolved import UnsolvedType
 
 
@@ -25,7 +25,7 @@ class LUCiFExFunction(Function):
             | Function
             | Expression
             | Callable[[np.ndarray], np.ndarray]
-            | Perturbation
+            | SpatialPerturbation
             | float
             | UnsolvedType
             | None
@@ -39,9 +39,9 @@ class LUCiFExFunction(Function):
         if name is None:
             name = f'f{id(self)}'
 
-        if isinstance(x, (Function, Expression, Callable, Perturbation, int, float, UnsolvedType)):
+        if isinstance(x, (Function, Expression, Callable, SpatialPerturbation, int, float, UnsolvedType)):
             super().__init__(fs, None, name, dtype)
-            if isinstance(x, Perturbation):
+            if isinstance(x, SpatialPerturbation):
                 x = x.combine_base_noise(fs)
             if isinstance(x, UnsolvedType):
                 x = x.value

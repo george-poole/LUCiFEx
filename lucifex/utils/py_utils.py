@@ -146,6 +146,12 @@ def MultipleDispatchTypeError(arg, sd_func: Callable | None = None) -> TypeError
     return TypeError(msg)
 
 
+def FixMeError(
+    msg: str = 'Working on it! Coming soon...',
+) -> NotImplementedError:
+    return NotImplementedError(msg)
+
+
 StrSlice: TypeAlias = str | slice
 """
 Type alias for strings representing slices 

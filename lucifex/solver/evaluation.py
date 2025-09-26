@@ -8,7 +8,7 @@ from ufl.restriction import Restricted
 from ufl.core.expr import Expr
 
 from ..fdm.ufl_operators import inner
-from ..utils import set_value, copy_callable, SpatialMarker, as_dofs_corrector
+from ..utils import set_value, copy_callable, SpatialMarker, as_dofs_setter
 from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 
@@ -297,7 +297,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
             )
 
         _f = LUCiFExFunction(solution.function_space)
-        dofs_corrector = as_dofs_corrector(dofs_corrector)
+        dofs_corrector = as_dofs_setter(dofs_corrector)
         def evaluation() -> LUCiFExFunction:
             _f.interpolate(expression)
             dofs_corrector(_f)

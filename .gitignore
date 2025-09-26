@@ -5,6 +5,7 @@
 *.xml
 *.vtk
 *.mp4
+!demo/*.mp4
 
 # interactive
 .ipynb_checkpoints

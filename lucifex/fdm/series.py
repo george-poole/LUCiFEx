@@ -303,10 +303,10 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         self, 
         t: float | Constant | np.ndarray,
     ) -> None:
-        """Advancing the `Series` object for the next time step
-        by shuffling
+        """Steps the `Series` object forward in time.
 
-        `([..., u-2, u-1], u0, u1) -> ([..., u-3, u-2], u1, Unsolved)`
+        e.g.
+        `([Unsolved, u₋₂, u₋₁]; u₀; u₁) -> ([u₋₂, u₋₁, u₀]; u₁; Unsolved)`
         """
         self._series_append.write(t)
 

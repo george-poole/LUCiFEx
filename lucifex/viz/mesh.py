@@ -13,7 +13,7 @@ from ..utils import (
     triangulation,
 )
 
-from ..utils import grid, filter_kwargs
+from ..utils import grid, filter_kwargs, FixMeError
 from .utils import optional_ax, set_axes
 
 
@@ -42,7 +42,7 @@ def _plot_interval_mesh(
     title: str | None = None,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
-    raise NotImplementedError # TODO
+    raise FixMeError()
 
 
 def _plot_rectangle_mesh(
@@ -81,8 +81,8 @@ def _rectangle_triangulation(
     trigl = triangulation(mesh)
     filter_kwargs(set_axes)(
         ax,
-        x_axis=trigl.x,
-        y_axis=trigl.y,
+        x_lims=trigl.x,
+        y_lims=trigl.y,
         title=title,
         **_kwargs,
     )
@@ -112,8 +112,8 @@ def _rectangle_quadrangulation(
     x_coordinates, y_coordinates = coordinates(mesh)
     filter_kwargs(set_axes)(
         ax,
-        x_axis=x_coordinates,
-        y_axis=y_coordinates,
+        x_lims=x_coordinates,
+        y_lims=y_coordinates,
         title=title,
         **_kwargs,
     )
@@ -139,8 +139,8 @@ def _rectangle_grid(
 
     filter_kwargs(set_axes)(
         ax,
-        x_axis=x, 
-        y_axis=y, 
+        x_lims=x, 
+        y_lims=y, 
         title=title, 
         **_kwargs,
     )

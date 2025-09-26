@@ -83,7 +83,7 @@ def interpolate_fem_function(
 
 
 @singledispatch
-def _interpolate_fem_function(u):
+def _interpolate_fem_function(u, *_):
     raise MultipleDispatchTypeError(u)
 
 

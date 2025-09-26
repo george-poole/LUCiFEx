@@ -69,7 +69,7 @@ def _plot_colormap(
 
 
 @singledispatch
-def __plot_colormap(f, *a, **k):
+def __plot_colormap(f, *_, **__):
     raise MultipleDispatchTypeError(f, __plot_colormap)
 
 

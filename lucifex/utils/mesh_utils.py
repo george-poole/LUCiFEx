@@ -146,7 +146,6 @@ def cell_aspect_ratios(mesh) -> np.ndarray:
 
 
 def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
-
     sizes = {
         'hmin': MinCellEdgeLength,
         'hmax': MaxCellEdgeLength,

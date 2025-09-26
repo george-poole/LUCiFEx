@@ -16,7 +16,7 @@ class LUCiFExConstant(Constant):
     def __init__(
         self,
         mesh,
-        value: float | Iterable[float] | UnsolvedType | None = None,
+        value: float | Iterable[float] | UnsolvedType | Constant | None = None,
         name: str | None = None,
         shape: tuple[int, ...] = (),
         index: int | None = None,
@@ -33,6 +33,8 @@ class LUCiFExConstant(Constant):
             value = float(value)
         if not isinstance(value, Iterable):
             value = np.full(shape, value)
+        if isinstance(value, Constant):
+            value = value.value
         super().__init__(mesh, value)
         
         self._index = index

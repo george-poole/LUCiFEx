@@ -1,21 +1,74 @@
-from typing import Literal, Iterable
+from typing import Literal, Iterable, Callable, ParamSpec, Concatenate, TypeVar
 
 import numpy as np
-from matplotlib.pyplot import subplots
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from dolfinx.fem import Function
 
-from .colormap import plot_colormap, plot_contours
 
+P = ParamSpec('P')
+T = TypeVar('T')
+def create_animation(    
+    plot_func: Callable[Concatenate[Figure, Axes, T, P], None],
+    clear_func: Callable[[Figure, Axes], None] | None = None,
+    millisecs: int = 100,
+    anim_kwargs: dict | None = None,
+    **plt_kwargs,
+) -> Callable[Concatenate[list[T], P], FuncAnimation] |  Callable[..., FuncAnimation]:
+    """
+    To display `anim: FunctionAnimation` in an IPython environment
+    ```
+    from IPython.display import HTML
+    HTML(anim.to_html5_video())
+    ```
+    """
 
-def animate_line(
-    lines: Iterable[Function | tuple[np.ndarray, np.ndarray]],
-    titles: str | Iterable[str] | None = None,
-):
-    ...
+    def _(
+        series: list[T],
+        **series_kwargs,
+    ) -> FuncAnimation:
+        n_snapshots = len(series)
 
+        fig, ax = plt.subplots()
+
+        def _snapshot(n: int) -> tuple[Figure, Axes]:
+            _series_kwargs = {k: v[n] for k, v in series_kwargs.items()}
+            plot_func(
+                fig,
+                ax,
+                series[n],
+                **_series_kwargs,
+                **plt_kwargs
+            )
+            return fig, ax
+        
+        _setup = lambda: _snapshot(n=0)
+
+        nonlocal clear_func
+        if clear_func is None:
+            clear_func = lambda _, ax: [i.remove() for i in (*ax.collections, *ax.lines, *ax.images)]
+
+        def _update(n: int):
+            clear_func(fig, ax)
+            return _snapshot(n)
+        
+        nonlocal anim_kwargs
+        if anim_kwargs is None:
+            anim_kwargs = {}
+
+        return FuncAnimation(
+            fig, 
+            _update, 
+            n_snapshots, 
+            _setup, 
+            interval=millisecs, 
+            **anim_kwargs,
+        )
+        
+    return _
+    
 
 def animate_colormap(
     cmaps: Iterable[Function | tuple[np.ndarray, np.ndarray, np.ndarray]],
@@ -29,8 +82,9 @@ def animate_colormap(
     interval: int = 100,
     **anim_kwargs
 ) -> FuncAnimation:
+    from .colormap import plot_colormap, plot_contours
     """
-    For display in an IPython environment, use
+    For display of `animation: FunctionAnimation` in an IPython environment, use
     ```
     from IPython.display import HTML
     HTML(animation.to_html5_video())
@@ -46,7 +100,7 @@ def animate_colormap(
     if contours is not None:
         assert len(contours) == n_snapshots
 
-    fig, ax = subplots()
+    fig, ax = plt.subplots()
 
     def _snapshot(n: int) -> tuple[Figure, Axes]:
         plot_colormap(

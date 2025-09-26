@@ -23,6 +23,7 @@ def plot_bar(
     edge_colors: str | Iterable[str] = "black",
     legend_labels: Iterable[str | float | int] | None = None,
     legend_title: str | None = None,
+    **kwargs,
 ) -> tuple[Figure, Axes]:
     set_axes(ax, x_label=x_label, y_label=y_label, title=title)
 

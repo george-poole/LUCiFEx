@@ -4,7 +4,7 @@ import dolfinx as dfx
 import numpy as np
 
 from ..utils import is_structured
-from .cartesian import CellType
+from .refine import is_simplex_mesh
 from .utils import overload_mesh
 
 
@@ -14,10 +14,12 @@ def transform(
     func: Callable,
     index: int,
     strict: bool = False,
-    bounds: bool = False, 
+    bounded: bool = False, 
 ) -> None:
     
-    assert is_transformable(mesh, strict)
+    if strict:
+        assert not is_simplex_mesh(mesh)
+        assert is_structured(mesh)
 
     def _transform(x):
         x_copy = np.copy(x)
@@ -30,34 +32,10 @@ def transform(
     if not len(x_transform) == len(x):
         raise ValueError('Expected array of equal length after transform.')
     
-    if bounds and not is_bounded_by_original(x_transform, x):
+    if bounded and not is_bounded_by_original(x_transform, x):
         raise ValueError('Expected array of equal bounds after transform.')
 
     mesh.geometry.x[:, :] = x_transform
-
-
-def is_transformable(
-    mesh: dfx.mesh.Mesh,
-    strict: bool = True,
-) -> bool:
-    """Checks that the mesh is suitable for coordinate
-    transformations"""
-
-    if not is_structured(mesh):
-       return False
-    
-    if not strict:
-        return True
-    else:
-        dim = mesh.geometry.dim
-        cell_name = mesh.topology.cell_name()
-        match dim:
-            case 1:
-                return True
-            case 2:
-                return cell_name == CellType.QUADRILATERAL
-            case 3:
-                return cell_name == CellType.HEXAHEDRON
             
 
 def is_bounded_by_original(

@@ -141,6 +141,21 @@ def write(
     ...
 
 
+@overload
+def write(
+    anim: FuncAnimation,
+    file_name: str,
+    dir_path: str | None = None,
+    file_ext: str = "mp4",
+    writer: str = "ffmpeg",
+    fps: int | None = None,
+    dpi: int = 150,
+    bitrate: int | None = None,
+    **saveanim_kwargs,
+) -> None:
+    ...
+
+
 def write(
     obj,
     file_name=None,
@@ -464,12 +479,12 @@ def _(
 def _(
     anim: FuncAnimation,
     file_name: str,
-    dir_path: str | None = None,
-    file_ext: str = "mp4",
-    writer: str = "ffmpeg",
-    fps: int | None = None,
-    dpi: int = 150,
-    bitrate: int | None = None,
+    dir_path=None,
+    file_ext="mp4",
+    writer= "ffmpeg",
+    fps= None,
+    dpi=150,
+    bitrate = None,
     **saveanim_kwargs,
 ) -> None:
     file_path = file_path_ext(dir_path, file_name, file_ext)

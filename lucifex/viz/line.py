@@ -74,7 +74,7 @@ def plot_line(
 
 
 @singledispatch
-def _plot_line(f):
+def _plot_line(f, *_, **__):
     raise MultipleDispatchTypeError(f)
 
 

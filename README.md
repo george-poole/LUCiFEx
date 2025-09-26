@@ -20,6 +20,8 @@ u^{n-1}(\textbf{x}) \\
 \vdots
 \end{bmatrix}$$
 
+$$u^n(\textbf{x})=\sum_ju_j^n\xi_j(\textbf{x})$$
+
 is represented by the `FunctionSeries` object
 
 ```python
@@ -52,13 +54,13 @@ which is equivalent to manually writing out
 
 **Running simulations**
 
-A time-dependent simulation is in effect a sequence of (linear) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, we define the simulation object as
+A time-dependent simulation is in effect a sequence of (linear) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, a simulation object is defined as
 
 ```python
 simulation = Simulation(solvers, t, dt)
 ```
 
-and furthermore provide the `configure_simulation` decorator to customise the configuration of a simulation created by a user-defined function.
+The `configure_simulation` decorator functions can be used to customise the configuration of a simulation.
 
 Integration over time is performed by the `integrate` routine
 
@@ -66,13 +68,13 @@ Integration over time is performed by the `integrate` routine
 integrate(simulation, n_stop, t_stop)
 ```
 
-if working in an interactive, hands-on iPython environment (ideal for demonstration, prototyping and testing purposes). In a script designed to be run from the command line, we instead have the `integrate_from_cli` routine 
+In a script designed to be run from the command line, the `integrate_from_cli` routine can instead be used
 
 ```python
 integrate_from_cli(simulation)
 ```
 
-which will furthermore create a command line interface into which arguments for the simulation and integration can be provided.
+to create a command line interface into which arguments for configuring, creating and integrating the simulation can be passed.
 
 **Postprocessing**
 
@@ -83,7 +85,7 @@ x, y = grid(mesh)
 uxy = grid(u)
 ```
 
-The decorators `postprocess` and `co_postprocess` enable functions acting on saved simulation data (e.g. to create a plot) to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and clutter one's script with repetitive statements. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written with the same name and to the same filename).
+The decorator functions `postprocess` and `co_postprocess` enable functions acting on saved simulation data (e.g. to create a plot) to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and write repetitive I/O routines. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written with the same name and to the same filename).
 
 ## Installation (macOS)
 
@@ -109,9 +111,9 @@ See `conda` directory for files to recreate Conda environment. To create the
 
 Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for editable mode).
 
-## Demos
+## Documentation
 
-See `demo/` for notebooks and scripts, which are divided into three categories: *A* (application-focussed with examples of PDEs from fluid mechanics and porous media), *L* (technical details from the `lucifex` package), and *N* (numerical methods for solving time-dependent problems in fluid mechanics).
+See `demo/` for notebooks and scripts, which are divided into three categories: *A* (application-focussed with examples of PDEs from fluid mechanics and porous media), *T* (technical details from the `lucifex` package), and *N* (numerical methods for solving time-dependent problems in fluid mechanics).
 
 ## TODO List
 
@@ -120,6 +122,9 @@ These features remain to be implemented as part of ongoing development:
 + further documentation and testing
 + update to latest version of `fenicsx` (currently on 0.6.0)
 + parallelisation with `mpi4py`
++ utilities for `gmsh` meshes
++ nested solvers
++ nonlinear solvers
 
 ## What does LUCiFEx *not* do?
 

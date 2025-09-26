@@ -7,6 +7,7 @@ from dolfinx.fem import Function, Constant
 
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
+
 class FiniteDifference:
     def __init__(
         self,
@@ -41,10 +42,9 @@ class FiniteDifference:
         else:
             raise TypeError
         
-        if name is not None:
-            self._name = name
-        else:
-            self._name = self.__class__.__name__
+        if name is None:
+            name = f'FD{id(self)}'
+        self._name = name
 
         self._trial = True
     
@@ -115,7 +115,7 @@ class FiniteDifferenceDerivative(FiniteDifference):
 
     def __init__(
         self,
-        dt_denominator: Callable[[Constant], Constant | Expr] | Callable[[float], float],
+        denominator: Callable[[Constant], Constant | Expr] | Callable[[float], float],
         indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
         init: 
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
@@ -123,7 +123,7 @@ class FiniteDifferenceDerivative(FiniteDifference):
         name: str | None = None,
     ) -> None:
         super().__init__(indices_coeffs, init, name)
-        self._dt_denominator = dt_denominator
+        self._denominator = denominator
 
     def __call__(
         self, 
@@ -137,7 +137,11 @@ class FiniteDifferenceDerivative(FiniteDifference):
             _dt = dt[0]
         else:
             _dt = dt
-        return du / self._dt_denominator(_dt)
+        return du / self._denominator(_dt)
+    
+    @property
+    def denominator(self) -> Callable[[Constant], Constant | Expr] | Callable[[float], float]:
+        return self._denominator
 
 
 CN = FiniteDifference(
@@ -317,10 +321,10 @@ def finite_difference_order(*args: FiniteDifference | tuple[FiniteDifference, ..
         return None
     
 
-def finite_difference_discretize(
-    expr: Series | tuple[Callable, tuple] | Expr | Function, 
+def finite_difference_argwise(
     D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
-    solution: FunctionSeries | None = None,
+    expr: Series | tuple[Callable, tuple] | Expr | Function, 
+    trial: FunctionSeries | None = None,
 ) -> Expr:
     if not isinstance(expr, Series):
         return expr
@@ -331,8 +335,10 @@ def finite_difference_discretize(
             assert isinstance(expr, ExprSeries) and expr.relation
             expr_func, expr_args = expr.relation
         if isinstance(D_fdm, tuple):
-            trial = [i is solution for i in expr_args]
-            return expr_func(*(D_i[trl](i) for trl, D_i, i in zip(trial, D_fdm, expr_args, strict=False)))
+            is_trial = [i is trial for i in expr_args]
+            return expr_func(
+                *(D_i[is_trl](i) for is_trl, D_i, i in zip(is_trial, D_fdm, expr_args, strict=False)),
+            )
         else:
             return D_fdm(expr_func(*expr_args))
     else:

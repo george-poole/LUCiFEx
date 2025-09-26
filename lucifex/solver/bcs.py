@@ -92,18 +92,19 @@ class BoundaryConditions:
         
         dirichlet = []
 
-        for b, g, m, i in zip(
-            self._btypes, self._values, self._markers, self._subindices, 
+        for uB, b, m, i in zip(
+            self._values, self._btypes, self._markers, self._subindices, 
             strict=True,
         ):
             if b in (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL):
-                g = fem_function(function_space, g, i)
+                if not isinstance(uB, (Function, Constant, Expr)):
+                    uB = fem_function(function_space, uB, i)
                 dofs = dofs_indices(function_space, m, i)
                 if i is not None:
-                    dbc = dirichletbc(g, dofs, function_space.sub(i))
+                    dbc = dirichletbc(uB, dofs, function_space.sub(i))
                     # TODO check this is incorrect dbc = dirichletbc(g, dofs[0])
                 else:
-                    dbc = dirichletbc(g, dofs)
+                    dbc = dirichletbc(uB, dofs)
                 dirichlet.append(dbc)
                 
         return dirichlet

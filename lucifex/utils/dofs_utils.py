@@ -154,24 +154,24 @@ def maximum(
     return dofs_transformation(np.max, u, fs, use_cache=True)
 
 
-def as_dofs_corrector(
-    dcs: Callable[[Function], None] 
+def as_dofs_setter(
+    setter: Callable[[Function], None] 
     | Iterable[tuple[SpatialMarker, float | Constant] | tuple[SpatialMarker, float | Constant, int]]
     | None,
 ) -> Callable[[Function], None]:
     
-    if isinstance(dcs, Callable):
-        return dcs
+    if isinstance(setter, Callable):
+        return setter
     
-    if dcs is None:
-        return as_dofs_corrector([])
+    if setter is None:
+        return as_dofs_setter([])
 
     markers, values, subspace_indices = [], [], []
-    for dc in dcs:
-        if len(dc) == 2:
-            m, v, si = *dc, None
-        elif len(dc) == 3:
-            m, v, si = dc
+    for sttr in setter:
+        if len(sttr) == 2:
+            m, v, si = *sttr, None
+        elif len(sttr) == 3:
+            m, v, si = sttr
         else:
             raise ValueError
         markers.append(as_spatial_indicator_func(m))

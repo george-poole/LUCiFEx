@@ -204,7 +204,7 @@ def cflr_timestep(
 
 def diffusive_timestep(
     d: Function | Expr | LUCiFExConstant | float,
-    h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"],
+    h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"] | float,
     courant: float = 1.0,
     dt_max: float = np.inf,
     dt_min: float = 0.0,

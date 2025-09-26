@@ -1,4 +1,4 @@
-from typing import Any, overload
+from typing import Any, overload, Protocol, runtime_checkable
 from inspect import isfunction
 from collections.abc import Callable, Iterable
 from operator import add, mul
@@ -10,11 +10,107 @@ from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
 from .enum_types import BoundaryType
-from .dofs_utils import as_dofs_corrector, SpatialMarker
+from .dofs_utils import as_dofs_setter, SpatialMarker
 from .fem_typecasting import fem_function
+from .fem_mutation import set_fem_function
 
 
-class Perturbation:
+@runtime_checkable
+class Perturbation(Protocol):
+
+    def base(
+        self,
+        function_space: FunctionSpace,
+    ) -> Function:
+        """
+        Returns the base function `b(𝐱)` only
+        """
+        ...
+
+    def noise(
+        self,
+        function_space: FunctionSpace,
+    ) -> Function:
+        """
+        Returns the noise function `N(𝐱)` only
+        """
+        ...
+
+    def combine_base_noise(
+        self,
+        function_space: FunctionSpace,
+        base: Function | None = None,
+        operator: Callable[[Any, Any], Any] = add,
+    ) -> Function:
+        """
+        Returns the base state and noise combined `u(𝐱) = 𝒪(b(𝐱), N(𝐱))`. 
+
+        Default operator is addition `u(𝐱) = b(𝐱) + N(𝐱)`.
+        """ 
+        ...
+
+
+class DofsPerturbation:
+    def __init__(
+        self,
+        base: Callable[[np.ndarray], np.ndarray]
+        | Function
+        | Constant
+        | Expression
+        | float
+        | Iterable[float],
+        seed: int,
+        amplitude: float | tuple[float, float],
+        dofs_corrector: Callable[[Function], None] 
+        | Iterable[tuple[SpatialMarker, float | Constant] | tuple[SpatialMarker, float | Constant, int]] 
+        | None = None,
+    ):
+        self._base = base
+        if isinstance(amplitude, float):
+            amplitude = (0.0, amplitude)
+        self._amplitude = amplitude
+        self._rng = np.random.default_rng(seed)
+        self._dofs_corrector = as_dofs_setter(dofs_corrector)
+
+    def base(
+        self,
+        function_space: FunctionSpace,
+        correct: bool = True,
+    ) -> Function:
+        f = fem_function(function_space, self._base)
+        if correct:
+            self._dofs_corrector(f)
+        return f
+        
+    def noise(
+        self,
+        function_space: FunctionSpace,
+    ) -> Function:
+        f = Function(function_space)
+        dofs = self._rng.uniform(*self._amplitude, len(f.x.array))
+        set_fem_function(f, dofs, dofs_indices=':')
+        return f
+    
+    def combine_base_noise(
+        self,
+        function_space: FunctionSpace,
+        base: Function | None = None,
+        operator: Callable[[np.ndarray, np.ndarray], np.ndarray] = add,
+        correct: bool = True,
+    ) -> Function:
+        if base is None:
+            base = self.base(function_space, False) 
+        perturbation = self.noise(function_space)
+
+        f = Function(function_space)
+        dofs = operator(base.x.array, perturbation.x.array)
+        set_fem_function(f, dofs, dofs_indices=':')
+        if correct:
+            self._dofs_corrector(f)
+        return f
+
+
+class SpatialPerturbation:
     """
     Combines a base function `b(𝐱)` with a noise function `N(𝐱)` to produce 
     a perturbation 
@@ -34,10 +130,6 @@ class Perturbation:
         | float
         | Iterable[float],
         noise: Callable[[np.ndarray], np.ndarray],
-        # | Function
-        # | Constant
-        # | Expression
-        # | float,
         domain: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
@@ -45,25 +137,15 @@ class Perturbation:
         | None = None, #FIXME subspace case,
         **rescale_kwargs,
     ) -> None:
-        # if isinstance(noise, list):
-        #     assert isinstance(domain, (list, np.ndarray))
-        #     dim = len(noise)
-        #     if isinstance(amplitude, float):
-        #         amplitude = (0, amplitude)
-        #     noise = [rescale(n, i, amplitude[1]**(1/dim)) for n, i in zip(noise, domain)]
-        #     noise = lambda x: amplitude[0] + reduce(mul, [n(x[i]) for n, i in zip(noise, index)])
         self._base = base
         self._noise = rescale(noise, domain, amplitude, **rescale_kwargs)
-        self._dofs_corrector = as_dofs_corrector(dofs_corrector)
+        self._dofs_corrector = as_dofs_setter(dofs_corrector)
 
     def base(
         self,
         function_space: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        """
-        Returns the base function `b(𝐱)` only
-        """
         f = fem_function(function_space, self._base)
         if correct:
             self._dofs_corrector(f)
@@ -73,9 +155,6 @@ class Perturbation:
         self,
         function_space: FunctionSpace,
     ) -> Function:
-        """
-        Returns the noise function `N(𝐱)` only
-        """
         return fem_function(function_space, self._noise)
 
     def combine_base_noise(
@@ -84,15 +163,7 @@ class Perturbation:
         base: Function | None = None,
         operator: Callable[[Any, Any], Any] = add,
         correct: bool = True,
-    ) -> Function:
-        """
-        Returns the base state and noise combined `u(𝐱) = 𝒪(b(𝐱), N(𝐱))`. 
-
-        Default operator is addition `u(𝐱) = b(𝐱) + N(𝐱)`.
-        """
-        if self._noise is None:
-            return self.base(function_space)
-        
+    ) -> Function:       
         if isfunction(self._base) and isfunction(self._noise):
             perturbed = lambda x: operator(self._base(x), self._noise(x))
         else:
@@ -104,6 +175,14 @@ class Perturbation:
         if correct:
             self._dofs_corrector(f)
         return f
+    
+
+def random_noise(
+    shape: int | tuple[int, ...],
+    seed: int,
+):
+    rng = np.random.default_rng(seed)
+    return rng.uniform(0, 1, shape)
     
 
 @overload
@@ -236,27 +315,30 @@ def sinusoid_noise(
     if isinstance(interval, float):
         interval = (0, interval)
 
+    x0 = interval[0]
+    Lx = interval[1] - interval[0]
+
     match boundary:
         case (BoundaryType.PERIODIC, BoundaryType.PERIODIC):
             # f(xmin) = f(xmax) and anti-symmetric about centre
-            wavelength = interval / waves
-            noise = lambda x: np.sin(2 * np.pi * x / wavelength)
+            wavelength = Lx / waves
+            noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.DIRICHLET):
             # f(xmin) = 0 , f(xmax) = 0 and symmetric about centre
-            wavelength = interval / (waves + 0.5)
-            noise = lambda x: np.sin(2 * np.pi * x / wavelength)
+            wavelength = Lx / (waves + 0.5)
+            noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.NEUMANN):
             # dfdx(xmin) = 0 , dfdx(xmax) = 0 and symmetric about centre
-            wavelength = interval / waves
-            noise = lambda x: np.cos(2 * np.pi * x / wavelength)
+            wavelength = Lx / waves
+            noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.DIRICHLET):
             # dfdx(xmin) = 0 and f(xmax) = 0
-            wavelength = interval / (waves + 0.25)
-            noise = lambda x: np.cos(2 * np.pi * x / wavelength)
+            wavelength = Lx / (waves + 0.25)
+            noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.NEUMANN):
             # f(xmin) = 0 and dfdx(xmax) = 0
-            wavelength = interval / (waves + 0.25)
-            noise = lambda x: np.sin(2 * np.pi * x / wavelength)
+            wavelength = Lx / (waves + 0.25)
+            noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case _:
             raise BoundaryTypeError(boundary)
         

@@ -2,7 +2,7 @@ from typing import Callable, Iterable
 
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
-from ..utils import as_spatial_indicator_func
+from ..utils import as_spatial_indicator_func, SpatialMarkerFunc
 from .cartesian import CellType
 from .utils import overload_mesh, copy_mesh
 
@@ -10,12 +10,12 @@ from .utils import overload_mesh, copy_mesh
 @overload_mesh
 def refine(
     mesh: Mesh,
-    marker: Callable | Iterable[Callable],
+    marker: SpatialMarkerFunc | Iterable[SpatialMarkerFunc],
     n_stop: int = 1,
     condition: Callable[[Mesh], bool] = None,
     redistribute: bool = True,
 ) -> None:
-    assert is_refinable(mesh)
+    assert is_simplex_mesh(mesh)
 
     marker = as_spatial_indicator_func(marker)
 
@@ -39,10 +39,7 @@ def refine(
     )
 
 
-def is_refinable(mesh: Mesh) -> bool:
-    """Checks that the mesh is suitable for refinement
-    transformations"""
-
+def is_simplex_mesh(mesh: Mesh) -> bool:
     dim = mesh.geometry.dim
     cell_name = mesh.topology.cell_name()
 

@@ -151,7 +151,8 @@ def integrate_from_cli(
             lucifex.fdm.AB2,
             lucifex.fdm.AB,
             lucifex.fdm.AM,
-            lucifex.utils.Perturbation,
+            lucifex.utils.SpatialPerturbation,
+            lucifex.utils.DofsPerturbation,
             )
         )
 
