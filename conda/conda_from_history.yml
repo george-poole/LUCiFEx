@@ -76,7 +76,7 @@ dependencies:
   - conda-forge/osx-64::lz4-c==1.9.4=hf0c8a7f_0
   - conda-forge/osx-64::nspr==4.35=hea0b92c_0
   - conda-forge/osx-64::openh264==2.3.1=hf0c8a7f_2
-  - conda-forge/osx-64::openssl==3.5.2=h6e31bce_0
+  - openssl==3.5.3
   - conda-forge/osx-64::p11-kit==0.24.1=h65f8906_0
   - conda-forge/osx-64::pcre2==10.40=h1c4e4bc_0
   - conda-forge/osx-64::pkg-config==0.29.2=ha3d46e9_1008
@@ -289,4 +289,5 @@ dependencies:
   - conda-forge/noarch::nbconvert==7.16.6=hb482800_0
   - conda-forge/noarch::pyvista==0.40.1=pyhd8ed1ab_0
   - conda-forge/osx-64::dolfinx_mpc==0.6.1=py310h1682543_2
+  - gmsh
 prefix: /Users/George/miniconda3/envs/lucifex
