@@ -43,12 +43,6 @@ def write(
     mode: Literal["a", "w", "c"] = "a",
     comm: MPI.Comm | None = None,
 ) -> None:
-    """`Function` objects are written as their
-    interpolation to a `P₁` or `DP₀` function space.
-
-    `StaticConstant` objects are written by typecasting
-    to a `DP₀` function on an interval mesh.
-    """
     ... # TODO what conditions for xdmf interpolation to P1 vs DP0?
 
 
@@ -133,6 +127,7 @@ def write(
     file_name: str | Callable[[Figure], str] | None = None,
     dir_path: str | None = None,
     close: bool = True,
+    pickle: bool = True,
     bbox_inches: str | None = "tight",
     dpi: int = 150,
     file_ext: str = "pdf",
@@ -164,7 +159,15 @@ def write(
     **kwargs,
 ):
     """
-    'a' for append, 'w' for write, 'c' for checkpoint
+    `Function` objects are written as their
+    interpolation to a `P₁` or `DP₀` function space.
+
+    `Constant` objects are written by typecasting
+    to a `DP₀` function on an interval mesh.
+
+    `mode='a'` to append \\
+    `mode='w'` to write \\
+    `mode='c'` to checkpoint
     """
     if file_name is None:
         try:
