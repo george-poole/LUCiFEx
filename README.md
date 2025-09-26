@@ -113,7 +113,7 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 ## Documentation
 
-See `demo/` for notebooks and scripts, which are divided into three categories: *A* (application-focussed with examples of PDEs from fluid mechanics and porous media), *T* (technical details from the `lucifex` package), and *N* (numerical methods for solving time-dependent problems in fluid mechanics).
+See `demo/` for notebooks and scripts, which are divided into three categories: `A` (application-focussed with examples of PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent problems in fluid mechanics) and `T` (technical details and testing of the `lucifex` package).
 
 ## TODO List
 
