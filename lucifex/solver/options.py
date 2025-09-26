@@ -10,7 +10,8 @@ from slepc4py import SLEPc
 
 class Options:
 
-    _dynamic: dict[str, Any] = {}
+    def __post_init__(self):
+        self._dynamic: dict[str, Any] = {}
 
     @classmethod
     def default(cls) -> Self:

@@ -85,30 +85,37 @@ class BoundaryConditions:
             self._btypes.append(BoundaryType(btype))
             self._subindices.append(subindex)
 
+    # TODO test all cases
     def create_strong_bcs(
         self,
         function_space: FunctionSpace,
     ) -> list[DirichletBCMetaClass]: 
+        """
+        Strongly enforced boundary condition `u = uD` on `∂Ω`
+        """
         
         dirichlet = []
 
-        for uB, b, m, i in zip(
+        for uD, b, m, i in zip(
             self._values, self._btypes, self._markers, self._subindices, 
             strict=True,
         ):
             if b in (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL):
-                if not isinstance(uB, (Function, Constant, Expr)):
-                    uB = fem_function(function_space, uB, i)
                 dofs = dofs_indices(function_space, m, i)
-                if i is not None:
-                    dbc = dirichletbc(uB, dofs, function_space.sub(i))
-                    # TODO check this is incorrect dbc = dirichletbc(g, dofs[0])
+                if isinstance(uD, Constant):
+                    if i is None:
+                        dbc = dirichletbc(uD, dofs, function_space)
+                    else:
+                        dbc = dirichletbc(uD, dofs, function_space.sub(i))
                 else:
-                    dbc = dirichletbc(uB, dofs)
+                    uD = fem_function(function_space, uD, i, try_identity=True)
+                    if i is None:
+                        dbc = dirichletbc(uD, dofs)
+                    else:
+                        dbc = dirichletbc(uD, dofs, function_space.sub(i))
                 dirichlet.append(dbc)
                 
         return dirichlet
-
 
     # TODO fix and test
     def create_periodic_bcs(
@@ -142,8 +149,9 @@ class BoundaryConditions:
         self,
         function_space: FunctionSpace,
     ) -> list[Form]:
-        """ Assumes a weak term of the form `∫ v·g ds` with test function `v` and
-        prescribed value `g`.
+        """
+        Weakly enforced boundary condition by a term `+∫ v·uN ds` with 
+        test function `v` and prescribed value `uN` in the variational form `F(v,u)=0`.
         """
         
         v = TestFunction(function_space)
@@ -153,11 +161,11 @@ class BoundaryConditions:
         forms = []
         
         for bd in boundary_data:
-            for i, g in bd:
-                if is_scalar(g):
-                    forms.append(v * g * ds(i))
-                elif is_vector(g):
-                    forms.append(inner(v, g) * ds(i))
+            for i, uN in bd:
+                if is_scalar(uN):
+                    forms.append(v * uN * ds(i))
+                elif is_vector(uN):
+                    forms.append(inner(v, uN) * ds(i))
                 else:
                     raise NotImplementedError
 

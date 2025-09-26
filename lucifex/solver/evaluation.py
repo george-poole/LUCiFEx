@@ -53,12 +53,13 @@ class EvaluationProblem(Generic[S, T]):
         cls, 
         solution: S | T, 
         func: Callable[P, Any],
+        future: bool = False,
     ):
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: func(*args, **kwargs))
+            return cls(solution, lambda: func(*args, **kwargs), future)
         return _create
 
     @property
@@ -90,6 +91,7 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
         integrand: Expr | tuple[Expr, ...] | Form,
         marker: SpatialMarker | Iterable[SpatialMarker] | Measure | None = None, # TODO expand to broader SpatialMarker type which further supports `int | str` tagging
         quadrature_degree: int | None = None,  # TODO expand to quadrature metadata/scheme
+        future: bool = False,
     ):
 
         if isinstance(integrand, Form):
@@ -129,7 +131,7 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
                     evaluation = lambda: assemble_scalar(form(integrand * dx))
 
         self._measure = dx
-        super().__init__(solution, evaluation)
+        super().__init__(solution, evaluation, future)
         # TODO parallel version
         # self._mesh.comm.gather(dfx.fem.assemble_scalar(self._compiled), root=0)
         # self._scalar = dfx.f.assemble_scalar(self._compiled)
@@ -146,12 +148,13 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
         integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form],
         marker: SpatialMarker | Measure | None = None,
         quadrature_degree: int | None = None, 
+        future: bool = False,
     ):
         def _create(
             *args: P.args, 
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree)
+            return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree, future)
         return _create
     
 
@@ -174,6 +177,7 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
         marker: SpatialMarker | Measure | None = None, 
         quadrature_degree: int | None = None, 
         facet_side: Literal['+', '-'] = '+',
+        future: bool = False,
     ):
         if isinstance(integrand, tuple):
             integrand = tuple(i(facet_side) if not isinstance(i, Restricted) else i for i in integrand)
@@ -181,7 +185,7 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
         if isinstance(integrand, Expr) and not isinstance(integrand, Restricted):
             integrand = integrand(facet_side)
 
-        super().__init__(solution, integrand, marker, quadrature_degree)
+        super().__init__(solution, integrand, marker, quadrature_degree, future)
 
     @classmethod
     def from_function(
@@ -191,12 +195,13 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
         marker: SpatialMarker | Measure | None = None,
         quadrature_degree: int | None = None, 
         facet_side: Literal['+', '-'] = '+',
+        future: bool = False,
     ):
         def _create(
             *args: P.args, 
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree, facet_side)
+            return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree, facet_side, future)
         return _create
 
 
@@ -216,6 +221,7 @@ class ProjectionProblem(BoundaryValueProblem):
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         dofs_corrector: Callable[[Function], None] | None = None,
+        future: bool = False,
     ):
 
         v = TestFunction(solution)
@@ -229,7 +235,7 @@ class ProjectionProblem(BoundaryValueProblem):
             bcs = BoundaryConditions(*bcs)
 
         super().__init__(solution, forms, bcs, petsc, jit, ffcx, dofs_corrector, 
-                         cache_matrix=True, use_partition=(False, False),)
+                         cache_matrix=True, use_partition=(False, False), future=future)
 
     @classmethod
     def from_function(
@@ -241,13 +247,14 @@ class ProjectionProblem(BoundaryValueProblem):
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         dofs_corrector: Callable[[Function], None] | None = None,
+        future: bool = False
     ):
         """from function"""
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, expression_func(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector)
+            return cls(solution, expression_func(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector, future)
         return _create
         
 

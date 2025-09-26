@@ -87,12 +87,12 @@ def fem_function(
     subspace_index: int | None = None,
     name: str | None = None,
     use_cache: bool = False,
-    recycle: bool = False,
+    try_identity: bool = False,
 ) -> Function:
             
     fs = fs_from_elem(fs, value)
 
-    if recycle and isinstance(value, Function):
+    if try_identity and isinstance(value, Function):
         if isinstance(fs, FunctionSpace) and value.function_space == fs:
             return value
         if isinstance(fs, tuple):

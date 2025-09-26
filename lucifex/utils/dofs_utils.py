@@ -96,6 +96,7 @@ def dofs(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[str, int] | None = None,
     l2_norm: bool = True,
     use_cache: bool = False,
+    try_identity: bool = False,
 ) -> np.ndarray:
     """
     scalar `u(𝐱) -> Σᵢ Uᵢϕᵢ(𝐱)` returns `{Uᵢ}`
@@ -110,11 +111,11 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = fem_function(fs, u, use_cache=use_cache, recycle=False)
+        u = fem_function(fs, u, use_cache=use_cache, try_identity=try_identity)
         return u.x.array[:]  # TODO or .vector[:] ?
     elif l2_norm and is_vector(u):
         scalars = fem_function_components(fs, u, use_cache=True)
-        scalar_dofs = np.stack([dofs(i, fs, use_cache=False) for i in scalars], axis=1)
+        scalar_dofs = np.stack([dofs(i, fs, use_cache=False, try_identity=False) for i in scalars], axis=1)
         return np.linalg.norm(scalar_dofs, axis=1, ord=2)
     else:
         raise ScalarVectorError(u)

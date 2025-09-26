@@ -15,7 +15,7 @@ class LUCiFExConstant(Constant):
     """
     def __init__(
         self,
-        mesh,
+        mesh: Mesh,
         value: float | Iterable[float] | UnsolvedType | Constant | None = None,
         name: str | None = None,
         shape: tuple[int, ...] = (),

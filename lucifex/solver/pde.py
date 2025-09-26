@@ -72,6 +72,7 @@ class BoundaryValueProblem:
         dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = False,
     ) -> None:
         
         if isinstance(forms, Form):
@@ -187,6 +188,7 @@ class BoundaryValueProblem:
         self._series = series
         self._use_partition = use_partition
         self._cache_matrix = cache_matrix
+        self._future = future
 
     @classmethod
     def from_forms_func(
@@ -199,6 +201,7 @@ class BoundaryValueProblem:
         dofs_corrector: Callable[[Function], None] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = False,
         solution: Function | FunctionSeries | None = None, 
     ):
         """
@@ -225,18 +228,20 @@ class BoundaryValueProblem:
                 dofs_corrector,
                 cache_matrix, 
                 use_partition,
+                future
             )
         return _create
 
     def solve(
         self,
-        future: bool = False,
+        future: bool | None = None,
         overwrite: bool = False,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] | None = None,
         use_partition: tuple[bool, bool] | None = None,
     ) -> None:
         """Mutates the data structures `self.solution` and `self.series` containing the solution"""
-
+        if future is None:
+            future = self._future
         if cache_matrix is None:
             cache_matrix = self.cache_matrix
         if use_partition is None:
@@ -386,11 +391,12 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         dofs_corrector: Callable[[Function], None] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = True,
     ) -> None:
         if ics is not None:
             solution.initialize_from_ics(ics)
         
-        super().__init__(solution, forms, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition)
+        super().__init__(solution, forms, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition, future)
 
         if forms_init is not None:
             self._init = InitialBoundaryValueProblem(
@@ -417,6 +423,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         dofs_corrector: Callable[[Function], None] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = True,
         solution: Function | FunctionSeries | None = None, 
     ):
         """
@@ -456,7 +463,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                 forms_init = None
                 n_init = None
             return cls(solution, forms, forms_init, n_init, ics, bcs, petsc, jit, ffcx, 
-                       dofs_corrector, cache_matrix, use_partition)
+                       dofs_corrector, cache_matrix, use_partition, future)
         return _create
 
     @property
@@ -466,15 +473,6 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
     @property
     def n_init(self) -> int:
         return self._n_init
-
-    def solve(
-        self,
-        future: bool = True,
-        overwrite: bool = False,
-        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] |  None = None,
-        use_partition: tuple[bool, bool] | None = None,
-    ) -> None:
-        super().solve(future, overwrite, cache_matrix, use_partition)
 
 
 P = ParamSpec("P")
@@ -496,9 +494,11 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         dofs_corrector: Callable[[Function], None] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = True,
+        
     ) -> None:
         bcs = None
-        super().__init__(uxt, forms, forms_init, ics, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition)
+        super().__init__(uxt, forms, forms_init, ics, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition, future)
 
     @classmethod
     def from_forms_func(
@@ -511,6 +511,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         dofs_corrector: Callable[[Function], None] | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
+        future: bool = True,
         solution: Function | FunctionSeries | None = None, 
     ):
         bcs = None
@@ -524,6 +525,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             dofs_corrector,
             cache_matrix,
             use_partition,
+            future,
             solution,
         )
 
@@ -560,6 +562,7 @@ class EigenvalueProblem:
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
+        future: bool = False,
     ) -> None:
         
         if slepc is None:
@@ -621,6 +624,7 @@ class EigenvalueProblem:
         self._eigenfunctions = eigenfunctions
         self._eigenseries = eigenseries
         self._cache_matrix = cache_matrix
+        self._future = future
 
     @classmethod
     def from_forms_func(
@@ -631,6 +635,7 @@ class EigenvalueProblem:
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
+        future: bool = False,
         solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int] | None = None,
     ):
         def _create(
@@ -653,16 +658,19 @@ class EigenvalueProblem:
                 jit,
                 ffcx,
                 cache_matrix,
+                future,
             )
 
         return _create
 
     def solve(
         self,
-        future: bool = False,
+        future: bool | None = None,
         overwrite: bool = False,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] | None = None,
     ) -> None:
+        if future is None:
+            future = self._future
         if cache_matrix is None:
             cache_matrix = self.cache_matrix
         if not isinstance(cache_matrix, tuple):
