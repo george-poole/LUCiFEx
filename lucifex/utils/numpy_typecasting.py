@@ -55,7 +55,6 @@ def _(mesh: Mesh):
         {mesh.topology.cell_name()} """
         )
 
-    # coordinates of each vertex in the mesh
     x_coordinates, y_coordinates = coordinates(mesh)
 
     # coordinates of each vertex in a given triangle cell
@@ -82,6 +81,7 @@ triangulation = optional_lru_cache(_triangulation)
 @optional_lru_cache
 def quadrangulation(
     mesh: Mesh,
+    **polycollection_kwargs,
 ) -> PolyCollection:
     if not mesh.geometry.dim == 2:
         raise ValueError(
@@ -97,7 +97,6 @@ def quadrangulation(
         {mesh.topology.cell_name()} """
         )
 
-    # coordinates of each vertex in the mesh
     xy_coordinates = mesh.geometry.x[:, :2]
 
     # coordinates of each vertex in a given quadrilateral cell
@@ -106,9 +105,13 @@ def quadrangulation(
     quads = [reorder_local_vertices(connec.links(i)) for i in range(n_cells)]
 
     vertices = xy_coordinates[quads]
-    quadl = PolyCollection(vertices)
+
+    _kwargs = dict(facecolor='white', edgecolor='black')
+    _kwargs.update(polycollection_kwargs)
+    quadl = PolyCollection(vertices, **_kwargs)
 
     return quadl
+
 
 
 @overload

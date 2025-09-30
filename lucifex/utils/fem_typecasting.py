@@ -21,6 +21,9 @@ def fem_function_space(
         | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
     subspace_index: int | None = None,
 ) -> FunctionSpace:
+    """
+    Typecast to `dolfinx.fem.FunctionSpace` 
+    """
     
     match fs:
         case fs if isinstance(fs, FunctionSpace):
@@ -89,6 +92,9 @@ def fem_function(
     use_cache: bool = False,
     try_identity: bool = False,
 ) -> Function:
+    """
+    Typecast to `dolfinx.fem.Function` 
+    """
             
     fs = fs_from_elem(fs, value)
 
@@ -160,8 +166,12 @@ def fem_function_components(
 def fem_constant(
     mesh: Mesh,
     value: float | Iterable[float] | Constant,
+    try_identity: bool = False,
 ) -> Constant:
-    if isinstance(value, Constant):
+    """
+    Typecast to `dolfinx.fem.Constant` 
+    """
+    if try_identity and isinstance(value, Constant):
         return value
     else:
         return _fem_constant(value, mesh)

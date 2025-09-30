@@ -23,11 +23,14 @@ def vertices(
 
 def coordinates(
     mesh: Mesh,
+    dim: int | None = None,
 ) -> tuple[np.ndarray, ...]:
     """
     `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
-    return tuple(mesh.geometry.x[:, i] for i in range(mesh.geometry.dim))
+    if dim is None:
+        dim = mesh.geometry.dim
+    return tuple(mesh.geometry.x[:, i] for i in range(dim))
 
 
 def axes(

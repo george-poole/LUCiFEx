@@ -31,7 +31,7 @@ def plot_mesh(
         case 2:
             _plot_rectangle_mesh(ax, mesh, title, **plt_kwargs)
         case 3:
-            raise ValueError("3D plotting not supported")
+            raise ValueError("3D plotting not supported.")
         case _:
             raise ValueError
 
@@ -56,16 +56,16 @@ def _plot_rectangle_mesh(
 
     match cell_type, structured:
         case CellType.TRIANGLE, True | False:
-            _rectangle_triangulation(ax, mesh, title, **plt_kwargs)
+            _plot_triangulation(ax, mesh, title, **plt_kwargs)
         case CellType.QUADRILATERAL, True:
-            _rectangle_grid(ax, mesh, title, **plt_kwargs)
+            _plot_grid(ax, mesh, title, **plt_kwargs)
         case CellType.QUADRILATERAL, False:
-            _rectangle_quadrangulation(ax, mesh, title, **plt_kwargs)
+            _plot_quadrangulation(ax, mesh, title, **plt_kwargs)
         case _:
             raise ValueError
 
 
-def _rectangle_triangulation(
+def _plot_triangulation(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
@@ -89,7 +89,7 @@ def _rectangle_triangulation(
     filter_kwargs(ax.triplot, Line2D)(trigl, **_kwargs)
 
 
-def _rectangle_quadrangulation(
+def _plot_quadrangulation(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,
@@ -98,11 +98,12 @@ def _rectangle_quadrangulation(
     """Suitable for structured and unstructured meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
-    _plt_kwargs = dict(facecolor=None, edgecolor='black', linewidth=0.75)
-    _kwargs = _plt_kwargs | _axs_kwargs
+    _poly_kwargs = dict(facecolor='white', edgecolor='black', linewidth=0.75)
+    _kwargs = _poly_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
     quadl = quadrangulation(mesh)
+    quadl = filter_kwargs(quadrangulation, Collection)(mesh, **_kwargs)
 
     for attr, value in _kwargs.items():
         setter = f'set_{attr}'
@@ -120,7 +121,7 @@ def _rectangle_quadrangulation(
     ax.add_collection(quadl)
 
 
-def _rectangle_grid(
+def _plot_grid(
     ax: Axes, 
     mesh: Mesh,
     title: str | None = None,

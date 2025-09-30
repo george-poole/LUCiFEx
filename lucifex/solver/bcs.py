@@ -202,14 +202,14 @@ class BoundaryConditions:
             strict=True,
         ):
             if b in boundary_types:
-                if isinstance(g, Expr):
+                if isinstance(g, (Function, Expr, Constant)):
                     pass 
                 elif isinstance(g, Iterable):
                     if all(isinstance(gi, (float, int)) for gi in g):
                         g = fem_constant(function_space.mesh, g)
                     else:
                         g = fem_function(function_space, g, i)
-                elif isinstance(g, (float, int, Constant)):
+                elif isinstance(g, (float, int)):
                     g = fem_constant(function_space.mesh, g)
                 else:
                     g = fem_function(function_space, g, i)

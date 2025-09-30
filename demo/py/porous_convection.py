@@ -4,7 +4,7 @@ from types import EllipsisType
 import numpy as np
 from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
-from ufl import (dx, Form, FacetNormal,
+from ufl import (dx, Form, FacetNormal, cos, sin,
                  as_matrix, Dx, TrialFunction, TestFunction,
                  det, transpose,  as_matrix)
 
@@ -41,6 +41,7 @@ def darcy_streamfunction(
     rho: Expr | Function,
     k: Expr | Function | Constant | float,
     mu: Expr | Function | Constant | float,
+    beta: Expr | Function | Constant | float,
 ) -> tuple[Form, Form]:
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
@@ -48,7 +49,7 @@ def darcy_streamfunction(
         F_lhs = -(mu / det(k)) * inner(grad(v), transpose(k) * grad(psi_trial)) * dx 
     else:
         F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
-    F_rhs = -v * Dx(rho, 0) * dx
+    F_rhs = -inner(v, cos(beta) * Dx(rho, 0) - sin(beta) * Dx(rho, 1)) * dx
     return F_lhs, F_rhs
 
 
@@ -106,7 +107,7 @@ def create_rectangle_domain(
     clockwise_names: tuple[str, str, str, str] = ('upper', 'right', 'lower', 'left'),
 ) -> tuple[Mesh, MeshBoundary]:
     
-    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, cell, name=name)
+    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, name, cell)
     boundary = mesh_boundary(
         mesh,
         {

@@ -7,13 +7,32 @@ from dolfinx.mesh import create_rectangle, create_interval, create_box
 from ..utils.enum_types import CellType, DiagonalType 
 
 
+def interval_mesh(
+    Lx: float | tuple[float, float],
+    Nx: int,
+    name: str | None = None,
+    comm: MPI.Comm | str = MPI.COMM_WORLD,
+) -> Mesh:
+    if not isinstance(Lx, tuple):
+        Lx = (0.0, Lx)
+    if isinstance(comm, str):
+        comm = getattr(MPI, comm)
+
+    mesh =  create_interval(comm, Nx, Lx)
+
+    if name is not None:
+        mesh.name = name
+
+    return mesh
+
+
 def rectangle_mesh(
     Lx: float | tuple[float, float],
     Ly: float | tuple[float, float],
     Nx: int,
     Ny: int,
-    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.QUADRILATERAL,
     name: str | None = None,
+    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.QUADRILATERAL,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
 ) -> Mesh:
     if not isinstance(Lx, tuple):
@@ -42,27 +61,15 @@ def rectangle_mesh(
     return mesh
 
 
-def interval_mesh(
-    Lx: float | tuple[float, float],
-    Nx: int,
-    comm: MPI.Comm | str = MPI.COMM_WORLD,
-) -> Mesh:
-    if not isinstance(Lx, tuple):
-        Lx = (0.0, Lx)
-    if isinstance(comm, str):
-        comm = getattr(MPI, comm)
-    return create_interval(comm, Nx, Lx)
-
-
-def box_mesh(
+def cuboid_mesh(
     Lx: float | tuple[float, float],
     Ly: float | tuple[float, float],
     Lz: float | tuple[float, float],
     Nx: int,
     Ny: int,
     Nz: int,
-    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.HEXAHEDRON,
     name: str | None = None,
+    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.HEXAHEDRON,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
 ) -> Mesh:
     create_box

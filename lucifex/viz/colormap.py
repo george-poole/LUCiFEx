@@ -108,7 +108,7 @@ def _(
             raise ValueError
 
     return __plot_colormap(
-        (f_np, x, y), fig, ax, colorbar, structured, **kwargs
+        (x, y, f_np), fig, ax, colorbar, structured, **kwargs
     )
 
 
@@ -136,14 +136,14 @@ def _(
 
 @__plot_colormap.register(tuple)
 def _(
-    fxy: tuple[np.ndarray, np.ndarray, np.ndarray],
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
     structured: bool | None = None,
     **kwargs,
 ):
-    f, x, y = fxy
+    x, y, z = xyz
 
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
@@ -156,9 +156,9 @@ def _(
         structured = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
 
     if not structured:
-        cmap = filter_kwargs(ax.tripcolor)(x, y, f, **_kwargs)
+        cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
     else:
-        cmap = filter_kwargs(ax.pcolormesh)(x, y, f.T, **_kwargs)
+        cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
 
     if colorbar is not False:
         divider = make_axes_locatable(ax)
