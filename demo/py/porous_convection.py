@@ -41,7 +41,8 @@ def darcy_streamfunction(
     rho: Expr | Function,
     k: Expr | Function | Constant | float,
     mu: Expr | Function | Constant | float,
-    beta: Expr | Function | Constant | float,
+    egx: Expr | Function | Constant | float | None = None,
+    egy: Expr | Function | Constant | float | None = None,
 ) -> tuple[Form, Form]:
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
@@ -49,8 +50,14 @@ def darcy_streamfunction(
         F_lhs = -(mu / det(k)) * inner(grad(v), transpose(k) * grad(psi_trial)) * dx 
     else:
         F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
-    F_rhs = -inner(v, cos(beta) * Dx(rho, 0) - sin(beta) * Dx(rho, 1)) * dx
-    return F_lhs, F_rhs
+    forms = [F_lhs]
+    if egx is not None:
+        F_egx = v * Dx(egx * rho, 1) * dx
+        forms.append(F_egx)
+    if egy is not None:
+        F_egy = -v * Dx(egy * rho, 0) * dx
+        forms.append(F_egy)
+    return forms
 
 
 def streamfunction_velocity(psi: Function) -> Expr:
@@ -144,7 +151,7 @@ def abstract_porous_convection(
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
-    courant: float | None = 0.75,
+    cfl_courant: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = AB1,
     D_diff: FiniteDifference = AB1,
@@ -187,7 +194,7 @@ def abstract_porous_convection(
 
     # timestep solver
     dt_solver = eval_solver(dt, cfl_timestep)(
-            u[0], cfl_h, courant, dt_max, dt_min,
+            u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
 
     # transport solver

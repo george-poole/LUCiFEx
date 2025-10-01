@@ -17,17 +17,27 @@ from .fem_utils import is_scalar, is_vector, ScalarVectorError
 from .fem_mutation import set_fem_function
 
 
-SpatialExpressionFunc = Callable[[np.ndarray], np.ndarray]
-"""Function of array `x` returning array expression `f(x)`"""
+SpatialExpression = Callable[[np.ndarray], np.ndarray]
+"""
+Function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)`
 
-SpatialIndicatorFunc = Callable[[np.ndarray], bool]
-"""Function of `x` returning `True/False`"""
+e.g. `lambda x: x[1] - Ly` if a boundary is defined by `y = Ly`
+"""
 
-SpatialMarkerFunc: TypeAlias = SpatialExpressionFunc | SpatialIndicatorFunc
-"""Function of `x` either returning expression `f(x)` such that `f(x) = 0` defines the boundary,
-or `True/False` indicating if `x` is on the boundary"""
+SpatialMarker = Callable[[np.ndarray], bool]
+"""
+Function of coordinates `x = (x₀, x₁, x₂)` returning `True` or `False`
 
-SpatialMarker: TypeAlias = SpatialMarkerFunc | int | str | Iterable["SpatialMarker"]
+e.g. `lambda x: np.isclose(x[1], Ly)` if a boundary is defined by `y = Ly`
+"""
+
+SpatialMarkerOrExpression: TypeAlias = SpatialMarker | SpatialExpression
+"""
+Function of coordinates `x = (x₀, x₁, x₂)` either returning expression `f(x)` 
+such that `f(x) = 0` defines the boundary, or `True` if `x` is on the boundary and `False` otherwise.
+"""
+
+SpatialMarkerTypes: TypeAlias = SpatialMarkerOrExpression | int | str | Iterable["SpatialMarker"]
 # TODO marker: str | int case for when no well-defined callable `f(x) = 0` exists to define boundary
 
 SubspaceIndex: TypeAlias = int | None 
@@ -35,16 +45,16 @@ SubspaceIndex: TypeAlias = int | None
 
 def dofs_indices(
     function_space: FunctionSpace,
-    dof_marker: SpatialMarker,
+    dof_marker: SpatialMarkerTypes,
     subspace_index: int | None = None,
     method = 'topological',
 ) -> np.ndarray | list[np.ndarray]:
     
-    dof_indicator = as_spatial_indicator_func(dof_marker)
+    _dof_marker = as_spatial_marker(dof_marker)
 
     if method == 'geometrical':
         if subspace_index is None:
-            return locate_dofs_geometrical(function_space, dof_indicator)
+            return locate_dofs_geometrical(function_space, _dof_marker)
         else:
             raise NotImplementedError
             # TODO does this work?
@@ -55,7 +65,7 @@ def dofs_indices(
         tdim = function_space.mesh.topology.dim
         edim = tdim - 1
         facets = locate_entities(  # TODO vs locate_entities_boundary
-            function_space.mesh, edim, dof_indicator
+            function_space.mesh, edim, _dof_marker
         )
         if subspace_index is None:
             return locate_dofs_topological(function_space, edim, facets)
@@ -73,11 +83,16 @@ def dofs_indices(
     raise ValueError(f'{method} not recognised')
 
 
-def as_spatial_indicator_func(
-    m: SpatialMarkerFunc | Iterable[SpatialMarkerFunc]
-) -> SpatialIndicatorFunc:
+def as_spatial_marker(
+    m: SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression]
+) -> SpatialMarker:
+    """
+    Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)` 
+    such that `f(x) = 0` defines the boundary to a function returning `True` 
+    if `x` is on the boundary and `False` otherwise.
+    """
     
-    def _as_marker_func(m: SpatialMarkerFunc) -> SpatialIndicatorFunc:
+    def _as_marker(m: SpatialMarkerOrExpression) -> SpatialMarker:
         x_test = (0.0, 0.0, 0.0)
         if isinstance(m(x_test), bool):
             return m
@@ -85,9 +100,9 @@ def as_spatial_indicator_func(
             return lambda x: np.isclose(m(x), 0.0)
 
     if not isinstance(m, Iterable):
-        return _as_marker_func(m)
+        return _as_marker(m)
     else:
-        return lambda x: np.any([_as_marker_func(mi)(x) for mi in m], axis=0)
+        return lambda x: np.any([_as_marker(mi)(x) for mi in m], axis=0)
     
     
 # @optional_lru_cache
@@ -157,7 +172,7 @@ def maximum(
 
 def as_dofs_setter(
     setter: Callable[[Function], None] 
-    | Iterable[tuple[SpatialMarker, float | Constant] | tuple[SpatialMarker, float | Constant, int]]
+    | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]]
     | None,
 ) -> Callable[[Function], None]:
     
@@ -175,7 +190,7 @@ def as_dofs_setter(
             m, v, si = sttr
         else:
             raise ValueError
-        markers.append(as_spatial_indicator_func(m))
+        markers.append(as_spatial_marker(m))
         values.append(v)
         subspace_indices.append(si)
     

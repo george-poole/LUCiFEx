@@ -8,7 +8,7 @@ from ufl.restriction import Restricted
 from ufl.core.expr import Expr
 
 from ..fdm.ufl_operators import inner
-from ..utils import set_value, copy_callable, SpatialMarker, as_dofs_setter
+from ..utils import set_value, copy_callable, SpatialMarkerTypes, as_dofs_setter
 from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 
@@ -89,7 +89,7 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
         self,
         solution: ConstantSeries | LUCiFExConstant,
         integrand: Expr | tuple[Expr, ...] | Form,
-        marker: SpatialMarker | Iterable[SpatialMarker] | Measure | None = None, # TODO expand to broader SpatialMarker type which further supports `int | str` tagging
+        marker: SpatialMarkerTypes | Iterable[SpatialMarkerTypes] | Measure | None = None, # TODO expand to broader SpatialMarker type which further supports `int | str` tagging
         quadrature_degree: int | None = None,  # TODO expand to quadrature metadata/scheme
         future: bool = False,
     ):
@@ -146,7 +146,7 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
         cls, 
         solution: ConstantSeries | LUCiFExConstant,
         integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form],
-        marker: SpatialMarker | Measure | None = None,
+        marker: SpatialMarkerTypes | Measure | None = None,
         quadrature_degree: int | None = None, 
         future: bool = False,
     ):
@@ -174,7 +174,7 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
         self,
         solution: ConstantSeries | LUCiFExConstant,
         integrand: Expr | tuple[Expr, ...] | Form,
-        marker: SpatialMarker | Measure | None = None, 
+        marker: SpatialMarkerTypes | Measure | None = None, 
         quadrature_degree: int | None = None, 
         facet_side: Literal['+', '-'] = '+',
         future: bool = False,
@@ -192,7 +192,7 @@ class InteriorFacetIntegrationProblem(IntegrationProblem):
         cls, 
         solution: ConstantSeries | LUCiFExConstant,
         integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form], 
-        marker: SpatialMarker | Measure | None = None,
+        marker: SpatialMarkerTypes | Measure | None = None,
         quadrature_degree: int | None = None, 
         facet_side: Literal['+', '-'] = '+',
         future: bool = False,
@@ -216,7 +216,7 @@ class ProjectionProblem(BoundaryValueProblem):
         self, 
         solution: LUCiFExFunction | FunctionSeries,
         expression: Function | Expr,
-        bcs: BoundaryConditions | Iterable[tuple[SpatialMarker, Value] | tuple[SpatialMarker, Value, SubspaceIndex]] | None = None, 
+        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerTypes, Value] | tuple[SpatialMarkerTypes, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -242,7 +242,7 @@ class ProjectionProblem(BoundaryValueProblem):
         cls,
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, Function | Expr],
-        bcs: BoundaryConditions | Iterable[tuple[SpatialMarker, Value] | tuple[SpatialMarker, Value, SubspaceIndex]] | None = None, 
+        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerTypes, Value] | tuple[SpatialMarkerTypes, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -282,7 +282,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
         solution: LUCiFExFunction | FunctionSeries,
         expression: LUCiFExFunction | Expr,
         dofs_corrector: Callable[[LUCiFExFunction], None] 
-        | Iterable[tuple[SpatialMarker, float | LUCiFExConstant] | tuple[SpatialMarker, float | LUCiFExConstant, SubspaceIndex]] 
+        | Iterable[tuple[SpatialMarkerTypes, float | LUCiFExConstant] | tuple[SpatialMarkerTypes, float | LUCiFExConstant, SubspaceIndex]] 
         | None = None, 
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -318,7 +318,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, LUCiFExFunction | Expr],
         dofs_corrector: Callable[[LUCiFExFunction], None] 
-        | Iterable[tuple[SpatialMarker, float | LUCiFExConstant] | tuple[SpatialMarker, float | LUCiFExConstant, SubspaceIndex]] 
+        | Iterable[tuple[SpatialMarkerTypes, float | LUCiFExConstant] | tuple[SpatialMarkerTypes, float | LUCiFExConstant, SubspaceIndex]] 
         | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,

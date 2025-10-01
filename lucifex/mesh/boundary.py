@@ -3,55 +3,65 @@ from typing import overload
 import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
-from ..utils.dofs_utils import SpatialMarkerFunc, as_spatial_indicator_func
+from ..utils.dofs_utils import SpatialMarkerOrExpression, SpatialMarker, as_spatial_marker
 
 
 class MeshBoundary:
-    def __init__(self, boundaries: dict[str | int, SpatialMarkerFunc]):
+    def __init__(self, boundaries: dict[str | int, SpatialMarkerOrExpression]):
         self._boundaries = boundaries
 
     @overload
     def __getitem__(
         self, 
         tag: str | int,
-    ) -> SpatialMarkerFunc:
+    ) -> SpatialMarkerOrExpression:
         ...
 
     @overload
     def __getitem__(
         self, 
         tag: tuple[str | int, ...],
-    ) -> list[SpatialMarkerFunc]:
+    ) -> list[SpatialMarkerOrExpression]:
         ...
 
     def __getitem__(
         self, 
         tag: str | int | tuple[str | int, ...],
-    ) -> SpatialMarkerFunc | list[SpatialMarkerFunc]:
+    ) -> SpatialMarkerOrExpression | list[SpatialMarkerOrExpression]:
         if isinstance(tag, tuple):
             return [self._boundaries[t] for t in tag]
         else:
             return self._boundaries[tag]
 
     @property
-    def union(self) -> list[SpatialMarkerFunc]:
+    def union(self) -> list[SpatialMarkerOrExpression]:
         """
-        `∪ᵢ ∂Ωᵢ`
+        `∪ᵢ∂Ωᵢ`
         """
         return list(self._boundaries.values())
+    
+    @property
+    def union_difference(self) -> SpatialMarker:
+        """
+        `∂Ω \ ∪ᵢ∂Ωᵢ`
+
+        If the defined boundaries are complete, then `∂Ω = ∪ᵢ∂Ωᵢ` and hence `∂Ω \ ∪ᵢ∂Ωᵢ = ∅`.
+        """
+        on_boundaries = as_spatial_marker(self.union)
+        return lambda x: np.logical_not(on_boundaries(x))
     
     @property
     def names(self) -> tuple[str | int, ...]:
         return tuple(self._boundaries.keys())
     
     @property
-    def markers(self) -> tuple[SpatialMarkerFunc, ...]:
+    def markers(self) -> tuple[SpatialMarkerOrExpression, ...]:
         return tuple(self._boundaries.values())
 
 
 def mesh_boundary(
     mesh: Mesh,
-    boundaries: dict[str | int, SpatialMarkerFunc],
+    boundaries: dict[str | int, SpatialMarkerOrExpression],
     verify: bool = True,
     complete: bool = False,
 ) -> MeshBoundary:
@@ -64,7 +74,7 @@ def mesh_boundary(
         if mesh.comm.Get_size() > 1:
             raise NotImplementedError('Not supported in parallel.')
         n_boundary_entities = [
-            len(locate_entities_boundary(mesh, dim, as_spatial_indicator_func(v)))
+            len(locate_entities_boundary(mesh, dim, as_spatial_marker(v)))
             for v in boundaries.values()
         ]
         if verify:

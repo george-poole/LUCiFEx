@@ -20,24 +20,24 @@ from ..utils.fem_utils import is_scalar, is_vector
 from ..utils.enum_types import BoundaryType
 from ..utils.fem_typecasting import fem_function, fem_constant
 from ..utils.dofs_utils import (
-    as_spatial_indicator_func,
+    as_spatial_marker,
     dofs_indices,
-    SpatialMarker,
-    SpatialExpressionFunc,
+    SpatialMarkerTypes,
+    SpatialExpression,
     SubspaceIndex,
 )
 
 Value: TypeAlias = (
     Function
     | Constant
-    | SpatialExpressionFunc
+    | SpatialExpression
     | float
     | Iterable[float]
     | Expr
 )
 
 # TODO understand master-slaves dof relations, single vs double periodic bc
-def periodic_relation(m: SpatialMarker, v: SpatialMarker): 
+def periodic_relation(m: SpatialMarkerTypes, v: SpatialMarkerTypes): 
     def _rltn(x: np.ndarray):
         x_master = x.copy()
         x_master = m(v(x))
@@ -54,12 +54,12 @@ class BoundaryConditions:
     """
     def __init__(
         self,
-        *bcs: tuple[BoundaryType, SpatialMarker, Value]
-        | tuple[BoundaryType, SpatialMarker, Value, SubspaceIndex]
-        | tuple[SpatialMarker, Value]
-        | tuple[SpatialMarker, Value, SubspaceIndex],
+        *bcs: tuple[BoundaryType, SpatialMarkerTypes, Value]
+        | tuple[BoundaryType, SpatialMarkerTypes, Value, SubspaceIndex]
+        | tuple[SpatialMarkerTypes, Value]
+        | tuple[SpatialMarkerTypes, Value, SubspaceIndex],
     ):
-        self._markers: list[SpatialMarker] = []
+        self._markers: list[SpatialMarkerTypes] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
@@ -132,7 +132,7 @@ class BoundaryConditions:
 
         for b, m, g in zip(self._btypes, self._markers, self._values):
             if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
-                g = as_spatial_indicator_func(g)
+                g = as_spatial_marker(g)
                 mpc.create_periodic_constraint_geometrical(
                     function_space, m, periodic_relation(m, g), bcs
                 )
@@ -230,7 +230,7 @@ class BoundaryConditions:
 def create_enumerated_measure(
     measure: Literal['dx', 'ds', 'dS'],
     mesh: Mesh,
-    markers: Iterable[SpatialMarker] = (),
+    markers: Iterable[SpatialMarkerTypes] = (),
     nums: Iterable[int] | None = None,
     num_unmarked: int | None = None,
 ) -> Measure:
@@ -255,7 +255,7 @@ def create_enumerated_measure(
     facet_indices_tagged = []
 
     for t, m in zip(nums, markers, strict=True):
-        m = as_spatial_indicator_func(m)
+        m = as_spatial_marker(m)
         facet_indices = locate_entities(mesh, fdim, m)
         facet_tags[facet_indices] = t
         facet_indices_tagged.extend(facet_indices)

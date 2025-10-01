@@ -10,7 +10,7 @@ from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
 from .enum_types import BoundaryType
-from .dofs_utils import as_dofs_setter, SpatialMarker
+from .dofs_utils import as_dofs_setter, SpatialMarkerTypes
 from .fem_typecasting import fem_function
 from .fem_mutation import set_fem_function
 
@@ -62,7 +62,7 @@ class DofsPerturbation:
         seed: int,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarker, float | Constant] | tuple[SpatialMarker, float | Constant, int]] 
+        | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]] 
         | None = None,
     ):
         self._base = base
@@ -133,7 +133,7 @@ class SpatialPerturbation:
         domain: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarker, float | Constant] | tuple[SpatialMarker, float | Constant, int]] 
+        | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]] 
         | None = None, #FIXME subspace case,
         **rescale_kwargs,
     ) -> None:

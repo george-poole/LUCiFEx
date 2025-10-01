@@ -4,17 +4,17 @@ from .fem_utils import (is_scalar, is_vector, is_tensor, extract_mesh, extract_m
                         is_mixed_space, is_same_element, is_family_alias, extract_integrands,
                         extract_integrand)
 from .dofs_utils import (
-    SpatialMarker,
-    SpatialIndicatorFunc, 
-    SpatialMarkerFunc,
-    SpatialExpressionFunc,
+    SpatialMarkerTypes,
+    SpatialMarker, 
+    SpatialMarkerOrExpression,
+    SpatialExpression,
     dofs_indices,
     dofs,
     dofs_transformation,
     extremum,
     maximum,
     minimum,
-    as_spatial_indicator_func,
+    as_spatial_marker,
     as_dofs_setter,
     dofs_limits_corrector,
 )
