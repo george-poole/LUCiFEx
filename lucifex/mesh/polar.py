@@ -10,10 +10,6 @@ from dolfinx.io.gmshio import model_to_mesh
 from ..utils.enum_types import CellType
 
 
-# gmsh.option.setNumber("General.Verbosity", 0)
-
-
-
 def get_entity_tags(
     model: gmsh.model,
     dim: int,
@@ -82,6 +78,7 @@ def annulus_model(
     comm = MPI.COMM_WORLD,
     rank: int = 0,
     markers: Iterable[tuple[str, int]] = (('cells', 1, get_cell_tags), ),
+    gmsh_options: dict | None = None,
     **gmsh_mesh_kwargs,
 ) -> gmsh.model:
     
@@ -116,15 +113,24 @@ def annulus_model(
         )
 
     res = (Router - Rinner) / Nr
-    _kwargs = {
+    ### TODO separate function
+    _gmsh_mesh_kwargs = {
         "CharacteristicLengthMin": res,
         "CharacteristicLengthMax": res,
     }
-    _kwargs.update(gmsh_mesh_kwargs)
-    for name, value in _kwargs.items():
+    _gmsh_mesh_kwargs.update(gmsh_mesh_kwargs)
+    for name, value in _gmsh_mesh_kwargs.items():
         gmsh.option.setNumber(f'Mesh.{name}', value)
     if cell == CellType.QUADRILATERAL:
         gmsh.option.setNumber("Mesh.RecombineAll", 1)
+
+    if gmsh_options is None:
+        gmsh_options = {}
+    _gmsh_options = {"General.Verbosity": 0}
+    _gmsh_options.update(gmsh_options)
+    for name, value in _gmsh_options.items():
+        gmsh.option.setNumber(name, value)
+    ### 
 
     gmsh.model.occ.synchronize()
     gmsh.model.mesh.generate(dim)

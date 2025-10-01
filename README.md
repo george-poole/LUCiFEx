@@ -41,20 +41,32 @@ u.time_series
 
 **Finite differences in time**
 
-`FiniteDifference` operators act on time-dependent quantitie to produce finite-difference discretizations. For example, the second-order Adams-Bashforth `AB2` discretization of $u(\textbf{x}, t)$ is written as
+`FiniteDifference` operators act on time-dependent quantitie to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
+
+$$u(\textbf{x}, t^n)\approx \tfrac{3}{2}u^n - \tfrac{1}{2}u^{n-1}$$
+
+
+is produced by the  `AB2` operator
 ```python
 AB2(u)
 ```
 
 which is equivalent to manually writing out
-
-```
+```python
 1.5 * u[0] - 0.5 * u[-1]
 ```
 
+**Unified problem-solving interface**
+
+Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Simple expressions are evaluated by solving an `EvaluationProblem`, which has subclasses `CellIntegrationProblem` for evaluating integrals of the form $\int_\Omega f(\textbf{x}, t)~\text{d}\Omega$ and `FacetIntegrationProblem` for evaluating integrals of the form $\int_{\Gamma} f(\textbf{x}, t)~\text{d}\Gamma$.  Algebraic equations (linear or linearized) can be solved as a `ProjectionProblem`. 
+
+**Time-dependent boundary conditions**
+
+Dirichlet, Neumann, Robin and periodic conditions are specified by `BoundaryConditions`. The boundary condition's value of type `Function`, `Constant` or `Expr` can be updated in the time-stepping loop to implement a time-dependent bundary condition. 
+
 **Running simulations**
 
-A time-dependent simulation is in effect a sequence of (linear) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, a simulation object is defined as
+A time-dependent simulation is in effect a sequence of (linear or linearized) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, a simulation object is defined as
 
 ```python
 simulation = Simulation(solvers, t, dt)
@@ -119,10 +131,10 @@ See `demo/` for notebooks and scripts, which are divided into three categories: 
 
 These features remain to be implemented as part of ongoing development:
 
-+ update to latest version of `fenicsx` (currently on 0.6.0)
++ update to latest version of `fenicsx` (currently on 0.6.0) and Python (currently on 3.10.12)
 + parallelisation with `mpi4py`
-+ utilities for `gmsh` meshes
 + nested solvers
++ preconditioned solvers
 + nonlinear solvers
 + more documentation and testing
 
@@ -131,5 +143,5 @@ These features remain to be implemented as part of ongoing development:
 These features are outside the scope of current development, but could be of interest in the future:
 
 + adaptive mesh refinement
-+ time-dependent meshes
++ time-dependent domains and boundaries
 + time-stepping with Runge-Kutta methods
