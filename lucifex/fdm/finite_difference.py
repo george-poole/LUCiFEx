@@ -316,7 +316,7 @@ def finite_difference_order(*args: FiniteDifference | tuple[FiniteDifference, ..
 
     orders = [a.order for a in args_fd]
     if orders:
-        return max(orders)
+        return max(1, max(orders))
     else:
         return None
     

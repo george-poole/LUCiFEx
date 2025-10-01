@@ -4,7 +4,7 @@ from types import EllipsisType
 import numpy as np
 from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
-from ufl import (dx, Form, FacetNormal, cos, sin,
+from ufl import (dx, Form, FacetNormal, inner,
                  as_matrix, Dx, TrialFunction, TestFunction,
                  det, transpose,  as_matrix)
 
@@ -128,25 +128,27 @@ def create_rectangle_domain(
     return mesh, boundary
 
 
+Phi: TypeAlias = Function
 C: TypeAlias = FunctionSeries
-Phi: TypeAlias = FunctionSeries
 U: TypeAlias = FunctionSeries
-def abstract_porous_convection(
+def create_simulation(
     # domain
     Omega: Mesh,
     dOmega: MeshBoundary,
+    egx: Expr | Function | Constant | float | None = None,
+    egy: Expr | Function | Constant | float = -1.0,
     # physical 
-    Ra: float = 0,
+    Ra: float = 1000.0,
     # initial conditions
     c_ics = None,
     # boundary conditions
     c_bcs: BoundaryConditions | EllipsisType | None = None,
     # constitutive relations
     phi: Callable[[np.ndarray], np.ndarray] | float = 1,
-    permeability: Callable[[Phi], Series] = lambda phi: phi**2,
-    dispersion: Callable[[Phi, U], Series] = lambda phi, _: phi,
+    permeability: Callable[[Phi], Expr] = lambda phi: phi**2,
+    dispersion: Callable[[Phi, U], Series] | Callable[[Phi], Function] = lambda phi: phi,
     density: Callable[[C], Series] = lambda c: c,
-    viscosity: Callable[[C], Series] = lambda *_: 1 + 0 * _[0], 
+    viscosity: Callable[[C], Series] = lambda c: 1 + 0 * c, 
     # time step
     dt_min: float = 0.0,
     dt_max: float = 0.5,
@@ -158,12 +160,26 @@ def abstract_porous_convection(
     D_reac: FiniteDifference 
     | tuple[FiniteDifference, FiniteDifference]
     | tuple[FiniteDifference, FiniteDifference, FiniteDifference] = AB1,
+    # TODO tabilization
+    # c_stabilization: str | None = None,
+    # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
     psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,
     # optional solvers
     secondary: bool = False,      
-) -> Simulation:    
+) -> Simulation:
+    """
+    2D streamfunction formulation with boundary conditions `ψ = 0` on `∂Ω`.
+
+    Default gravity unit vector is `e₉ = -eʸ`.
+    
+    Default boundary conditions are no flux of solute everywhere on `∂Ω`. 
+    
+    Default constitutive relations are uniform porosity `ϕ = 1`, 
+    isotropic quadratic permeability `K(ϕ) = ϕ²`, isotropic linear solutal
+    dispersion `D(ϕ) = ϕ` and uniform viscosity `μ = 1`.
+    """    
 
     order = finite_difference_order(D_adv, D_diff, D_reac)
 
@@ -180,16 +196,19 @@ def abstract_porous_convection(
 
     # constitutive relations
     phi = Function((Omega, 'P', 1), phi, 'phi')
-    k = ExprSeries(permeability(phi), 'k')
-    d = ExprSeries(dispersion(phi, u), 'd')
+    k: Expr = permeability(phi)
+    try:
+        d = ExprSeries(dispersion(phi, u), 'd')
+    except TypeError:
+        d: Expr = dispersion(phi)
     rho = ExprSeries(density(c), 'rho')
     mu = ExprSeries(viscosity(c), 'mu')
     
-    namespace = [Ra, phi, k, d, rho, mu]
+    namespace = [Ra, phi, ('k', k), ('d', d), rho, mu]
 
     # flow solvers
     psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
-    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, rho, k, mu)
+    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, rho[0], k, mu[0], egx, egy)
     u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
 
     # timestep solver
@@ -199,9 +218,8 @@ def abstract_porous_convection(
 
     # transport solver
     c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
-    c_limits = (0, 1) if c_limits is Ellipsis else c_limits
     c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
-        c, dt, phi, u, Ra, d, D_adv, D_diff,
+        c, dt, phi, u, Ra, d[0] if isinstance(d, ExprSeries) else d, D_adv, D_diff,
     )
 
     solvers = [psi_solver, u_solver, dt_solver, c_solver]

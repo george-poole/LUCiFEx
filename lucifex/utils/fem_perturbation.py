@@ -189,7 +189,7 @@ def random_noise(
 def cubic_noise(
     boundary: str | tuple[str, str],
     interval: float | tuple[float, float],
-    frequency: int,
+    n_freq: int,
     seed: int, 
     index: int | Iterable[int] | None = None,
 ) -> Callable[[np.ndarray], np.ndarray]:
@@ -200,7 +200,7 @@ def cubic_noise(
 def cubic_noise(
     boundary: list[str | tuple[str, str]],
     interval: list[float | tuple[float, float]],
-    frequency: Iterable[int],
+    n_freq: Iterable[int],
     seed: Iterable[int], 
     index: Iterable[int],
 ) -> Callable[[np.ndarray], np.ndarray]:
@@ -210,17 +210,20 @@ def cubic_noise(
 def cubic_noise(
     boundary: str | tuple[str, str] | list[str | tuple[str, str]],
     interval: float | tuple[float, float] | list[float | tuple[float, float]],
-    frequency: int | Iterable[int],
+    n_freq: int | Iterable[int],
     seed: int | Iterable[int], 
     index: int | Iterable[int] | None = None,
 ) -> Callable[[np.ndarray], np.ndarray]:
     if isinstance(boundary, list):
         assert isinstance(interval, list)
-        assert isinstance(frequency, Iterable)
+        assert isinstance(n_freq, Iterable)
         assert isinstance(seed, Iterable)
+        assert not isinstance(index, int)
+        if index is None:
+            index = tuple(range(len(boundary)))
         assert index is not None
         noises = [cubic_noise(b, l, f, s, i) for b, l, f, s, i in 
-                  zip(boundary, interval, frequency, seed, index, strict=True)]
+                  zip(boundary, interval, n_freq, seed, index, strict=True)]
         return lambda x: reduce(mul, [n(x) for n in noises])
 
     if isinstance(boundary, str):
@@ -228,7 +231,7 @@ def cubic_noise(
     if isinstance(interval, float):
         interval = (0, interval)
     
-    x_coarse = np.linspace(*interval, num=frequency)
+    x_coarse = np.linspace(*interval, num=n_freq)
     rng = np.random.default_rng(seed)
     noise_coarse = rng.uniform(0, 1, x_coarse.size)
 
@@ -281,7 +284,7 @@ def cubic_noise(
 def sinusoid_noise(
     boundary: str | tuple[str, str] | list[str | tuple[str, str]],
     interval: float | tuple[float, float] | list[float | tuple[float, float]],
-    waves: int | Iterable[int],
+    n_waves: int | Iterable[int],
     index: int | Iterable[int] | None = None,
 ) -> Callable[[np.ndarray], np.ndarray]:
     ...
@@ -291,7 +294,7 @@ def sinusoid_noise(
 def sinusoid_noise(
     boundary: list[str | tuple[str, str]],
     interval: list[float | tuple[float, float]],
-    waves: Iterable[int],
+    n_waves: Iterable[int],
     index: Iterable[int],
 ) -> Callable[[np.ndarray], np.ndarray]:
     ...
@@ -300,14 +303,16 @@ def sinusoid_noise(
 def sinusoid_noise(
     boundary: str | tuple[str, str] | list[str | tuple[str, str]],
     interval: float | tuple[float, float] | list[float | tuple[float, float]],
-    waves: int | Iterable[int],
+    n_waves: int | Iterable[int],
     index: int | Iterable[int] | None = None,
 ) -> Callable[[np.ndarray], np.ndarray]:
     if isinstance(boundary, list):
         assert isinstance(interval, list)
-        assert isinstance(waves, Iterable)
-        assert index is not None
-        noises = [sinusoid_noise(b, l, w, i) for b, l, w, i in zip(boundary, interval, waves, index, strict=True)]
+        assert isinstance(n_waves, Iterable)
+        assert not isinstance(index, int)
+        if index is None:
+            index = tuple(range(len(boundary)))
+        noises = [sinusoid_noise(b, l, w, i) for b, l, w, i in zip(boundary, interval, n_waves, index, strict=True)]
         return lambda x: reduce(mul, [n(x) for n in noises])
 
     if isinstance(boundary, str):
@@ -321,23 +326,23 @@ def sinusoid_noise(
     match boundary:
         case (BoundaryType.PERIODIC, BoundaryType.PERIODIC):
             # f(xmin) = f(xmax) and anti-symmetric about centre
-            wavelength = Lx / waves
+            wavelength = Lx / n_waves
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.DIRICHLET):
             # f(xmin) = 0 , f(xmax) = 0 and symmetric about centre
-            wavelength = Lx / (waves + 0.5)
+            wavelength = Lx / (n_waves + 0.5)
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.NEUMANN):
             # dfdx(xmin) = 0 , dfdx(xmax) = 0 and symmetric about centre
-            wavelength = Lx / waves
+            wavelength = Lx / n_waves
             noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.DIRICHLET):
             # dfdx(xmin) = 0 and f(xmax) = 0
-            wavelength = Lx / (waves + 0.25)
+            wavelength = Lx / (n_waves + 0.25)
             noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.NEUMANN):
             # f(xmin) = 0 and dfdx(xmax) = 0
-            wavelength = Lx / (waves + 0.25)
+            wavelength = Lx / (n_waves + 0.25)
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case _:
             raise BoundaryTypeError(boundary)

@@ -29,7 +29,7 @@ class Simulation:
         solvers: Iterable[Solver],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        namespace: Iterable[ExprSeries | Function | Constant] = (),
+        namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
@@ -122,7 +122,8 @@ class Simulation:
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.series.name: s.series for s in self.solvers})
-        d.update({f.name: f for f in self.namespace_extras})
+        d.update({f.name: f for f in self.namespace_extras if not isinstance(f, tuple)})
+        d.update({f[0]: f[1] for f in self.namespace_extras if isinstance(f, tuple)})
         return d
     
     @property
