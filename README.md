@@ -33,7 +33,7 @@ and its past, present and future values are accessed as
 u[-1], u[0], u[1]
 ```
 
-If held in memory in accordance with the `store` parameter passed to `FunctionSeries`, the full sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
+If held in memory in accordance with the `store` parameter passed to `FunctionSeries`, the sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
 ```
 u.series
 u.time_series
@@ -41,10 +41,9 @@ u.time_series
 
 **Finite differences in time**
 
-`FiniteDifference` operators act on time-dependent quantitie to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
+`FiniteDifference` operators act on time-dependent quantities to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
 
 $$u(\textbf{x}, t^n)\approx \tfrac{3}{2}u^n - \tfrac{1}{2}u^{n-1}$$
-
 
 is produced by the  `AB2` operator
 ```python
