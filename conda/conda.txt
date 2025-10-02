@@ -25,6 +25,7 @@ cached_property           1.5.2              pyha770c72_1    conda-forge
 cairo                     1.16.0            h09dd18c_1016    conda-forge
 certifi                   2025.8.3           pyhd8ed1ab_0    conda-forge
 cffi                      1.15.1          py310ha78151a_3    conda-forge
+cftime                    1.6.4           py310hcb5bc8d_2    conda-forge
 charset-normalizer        3.2.0              pyhd8ed1ab_0    conda-forge
 click                     8.2.1              pyh707e725_0    conda-forge
 co2-dissolution-pkg       0.0.1                    pypi_0    pypi
@@ -87,6 +88,7 @@ idna                      3.4                pyhd8ed1ab_0    conda-forge
 imageio                   2.37.0             pyhfb79c49_0    conda-forge
 imath                     3.1.9                h7d26f99_0    conda-forge
 importlib-metadata        8.6.1              pyha770c72_0    conda-forge
+importlib_metadata        8.6.1                hd8ed1ab_0    conda-forge
 importlib_resources       6.5.2              pyhd8ed1ab_0    conda-forge
 iniconfig                 2.0.0              pyhd8ed1ab_1    conda-forge
 ipykernel                 6.29.5             pyh57ce528_0    conda-forge
@@ -162,9 +164,12 @@ llvmlite                  0.43.0          py310h6d0c2b6_1
 loguru                    0.7.0           py310h2ec42d9_0    conda-forge
 lucifex                   0.0.1                    pypi_0    pypi
 lz4-c                     1.9.4                hf0c8a7f_0    conda-forge
+markdown-it-py            4.0.0              pyhd8ed1ab_0    conda-forge
 markupsafe                3.0.2           py310h8e2f543_1    conda-forge
 matplotlib-base           3.7.2           py310h475a17b_0    conda-forge
 matplotlib-inline         0.1.7              pyhd8ed1ab_1    conda-forge
+mdurl                     0.1.2              pyhd8ed1ab_1    conda-forge
+meshio                    5.3.5              pyhd8ed1ab_0    conda-forge
 metis                     5.1.0             h2e338ed_1006    conda-forge
 mistune                   3.1.3              pyh29332c3_0    conda-forge
 mpfr                      4.2.0                h4f9bd69_0    conda-forge
@@ -186,6 +191,7 @@ nbconvert-pandoc          7.16.6               hed9df3c_0    conda-forge
 nbformat                  5.10.4             pyhd8ed1ab_1    conda-forge
 ncurses                   6.4                  hf0c8a7f_0    conda-forge
 nest-asyncio              1.6.0              pyhd8ed1ab_1    conda-forge
+netcdf4                   1.6.4           nompi_py310h3504ac7_100    conda-forge
 nettle                    3.8.1                h96f3785_1    conda-forge
 networkx                  3.2                pyhd8ed1ab_0    conda-forge
 nlohmann_json             3.11.2               hbbd2c75_0    conda-forge
@@ -230,12 +236,14 @@ pure_eval                 0.2.3              pyhd8ed1ab_1    conda-forge
 pybind11-abi              4                    hd8ed1ab_3    conda-forge
 pycparser                 2.21               pyhd8ed1ab_0    conda-forge
 pygments                  2.19.1             pyhd8ed1ab_0    conda-forge
+pygmsh                    7.1.17          py310h2ec42d9_2    conda-forge
 pyparsing                 3.0.9              pyhd8ed1ab_0    conda-forge
 pysocks                   1.7.1              pyha2e5f31_6    conda-forge
 pytest                    8.4.2              pyhd8ed1ab_0    conda-forge
 python                    3.10.12         had23ca6_0_cpython    conda-forge
 python-dateutil           2.8.2              pyhd8ed1ab_0    conda-forge
 python-fastjsonschema     2.21.1             pyhd8ed1ab_0    conda-forge
+python-gmsh               4.11.1               h57928b3_6    conda-forge
 python-tzdata             2025.2             pyhd8ed1ab_0    conda-forge
 python_abi                3.10                    3_cp310    conda-forge
 pytz                      2025.2             pyhd8ed1ab_0    conda-forge
@@ -247,6 +255,7 @@ rapidjson                 1.1.0.post20240409      hf036a51_1    conda-forge
 readline                  8.2                  h9e318b2_1    conda-forge
 referencing               0.36.2             pyh29332c3_0    conda-forge
 requests                  2.31.0             pyhd8ed1ab_0    conda-forge
+rich                      14.1.0             pyhe01879c_0    conda-forge
 rpds-py                   0.23.1          py310h40a894c_0    conda-forge
 scalapack                 2.2.0                hc746714_1    conda-forge
 scikit-image              0.24.0          py310hbf2a7f0_2    conda-forge
