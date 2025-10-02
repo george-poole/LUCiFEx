@@ -130,7 +130,7 @@ class SpatialPerturbation:
         | float
         | Iterable[float],
         noise: Callable[[np.ndarray], np.ndarray],
-        domain: list[float | tuple[float, float]] | np.ndarray,
+        domain_lims: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
         | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]] 
@@ -138,7 +138,7 @@ class SpatialPerturbation:
         **rescale_kwargs,
     ) -> None:
         self._base = base
-        self._noise = rescale(noise, domain, amplitude, **rescale_kwargs)
+        self._noise = rescale(noise, domain_lims, amplitude, **rescale_kwargs)
         self._dofs_corrector = as_dofs_setter(dofs_corrector)
 
     def base(
@@ -357,7 +357,7 @@ def sinusoid_noise(
 @overload
 def rescale(
     func: Callable[[np.ndarray], np.ndarray],
-    interval: float | tuple[float, float],
+    domain_lims: float | tuple[float, float],
     amplitude: float | tuple[float, float],
     n_fine: int = 1e6,
     eps: float = 1e-4,
@@ -371,7 +371,7 @@ def rescale(
 @overload
 def rescale(
     func: Callable[[np.ndarray], np.ndarray],
-    domain: list[float | tuple[float, float]] | np.ndarray,
+    domain_lims: list[float | tuple[float, float]] | np.ndarray,
     amplitude: float | tuple[float, float],
     n_fine: int = 1e6,
     eps: float = 1e-4,
@@ -386,7 +386,7 @@ def rescale(
 
 def rescale(
     func: Callable[[np.ndarray], np.ndarray],
-    domain: float | tuple[float, float] | list[float | tuple[float, float]] | np.ndarray,
+    domain_lims: float | tuple[float, float] | list[float | tuple[float, float]] | np.ndarray,
     amplitude: float | tuple[float, float],
     n_fine: int = 1e4,
     eps: float = 1e-4,
@@ -396,19 +396,19 @@ def rescale(
     f_min, f_max = amplitude
 
     if is_univariate(func):
-        if isinstance(domain, float):
-            domain = (0, domain)
+        if isinstance(domain_lims, float):
+            domain_lims = (0, domain_lims)
         # large num > 0 and small ε > 0 for robustness
-        x_fine = np.linspace(*domain, num=int(n_fine))
+        x_fine = np.linspace(*domain_lims, num=int(n_fine))
         noise_fine = func(x_fine)
     else:
-        if isinstance(domain, np.ndarray):
-            x_fine_vertices = domain
+        if isinstance(domain_lims, np.ndarray):
+            x_fine_vertices = domain_lims
         else:
-            assert isinstance(domain, list)
-            domain = [(0, d) if isinstance(d, float) else d for d in domain]
-            dim = len(domain)
-            x_fine_axes = [np.linspace(*d, num=int(n_fine ** (1/dim))) for d in domain]
+            assert isinstance(domain_lims, list)
+            domain_lims = [(0, d) if isinstance(d, float) else d for d in domain_lims]
+            dim = len(domain_lims)
+            x_fine_axes = [np.linspace(*d, num=int(n_fine ** (1/dim))) for d in domain_lims]
             x_fine_vertices = np.array([i for i in product(*x_fine_axes)])
         noise_fine = [func(x) for x in x_fine_vertices]
 

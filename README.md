@@ -101,11 +101,11 @@ The decorator functions `postprocess` and `co_postprocess` enable functions acti
 
 ## Installation (macOS)
 
+Please note that `LUCiFEx` is a research code still under active development.
 
 `git clone https://github.com/george-poole/LUCiFEx.git`
 
-See `conda` directory for files to recreate Conda environment. To create the 
-`lucifex` environment, do one of
+See `conda` directory for files to recreate Conda environment. To create Conda environment named `lucifex`, do one of
 
 * `conda create -n lucifex` <br>
 `conda install --file conda_explicit.txt` <br>

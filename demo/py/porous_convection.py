@@ -52,10 +52,10 @@ def darcy_streamfunction(
         F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
     forms = [F_lhs]
     if egx is not None:
-        F_egx = v * Dx(egx * rho, 1) * dx
+        F_egx = -v * Dx(egx * rho, 1) * dx
         forms.append(F_egx)
     if egy is not None:
-        F_egy = -v * Dx(egy * rho, 0) * dx
+        F_egy = v * Dx(egy * rho, 0) * dx
         forms.append(F_egy)
     return forms
 
@@ -135,16 +135,17 @@ def create_simulation(
     # domain
     Omega: Mesh,
     dOmega: MeshBoundary,
+    # gravity
     egx: Expr | Function | Constant | float | None = None,
     egy: Expr | Function | Constant | float = -1.0,
-    # physical 
+    # physical
     Ra: float = 1000.0,
     # initial conditions
     c_ics = None,
     # boundary conditions
     c_bcs: BoundaryConditions | EllipsisType | None = None,
     # constitutive relations
-    phi: Callable[[np.ndarray], np.ndarray] | float = 1,
+    porosity: Callable[[np.ndarray], np.ndarray] | float = 1,
     permeability: Callable[[Phi], Expr] = lambda phi: phi**2,
     dispersion: Callable[[Phi, U], Series] | Callable[[Phi], Function] = lambda phi: phi,
     density: Callable[[C], Series] = lambda c: c,
@@ -160,7 +161,7 @@ def create_simulation(
     D_reac: FiniteDifference 
     | tuple[FiniteDifference, FiniteDifference]
     | tuple[FiniteDifference, FiniteDifference, FiniteDifference] = AB1,
-    # TODO tabilization
+    # TODO supg stabilization
     # c_stabilization: str | None = None,
     # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
@@ -195,7 +196,7 @@ def create_simulation(
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
 
     # constitutive relations
-    phi = Function((Omega, 'P', 1), phi, 'phi')
+    phi = Function((Omega, 'P', 1), porosity, 'phi')
     k: Expr = permeability(phi)
     try:
         d = ExprSeries(dispersion(phi, u), 'd')
@@ -234,6 +235,5 @@ def create_simulation(
                 ds_solver(ConstantSeries(Omega, "fOmega", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0], Ra),
             ]
         )
-
     
     return Simulation(solvers, t, dt, namespace)
