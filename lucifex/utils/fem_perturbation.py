@@ -129,7 +129,7 @@ class SpatialPerturbation:
         | Expression
         | float
         | Iterable[float],
-        noise: Callable[[np.ndarray], np.ndarray],
+        noise_shape: Callable[[np.ndarray], np.ndarray],
         domain_lims: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
@@ -138,7 +138,7 @@ class SpatialPerturbation:
         **rescale_kwargs,
     ) -> None:
         self._base = base
-        self._noise = rescale(noise, domain_lims, amplitude, **rescale_kwargs)
+        self._noise = rescale(noise_shape, domain_lims, amplitude, **rescale_kwargs)
         self._dofs_corrector = as_dofs_setter(dofs_corrector)
 
     def base(

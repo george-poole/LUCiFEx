@@ -58,7 +58,7 @@ which is equivalent to manually writing out
 
 **Unified problem-solving interface**
 
-Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Simple expressions are evaluated by solving an `EvaluationProblem`, which has subclasses `CellIntegrationProblem` for evaluating integrals of the form $\int_\Omega f(\textbf{x}, t)~\text{d}\Omega$ and `FacetIntegrationProblem` for evaluating integrals of the form $\int_{\Gamma} f(\textbf{x}, t)~\text{d}\Gamma$.  Algebraic equations (linear or linearized) can be solved as a `ProjectionProblem`. 
+Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Simple expressions are evaluated by solving an `EvaluationProblem`, which has subclasses `CellIntegrationProblem` and `FacetIntegrationProblem` for evaluating integrals.  Algebraic equations (linear or linearized) can be solved as a `ProjectionProblem`. 
 
 **Time-dependent boundary conditions**
 
