@@ -2,7 +2,7 @@
 
 Welcome to the ***Linearized Convection in FEniCSx*** package! 
 
-Development has been primarily motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, do not hesitate to email `grp39@cam.ac.uk`.
+Development has been primarily motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
 
 ![LUCiFEx](demo/figures/A12_convection_onset_highres.png)
 
