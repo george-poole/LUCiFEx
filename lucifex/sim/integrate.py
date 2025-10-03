@@ -51,7 +51,7 @@ def integrate(
     _writers: list[Writer] = [as_writer(w) for w in writers]
     _writers.extend(simulation.writers)
 
-    n_init_solvers = max(i.n_init for i in simulation.solvers if isinstance(i, (IBVP, IVP)))
+    n_init_solvers = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
     if n_init is not None:
         if not n_init > n_init_solvers:
             raise ValueError("Overridden `n_init` value must be greater than simulation's finite difference discretization order")
@@ -67,11 +67,12 @@ def integrate(
             dt_solver_init = simulation.solvers[simulation.index(dt.name)]
 
     solvers_init = [
-        i.init if isinstance(i, (IBVP, IVP)) and i.init is not None else dt_solver_init if i.series is dt else i
-        for i in simulation.solvers
+        s.init if isinstance(s, (IBVP, IVP)) and s.init is not None 
+        else dt_solver_init if s.series is dt 
+        else s for s in simulation.solvers
     ]
 
-    series_ics = [t, *[i.series for i in simulation.solvers if i.series.ics is not None]]
+    series_ics = [t, *[s.series for s in simulation.solvers if s.series.ics is not None]]
     if resume:
         n_init = 0
         read_checkpoint(series_ics, simulation.dir_path, simulation.checkpoint_file)
@@ -114,7 +115,7 @@ def integrate(
         [s.solve() for s in _solvers]
         t.update(t[0].value + _dt.value, future=True)
         [w.write(t[0]) for w in _writers]
-        [s.forward(t[0]) for s in _solvers]
+        [s.forward(t[0]) for s in simulation.series]
         t.forward(t[0])
         _n += 1
 

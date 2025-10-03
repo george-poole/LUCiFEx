@@ -296,7 +296,8 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
             container = self._present
 
         if not overwrite:
-            assert is_unsolved(container)
+            if not is_unsolved(container):
+                raise RuntimeError('Cannot overwrite the solution if `overwrite=False`.')
         self._set_container(container, value)
 
     def forward(

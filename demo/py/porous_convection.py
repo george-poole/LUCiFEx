@@ -98,7 +98,7 @@ def porous_advection_diffusion(
 
     if bcs is not None:
         ds, c_neumann = bcs.boundary_data(c.function_space, 'neumann')
-        F_neumann = sum([(1 / Ra) * v * cN * ds(i) for i, cN in c_neumann])
+        F_neumann = sum([-(1 / Ra) * v * cN * ds(i) for i, cN in c_neumann])
         forms.append(F_neumann)
 
     return forms

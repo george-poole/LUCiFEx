@@ -165,7 +165,7 @@ def _(
     
     mesh = f.function_space.mesh
     x_axes = grid(use_cache=True)(mesh, strict)
-    f_vertices = dofs(f, ('P', 1))
+    f_vertices = dofs(f, ('P', 1), try_identity=True)
 
     if jit is True:
         _mesh_func = lambda l: numba.typed.List(vertices(l))

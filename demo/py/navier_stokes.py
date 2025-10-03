@@ -1,7 +1,7 @@
 from typing import Callable
 
 from ufl import (
-    dx, ds, Form, FacetNormal, FacetNormal,
+    dx, ds, Form, FacetNormal,
     TrialFunction, TestFunction, Identity, sym,
 )
 from ufl.core.expr import Expr
@@ -16,7 +16,7 @@ from lucifex.solver import (
     BoundaryConditions, bvp_solver, ibvp_solver, eval_solver,
 )
 from lucifex.mesh import ellipse_obstacle_mesh
-from lucifex.sim import Simulation, configure_simulation
+from lucifex.sim import configure_simulation
 
 
 def ipcs_1(
@@ -26,18 +26,18 @@ def ipcs_1(
     rho: Constant,
     strain: Callable[[Function], Expr],
     stress: Callable[[Function, Function], Expr],
-    Dadv: FiniteDifference,
-    Dvisc: FiniteDifference,
-    Df: FiniteDifference = FE,
+    D_adv: FiniteDifference,
+    D_visc: FiniteDifference,
+    D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     n = FacetNormal(u.function_space.mesh)
     epsilon = strain(v)
-    sigma = stress(Dvisc(u), p[0])
+    sigma = stress(D_visc(u), p[0])
 
     F_dudt = rho * inner(v, DT(u, dt)) * dx
-    F_adv = rho * inner(v, Dadv(dot(u, nabla_grad(u)))) * dx
+    F_adv = rho * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
     F_visc = inner(epsilon, sigma) * dx
     F_ds = -inner(v, dot(n, sigma)) * ds
 
@@ -45,7 +45,7 @@ def ipcs_1(
 
     if f is not None:
         if isinstance(f, Series):
-            f = Df(f)
+            f = D_force(f)
         F_f = -inner(v, f) * dx
         forms.append(F_f)
 
@@ -75,7 +75,7 @@ def ipcs_3(
     u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
     F_dudt = rho * (1 / dt) * inner(v, (u_trial - u[1])) * dx
-    F_grad = inner(v, grad(p[1] - p[0])) * dx
+    F_grad = inner(v, grad(p[1]) - grad(p[0])) * dx
     return F_dudt, F_grad
 
 
@@ -151,4 +151,5 @@ def navier_stokes_obstacle(
     
     solvers = [dt_solver, *ns_solvers]
     namespace = [rho, mu]
-    return Simulation(solvers, t, dt, namespace)
+
+    return solvers, t, dt, namespace

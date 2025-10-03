@@ -77,7 +77,7 @@ class Simulation:
             try:
                 return self.namespace[key]
             except KeyError:
-                raise KeyError(f"{key} not found in simulation's namespace")
+                raise KeyError(f"{key} not found in simulation's namespace.")
         else:
             raise TypeError
         
@@ -85,18 +85,25 @@ class Simulation:
         for i in (self.solvers, self.t, self.dt, self.namespace_extras):
             yield i
 
-    def index(self, name: str) -> int:
+    def index(self, name: str) -> int | tuple[int, ...]:
+        indices = []
         for i, s in enumerate(self.solvers):
             if s.series.name == name:
-                return i
-        raise ValueError
+                return indices.append(i)
     
+        if len(indices) == 0:   
+            raise ValueError(f"{name} not found in simulation's solvers.")
+        elif len(indices) == 1:
+            return indices[0]
+        else:
+            return tuple(indices)
+
     def _map_to_solver_series(
         self,
         obj: dict[str | Iterable[str], T] | tuple[T, T] | T,
     ) -> dict[str, T]:
         if obj is None or isinstance(obj, T.__constraints__):
-            return {i.series.name: obj for i in self.solvers}
+            return {s.name: obj for s in self.series}
             
         if isinstance(obj, dict):
             d = {}
@@ -112,16 +119,24 @@ class Simulation:
         if isinstance(obj, tuple):
             assert len(obj) == 2
             obj_function, obj_constant = obj
-            function_dict = {i.series.name: obj_function for i in self.solvers if isinstance(i.series, FunctionSeries)}
-            constant_dict = {i.series.name: obj_constant for i in self.solvers if isinstance(i.series, ConstantSeries)}
+            function_dict = {s.name: obj_function for s in self.series if isinstance(s, FunctionSeries)}
+            constant_dict = {s.name: obj_constant for s in self.series if isinstance(s, ConstantSeries)}
             return function_dict | constant_dict
         
         raise MultipleDispatchTypeError(obj)
     
     @property
+    def series(self) -> list[FunctionSeries | ConstantSeries]:
+        """
+        `len(series) ≤ len(solvers)` because a series may be solved for by more 
+        than one solvers (e.g. in splitting or linearization schemes)
+        """
+        return list({s.series for s in self.solvers})
+    
+    @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
-        d.update({s.series.name: s.series for s in self.solvers})
+        d.update({s.name: s for s in self.series})
         d.update({f.name: f for f in self.namespace_extras if not isinstance(f, tuple)})
         d.update({f[0]: f[1] for f in self.namespace_extras if isinstance(f, tuple)})
         return d
@@ -133,7 +148,7 @@ class Simulation:
     @store_step.setter
     def store_step(self, value):
         if value is Ellipsis:
-            self._store_step = {s.series.name: s.series.store for s in self.solvers}
+            self._store_step = {s.name: s.store for s in self.series}
         else:
             self._store_step = self._map_to_solver_series(value)
             for name, store in self._store_step.items():
