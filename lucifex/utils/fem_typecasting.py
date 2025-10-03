@@ -10,7 +10,7 @@ from ufl import FiniteElement, MixedElement, VectorElement
 
 from .fem_utils import is_same_element, extract_mesh, is_vector, is_component_space, VectorError
 from .py_utils import MultipleDispatchTypeError, optional_lru_cache
-from .fem_mutation import interpolate_fem_function
+from .fem_mutation import set_fem_function
 
 
 def fem_function_space(
@@ -118,7 +118,7 @@ def fem_function(
             pass
 
     f = _create_fem_function(use_cache=use_cache)(fs, subspace_index, name)
-    interpolate_fem_function(f, value)
+    set_fem_function(f, value)
     return f
 
 
@@ -155,7 +155,7 @@ def fem_function_components(
         f = _create_fem_function_components(use_cache=use_cache)(fs, names)
         u = [ui.collapse() for ui in u.split()]
         for fi, ui in zip(f, u, strict=True):
-            interpolate_fem_function(fi, ui)
+            set_fem_function(fi, ui)
         return f
     else:
         # e.g. vector-valued u ∈ BDM

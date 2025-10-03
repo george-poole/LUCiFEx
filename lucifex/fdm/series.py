@@ -291,13 +291,13 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         overwrite: bool = False,
     ):
         if future:
-            attr = self._future
+            container = self._future
         else:
-            attr = self._present
+            container = self._present
 
         if not overwrite:
-            assert is_unsolved(attr)
-        self._set_container(attr, value)
+            assert is_unsolved(container)
+        self._set_container(container, value)
 
     def forward(
         self, 

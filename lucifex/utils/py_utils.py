@@ -23,7 +23,7 @@ class classproperty:
 
 P = ParamSpec("P")
 R = TypeVar('R')
-def copy_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
+def replicate_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
     def _decorator(dummy: Callable[[], None]):
         assert dummy() is None
         def _wrapper(*args, **kwargs):

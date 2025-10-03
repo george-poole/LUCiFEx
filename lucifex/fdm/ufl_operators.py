@@ -18,7 +18,7 @@ def unary_operator(ufl_func: Callable[[T], R]):
         assert dummy() is None
 
         # functools.update_wrapper(target, ufl_func) TODO __doc__ only?
-        def _inner(u):
+        def _inner(u, *a, **k):
             if u is Unsolved:
                 return Unsolved
             elif isinstance(u, Series):
@@ -29,7 +29,7 @@ def unary_operator(ufl_func: Callable[[T], R]):
                     name = None
                 return ExprSeries([ufl_func(ui) for ui in u], name)
             else:
-                return ufl_func(u)
+                return ufl_func(u, *a, **k)
         return _inner
     
     return _decorator
@@ -47,7 +47,7 @@ def binary_operator(ufl_func: Callable[[T0, T1], R]):
         assert target() is None
 
         # @functools.wraps(ufl_func) TODO __doc__ only?
-        def _inner(u, v):
+        def _inner(u, v, *a, **k):
             if u is Unsolved or v is Unsolved:
                 return Unsolved
         
@@ -61,11 +61,11 @@ def binary_operator(ufl_func: Callable[[T0, T1], R]):
                 case False, False:
                     return ufl_func(u, v)
                 case False, True:
-                    return ExprSeries([ufl_func(u, i) for i in v], name)
+                    return ExprSeries([ufl_func(u, i, *a, **k) for i in v], name)
                 case True, False:
-                    return ExprSeries([ufl_func(ui, v) for ui in u], name)
+                    return ExprSeries([ufl_func(ui, v, *a, **k) for ui in u], name)
                 case True, True:
-                    return ExprSeries([ufl_func(ui, vi) for ui, vi in zip(u, v)], name)
+                    return ExprSeries([ufl_func(ui, vi, *a, **k) for ui, vi in zip(u, v)], name)
 
         return _inner
 
@@ -82,6 +82,18 @@ def grad(): pass
 
 @unary_operator(ufl.curl)
 def curl(): pass
+
+
+@unary_operator(ufl.nabla_div)
+def nabla_div(): pass
+
+
+@unary_operator(ufl.nabla_grad)
+def nabla_grad(): pass
+
+
+@unary_operator(ufl.Dx)
+def Dx(): pass
 
 
 @binary_operator(ufl.inner)

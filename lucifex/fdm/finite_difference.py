@@ -9,6 +9,9 @@ from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 
 class FiniteDifference:
+
+    trial_default = True
+
     def __init__(
         self,
         indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
@@ -46,7 +49,7 @@ class FiniteDifference:
             name = f'FD{id(self)}'
         self._name = name
 
-        self._trial = True
+        self.trial = self.trial_default
     
     @property
     def coefficients(self) -> dict[int, float]:
@@ -90,7 +93,7 @@ class FiniteDifference:
             raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
         
         if trial is None:
-            trial = self._trial if isinstance(u, FunctionSeries) else False
+            trial = self.trial if isinstance(u, FunctionSeries) else False
 
         if trial:
             _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
@@ -98,14 +101,6 @@ class FiniteDifference:
             _u = lambda n: u[n]
 
         return sum((c * _u(n) for n, c in self.coefficients.items()))
-    
-    def __getitem__(
-        self,
-        trial: bool,
-    ) -> Self:
-        obj = FiniteDifference(self.coefficients, self.init, self.name)
-        obj._trial = trial
-        return obj
 
     def __repr__(self) -> str:
         return self.name
@@ -129,8 +124,9 @@ class FiniteDifferenceDerivative(FiniteDifference):
         self, 
         u: FunctionSeries,
         dt: ConstantSeries | Constant | None = None,
+        trial: bool | None = None,
     ) -> Expr:
-        du = super().__call__(u)
+        du = super().__call__(u, trial)
         if dt is None:
             return du
         if isinstance(dt, ConstantSeries):
@@ -335,9 +331,9 @@ def finite_difference_argwise(
             assert isinstance(expr, ExprSeries) and expr.relation
             expr_func, expr_args = expr.relation
         if isinstance(D_fdm, tuple):
-            is_trial = [i is trial for i in expr_args]
+            use_trial = [arg is trial for arg in expr_args]
             return expr_func(
-                *(D_i[is_trl](i) for is_trl, D_i, i in zip(is_trial, D_fdm, expr_args, strict=False)),
+                *(Di(arg, trl) for Di, arg, trl in zip(D_fdm, expr_args, use_trial, strict=False)),
             )
         else:
             return D_fdm(expr_func(*expr_args))

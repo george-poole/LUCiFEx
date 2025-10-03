@@ -16,7 +16,7 @@ from dolfinx.fem.petsc import create_matrix, create_vector
 from petsc4py import PETSc
 from slepc4py import SLEPc
 
-from ..utils import Perturbation, copy_callable, MultipleDispatchTypeError, dofs_limits_corrector, fem_function_space
+from ..utils import Perturbation, replicate_callable, MultipleDispatchTypeError, dofs_limits_corrector, fem_function_space
 from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
 
 from .bcs import BoundaryConditions
@@ -73,6 +73,7 @@ class BoundaryValueProblem:
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = False,
+        overwrite: bool = False,
     ) -> None:
         
         if isinstance(forms, Form):
@@ -189,6 +190,7 @@ class BoundaryValueProblem:
         self._use_partition = use_partition
         self._cache_matrix = cache_matrix
         self._future = future
+        self._overwrite = overwrite
 
     @classmethod
     def from_forms_func(
@@ -202,6 +204,7 @@ class BoundaryValueProblem:
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = False,
+        overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
     ):
         """
@@ -228,20 +231,23 @@ class BoundaryValueProblem:
                 dofs_corrector,
                 cache_matrix, 
                 use_partition,
-                future
+                future,
+                overwrite,
             )
         return _create
 
     def solve(
         self,
         future: bool | None = None,
-        overwrite: bool = False,
+        overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] | None = None,
         use_partition: tuple[bool, bool] | None = None,
     ) -> None:
         """Mutates the data structures `self.solution` and `self.series` containing the solution"""
         if future is None:
             future = self._future
+        if overwrite is None:
+            overwrite = self._overwrite
         if cache_matrix is None:
             cache_matrix = self.cache_matrix
         if use_partition is None:
@@ -392,11 +398,24 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = True,
+        overwrite: bool = False,
     ) -> None:
         if ics is not None:
             solution.initialize_from_ics(ics)
         
-        super().__init__(solution, forms, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition, future)
+        super().__init__(
+            solution, 
+            forms, 
+            bcs, 
+            petsc, 
+            jit, 
+            ffcx, 
+            dofs_corrector, 
+            cache_matrix, 
+            use_partition, 
+            future,
+            overwrite,
+        )
 
         if forms_init is not None:
             self._init = InitialBoundaryValueProblem(
@@ -424,6 +443,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = True,
+        overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
     ):
         """
@@ -454,6 +474,8 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                     return arg
 
             order = finite_difference_order(*args, *kwargs.values())
+            if order is None:
+                raise ValueError('No `FiniteDifference` arguments from which to deduce order.')
             if order > 1:
                 args_init = [_init(i) for i in args]
                 kwargs_init = {k: _init(v) for k, v in kwargs.items()}
@@ -462,8 +484,22 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             else:
                 forms_init = None
                 n_init = None
-            return cls(solution, forms, forms_init, n_init, ics, bcs, petsc, jit, ffcx, 
-                       dofs_corrector, cache_matrix, use_partition, future)
+            return cls(
+                solution, 
+                forms, 
+                forms_init,
+                n_init, 
+                ics, 
+                bcs, 
+                petsc, 
+                jit, 
+                ffcx, 
+                dofs_corrector, 
+                cache_matrix, 
+                use_partition, 
+                future, 
+                overwrite,
+            )
         return _create
 
     @property
@@ -495,10 +531,24 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = True,
-        
+        overwrite: bool = False,
     ) -> None:
         bcs = None
-        super().__init__(uxt, forms, forms_init, ics, bcs, petsc, jit, ffcx, dofs_corrector, cache_matrix, use_partition, future)
+        super().__init__(
+            uxt,
+            forms, 
+            forms_init, 
+            ics, 
+            bcs, 
+            petsc, 
+            jit, 
+            ffcx, 
+            dofs_corrector, 
+            cache_matrix, 
+            use_partition, 
+            future,
+            overwrite,
+        )
 
     @classmethod
     def from_forms_func(
@@ -512,6 +562,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         use_partition: tuple[bool, bool] = (False, False),
         future: bool = True,
+        overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
     ):
         bcs = None
@@ -527,6 +578,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             use_partition,
             future,
             solution,
+            overwrite,
         )
 
 
@@ -563,6 +615,7 @@ class EigenvalueProblem:
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
         future: bool = False,
+        overwrite: bool = False,
     ) -> None:
         
         if slepc is None:
@@ -625,6 +678,7 @@ class EigenvalueProblem:
         self._eigenseries = eigenseries
         self._cache_matrix = cache_matrix
         self._future = future
+        self._overwrite = overwrite
 
     @classmethod
     def from_forms_func(
@@ -636,6 +690,7 @@ class EigenvalueProblem:
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
         future: bool = False,
+        overwrite: bool = False,
         solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int] | None = None,
     ):
         def _create(
@@ -659,6 +714,7 @@ class EigenvalueProblem:
                 ffcx,
                 cache_matrix,
                 future,
+                overwrite,
             )
 
         return _create
@@ -666,11 +722,13 @@ class EigenvalueProblem:
     def solve(
         self,
         future: bool | None = None,
-        overwrite: bool = False,
+        overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] | None = None,
     ) -> None:
         if future is None:
             future = self._future
+        if overwrite is None:
+            overwrite = self._overwrite
         if cache_matrix is None:
             cache_matrix = self.cache_matrix
         if not isinstance(cache_matrix, tuple):
@@ -737,18 +795,18 @@ class EigenvalueProblem:
         return self._eigenseries
         
     
-@copy_callable(BoundaryValueProblem.from_forms_func)
+@replicate_callable(BoundaryValueProblem.from_forms_func)
 def bvp_solver():
     pass
 
-@copy_callable(InitialBoundaryValueProblem.from_forms_func)
+@replicate_callable(InitialBoundaryValueProblem.from_forms_func)
 def ibvp_solver():
     pass
 
-@copy_callable(InitialValueProblem.from_forms_func)
+@replicate_callable(InitialValueProblem.from_forms_func)
 def ivp_solver():
     pass
 
-@copy_callable(EigenvalueProblem.from_forms_func)
+@replicate_callable(EigenvalueProblem.from_forms_func)
 def evp_solver():
     pass

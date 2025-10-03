@@ -1,5 +1,3 @@
-""" Module for creating line, colormap and scatter plots """
-
 from .anim import create_animation
 from .bar import plot_bar
 from .colormap import plot_colormap, plot_contours

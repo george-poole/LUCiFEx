@@ -163,12 +163,6 @@ def tex(
     label: str | float | int | None,
     escape: str = "/",
 ) -> str:
-    """Figure titles and axis labels are rendered in
-    TeX by prepending and appending `$`. Mathematical symbols
-    listed in `MATH_SYMBOLS` are prepended with a backslash.
-    Otherwise, write e.g. `\\symbol` to provide the backslash.
-    For plain text, write e.g. `\\text{...}`."""
-
     if isinstance(label, (float, int)):
         return f"${label}$"
 

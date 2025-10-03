@@ -8,7 +8,7 @@ from ufl.restriction import Restricted
 from ufl.core.expr import Expr
 
 from ..fdm.ufl_operators import inner
-from ..utils import set_value, copy_callable, SpatialMarkerTypes, as_dofs_setter
+from ..utils import set_value, replicate_callable, SpatialMarkerTypes, as_dofs_setter
 from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 
@@ -27,6 +27,7 @@ class EvaluationProblem(Generic[S, T]):
         solution: S | T,
         evaluation: Callable[[], Any],
         future: bool = False,
+        overwrite: bool = False,
     ) -> None:
         if isinstance(solution, LUCiFExConstant):
             uh = solution
@@ -47,6 +48,7 @@ class EvaluationProblem(Generic[S, T]):
         self._solution = uh
         self._evaluation = evaluation
         self._future = future
+        self._overwrite = overwrite
 
     @classmethod
     def from_function(
@@ -54,12 +56,13 @@ class EvaluationProblem(Generic[S, T]):
         solution: S | T, 
         func: Callable[P, Any],
         future: bool = False,
+        overwrite: bool = False,
     ):
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: func(*args, **kwargs), future)
+            return cls(solution, lambda: func(*args, **kwargs), future, overwrite)
         return _create
 
     @property
@@ -70,9 +73,15 @@ class EvaluationProblem(Generic[S, T]):
     def solution(self) -> T:
         return self._solution
 
-    def solve(self, future: bool | None = None, overwrite: bool = False) -> None:
+    def solve(
+        self, 
+        future: bool | None = None, 
+        overwrite: bool | None = None,
+    ) -> None:
         if future is None:
             future = self._future
+        if overwrite is None:
+            overwrite = self._overwrite
         set_value(self._solution, self._evaluation())
         self._series.update(self._solution, future, overwrite)
 
@@ -222,6 +231,7 @@ class ProjectionProblem(BoundaryValueProblem):
         ffcx: OptionsFFCX | dict | None = None,
         dofs_corrector: Callable[[Function], None] | None = None,
         future: bool = False,
+        overwrite: bool = False,
     ):
 
         v = TestFunction(solution)
@@ -234,8 +244,19 @@ class ProjectionProblem(BoundaryValueProblem):
         if isinstance(bcs, Iterable):
             bcs = BoundaryConditions(*bcs)
 
-        super().__init__(solution, forms, bcs, petsc, jit, ffcx, dofs_corrector, 
-                         cache_matrix=True, use_partition=(False, False), future=future)
+        super().__init__(
+            solution, 
+            forms, 
+            bcs, 
+            petsc, 
+            jit, 
+            ffcx, 
+            dofs_corrector, 
+            cache_matrix=True, 
+            use_partition=(False, False), 
+            future=future, 
+            overwrite=overwrite,
+        )
 
     @classmethod
     def from_function(
@@ -247,14 +268,25 @@ class ProjectionProblem(BoundaryValueProblem):
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         dofs_corrector: Callable[[Function], None] | None = None,
-        future: bool = False
+        future: bool = False,
+        overwrite: bool = False,
     ):
         """from function"""
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, expression_func(*args, **kwargs), bcs, petsc, jit, ffcx, dofs_corrector, future)
+            return cls(
+                solution, 
+                expression_func(*args, **kwargs), 
+                bcs, 
+                petsc, 
+                jit, 
+                ffcx, 
+                dofs_corrector,
+                future,
+                overwrite,
+            )
         return _create
         
 
@@ -329,30 +361,37 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, expression_func(*args, **kwargs), dofs_corrector, jit, ffcx, future)
+            return cls(
+                solution, 
+                expression_func(*args, **kwargs), 
+                dofs_corrector, 
+                jit, 
+                ffcx, 
+                future,
+            )
         return _create
 
 
-@copy_callable(EvaluationProblem[ConstantSeries | FunctionSeries, LUCiFExConstant | LUCiFExFunction].from_function)
+@replicate_callable(EvaluationProblem[ConstantSeries | FunctionSeries, LUCiFExConstant | LUCiFExFunction].from_function)
 def eval_solver():
     pass
 
-@copy_callable(CellIntegrationProblem.from_function)
+@replicate_callable(CellIntegrationProblem.from_function)
 def dx_solver():
     pass
 
-@copy_callable(FacetIntegrationProblem.from_function)
+@replicate_callable(FacetIntegrationProblem.from_function)
 def ds_solver():
     pass
 
-@copy_callable(InteriorFacetIntegrationProblem.from_function)
+@replicate_callable(InteriorFacetIntegrationProblem.from_function)
 def dS_solver():
     pass
 
-@copy_callable(ProjectionProblem.from_function)
+@replicate_callable(ProjectionProblem.from_function)
 def projection_solver():
     pass
 
-@copy_callable(InterpolationProblem.from_function)
+@replicate_callable(InterpolationProblem.from_function)
 def interpolation_solver():
     pass

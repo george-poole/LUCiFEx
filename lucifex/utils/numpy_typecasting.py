@@ -73,7 +73,8 @@ def _(f: Function):
 
     Note that this is suitable on both structured and unstructured meshes.
     """
-    return dofs(f, ('P', 1))
+    return dofs(f, ('P', 1), try_identity=True)
+
 
 triangulation = optional_lru_cache(_triangulation)
 

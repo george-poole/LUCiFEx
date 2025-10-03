@@ -15,14 +15,14 @@ from .py_utils import StrSlice, as_slice, MultipleDispatchTypeError
 # TODO @overload
 def set_fem_function(
     f: Function,
-    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float],
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """Mutates `f`, does not mutate `value`"""
     if isinstance(dofs_indices, StrSlice):
         dofs_indices = as_slice(dofs_indices)
     elif isinstance(dofs_indices, Iterable):
-        dofs_indices = np.array(dofs_indices), np.asarray
+        dofs_indices = np.array(dofs_indices)
     return _set_fem_function(value, f, dofs_indices)
 
 
@@ -76,7 +76,7 @@ def _(value, u: Function, indices: np.ndarray | None):
 
 def interpolate_fem_function(
     f: Function,
-    value: Function | Constant | Callable[[np.ndarray], np.ndarray] | Expression | Expr | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
 ) -> None:
     """Mutates `f` by calling its `interpolate` method"""
     return _interpolate_fem_function(value, f)

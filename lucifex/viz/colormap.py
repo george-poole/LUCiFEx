@@ -24,10 +24,11 @@ def _plot_colormap(
     ax: Axes, 
     f: Function,
     colorbar: bool | tuple[float, float] = True,
+    structured: bool | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> None:
-    """Plots a colormap of a scalar-valued function"""
+    """Plots colormap of a scalar-valued function"""
     ...
 
 
@@ -37,11 +38,12 @@ def _plot_colormap(
     ax: Axes, 
     expr: Expr,
     colorbar: bool | tuple[float, float] = True,
+    structured: bool | None = None,
     use_cache: bool = False,
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
-    """Plots a colormap of a scalar-valued expression"""
+    """Plots colormap of a scalar-valued expression"""
     ...
 
 
@@ -49,7 +51,7 @@ def _plot_colormap(
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
-    fxy: tuple[np.ndarray, np.ndarray, np.ndarray],
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     colorbar: bool | tuple[float, float] = True,
     structured: bool | None = None,
     **kwargs,
@@ -79,6 +81,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
+    structured: bool | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> tuple[Figure, Axes]:
@@ -87,20 +90,22 @@ def _(
 
     mesh = f.function_space.mesh
     cell_type = mesh.topology.cell_name()
-    structured = is_structured(use_cache=True)(mesh)
+
+    if structured is None:
+        structured = is_structured(use_cache=True)(mesh)
 
     match cell_type, structured:
         case CellType.TRIANGLE, False:
             trigl = triangulation(use_cache=True)(f.function_space.mesh)
-            x, y = trigl.x, trigl.y
-            f_np = triangulation(use_cache=use_cache)(f)
+            f_tri = triangulation(use_cache=use_cache)(f)
+            xyz = (trigl, f_tri)
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
             x, y = grid(use_cache=True)(f.function_space.mesh)
-            f_np = grid(use_cache=use_cache)(f)
+            f_grid = grid(use_cache=use_cache)(f)
+            xyz = (x, y, f_grid)
         case CellType.QUADRILATERAL, False:
             raise NotImplementedError(
-                """ 
-            Plotting functions on unstructured quadrilateral meshes 
+                """ Plotting colormaps on unstructured quadrilateral meshes 
             is not supported by the `matplotlib` backend. Consider using
             `pyvista` instead. """
             )
@@ -108,7 +113,7 @@ def _(
             raise ValueError
 
     return __plot_colormap(
-        (x, y, f_np), fig, ax, colorbar, structured, **kwargs
+        xyz, fig, ax, colorbar, structured, **kwargs
     )
 
 
@@ -118,6 +123,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
+    structured: bool | None = None,
     use_cache: bool = False,
     mesh: Mesh | None = None,
     **kwargs,
@@ -130,20 +136,28 @@ def _(
         fig, 
         ax,
         colorbar,
+        structured,
         **kwargs
     )
 
 
 @__plot_colormap.register(tuple)
 def _(
-    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
     structured: bool | None = None,
     **kwargs,
 ):
-    x, y, z = xyz
+    triang_available = len(xyz) == 2
+
+    if triang_available:
+        tri, z = xyz
+        assert isinstance(tri, Triangulation)
+        x, y = tri.x, tri.y
+    else:
+        x, y, z = xyz
 
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
@@ -152,13 +166,15 @@ def _(
 
     filter_kwargs(set_axes)(ax, **_kwargs)
 
-    if structured is None:
-        structured = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
-
-    if not structured:
-        cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
+    if triang_available:
+        cmap = filter_kwargs(ax.tripcolor)(tri, z, **_kwargs)
     else:
-        cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
+        if structured is None:
+            structured = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
+        if not structured:
+            cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
+        else:
+            cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
 
     if colorbar is not False:
         divider = make_axes_locatable(ax)
@@ -177,34 +193,33 @@ plot_colormap = optional_fig_ax(_plot_colormap)
 @optional_ax
 def plot_contours(
     ax: Axes,
-    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[np.ndarray, Triangulation],
+    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     levels: Iterable[float] | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> None:
     """Plots contours of a scalar-valued function"""
-
     if isinstance(f, tuple):
+        triang_available = len(f) == 2
+        
+        if triang_available:
+            tri, z = f
+            assert isinstance(tri, Triangulation)
+            x, y = tri.x, tri.y
+        else:
+            x, y, z = f
+
         _plt_kwargs = dict(linestyles="solid", color="black", linewidths=LW)
         _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
-        match f:
-            case fxy, trigl:
-                _axs_kwargs.update(x_lims=trigl.x, y_lims=trigl.y)
-                tri = True
-            case fxy, x, y:
-                _axs_kwargs.update(x_lims=x, y_lims=y)
-                tri = False
-            case _:
-                raise ValueError
-
+        _axs_kwargs.update(x_lims=x, y_lims=y)
         _kwargs = _plt_kwargs | _axs_kwargs
         _kwargs.update(**kwargs)
         filter_kwargs(set_axes)(ax, **_kwargs)
 
-        if tri:
-            filter_kwargs(ax.tricontour, ContourSet)(trigl, fxy, levels=levels, **_kwargs)
+        if triang_available:
+            filter_kwargs(ax.tricontour, ContourSet)(tri, z, levels=levels, **_kwargs)
         else:
-            filter_kwargs(ax.contour, ContourSet)(x, y, fxy.T, levels=levels, **_kwargs)
+            filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
 
     else:
         structured = is_structured(use_cache=use_cache)(f.function_space.mesh)

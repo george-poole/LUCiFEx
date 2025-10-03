@@ -64,7 +64,7 @@ def streamfunction_velocity(psi: Function) -> Expr:
     return as_matrix([[0, 1], [-1, 0]]) * grad(psi)
 
 
-def advection_diffusion(
+def porous_advection_diffusion(
     c: FunctionSeries,
     dt: Constant,
     phi: Series | Function | Expr,
@@ -87,7 +87,7 @@ def advection_diffusion(
 
     match D_adv:
         case D_adv_u, D_adv_c:
-            adv = (1 / phi) * inner(D_adv_u[False](u), grad(D_adv_c(c)))
+            adv = (1 / phi) * inner(D_adv_u(u, False), grad(D_adv_c(c)))
         case D_adv:
             adv = (1 / phi) * D_adv(inner(u, grad(c)))
     F_adv = v * adv * dx
@@ -219,7 +219,7 @@ def create_simulation(
 
     # transport solver
     c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
+    c_solver = ibvp_solver(porous_advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
         c, dt, phi, u, Ra, d[0] if isinstance(d, ExprSeries) else d, D_adv, D_diff,
     )
 

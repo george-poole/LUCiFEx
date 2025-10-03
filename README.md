@@ -12,7 +12,7 @@ A time-dependent finite element function
 
 $$u(\textbf{x},t)\approx\sum_ju_j(t)\xi_j(\textbf{x})$$
 
-$$u(\textbf{x}, t\leq t^n)\approx
+$$u(\textbf{x}, t\leq t^{n+1})\approx
 \begin{bmatrix}
 u^{n+1}(\textbf{x}) \\
 u^n(\textbf{x}) \\
@@ -20,17 +20,15 @@ u^{n-1}(\textbf{x}) \\
 \vdots
 \end{bmatrix}$$
 
-$$u^n(\textbf{x})=\sum_ju_j^n\xi_j(\textbf{x})$$
-
-is represented by the `FunctionSeries` object
+where $u^n(\textbf{x})=\sum_ju_j^n\xi_j(\textbf{x})$ and $u_j^n\approx u_j(t^n)$ is represented by the `FunctionSeries` object
 
 ```python
 u = FunctionSeries(function_space, 'u', order, store)
 ```
 
-and its past, present and future values are accessed as
+and its past, present and future values $u^{n-1}$, $u^n$, $u^{n+1}$ are accessed as
 ```
-u[-1], u[0], u[1]
+u[-1], u[0], u[+1]
 ```
 
 If held in memory in accordance with the `store` parameter passed to `FunctionSeries`, the sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
@@ -57,7 +55,7 @@ which is equivalent to manually writing out
 
 **Unified problem-solving interface**
 
-Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Simple expressions are evaluated by solving an `EvaluationProblem`, which has subclasses `CellIntegrationProblem` and `FacetIntegrationProblem` for evaluating integrals.  Algebraic equations (linear or linearized) can be solved as a `ProjectionProblem`. 
+Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Algebraic expressions of finite element functions can be evaluated by solving a `ProjectionProblem` or an `InterpolationProblem`. Integral expressions are evaluated by solving a `CellIntegrationProblem` for area/volume intetrals or a `FacetIntegrationProblem` for line/surface integrals in 2D/3D.  Simple sumerical expressions may be evaluated by solving an `EvaluationProblem`. 
 
 **Time-dependent boundary conditions**
 
@@ -124,7 +122,7 @@ Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for 
 
 ## Documentation
 
-See `demo/` for notebooks and scripts, which are divided into three categories: `A` (application-focussed with examples of PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent problems in fluid mechanics) and `T` (technical details and testing of the `lucifex` package).
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (application-focussed with examples of PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent problems in fluid mechanics) and `T` (technical details and testing of the `lucifex` package).
 
 ## Further work
 

@@ -155,7 +155,10 @@ class BoundaryConditions:
         """
         
         v = TestFunction(function_space)
-        boundary_types = (BoundaryType.NEUMANN, BoundaryType.ROBIN, BoundaryType.NATURAL)
+        boundary_types = (
+            BoundaryType.NEUMANN, BoundaryType.ROBIN, 
+            BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
+        )
         ds, *boundary_data = self.boundary_data(function_space, *boundary_types)
 
         forms = []
