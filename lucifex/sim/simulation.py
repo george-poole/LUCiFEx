@@ -232,6 +232,10 @@ def configure_simulation(
         simulation_func_params = signature(simulation_func).parameters
 
         @overload
+        def _(*args: P.args, **kwargs: P.kwargs) -> Simulation:
+            ...
+
+        @overload
         def _(
             *,
             petsc: dict | OptionsPETSc = ...,
@@ -247,10 +251,6 @@ def configure_simulation(
             dir_label: str | None = ...,
             dir_timestamp: bool = ...,
         ) -> Callable[P, Simulation]:
-            ...
-
-        @overload
-        def _(*args: P.args, **kwargs: P.kwargs) -> Simulation:
             ...
 
         @functools.wraps(simulation_func)

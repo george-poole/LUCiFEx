@@ -1,4 +1,7 @@
-from typing import Literal, Iterable, Callable, ParamSpec, Concatenate, TypeVar
+from typing import (
+    Literal, Iterable, Callable, ParamSpec, 
+    Concatenate, TypeVar, Protocol, Generic, Any,
+)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +9,16 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from dolfinx.fem import Function
+
+
+T = TypeVar('T')
+class FuncAnimationFromSeries(Protocol, Generic[T]):
+    def __call__(
+        self, 
+        arg_series: list[T],
+        **kwargs_series: list[Any],
+    ) -> FuncAnimation:
+        ...
 
 
 P = ParamSpec('P')
@@ -16,7 +29,7 @@ def create_animation(
     millisecs: int = 100,
     anim_kwargs: dict | None = None,
     **plt_kwargs,
-) -> Callable[Concatenate[list[T], P], FuncAnimation] |  Callable[..., FuncAnimation]:
+) -> FuncAnimationFromSeries[T]:
     """
     To display `anim: FunctionAnimation` in an IPython environment
     ```
@@ -24,22 +37,21 @@ def create_animation(
     HTML(anim.to_html5_video())
     ```
     """
-
     def _(
-        series: list[T],
-        **series_kwargs,
+        arg_series: list[T],
+        **kwargs_series: list[Any],
     ) -> FuncAnimation:
-        n_snapshots = len(series)
+        n_snapshots = len(arg_series)
 
         fig, ax = plt.subplots()
 
         def _snapshot(n: int) -> tuple[Figure, Axes]:
-            _series_kwargs = {k: v[n] for k, v in series_kwargs.items()}
+            __kwargs_series = {k: v[n] for k, v in kwargs_series.items()}
             plot_func(
                 fig,
                 ax,
-                series[n],
-                **_series_kwargs,
+                arg_series[n],
+                **__kwargs_series,
                 **plt_kwargs
             )
             return fig, ax
