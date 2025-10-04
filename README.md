@@ -6,6 +6,19 @@ Development has been primarily motivated by the numerical study of 2D convection
 
 ![LUCiFEx](demo/figures/A12_convection_onset_highres.png)
 
+## Documentation
+
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid mechanics examples shown in `demo` include:
+* Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$ or )
+* Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
+* Stokes equation
+* transport of solute and/or heat coupled to fluid flow
+* stabilization methods for advection-dominated transport equations
+* classic instability problems such as Rayleigh-Bénard convection and Saffman-Taylor fingering
+* perturbations for the initial conditions of instability problems
+* simulations on both Cartesian and non-Cartesian domains
+
+
 ## What does LUCiFEx do?
 
 **Time-dependent quantities**
@@ -39,6 +52,8 @@ u.series
 u.time_series
 ```
 
+Time-dependent constants and expressions are similarly implemented by `ConstantSeries` and `ExprSeries`.
+
 **Finite differences in time**
 
 `FiniteDifference` operators act on time-dependent quantities to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
@@ -63,7 +78,11 @@ Partial differential equations (linear or linearized) to be solved can be of typ
 
 Dirichlet, Neumann, Robin and periodic conditions are specified by `BoundaryConditions`. The boundary condition's value of type `Function`, `Constant` or `Expr` can be updated in the time-stepping loop to implement a time-dependent bundary condition. 
 
-**Running simulations**
+**Abstraction and composition**
+
+The design of `lucifex` encourages where possible abstraction over a PDE's domain, initial conditions, boundary conditions and constitutive relations. An emphasis on functions helps to create code that is flexible and reusable.
+
+**Time-dependent simulation**
 
 A time-dependent simulation is in effect a sequence of (linear or linearized) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, a simulation object is defined as
 
@@ -89,14 +108,14 @@ to create a command line interface into which arguments for configuring, creatin
 
 **Postprocessing**
 
-The `grid` function converts structured meshes and finite element functions defined on structured meshes into `numpy` arrays in order to facilitate further postprocessing within the ecosystem of scientific Python packages.
+The `grid` function converts Cartesian meshes and finite element functions defined on Cartesian meshes into `numpy` arrays in order to facilitate further postprocessing within the ecosystem of scientific Python packages (e.g. `scipy` and `matplotlib`).
 
 ```
-x, y = grid(mesh)
-uxy = grid(u)
+x_axis, y_axis = grid(mesh)
+u_grid = grid(u)
 ```
 
-The decorator functions `postprocess` and `co_postprocess` enable functions acting on saved simulation data (e.g. to create a plot) to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and write repetitive I/O routines. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written with the same name and to the same filename).
+Applying the decorator functions `postprocess` and `co_postprocess` to functions acting on saved simulation data (e.g. to create a plot) enables them to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and write repetitive I/O routines. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written to the same filename with the same object name).
 
 ## Installation (macOS)
 
@@ -104,15 +123,15 @@ Please note that `LUCiFEx` is a research code still under active development.
 
 `git clone https://github.com/george-poole/LUCiFEx.git`
 
-See `conda` directory for files to recreate Conda environment. To create Conda environment named `lucifex`, do one of
+See `conda` directory for files to recreate Conda environment. To create a Conda environment named `lucifex`, first do `conda create -n lucifex` followed `conda activate lucifex` and then one of
 
-* `conda create -n lucifex` <br>
-`conda install --file conda_explicit.txt` <br>
+* `conda install --file conda_explicit.txt` <br>
 (requirements file created by `conda list --explicit > conda_explicit.txt`)
 
-* `conda create -n lucifex` <br>
-`conda install x --file conda.txt` <br>
+* `conda install x --file conda.txt` <br>
 (requirements file created by `conda list > conda.txt`)
+
+or do
 
 * `conda env create --name lucifex -f conda_from_history.yml` <br>
 (environment file created by `conda env export --from-history > conda_from_history.yml`)
@@ -121,10 +140,6 @@ See `conda` directory for files to recreate Conda environment. To create Conda e
 (environment file created by `conda env export > conda.yml`)
 
 Finally `conda activate lucifex` and `pip install .` (or `pip install -e .` for editable mode).
-
-## Documentation
-
-See `demo` for notebooks and scripts, which are divided into three categories: `A` (application-focussed with examples of PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent problems in fluid mechanics) and `T` (technical details and testing of the `lucifex` package).
 
 ## Further work
 

@@ -8,26 +8,13 @@ def annulus_model(
     Rinner: float,
     Router: float, 
     centre: tuple[float, float] = (0.0, 0.0),
-    structured: bool = False, #TODO
 ) -> gmsh.model:
     
     centre = (*centre, 0)
     dim = 2
-
-    if structured:
-        raise NotImplementedError  #TODO
-    else:
-        # NOTE alternative creation of `annulus`
-        # c_inner = gmsh.model.occ.addCircle(*centre, Rinner)
-        # c_outer = gmsh.model.occ.addCircle(*centre, Router)
-        # curve_inner = gmsh.model.occ.addCurveLoop([c_inner])
-        # curve_outer = gmsh.model.occ.addCurveLoop([c_outer])
-        # annulus = gmsh.model.occ.addPlaneSurface([curve_outer, curve_inner])
-        # gmsh.model.occ.synchronize() 
-        disk_outer = gmsh.model.occ.add_disk(*centre, Router, Router)
-        disk_inner = gmsh.model.occ.add_disk(*centre, Rinner, Rinner)
-        gmsh.model.occ.cut([(dim, disk_outer)], [(dim, disk_inner)])
-    
+    disk_outer = gmsh.model.occ.add_disk(*centre, Router, Router)
+    disk_inner = gmsh.model.occ.add_disk(*centre, Rinner, Rinner)
+    gmsh.model.occ.cut([(dim, disk_outer)], [(dim, disk_inner)])
     return gmsh.model
 
 
@@ -36,6 +23,16 @@ def annulus_model(
 )
 def annulus_mesh():
     pass
+
+
+def arc_model(
+    radius: float,
+    angle: float | tuple[float, float], 
+) -> gmsh.model:
+    if not isinstance(angle, tuple):
+        angle = (0.0, angle)
+
+    
 
 
 def ellipse_model(

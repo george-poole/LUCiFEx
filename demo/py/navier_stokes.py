@@ -84,18 +84,22 @@ def ipcs_3(
     write_step=None,
 )
 def navier_stokes_obstacle(
+    # domain
     Lx: float,
     Ly: float,
     r: float,
     c: tuple[float, float],
     dx: float,
-    dt_max: float,
-    dt_min: float,
-    cfl_courant: float,
+    # physical
     rho: float,
     mu: float,
     p_in: float,
+    # time step
+    dt_max: float,
+    dt_min: float,
+    cfl_courant: float,
     scheme: str,
+    # time discretization
     Dadv: FiniteDifference,
     Dvisc: FiniteDifference,
 ):

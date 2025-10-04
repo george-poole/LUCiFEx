@@ -15,7 +15,7 @@ import numpy as np
 from .enum_types import CellType
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
-from .mesh_utils import vertices, coordinates, axes, is_structured
+from .mesh_utils import vertices, coordinates, axes, is_cartesian
 from .fem_utils import is_scalar, ScalarError
 
 
@@ -271,7 +271,7 @@ def vertex_to_grid_index_map(
 ) -> dict[int, int | tuple[int, ...]]:
     """LRU-cached and JIT-compiled under the hood. JIT-compilation
     requires a `numba` installation."""
-    if not is_structured(mesh):
+    if not is_cartesian(mesh):
         raise ValueError("Mesh must be structured")
     return _vertex_to_grid_index_map(mesh, jit)
 

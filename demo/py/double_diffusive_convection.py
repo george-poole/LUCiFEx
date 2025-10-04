@@ -75,6 +75,7 @@ def navier_stokes_double_diffusion(
     dt_max: float = 0.5,
     dt_min: float = 0.0,
     cfl_courant: float = 0.75,
+    # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_force_ns: FiniteDifference = FE,

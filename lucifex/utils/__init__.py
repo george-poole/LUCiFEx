@@ -42,7 +42,7 @@ from .mesh_utils import(
     cell_aspect_ratios,
     n_cells,
     n_entities,
-    is_structured,
+    is_cartesian,
 )
 from .fem_mutation import (set_fem_constant, set_fem_function, 
                            interpolate_fem_function, set_value)

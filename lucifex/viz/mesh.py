@@ -8,7 +8,7 @@ from dolfinx.mesh import Mesh
 from ..mesh.cartesian import CellType
 from ..utils import (
     coordinates,
-    is_structured,
+    is_cartesian,
     quadrangulation,
     triangulation,
 )
@@ -52,9 +52,9 @@ def _plot_rectangle_mesh(
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
     cell_type = mesh.topology.cell_name()
-    structured = is_structured(mesh)
+    cartesian = is_cartesian(mesh)
 
-    match cell_type, structured:
+    match cell_type, cartesian:
         case CellType.TRIANGLE, True | False:
             _plot_triangulation(ax, mesh, title, **plt_kwargs)
         case CellType.QUADRILATERAL, True:

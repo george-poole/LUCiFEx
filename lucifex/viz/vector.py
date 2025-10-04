@@ -6,7 +6,7 @@ from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ..utils import is_vector, grid, fem_function, fem_function_components, is_structured
+from ..utils import is_vector, grid, fem_function, fem_function_components, is_cartesian
 from .utils import set_axes, optional_ax
 
 
@@ -32,7 +32,7 @@ def plot_quiver(
     else:
         fx, fy = (fem_function(('P', 1), i) for i in f)
 
-    if not is_structured(fx.function_space.mesh):
+    if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Quiver plots on non-structured meshes are not supported.")
     
     x, y = grid(use_cache=True)(fx.function_space.mesh)
@@ -86,7 +86,7 @@ def plot_streamlines(
     else:
         fx, fy = (fem_function(('P', 1), i) for i in f)
 
-    if not is_structured(fx.function_space.mesh):
+    if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Streamline plots on non-structured meshes are not supported.")
 
     x, y = grid(use_cache=True)(fx.function_space.mesh)

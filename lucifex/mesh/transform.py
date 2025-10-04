@@ -3,7 +3,7 @@ from typing import Callable, Iterable
 import dolfinx as dfx
 import numpy as np
 
-from ..utils import is_structured
+from ..utils import is_cartesian
 from .refine import is_simplex_mesh
 from .utils import overload_mesh
 
@@ -19,7 +19,7 @@ def transform(
     
     if strict:
         assert not is_simplex_mesh(mesh)
-        assert is_structured(mesh)
+        assert is_cartesian(mesh)
 
     def _transform(x):
         x_copy = np.copy(x)

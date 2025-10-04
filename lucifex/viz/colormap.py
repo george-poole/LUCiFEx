@@ -12,7 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 
 from ..mesh.cartesian import CellType
-from ..utils import (is_scalar, grid, triangulation, fem_function, is_structured, 
+from ..utils import (is_scalar, grid, triangulation, fem_function, is_cartesian, 
                      filter_kwargs, MultipleDispatchTypeError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax
@@ -24,7 +24,7 @@ def _plot_colormap(
     ax: Axes, 
     f: Function,
     colorbar: bool | tuple[float, float] = True,
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> None:
@@ -38,7 +38,7 @@ def _plot_colormap(
     ax: Axes, 
     expr: Expr,
     colorbar: bool | tuple[float, float] = True,
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     use_cache: bool = False,
     mesh: Mesh | None = None,
     **kwargs,
@@ -53,7 +53,7 @@ def _plot_colormap(
     ax: Axes, 
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     colorbar: bool | tuple[float, float] = True,
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     **kwargs,
 ) -> None:
     ...
@@ -81,7 +81,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> tuple[Figure, Axes]:
@@ -91,10 +91,10 @@ def _(
     mesh = f.function_space.mesh
     cell_type = mesh.topology.cell_name()
 
-    if structured is None:
-        structured = is_structured(use_cache=True)(mesh)
+    if cartesian is None:
+        cartesian = is_cartesian(use_cache=True)(mesh)
 
-    match cell_type, structured:
+    match cell_type, cartesian:
         case CellType.TRIANGLE, False:
             trigl = triangulation(use_cache=True)(f.function_space.mesh)
             f_tri = triangulation(use_cache=use_cache)(f)
@@ -113,7 +113,7 @@ def _(
             raise ValueError
 
     return __plot_colormap(
-        xyz, fig, ax, colorbar, structured, **kwargs
+        xyz, fig, ax, colorbar, cartesian, **kwargs
     )
 
 
@@ -123,7 +123,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     use_cache: bool = False,
     mesh: Mesh | None = None,
     **kwargs,
@@ -136,7 +136,7 @@ def _(
         fig, 
         ax,
         colorbar,
-        structured,
+        cartesian,
         **kwargs
     )
 
@@ -147,7 +147,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float],
-    structured: bool | None = None,
+    cartesian: bool | None = None,
     **kwargs,
 ):
     triang_available = len(xyz) == 2
@@ -171,7 +171,7 @@ def _(
     else:
         if structured is None:
             structured = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
-        if not structured:
+        if not cartesian:
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
         else:
             cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
@@ -222,8 +222,8 @@ def plot_contours(
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
 
     else:
-        structured = is_structured(use_cache=use_cache)(f.function_space.mesh)
-        if not structured:
+        cartesian = is_cartesian(use_cache=use_cache)(f.function_space.mesh)
+        if not cartesian:
             trigl = triangulation(use_cache=True)(f.function_space.mesh)
             f_trigl = triangulation(use_cache=use_cache)(f)
             return plot_contours((f_trigl, trigl), levels, **_kwargs)

@@ -41,16 +41,19 @@ def axes(
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
     if strict:
-        assert is_structured(mesh)
+        assert is_cartesian(mesh)
     return tuple(np.sort(np.unique(i)) for i in coordinates(mesh))
 
 
 def vertices_tensor(
     mesh: Mesh,
+    strict: bool = False,
 ) -> np.ndarray:
     """
-    Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex. 
+    Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
+    if strict:
+        assert is_cartesian(mesh)
     mesh_axes = axes(mesh)
     if len(mesh_axes) == 2:
         x, y = mesh_axes
@@ -68,30 +71,26 @@ def axes_spacing(
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
     if strict:
-        assert is_structured(mesh)
+        assert is_cartesian(mesh)
     return tuple(np.diff(i) for i in axes(mesh))
 
 
 @optional_lru_cache
-def is_structured(
+def is_cartesian(
     mesh: Mesh,
 ) -> bool:
-    """
-    Returns `True` if the mesh is structured (i.e. the
-    vertices form a Cartesian grid).
-    """
     mesh_axes = axes(mesh, strict=False)
     n_vertices = len(mesh.geometry.x)
     n_axes = [len(i) for i in mesh_axes]
-    n_vertices_structured = np.prod(n_axes)
-    return bool(n_vertices == n_vertices_structured)
+    n_vertices_cartesian = np.prod(n_axes)
+    return bool(n_vertices == n_vertices_cartesian)
 
 
 @optional_lru_cache
-def is_uniform(
+def is_uniform_cartesian(
     mesh: Mesh,
 ) -> bool:
-    if not is_structured(mesh):
+    if not is_cartesian(mesh):
         return False
     return all(all(np.isclose(dx[0], dx)) for dx in axes_spacing(mesh))
 

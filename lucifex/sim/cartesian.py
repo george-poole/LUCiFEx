@@ -6,7 +6,7 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils import is_structured, MultipleDispatchTypeError
+from ..utils import is_cartesian, MultipleDispatchTypeError
 from ..utils.fem_utils import ScalarVectorError, is_discontinuous_lagrange
 from ..fdm.series import ConstantSeries, FunctionSeries, GridSeries, NumericSeries
 from ..io import write, load_mesh, load_function_series, load_constant_series
@@ -106,7 +106,7 @@ def _(
     else:
         mesh = mesh
 
-    if not is_structured(mesh):
+    if not is_cartesian(mesh):
         raise ValueError('Expected a structured mesh')
 
     for i in load_grid_args:
