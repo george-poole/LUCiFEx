@@ -1,4 +1,5 @@
 import gmsh
+import numpy as np
 
 from ..utils.py_utils import replicate_callable
 from .utils import create_gmsh_mesh_factory
@@ -25,14 +26,44 @@ def annulus_mesh():
     pass
 
 
-def arc_model(
+def circle_sector_model(
     radius: float,
     angle: float | tuple[float, float], 
+    centre: tuple[float, float] = (0.0, 0.0),
 ) -> gmsh.model:
     if not isinstance(angle, tuple):
         angle = (0.0, angle)
+    angle = tuple(np.pi * i / 180 for i in angle)
+    centre = (*centre, 0)
+    start = (
+        centre[0] + radius * np.cos(angle[0]), 
+        centre[1] + radius * np.sin(angle[0]), 
+        0,
+    )
+    end = (
+        centre[0] + radius * np.cos(angle[1]), 
+        centre[1] + radius * np.sin(angle[1]), 
+        0,
+    )
+
+    centre = gmsh.model.geo.addPoint(*centre)
+    start = gmsh.model.geo.addPoint(*start)
+    end = gmsh.model.geo.addPoint(*end)
+
+    arc = gmsh.model.geo.addCircleArc(start, centre, end)
+    start_line = gmsh.model.geo.addLine(centre, start)        
+    end_line = gmsh.model.geo.addLine(end, centre)    
+
+    loop = gmsh.model.geo.addCurveLoop([start_line, arc, end_line])
+    gmsh.model.geo.addPlaneSurface([loop])
+    return gmsh.model
 
     
+@replicate_callable(
+    create_gmsh_mesh_factory(circle_sector_model, 2, 'circle_sector'),
+)
+def circle_sector_mesh():
+    pass
 
 
 def ellipse_model(

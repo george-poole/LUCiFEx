@@ -71,7 +71,7 @@ def _plot_triangulation(
     title: str | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    """Suitable for structured and unstructured meshes"""
+    """Suitable for Cartesian and unstructured meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _plt_kwargs = dict(color='black', linewidth=0.75)
@@ -95,7 +95,7 @@ def _plot_quadrangulation(
     title: str | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    """Suitable for structured and unstructured meshes"""
+    """Suitable for Cartesian and unstructured meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _poly_kwargs = dict(facecolor='white', edgecolor='black', linewidth=0.75)
@@ -127,7 +127,7 @@ def _plot_grid(
     title: str | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    """Suitable only for structured meshes"""
+    """Suitable only for Cartesian meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
     _plt_kwargs = dict(color='black', linewidth=0.75)

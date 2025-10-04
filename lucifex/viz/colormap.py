@@ -169,8 +169,8 @@ def _(
     if triang_available:
         cmap = filter_kwargs(ax.tripcolor)(tri, z, **_kwargs)
     else:
-        if structured is None:
-            structured = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
+        if cartesian is None:
+            cartesian = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
         if not cartesian:
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
         else:

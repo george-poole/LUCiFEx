@@ -87,7 +87,7 @@ def plot_streamlines(
         fx, fy = (fem_function(('P', 1), i) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
-        raise ValueError("Streamline plots on non-structured meshes are not supported.")
+        raise ValueError("Streamline plots on unstructured meshes are not supported.")
 
     x, y = grid(use_cache=True)(fx.function_space.mesh)
     fx_grid = grid(fx)

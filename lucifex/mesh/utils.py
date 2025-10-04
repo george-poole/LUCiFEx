@@ -73,7 +73,7 @@ def create_gmsh_mesh_factory(
         name: str = default_name,
         comm = MPI.COMM_WORLD,
         rank: int = 0,
-        markers: Iterable[tuple[str, int]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),
+        markers: Iterable[tuple[str, int, Callable[[gmsh.model], tuple]]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),
         meshtags: bool = False,
         gmsh_set_number: dict | None = None,
         **gmsh_set_mesh,
@@ -83,12 +83,15 @@ def create_gmsh_mesh_factory(
                 initialize_model(gmsh.model, name)
                 model = model_func(*args, **kwargs)
                 gmsh.model.occ.synchronize()
+                gmsh.model.geo.synchronize()
                 set_model_groups(gmsh.model, markers)
                 set_model_options(h, cell, gmsh_set_number, gmsh_set_mesh)
                 gmsh.model.occ.synchronize()
+                gmsh.model.geo.synchronize()
                 gmsh.model.mesh.generate(dim)
                 mesh, cell_meshtags, facet_meshtags = model_to_mesh(model, comm, rank, dim)
                 gmsh.finalize()
+                mesh.name = name
                 if meshtags:
                     return mesh, cell_meshtags, facet_meshtags  
                 else:
@@ -113,6 +116,17 @@ def initialize_model(
     if not gmsh.isInitialized():
         gmsh.initialize()
     model.add(name)
+
+
+def set_model_groups(
+    model: gmsh.model,
+    markers: Iterable[tuple[str, int, Callable]],
+) -> None:
+    for name, tag, get_tags in markers:
+        dim, tags = get_tags(model)
+        model.addPhysicalGroup(
+            dim, tags, tag, name,
+        )
 
 
 def set_model_options(
@@ -141,14 +155,3 @@ def set_model_options(
     _gmsh_set_number.update(gmsh_set_number)
     for name, value in _gmsh_set_number.items():
         gmsh.option.setNumber(name, value)
-
-
-def set_model_groups(
-    model: gmsh.model,
-    markers: Iterable[tuple[str, int, Callable]],
-) -> None:
-    for name, tag, get_tags in markers:
-        dim, tags = get_tags(model)
-        model.addPhysicalGroup(
-            dim, tags, tag, name,
-        )

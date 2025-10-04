@@ -71,7 +71,7 @@ def _(f: Function):
     """Interpolates function to P₁ (which has identity vertex-to-dof map)
     to evaluate the function at the vertex values.
 
-    Note that this is suitable on both structured and unstructured meshes.
+    Note that this is suitable on both Cartesian and unstructured meshes.
     """
     return dofs(f, ('P', 1), try_identity=True)
 
@@ -158,7 +158,7 @@ def _(
     (which has identity vertex-to-DoF map) to evaluate the function at the vertex values,
     then returns these vertex values in a `np.ndarray`.
 
-    Note that this is suitable only if the mesh is structured.
+    Note that this is suitable only if the mesh is Cartesian.
     """
     if not is_scalar(f):
         raise ScalarError(f)
@@ -196,7 +196,7 @@ def _grid_jit(
     x_axes: tuple[np.ndarray, ...],
 ) -> np.ndarray:
     """A JIT-compiled function that returns the vertex values on a
-    structured grid. See also `_function_grid_no_jit` for a slower, non-compiled version.
+    Cartesian grid. See also `_function_grid_no_jit` for a slower, non-compiled version.
     """
 
     n_vertex = len(f_vertices)
@@ -235,8 +235,10 @@ def _grid_nojit(
     x_vertices: list[tuple[float, ...]],
     x_axes: tuple[np.ndarray, ...],
 ) -> np.ndarray:
-    """A function that returns the vertex values on a structured
-    grid.  See also `_function_grid_jit` for a faster, JIT-compiled version."""
+    """
+    A function that returns the vertex values on a Cartesian
+    grid. See also `_function_grid_jit` for a faster, JIT-compiled version.
+    """
     dim = len(x_axes)
     nx = [len(i) for i in x_axes]
     f_grid = np.zeros(nx)
@@ -269,10 +271,12 @@ def vertex_to_grid_index_map(
     mesh: Mesh,
     jit: bool = True,
 ) -> dict[int, int | tuple[int, ...]]:
-    """LRU-cached and JIT-compiled under the hood. JIT-compilation
-    requires a `numba` installation."""
+    """
+    LRU-cached and JIT-compiled under the hood. JIT-compilation
+    requires a `numba` installation.
+    """
     if not is_cartesian(mesh):
-        raise ValueError("Mesh must be structured")
+        raise ValueError("Mesh must be Cartesian")
     return _vertex_to_grid_index_map(mesh, jit)
 
 
