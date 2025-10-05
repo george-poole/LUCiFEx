@@ -19,28 +19,45 @@ from lucifex.mesh import ellipse_obstacle_mesh
 from lucifex.sim import configure_simulation
 
 
+def strain(u: Function | Expr) -> Expr:
+    return sym(nabla_grad(u))
+
+
+def newtonian_stress(
+    u: Function | Expr, 
+    p: Function | Expr,
+    mu: Constant,
+) -> Expr:
+    dim = u.ufl_shape[0]
+    return -p * Identity(dim) + 2 * mu * strain(u)
+
+
 def ipcs_1(
     u: FunctionSeries,
     p: FunctionSeries,
     dt: ConstantSeries | Constant,
     rho: Constant,
-    strain: Callable[[Function], Expr],
-    stress: Callable[[Function, Function], Expr],
+    mu: Constant,
+    stress: Callable[[Function, Function, Constant], Expr],
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
+    sigma_bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     n = FacetNormal(u.function_space.mesh)
     epsilon = strain(v)
-    sigma = stress(D_visc(u), p[0])
+    sigma = stress(D_visc(u), p[0], mu)
 
     F_dudt = rho * inner(v, DT(u, dt)) * dx
     F_adv = rho * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
-    F_visc = inner(epsilon, sigma) * dx
-    F_ds = -inner(v, dot(n, sigma)) * ds
-
+    F_visc = inner(epsilon, sigma) * dx 
+    if sigma_bcs is None:
+        F_ds = -inner(v, dot(n, sigma)) * ds
+    else:
+        dsN, natural = sigma_bcs.boundary_data(u.function_space, 'natural')
+        F_ds = sum([-inner(v, sigmaN) * dsN(i) for i, sigmaN in natural])
     forms = [F_dudt, F_adv, F_visc, F_ds]
 
     if f is not None:
@@ -98,12 +115,12 @@ def navier_stokes_obstacle(
     dt_max: float,
     dt_min: float,
     cfl_courant: float,
-    scheme: str,
+    ns_scheme: str,
     # time discretization
-    Dadv: FiniteDifference,
-    Dvisc: FiniteDifference,
+    D_adv: FiniteDifference,
+    D_visc: FiniteDifference,
 ):
-    order = finite_difference_order(Dadv, Dvisc)
+    order = finite_difference_order(D_adv, D_visc)
     mesh = ellipse_obstacle_mesh(dx, 'triangle')(Lx, Ly, r, c)
     dim = mesh.geometry.dim
     zero = [0.0] * dim
@@ -114,9 +131,6 @@ def navier_stokes_obstacle(
     dt = ConstantSeries(mesh, 'dt')
     rho = Constant(mesh, rho, 'rho')
     mu = Constant(mesh, mu, 'mu')
-
-    strain = lambda u: sym(nabla_grad(u))
-    stress = lambda u, p: -p * Identity(dim) + 2 * mu * strain(u)
 
     obstacle = lambda x: (x[0] - c[0]) **2 + (x[1] - c[1]) **2 - r**2
     u_bcs = BoundaryConditions(
@@ -133,9 +147,9 @@ def navier_stokes_obstacle(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
 
-    if scheme == 'ipcs':
+    if ns_scheme == 'ipcs':
         ipcs1_solver = ibvp_solver(ipcs_1, bcs=u_bcs)(
-            u, p, dt[0], rho, strain, stress, FE, CN,
+            u, p, dt[0], rho, mu, newtonian_stress, FE, CN,
         )
         ipcs2_solver = bvp_solver(ipcs_2, bcs=p_bcs, future=True)(
             p, u, dt[0], rho,
@@ -144,14 +158,14 @@ def navier_stokes_obstacle(
             u, p, dt[0], rho,
         )
         ns_solvers = [ipcs1_solver, ipcs2_solver, ipcs3_solver]
-    elif scheme == 'chorin':
+    elif ns_scheme == 'chorin':
         chorin1_solver = ...
         chorin2_solver = ...
         chorin3_solver = ...
         ns_solvers = [chorin1_solver, chorin2_solver, chorin3_solver]
         raise NotImplementedError
     else:
-        raise ValueError(f'{scheme} not recognised')
+        raise ValueError(f'{ns_scheme} not recognised')
     
     solvers = [dt_solver, *ns_solvers]
     namespace = [rho, mu]

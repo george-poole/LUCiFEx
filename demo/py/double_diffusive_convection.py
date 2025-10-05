@@ -1,7 +1,5 @@
-from ufl import (
-    dx, Form, as_vector,
-    TestFunction, Identity, sym,
-)
+from ufl import dx, Form, as_vector, TestFunction
+
 from lucifex.fdm import DT, FiniteDifference, FE, CN, BE
 from lucifex.fem import LUCiFExConstant as Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
@@ -9,14 +7,17 @@ from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
-from lucifex.fdm.ufl_operators import inner, grad, nabla_grad
+from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import (
     BoundaryConditions, bvp_solver, ibvp_solver, eval_solver,
 )
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
-from .navier_stokes import ipcs_1, ipcs_2, ipcs_3
+from .navier_stokes import (
+    ipcs_1, ipcs_2, ipcs_3,
+    newtonian_stress,
+)
 
 
 def advection_diffusion(
@@ -82,7 +83,9 @@ def navier_stokes_double_diffusion(
     D_adv_dd: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
     D_diff_dd: FiniteDifference = CN,
 ):
-    order = finite_difference_order(D_adv_ns, D_visc_ns)
+    order = finite_difference_order(
+        D_adv_ns, D_visc_ns, D_force_ns, D_adv_dd, D_diff_dd,
+    )
     Lx = 2.0
     Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
@@ -140,15 +143,12 @@ def navier_stokes_double_diffusion(
         ('dirichlet', dOmega.union, zero),
     )  
 
-    strain = lambda u: sym(nabla_grad(u))
-    stress = lambda u, p: -p * Identity(dim) + 2 * strain(u)
-
     dt_solver = eval_solver(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
 
     ipcs1_solver = ibvp_solver(ipcs_1, bcs=u_bcs)(
-        u, p, dt[0], 1/Pr, strain, stress, D_adv_ns, D_visc_ns, D_force_ns, f,
+        u, p, dt[0], 1/Pr, 1, newtonian_stress, D_adv_ns, D_visc_ns, D_force_ns, f,
     )
     ipcs2_solver = bvp_solver(ipcs_2, future=True)(
         p, u, dt[0], 1/Pr,
@@ -161,7 +161,7 @@ def navier_stokes_double_diffusion(
         c, dt[0], u, Le, D_adv_dd, D_diff_dd,
     )
     theta_solver = ibvp_solver(advection_diffusion, bcs=theta_bcs)(
-        theta, dt[0], u, Constant(Omega, 1.0), D_adv_dd, D_diff_dd,
+        theta, dt[0], u, 1, D_adv_dd, D_diff_dd,
     )
 
     solvers = [dt_solver, ipcs1_solver, ipcs2_solver, ipcs3_solver, c_solver, theta_solver]

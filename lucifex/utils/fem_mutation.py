@@ -15,7 +15,7 @@ from .py_utils import StrSlice, as_slice, MultipleDispatchTypeError
 # TODO @overload
 def set_fem_function(
     f: Function,
-    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """Mutates `f`, does not mutate `value`"""
@@ -76,7 +76,7 @@ def _(value, u: Function, indices: np.ndarray | None):
 
 def interpolate_fem_function(
     f: Function,
-    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
 ) -> None:
     """Mutates `f` by calling its `interpolate` method"""
     return _interpolate_fem_function(value, f)
@@ -106,7 +106,7 @@ def _(u: Constant, f: Function):
     
 
 @_interpolate_fem_function.register(Iterable)
-def _(u: Iterable[float | Callable], f: Function):
+def _(u: Iterable[float | Constant | Callable], f: Function):
     def _lambda_x(u) -> Callable[[np.ndarray], np.ndarray]:
         if isinstance(u, (int ,float)):
             return lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType)

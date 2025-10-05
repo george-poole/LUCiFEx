@@ -2,7 +2,7 @@
 
 Welcome to the ***Linearized Convection in FEniCSx*** package! 
 
-Development has been primarily motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
+Development has primarily been motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
 
 ![LUCiFEx](demo/figures/A12_convection_onset_highres.png)
 
@@ -11,7 +11,7 @@ Development has been primarily motivated by the numerical study of 2D convection
 See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid mechanics examples shown in `demo` include:
 * Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$ or )
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
-* Stokes equation
+* Stokes equations
 * advection-diffusion-reaction equations for the transport of solute and/or heat coupled to fluid flow
 * stabilization methods for advection-dominated transport equations
 * classic instability problems such as Rayleigh-Bénard convection and Saffman-Taylor fingering
@@ -21,7 +21,7 @@ See `demo` for notebooks and scripts, which are divided into three categories: `
 
 ## What does LUCiFEx do?
 
-**Time-dependent quantities**
+### Time-dependent quantities
 
 A time-dependent finite element function 
 
@@ -41,9 +41,9 @@ where $u^n(\textbf{x})=\sum_ju_j^n\xi_j(\textbf{x})$ and $u_j^n\approx u_j(t^n)$
 u = FunctionSeries(function_space, 'u', order, store)
 ```
 
-and its past, present and future values $u^{n-1}$, $u^n$, $u^{n+1}$ are accessed as
+and its future, present and past values $u^{n+1}, u^n, u^{n-1}, \dots$ as far back as specified by `order` are accessed as
 ```
-u[-1], u[0], u[+1]
+u[+1], u[0], u[-1], ...
 ```
 
 If held in memory in accordance with the `store` parameter passed to `FunctionSeries`, the sequences $[u^0(\textbf{x}), u^1(\textbf{x}), \dots]$ and $[t^0, t^1, \dots]$ are acessed as
@@ -54,7 +54,7 @@ u.time_series
 
 Time-dependent constants and expressions are similarly implemented by `ConstantSeries` and `ExprSeries`.
 
-**Finite differences in time**
+### Finite differences in time
 
 `FiniteDifference` operators act on time-dependent quantities to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
 
@@ -70,19 +70,19 @@ which is equivalent to manually writing out
 1.5 * u[0] - 0.5 * u[-1]
 ```
 
-**Unified problem-solving interface**
+### Unified problem-solving interface
 
 Partial differential equations (linear or linearized) to be solved can be of type `BoundaryValueProblem`, `InitialBoundaryValueProblem` or `EigenvalueProblem`. Algebraic expressions of finite element functions can be evaluated by solving a `ProjectionProblem` or an `InterpolationProblem`. Integral expressions are evaluated by solving a `CellIntegrationProblem` for area/volume intetrals or a `FacetIntegrationProblem` for line/surface integrals in 2D/3D.  Simple sumerical expressions may be evaluated by solving an `EvaluationProblem`. 
 
-**Time-dependent boundary conditions**
-
-Dirichlet, Neumann, Robin and periodic conditions are specified by `BoundaryConditions`. The boundary condition's value of type `Function`, `Constant` or `Expr` can be updated in the time-stepping loop to implement a time-dependent bundary condition. 
-
-**Abstraction and composition**
+### Abstraction and composition
 
 The design of `lucifex` encourages where possible abstraction over a PDE's domain, initial conditions, boundary conditions and constitutive relations. An emphasis on functions and a functional style of programming helps to create code that is flexible and reusable.
 
-**Time-dependent simulation**
+### Time-dependent boundary conditions
+
+Dirichlet, Neumann, Robin and periodic conditions are specified by `BoundaryConditions`. The boundary condition's value of type `Function`, `Constant` or `Expr` can be updated in the time-stepping loop to implement a time-dependent bundary condition. 
+
+### Time-dependent simulation
 
 A time-dependent simulation is in effect a sequence of (linear or linearized) problems to be solved sequentially, over and over again in a time-stepping loop. Given the sequence of problems `solvers`, time  `t` and timestep `dt`, a simulation object is defined as
 
@@ -95,18 +95,20 @@ The `configure_simulation` decorator functions can be used to customise the conf
 Integration over time is performed by the `integrate` routine
 
 ```python
-integrate(simulation, n_stop, t_stop)
+integrate(simulation, n_stop, t_stop, stoppers=...)
 ```
 
-In a script designed to be run from the command line, the `integrate_from_cli` routine can instead be used
+and conditions for stopping the integration can be specified by `n_stop`, `t_stop` and `stoppers`.
+
+In a script designed to be run from the command line, the `integrate_from_cli` routine can instead be used with a function `simulation_factory` that returns a `Simulation` object
 
 ```python
-integrate_from_cli(simulation)
+integrate_from_cli(simulation_factory)
 ```
 
 to create a command line interface into which arguments for configuring, creating and integrating the simulation can be passed.
 
-**Postprocessing**
+### Postprocessing
 
 The `grid` function converts Cartesian meshes and finite element functions defined on Cartesian meshes into `numpy` arrays in order to facilitate further postprocessing within the ecosystem of scientific Python packages (e.g. `scipy` and `matplotlib`).
 

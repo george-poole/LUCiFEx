@@ -189,6 +189,7 @@ def _(value, mesh: Mesh,):
 @_fem_constant.register(Iterable)
 def _(value: Iterable[float], mesh: Mesh):
     if all(isinstance(i, (float, int)) for i in value):
+        value = [float(i) for i in value]
         return Constant(mesh, value)
     else:
         raise TypeError('Expected an iterable of numbers')

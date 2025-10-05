@@ -189,7 +189,6 @@ def _(
 plot_colormap = optional_fig_ax(_plot_colormap)
 
 
-# TODO singledispatch version
 @optional_ax
 def plot_contours(
     ax: Axes,
@@ -199,6 +198,16 @@ def plot_contours(
     **kwargs,
 ) -> None:
     """Plots contours of a scalar-valued function"""
+    return _plot_contours(ax, f, levels, use_cache, **kwargs)
+
+
+def _plot_contours(
+    ax: Axes,
+    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
+    levels: Iterable[float],
+    use_cache: bool,
+    **kwargs,
+) -> None:
     if isinstance(f, tuple):
         triang_available = len(f) == 2
         
@@ -226,9 +235,9 @@ def plot_contours(
         if not cartesian:
             trigl = triangulation(use_cache=True)(f.function_space.mesh)
             f_trigl = triangulation(use_cache=use_cache)(f)
-            return plot_contours((f_trigl, trigl), levels, **_kwargs)
+            return _plot_contours(ax, (trigl, f_trigl), levels, use_cache, **kwargs)
         else:
             x, y = grid(use_cache=True)(f.function_space.mesh)
             f_grid = grid(use_cache=use_cache)(f)
-            return plot_contours((f_grid, x, y), levels, **_kwargs)
+            return _plot_contours(ax, (x, y, f_grid), levels, use_cache, **kwargs)
         

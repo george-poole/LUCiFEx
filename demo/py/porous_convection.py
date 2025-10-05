@@ -104,7 +104,7 @@ def porous_advection_diffusion(
     return forms
 
 
-def create_rectangle_domain(
+def rectangle_domain(
     Lx: float,
     Ly: float,
     Nx: int,

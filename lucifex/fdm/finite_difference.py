@@ -1,4 +1,4 @@
-from typing import Iterable, Any, Callable
+from typing import Iterable, Any, Callable, overload
 from typing_extensions import Self
 
 from ufl.core.expr import Expr
@@ -93,9 +93,10 @@ class FiniteDifference:
             raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
         
         if trial is None:
-            trial = self.trial if isinstance(u, FunctionSeries) else False
+            trial = self.trial if isinstance(u, FunctionSeries) else trial
 
         if trial:
+            assert isinstance(u, FunctionSeries)
             _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
         else:
             _u = lambda n: u[n]
@@ -318,24 +319,60 @@ def finite_difference_order(*args: FiniteDifference | tuple[FiniteDifference, ..
     
 
 def finite_difference_argwise(
-    D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
-    expr: Series | tuple[Callable, tuple] | Expr | Function, 
+    D_fdm: tuple[FiniteDifference, ...],
+    expr: ExprSeries | tuple[Callable, tuple], 
     trial: FunctionSeries | None = None,
 ) -> Expr:
-    if not isinstance(expr, Series):
-        return expr
-    if isinstance(D_fdm, tuple):
-        if isinstance(expr, tuple):
-            expr_func, expr_args = expr
-        else:
-            assert isinstance(expr, ExprSeries) and expr.relation
-            expr_func, expr_args = expr.relation
-        if isinstance(D_fdm, tuple):
-            use_trial = [arg is trial for arg in expr_args]
-            return expr_func(
-                *(Di(arg, trl) for Di, arg, trl in zip(D_fdm, expr_args, use_trial, strict=False)),
-            )
-        else:
-            return D_fdm(expr_func(*expr_args))
+    if isinstance(expr, tuple):
+        expr_func, expr_args = expr
     else:
-        return D_fdm(expr)
+        assert isinstance(expr, ExprSeries)
+        assert expr.relation
+        expr_func, expr_args = expr.relation
+    use_trial = [arg is trial for arg in expr_args]
+    return expr_func(
+        *(Di(arg, ut) for Di, arg, ut in zip(D_fdm, expr_args, use_trial, strict=False)),
+    )
+    
+
+@overload
+def apply_finite_difference(
+    D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
+    expr: Function | Expr | Constant, 
+) -> Function | Expr | Constant:
+    ...
+
+
+@overload
+def apply_finite_difference(
+    D_fdm: FiniteDifference,
+    expr: Series, 
+    trial: bool | None = None,
+) -> Expr:
+    ...
+
+
+@overload
+def apply_finite_difference(
+    D_fdm: tuple[FiniteDifference, ...],
+    expr: ExprSeries | tuple[Callable, tuple], 
+    trial: FunctionSeries | bool | None = None,
+) -> Expr:
+    ...
+    
+
+def apply_finite_difference(
+    D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
+    expr: Function 
+    | Expr
+    | Constant 
+    | Series
+    | tuple[Callable[[tuple[Series, ...]], Expr], tuple[Series, ...]],
+    trial: FunctionSeries | bool | None = None,
+) -> Expr:
+    if isinstance(expr, (Function, Expr, Constant)):
+        return expr
+    if isinstance(D_fdm, FiniteDifference):
+        return D_fdm(expr, trial)
+    if isinstance(D_fdm, tuple):
+        return finite_difference_argwise(D_fdm, expr, trial)
