@@ -84,7 +84,7 @@ def plot_streamlines(
             )
         fx, fy = fem_function_components(('P', 1), f)
     else:
-        fx, fy = (fem_function(('P', 1), i) for i in f)
+        fx, fy = (fem_function(('P', 1), i, try_identity=True) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Streamline plots on unstructured meshes are not supported.")

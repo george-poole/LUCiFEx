@@ -1,20 +1,19 @@
+from typing import Callable
+
 import numpy as np
 from ufl import as_vector, Dx
-
-from ufl.core.expr import Expr
 
 from lucifex.fdm import (
     BE, FE, CN, FiniteDifference, cfl_timestep, 
     FunctionSeries, ConstantSeries, ExprSeries, finite_difference_order,
 )
-from lucifex.fdm.ufl_operators import inner, div, nabla_grad, dot, grad
 from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
 from lucifex.solver import (
     BoundaryConditions, bvp_solver, ibvp_solver, eval_solver,
 )
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
+from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise
 
 from .double_diffusive_convection import advection_diffusion
 from .navier_stokes import newtonian_stress, ipcs_1, ipcs_2, ipcs_3
@@ -32,14 +31,13 @@ def navier_stokes_marangoni(
     Ny: int,
     cell: str = CellType.QUADRILATERAL,
     # physical
-    Ra: float = 1e3,
+    Ra: float = 1.0,
     Pr: float = 1.0,
     Ma: float = 1.0,
     # initial perturbation
-    exp_eps: float = 1e-2,
+    c_base: Callable[[np.ndarray], np.ndarray] = lambda x: 0 * x[0],
     noise_eps: float = 1e-6,
     noise_freq: tuple[int, int] = (8, 8),
-    noise_seed: tuple[int, int, int, int] = (12, 34),
     # time step
     dt_max: float = 0.1,
     dt_min: float = 0.0,
@@ -70,12 +68,11 @@ def navier_stokes_marangoni(
     zero = [0.0] * dim
 
     c_bcs = BoundaryConditions(
-        ("dirichlet", dOmega['lower'], 1.0),
-        ('neumann', dOmega['upper', 'left', 'right'], 0.0)
+        ('neumann', dOmega.union, 0.0)
     )
     c_ics = SpatialPerturbation(
-        lambda x: np.exp(- x[1] / (Ly * exp_eps)),
-        cubic_noise(['neumann', ('dirichlet', 'neumann')], [Lx, Ly], noise_freq, noise_seed),
+        c_base,
+        sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], noise_freq),
         [Lx, Ly],
         noise_eps,
     ) 
@@ -94,6 +91,7 @@ def navier_stokes_marangoni(
 
     u_bcs = BoundaryConditions(
         ('dirichlet', dOmega['lower', 'left', 'right'], zero),
+        ('dirichlet', dOmega['upper'], 0.0, 1),
     )  
 
     sigma_bcs = BoundaryConditions(

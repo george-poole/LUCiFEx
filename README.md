@@ -9,7 +9,7 @@ Development has primarily been motivated by the numerical study of 2D convection
 ## Documentation
 
 See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid mechanics examples shown in `demo` include:
-* Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$ or )
+* Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$)
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
 * Stokes equations
 * advection-diffusion-reaction equations for the transport of solute and/or heat coupled to fluid flow

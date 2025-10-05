@@ -160,6 +160,8 @@ def plot_stacked_lines(
     assert len(f) > 0
     if gridspec_kw is None:
         gridspec_kw = {}
+    if y_labels is None:
+        y_labels = [None] * len(f)
 
     fig, ax = plt.subplots(len(f), sharex=True, gridspec_kw=gridspec_kw)
     
