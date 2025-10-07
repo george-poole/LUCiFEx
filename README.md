@@ -141,7 +141,7 @@ A time-dependent simulation is in effect a sequence of (linear or linearized) pr
 simulation = Simulation(solvers, t, dt)
 ```
 
-The `configure_simulation` decorator functions can be used to customise the configuration of a simulation.
+The `configure_simulation` decorator function can be used to set default values for the configuration of a simulation, such as where to write data and how frequently to write data during the course of the simulation.
 
 Integration over time is performed by the `integrate` routine
 
