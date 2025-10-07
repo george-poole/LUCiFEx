@@ -120,7 +120,10 @@ def n_cells(
 
 
 def entities_to_coordinates(
-    entity_indices: Iterable[int], edim: int, msh: Mesh, centroid: bool = True
+    entity_indices: Iterable[int], 
+    edim: int, 
+    msh: Mesh, 
+    centroid: bool = True,
 ) -> list[np.ndarray]:
     entity_indices = np.array(entity_indices, dtype=np.int32)
     vertex_indices = entities_to_geometry(msh, edim, entity_indices, False)

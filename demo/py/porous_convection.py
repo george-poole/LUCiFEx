@@ -24,6 +24,30 @@ from lucifex.utils import extremum, is_tensor
 from lucifex.sim import Simulation
 
 
+def rectangle_domain(
+    Lx: float,
+    Ly: float,
+    Nx: int,
+    Ny: int,
+    cell: str,
+    name: str = 'LxLy',
+    clockwise_names: tuple[str, str, str, str] = ('upper', 'right', 'lower', 'left'),
+) -> tuple[Mesh, MeshBoundary]:
+    
+    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, name, cell)
+    boundary = mesh_boundary(
+        mesh,
+        {
+            clockwise_names[0]: lambda x: x[1] - Ly,
+            clockwise_names[1]: lambda x: x[0] - Lx,
+            clockwise_names[2]: lambda x: x[1],
+            clockwise_names[3]: lambda x: x[0],
+        },
+    )
+
+    return mesh, boundary
+
+
 def flux(
     c: Function,
     u: Function | Constant,
@@ -38,9 +62,9 @@ def flux(
 
 def darcy_streamfunction(
     psi: FunctionSeries,
-    rho: Expr | Function,
     k: Expr | Function | Constant | float,
     mu: Expr | Function | Constant | float,
+    rho: Expr | Function,
     egx: Expr | Function | Constant | float | None = None,
     egy: Expr | Function | Constant | float | None = None,
 ) -> tuple[Form, Form]:
@@ -104,34 +128,10 @@ def porous_advection_diffusion(
     return forms
 
 
-def rectangle_domain(
-    Lx: float,
-    Ly: float,
-    Nx: int,
-    Ny: int,
-    cell: str,
-    name: str = 'LxLy',
-    clockwise_names: tuple[str, str, str, str] = ('upper', 'right', 'lower', 'left'),
-) -> tuple[Mesh, MeshBoundary]:
-    
-    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, name, cell)
-    boundary = mesh_boundary(
-        mesh,
-        {
-            clockwise_names[0]: lambda x: x[1] - Ly,
-            clockwise_names[1]: lambda x: x[0] - Lx,
-            clockwise_names[2]: lambda x: x[1],
-            clockwise_names[3]: lambda x: x[0],
-        },
-    )
-
-    return mesh, boundary
-
-
 Phi: TypeAlias = Function
 C: TypeAlias = FunctionSeries
 U: TypeAlias = FunctionSeries
-def create_simulation(
+def porous_convection_simulation(
     # domain
     Omega: Mesh,
     dOmega: MeshBoundary,
@@ -209,7 +209,7 @@ def create_simulation(
 
     # flow solvers
     psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
-    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, rho[0], k, mu[0], egx, egy)
+    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, k, mu[0], rho[0], egx, egy)
     u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
 
     # timestep solver

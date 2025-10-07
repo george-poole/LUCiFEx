@@ -94,7 +94,7 @@ def as_spatial_marker(
     
     def _as_marker(m: SpatialMarkerOrExpression) -> SpatialMarker:
         x_test = (0.0, 0.0, 0.0)
-        if isinstance(m(x_test), bool):
+        if isinstance(m(x_test), (bool, np.bool_)):
             return m
         else:
             return lambda x: np.isclose(m(x), 0.0)
@@ -114,11 +114,11 @@ def dofs(
     try_identity: bool = False,
 ) -> np.ndarray:
     """
-    scalar `u(𝐱) -> Σᵢ Uᵢϕᵢ(𝐱)` returns `{Uᵢ}`
+    scalar `u(𝐱) = Σᵢ Uᵢϕᵢ(𝐱)` returns `{Uᵢ}`
 
-    vector `𝐮(𝐱) -> Σᵢ Uᵢ𝛟ᵢ(𝐱)` and `l2_norm=False` returns `{Uᵢ}`
+    vector `𝐮(𝐱) = Σᵢ Uᵢ𝛟ᵢ(𝐱)` and `l2_norm=False` returns `{Uᵢ}`
     
-    vector `𝐮(𝐱) -> Σᵢ (Uˣᵢ, Uʸᵢ, Uᶻᵢ)ϕᵢ(𝐱)` and `l2_norm=True` returns `{(Uˣᵢ² + Uʸᵢ² + Uᶻᵢ²)¹ᐟ²}`
+    vector `𝐮(𝐱) = Σᵢ (Uˣᵢ, Uʸᵢ, Uᶻᵢ)ϕᵢ(𝐱)` and `l2_norm=True` returns `{(Uˣᵢ² + Uʸᵢ² + Uᶻᵢ²)¹ᐟ²}`
     """
     
     if fs is None:

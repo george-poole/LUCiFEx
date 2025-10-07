@@ -1,7 +1,7 @@
 from functools import singledispatch, lru_cache
 import os
 import pickle as pkl
-from typing import Literal, overload, Protocol, Any, Callable
+from typing import Literal, overload, Protocol, Any, Callable, Iterable
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -130,7 +130,7 @@ def write(
     pickle: bool = True,
     bbox_inches: str | None = "tight",
     dpi: int = 150,
-    file_ext: str = "pdf",
+    file_ext: str | Iterable[str] = "pdf",
     **savefig_kwargs,
 ):
     ...
@@ -441,6 +441,12 @@ def _(
     file_ext = "pdf",
     **kwargs,
 ):
+    if not isinstance(file_ext, str):
+        assert all(isinstance(i, str) for i in file_ext)
+        for ext in file_ext:
+            _write(fig, file_name, dir_path, close, pickle, bbox_inches, dpi, ext, **kwargs)
+        return
+        
     if callable(file_name):
         file_name = file_name(fig)
     assert file_name is not None

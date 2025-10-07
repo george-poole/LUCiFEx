@@ -193,7 +193,7 @@ plot_colormap = optional_fig_ax(_plot_colormap)
 def plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
-    levels: Iterable[float] | None = None,
+    levels: Iterable[float] | int | None = None,
     use_cache: bool = False,
     **kwargs,
 ) -> None:
@@ -204,7 +204,7 @@ def plot_contours(
 def _plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
-    levels: Iterable[float],
+    levels: Iterable[float] | int | None,
     use_cache: bool,
     **kwargs,
 ) -> None:

@@ -7,11 +7,12 @@ from functools import reduce
 
 import numpy as np
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
-from scipy.interpolate import CubicSpline, PchipInterpolator
+from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpolator
 
 from .enum_types import BoundaryType
 from .dofs_utils import as_dofs_setter, SpatialMarkerTypes
-from .fem_typecasting import fem_function
+from .mesh_utils import coordinates, vertices
+from .fem_typecasting import fem_function, fem_function_space
 from .fem_mutation import set_fem_function
 
 
@@ -61,6 +62,7 @@ class DofsPerturbation:
         | Iterable[float],
         seed: int,
         amplitude: float | tuple[float, float],
+        freq: tuple[int, ...] | None = None,
         dofs_corrector: Callable[[Function], None] 
         | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]] 
         | None = None,
@@ -69,6 +71,7 @@ class DofsPerturbation:
         if isinstance(amplitude, float):
             amplitude = (0.0, amplitude)
         self._amplitude = amplitude
+        self._freq = freq
         self._rng = np.random.default_rng(seed)
         self._dofs_corrector = as_dofs_setter(dofs_corrector)
 
@@ -85,9 +88,25 @@ class DofsPerturbation:
     def noise(
         self,
         function_space: FunctionSpace,
+        freq: tuple[float, ...] | None = None,
+        method: str | None = None,
     ) -> Function:
+        if freq is None:
+            freq = self._freq
+        function_space = fem_function_space(function_space)
+
         f = Function(function_space)
-        dofs = self._rng.uniform(*self._amplitude, len(f.x.array))
+        if freq is None:
+            dofs = self._rng.uniform(*self._amplitude, len(f.x.array))
+        else:
+            method = 'linear' if method is None else method
+            vs = vertices(function_space.mesh)
+            xs = coordinates(function_space.mesh)
+            xlims = [(np.min(i), np.max(i)) for i in xs]
+            x_coarse = [np.linspace(*lim, num=f) for lim, f in zip(xlims, freq, strict=True)]
+            noise = self._rng.uniform(*self._amplitude, freq)
+            dofs = RegularGridInterpolator(x_coarse, noise, method=method)(vs)
+        
         set_fem_function(f, dofs, dofs_indices=':')
         return f
     
@@ -97,12 +116,14 @@ class DofsPerturbation:
         base: Function | None = None,
         operator: Callable[[np.ndarray, np.ndarray], np.ndarray] = add,
         correct: bool = True,
+        name: str | None = None,
     ) -> Function:
+        function_space = fem_function_space(function_space)
         if base is None:
             base = self.base(function_space, False) 
         perturbation = self.noise(function_space)
 
-        f = Function(function_space)
+        f = Function(function_space, name=name)
         dofs = operator(base.x.array, perturbation.x.array)
         set_fem_function(f, dofs, dofs_indices=':')
         if correct:
@@ -163,6 +184,7 @@ class SpatialPerturbation:
         base: Function | None = None,
         operator: Callable[[Any, Any], Any] = add,
         correct: bool = True,
+        name: str | None = None,
     ) -> Function:       
         if isfunction(self._base) and isfunction(self._noise):
             perturbed = lambda x: operator(self._base(x), self._noise(x))
@@ -174,6 +196,8 @@ class SpatialPerturbation:
         f = fem_function(function_space, perturbed)
         if correct:
             self._dofs_corrector(f)
+        if name is not None:
+            f.name = name
         return f
     
 
@@ -352,7 +376,7 @@ def sinusoid_noise(
         return lambda x: noise(x[index])
     else:
         return lambda x: noise(x)
-
+    
 
 @overload
 def rescale(

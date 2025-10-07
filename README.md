@@ -4,7 +4,45 @@ Welcome to the ***Linearized Convection in FEniCSx*** package!
 
 Development has primarily been motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
 
-![LUCiFEx](demo/figures/A12_convection_onset_highres.png)
+## Gallery
+
+<!-- ![LUCiFEx](demo/figures/A12_convection_onset_highres.png) -->
+
+<table>
+  <tr>
+    <td><img src="demo/figures/A09_darcy_p.png" width="400"/></td>
+    <td><img src="demo/figures/A10_darcy_streamfunction_k_streamlines.png" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="left"> Darcy flow through a lens of low permeability </td>
+    <td align="left"> Darcy flow across an anticline of heterogeneous permeability </td>
+  </tr>
+  <tr>
+    <td><img src="demo/figures/A15a_rayleigh_benard_rectangle_c(t=15.75).png" width="400"/></td>
+    <td><img src="demo/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="left"> porous Rayleigh-Bénard convection in a rectangle </td>
+    <td align="left"> porous Rayleigh-Bénard convection in a semicircle </td>
+  </tr>
+    <tr>
+    <td><img src="demo/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
+    <td><img src="demo/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="left"> porous Rayleigh-Bénard convection in an annulus </td>
+    <td align="left"> porous convection in an inclined domain </td>
+  </tr>
+  </tr>
+    <tr>
+    <td><img src="demo/figures/A17_double_diffusive_c(t=0.07).png" width="400"/></td>
+    <td><img src="demo/figures/A19_marangoni_convection_c(t=1.96e-02).png" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="left"> pure fluid double diffusive convection </td>
+    <td align="left"> pure fluid Marangoni convection </td>
+  </tr>
+</table>
 
 ## Documentation
 
@@ -15,7 +53,7 @@ See `demo` for notebooks and scripts, which are divided into three categories: `
 * advection-diffusion-reaction equations for the transport of solute and/or heat coupled to fluid flow
 * stabilization methods for advection-dominated transport equations
 * classic instability problems such as Rayleigh-Bénard convection and Saffman-Taylor fingering
-* perturbations to the initial conditions of instability problems
+* customisable perturbations to the initial conditions of instability problems
 * simulations on both Cartesian and non-Cartesian domains
 
 
