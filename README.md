@@ -67,10 +67,10 @@ See `demo` for notebooks and scripts, which are divided into three categories: `
 * customisable perturbations to the initial conditions of instability problems
 * simulations on both Cartesian and non-Cartesian domains
 
-These short notebooks are primarily for quick, inexpensive demonstration purposes and as such most do not use a fine mesh, stabilization methods for advection-dominated flows or low-level problem-specific optimizations. See [LUCiFExBenchmarks](https://github.com/george-poole/LUCiFExBenchmarks) for more rigorous benchmarking.
+These short notebooks are primarily for quick, inexpensive demonstration purposes and as such most do not use a high-resolution mesh, sophisticated stabilization methods or low-level problem-specific optimizations. See [LUCiFExBenchmarks](https://github.com/george-poole/LUCiFExBenchmarks) for more rigorous benchmarking.
 
 
-## What does LUCiFEx in addition to FEniCSx?
+## What does LUCiFEx do in addition to FEniCSx?
 
 ### Time-dependent quantities
 
