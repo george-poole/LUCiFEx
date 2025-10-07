@@ -68,9 +68,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     zero = [0.0] * dim
 
     c_bcs = BoundaryConditions(
-        ("dirichlet", dOmega['lower'], 0.0),
-        ("dirichlet", dOmega['upper'], 1.0),
-        ('neumann', dOmega['left', 'right'], 0.0)
+        ('neumann', dOmega.union, 0.0)
     )
     c_ics = SpatialPerturbation(
         lambda x: 1.0 * (x[1] > Ly / 2) + 0.0,

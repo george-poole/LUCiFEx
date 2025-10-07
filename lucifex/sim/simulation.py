@@ -77,7 +77,7 @@ class Simulation:
             try:
                 return self.namespace[key]
             except KeyError:
-                raise KeyError(f"{key} not found in simulation's namespace.")
+                raise KeyError(f"'{key}' not found in simulation's namespace.")
         else:
             raise TypeError
         
@@ -221,7 +221,7 @@ def configure_simulation(
         simulation_func: Callable[
             P, 
             tuple[Iterable[Solver], ConstantSeries, ConstantSeries] 
-            | tuple[Iterable[Solver], ConstantSeries, ConstantSeries, Iterable] 
+            | tuple[Iterable[Solver], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
             | Simulation],
     ):
         

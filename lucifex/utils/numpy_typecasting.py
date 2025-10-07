@@ -540,3 +540,26 @@ def _cross_section_colormap(
         raise ValueError
 
     return x_axis, y_axis, z_grid, z_value
+
+
+def spacetime_grid(
+    u: Iterable[Function | tuple[np.ndarray, ...]],
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    use_cache: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> np.ndarray:
+    _cross_sections = []
+    xaxis, _csec, value  = cross_section(
+        u[0], axis, value, fraction, use_cache, axis_names,
+    )
+    _cross_sections.append(_csec)
+
+    for _u in u[1:]:
+        _xaxis, _csec, _value  = cross_section(_u, axis, value, fraction, use_cache, axis_names)
+        assert np.isclose(value, _value)
+        assert np.all(np.isclose(xaxis, _xaxis))
+        _cross_sections.append(_csec)
+
+    return np.array(_cross_sections).T

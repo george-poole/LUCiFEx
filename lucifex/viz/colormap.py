@@ -111,9 +111,12 @@ def _(
             )
         case _:
             raise ValueError
+        
+    _kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
+    _kwargs.update(kwargs)
 
     return __plot_colormap(
-        xyz, fig, ax, colorbar, cartesian, **kwargs
+        xyz, fig, ax, colorbar, cartesian, **_kwargs
     )
 
 
@@ -160,7 +163,7 @@ def _(
         x, y, z = xyz
 
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
-    _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
+    _axs_kwargs = dict(x_lims=x, y_lims=y, aspect='equal')
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 

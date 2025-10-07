@@ -39,23 +39,30 @@ def porous_convection_anisotropic_rectangle(
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
+    # gravity
+    beta: float = 0.0,
     # physical
     Ra: float = 5e2,
+    # constitutive relations
     porosity: Callable[[np.ndarray], np.ndarray] | float = 1,
     kappa: float = 1.0,
     vartheta: float = 0.0,
-    beta: float = 0.0,
+    # initial conditions
     erf_eps: float = 1e-2,
     c_eps: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (1234, 5678),
+    # time step
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
+    # time discretization
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
     D_diff: FiniteDifference = CN,
+    # linear algebra
     psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,
+    # optional solvers
     secondary: bool = False,
 ) -> Simulation:
     Omega, dOmega = rectangle_domain(Lx, Ly, Nx, Ny, cell)

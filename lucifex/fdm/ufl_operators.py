@@ -96,6 +96,50 @@ def nabla_grad(): pass
 def Dx(): pass
 
 
+@unary_operator(ufl.exp)
+def exp(): pass
+
+
+@unary_operator(ufl.sin)
+def sin(): pass
+
+
+@unary_operator(ufl.cos)
+def cos(): pass
+
+
+@unary_operator(ufl.tan)
+def tan(): pass
+
+
+@unary_operator(ufl.asin)
+def asin(): pass
+
+
+@unary_operator(ufl.acos)
+def acos(): pass
+
+
+@unary_operator(ufl.atan)
+def atan(): pass
+
+
+@unary_operator(ufl.atan_2)
+def atan_2(): pass
+
+
+@unary_operator(ufl.sinh)
+def sinh(): pass
+
+
+@unary_operator(ufl.cosh)
+def cosh(): pass
+
+
+@unary_operator(ufl.tanh)
+def tanh(): pass
+
+
 @binary_operator(ufl.inner)
 def inner(): pass
 

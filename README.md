@@ -2,7 +2,9 @@
 
 Welcome to the ***Linearized Convection in FEniCSx*** package! 
 
-Development has primarily been motivated by the numerical study of 2D convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
+LUCiFEx is a flexible and user-friendly package for the applied mathematician to solve time-dependent PDEs numerically by the finite element method using [FEniCSx](https://github.com/FEniCS/dolfinx).
+
+Development has primarily been motivated by the numerical study of fluid dynamics in 2D porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
 
 ## Gallery
 
@@ -42,11 +44,20 @@ Development has primarily been motivated by the numerical study of 2D convection
     <td align="left"> pure fluid double diffusive convection </td>
     <td align="left"> pure fluid Marangoni convection </td>
   </tr>
+  </tr>
+    <tr>
+    <td><img src="demo/figures/A18_rayleigh_taylor_c(t=0.05).png" width="400"/></td>
+    <td><img src="demo/figures/A20_saffman_taylor_c(t=0.36).png" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="left"> pure fluid Rayleigh-Taylor instability </td>
+    <td align="left"> porous Saffman-Taylor instability </td>
+  </tr>
 </table>
 
 ## Documentation
 
-See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid mechanics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid mechanics examples shown in `demo` include:
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid dynamics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid dynamics examples shown in `demo` include:
 * Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$)
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
 * Stokes equations
@@ -56,8 +67,10 @@ See `demo` for notebooks and scripts, which are divided into three categories: `
 * customisable perturbations to the initial conditions of instability problems
 * simulations on both Cartesian and non-Cartesian domains
 
+These short notebooks are primarily for quick, inexpensive demonstration purposes and as such most do not use a fine mesh, stabilization methods for advection-dominated flows or low-level problem-specific optimizations. See [LUCiFExBenchmarks](https://github.com/george-poole/LUCiFExBenchmarks) for more rigorous benchmarking.
 
-## What does LUCiFEx do?
+
+## What does LUCiFEx in addition to FEniCSx?
 
 ### Time-dependent quantities
 

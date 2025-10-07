@@ -143,7 +143,8 @@ def porous_convection_simulation(
     # initial conditions
     c_ics = None,
     # boundary conditions
-    c_bcs: BoundaryConditions | EllipsisType | None = None,
+    c_bcs: BoundaryConditions | EllipsisType | None = Ellipsis,
+    psi_bcs: BoundaryConditions | EllipsisType | None = Ellipsis,
     # constitutive relations
     porosity: Callable[[np.ndarray], np.ndarray] | float = 1,
     permeability: Callable[[Phi], Expr] = lambda phi: phi**2,
@@ -158,9 +159,6 @@ def porous_convection_simulation(
     # time discretization
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = AB1,
     D_diff: FiniteDifference = AB1,
-    D_reac: FiniteDifference 
-    | tuple[FiniteDifference, FiniteDifference]
-    | tuple[FiniteDifference, FiniteDifference, FiniteDifference] = AB1,
     # TODO supg stabilization
     # c_stabilization: str | None = None,
     # c_limits: tuple[float, float] | EllipsisType | None = None,
@@ -182,7 +180,7 @@ def porous_convection_simulation(
     dispersion `D(ϕ) = ϕ` and uniform viscosity `μ = 1`.
     """    
 
-    order = finite_difference_order(D_adv, D_diff, D_reac)
+    order = finite_difference_order(D_adv, D_diff)
 
     # flow fields
     psi_deg = 2
@@ -208,7 +206,7 @@ def porous_convection_simulation(
     namespace = [Ra, phi, ('k', k), ('d', d), rho, mu]
 
     # flow solvers
-    psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
+    psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0)) if psi_bcs is Ellipsis else psi_bcs
     psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, k, mu[0], rho[0], egx, egy)
     u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
 

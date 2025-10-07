@@ -26,6 +26,7 @@ from .numpy_typecasting import (
     vertex_to_grid_index_map,
     where_on_grid,
     cross_section,
+    spacetime_grid,
 )
 from .fem_perturbation import (
     SpatialPerturbation, DofsPerturbation, Perturbation, 
