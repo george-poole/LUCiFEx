@@ -74,7 +74,7 @@ def ipcs_2(
     u: FunctionSeries,
     dt: Constant,
     rho: Constant,
-) -> tuple[Form, Form]:
+) -> tuple[Form, Form, Form]:
     p_trial = TrialFunction(p.function_space)
     q = TestFunction(p.function_space)
     F_trial = inner(grad(q), grad(p_trial)) * dx
@@ -93,6 +93,58 @@ def ipcs_3(
     v = TestFunction(u.function_space)
     F_dudt = rho * (1 / dt) * inner(v, (u_trial - u[1])) * dx
     F_grad = inner(v, grad(p[1]) - grad(p[0])) * dx
+    return F_dudt, F_grad
+
+
+def chorin_1(
+    u: FunctionSeries,
+    dt: ConstantSeries | Constant,
+    rho: Constant,
+    mu: Constant,
+    D_adv: FiniteDifference,
+    D_visc: FiniteDifference,
+    D_force: FiniteDifference = FE,
+    f: FunctionSeries | Function | Constant| None = None,
+) -> list[Form]:
+    v = TestFunction(u.function_space)
+    F_dudt = rho * inner(v, DT(u, dt)) * dx
+    F_adv = rho * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
+    F_visc = mu * inner(grad(v), grad(D_visc(u))) * dx
+    
+    forms = [F_dudt, F_adv, F_visc]
+
+    if f is not None:
+        if isinstance(f, Series):
+            f = D_force(f)
+        F_f = -inner(v, f) * dx
+        forms.append(F_f)
+
+    return forms
+
+
+def chorin_2(
+    p: FunctionSeries,
+    u: FunctionSeries,
+    dt: Constant,
+    rho: Constant,
+) -> tuple[Form, Form]:
+    p_trial = TrialFunction(p.function_space)
+    q = TestFunction(p.function_space)
+    F_trial = inner(grad(q), grad(p_trial)) * dx
+    F_div = q * rho * (1 / dt) * div(u[1])  * dx
+    return F_trial, F_div
+
+
+def chorin_3(
+    u: FunctionSeries,
+    p: FunctionSeries,
+    dt: Constant,
+    rho: Constant,
+) -> tuple[Form, Form]:
+    u_trial = TrialFunction(u.function_space)
+    v = TestFunction(u.function_space)
+    F_dudt = rho * (1 / dt) * inner(v, (u_trial - u[1])) * dx
+    F_grad = inner(v, grad(p[1])) * dx
     return F_dudt, F_grad
 
 
@@ -159,9 +211,15 @@ def navier_stokes_obstacle(
         )
         ns_solvers = [ipcs1_solver, ipcs2_solver, ipcs3_solver]
     elif ns_scheme == 'chorin':
-        chorin1_solver = ...
-        chorin2_solver = ...
-        chorin3_solver = ...
+        chorin1_solver = ibvp_solver(chorin_1, bcs=u_bcs)(
+            u, dt[0], rho, mu, FE, CN,
+        )
+        chorin2_solver = bvp_solver(chorin_2, bcs=p_bcs, future=True)(
+            p, u, dt[0], rho,
+        )
+        chorin3_solver = bvp_solver(chorin_3, future=True, overwrite=True)(
+            u, p, dt[0], rho,
+        )
         ns_solvers = [chorin1_solver, chorin2_solver, chorin3_solver]
         raise NotImplementedError
     else:
