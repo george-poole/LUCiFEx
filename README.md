@@ -57,7 +57,7 @@ Development has primarily been motivated by the numerical study of fluid dynamic
 
 ## Documentation
 
-See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid dynamics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the `lucifex` package). Fluid dynamics examples shown in `demo` include:
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid dynamics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the LUCiFEx package). Fluid dynamics examples shown in `demo` include:
 * Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$)
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
 * Stokes equations
@@ -127,7 +127,7 @@ Partial differential equations (linear or linearized) to be solved can be of typ
 
 ### Abstraction and composition
 
-The design of `lucifex` encourages where possible abstraction over a PDE's domain, initial conditions, boundary conditions and constitutive relations. An emphasis on functions and a functional style of programming helps to create code that is flexible and reusable.
+The design of LUCiFEx encourages where possible abstraction over a PDE's domain, initial conditions, boundary conditions, constitutive relations and time discretizations. An emphasis on functions and a functional style of programming helps to create code that is flexible and reusable.
 
 ### Time-dependent boundary conditions
 
@@ -200,7 +200,7 @@ These features remain to be implemented as part of ongoing development:
 
 + update to latest version of `fenicsx` (currently on 0.6.0) and Python (currently on 3.10.12)
 + parallelisation with `mpi4py`
-+ nested solvers
++ nested and blocked solvers
 + preconditioned solvers
 + nonlinear solvers
 + more documentation and testing
