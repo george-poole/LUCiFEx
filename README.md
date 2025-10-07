@@ -168,7 +168,7 @@ x_axis, y_axis = grid(mesh)
 u_grid = grid(u)
 ```
 
-Applying the decorator functions `postprocess` and `co_postprocess` to functions acting on simulation data (e.g. to create a plot) enables them to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and write repetitive I/O routines. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written to the same filename with the same object name).
+Applying the decorator functions `postprocess` and `co_postprocess` to functions acting on simulation data (e.g. to create a plot) enables them to be called using a convenient short-hand syntax, avoiding the need to explicitly load data in advance and write repetitive lines of code for I/O. They furthermore enable the batch-postprocessing of an ensemble of simulation directories in which each individual directory has the same stucture (e.g. the `FunctionSeries` object `u` has been written to the same filename with the same object name).
 
 ## Installation (macOS)
 
