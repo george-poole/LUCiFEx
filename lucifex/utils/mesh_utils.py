@@ -162,18 +162,3 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
         return sizes[h](mesh)
     except KeyError:
         raise ValueError(f'Invalid cell size quantity {h}.')
-        
-
-# def get_boundary_midpoint(
-#     mesh: Mesh, surface: Callable
-# ) -> tuple[float, float, float]:
-#     """Computes the midpoint (x, y, z) of a sub-boundary defined by a callable
-#     surface function. Note that 1D and 2D meshes are treated as if they are embedded
-#     in 3D space"""
-#     facets = locate_entities_boundary(
-#         mesh, mesh.topology.dim - 1, lambda x: np.isclose(surface(x), 0.0)
-#     )
-#     facet_midpoints = compute_midpoints(mesh, mesh.topology.dim - 1, facets)
-#     bdry_midpoint = np.mean(facet_midpoints, axis=0)
-
-#     return tuple(bdry_midpoint)

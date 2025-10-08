@@ -12,6 +12,7 @@ from dolfinx.fem import (
 )
 from ufl.core.expr import Expr
 
+from .py_utils import StrEnum
 from .fem_typecasting import fem_function, fem_function_components
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
 from .fem_mutation import set_fem_function
@@ -37,40 +38,46 @@ Function of coordinates `x = (x₀, x₁, x₂)` either returning expression `f(
 such that `f(x) = 0` defines the boundary, or `True` if `x` is on the boundary and `False` otherwise.
 """
 
-SpatialMarkerTypes: TypeAlias = SpatialMarkerOrExpression | int | str | Iterable["SpatialMarker"]
-# TODO marker: str | int case for when no well-defined callable `f(x) = 0` exists to define boundary
+# TODO int and str markers from mesh tags (especially irregular gmsh meshes)?
+SpatialMarkerTypes: TypeAlias = SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression]
 
 SubspaceIndex: TypeAlias = int | None 
 
 
+class DofsMethodType(StrEnum):
+    GEOMETRICAL = 'geometrical'
+    TOPOLOGICAL = 'topological'
+
+
 def dofs_indices(
     function_space: FunctionSpace,
-    dof_marker: SpatialMarkerTypes,
+    dofs_marker: SpatialMarkerTypes,
     subspace_index: int | None = None,
-    method = 'topological',
+    method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
 ) -> np.ndarray | list[np.ndarray]:
     
-    _dof_marker = as_spatial_marker(dof_marker)
+    method = DofsMethodType(method)
+    _dofs_marker = as_spatial_marker(dofs_marker)
 
-    if method == 'geometrical':
+    if method == DofsMethodType.GEOMETRICAL:
         if subspace_index is None:
-            return locate_dofs_geometrical(function_space, _dof_marker)
+            return locate_dofs_geometrical(function_space, _dofs_marker)
         else:
-            raise NotImplementedError
-            # TODO does this work?
-            # function_subspace, _ = function_space.sub(subspace_index).collapse()
-            # return locate_dofs_geometrical(function_subspace, dof_indicator)
+            function_subspace, _ = function_space.sub(subspace_index).collapse()
+            return locate_dofs_geometrical(
+                [function_space.sub(subspace_index), function_subspace],
+                _dofs_marker,
+            )
         
-    if method == 'topological':
+    if method == DofsMethodType.TOPOLOGICAL:
         tdim = function_space.mesh.topology.dim
         edim = tdim - 1
-        facets = locate_entities(  # TODO vs locate_entities_boundary
-            function_space.mesh, edim, _dof_marker
+        facets = locate_entities(
+            function_space.mesh, edim, _dofs_marker
         )
         if subspace_index is None:
             return locate_dofs_topological(function_space, edim, facets)
         else:
-            # components of vector space or subspaces of a mixed space
             function_subspace, _ = function_space.sub(subspace_index).collapse()
             dofs = locate_dofs_topological(
                 [function_space.sub(subspace_index), function_subspace],
@@ -93,7 +100,7 @@ def as_spatial_marker(
     """
     
     def _as_marker(m: SpatialMarkerOrExpression) -> SpatialMarker:
-        x_test = (0.0, 0.0, 0.0)
+        x_test = np.array([0.0, 0.0, 0.0])
         if isinstance(m(x_test), (bool, np.bool_)):
             return m
         else:

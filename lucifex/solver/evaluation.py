@@ -234,8 +234,8 @@ class ProjectionProblem(BoundaryValueProblem):
         overwrite: bool = False,
     ):
 
-        v = TestFunction(solution)
-        u = TrialFunction(solution)
+        v = TestFunction(solution.function_space)
+        u = TrialFunction(solution.function_space)
         dx = Measure('dx')
         F_lhs = inner(v, u) * dx
         F_rhs = inner(v, expression) * dx
@@ -319,6 +319,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         future: bool = False,
+        overwrite: bool = False,
     ):
         if jit is None:
             jit = self.jit_default
@@ -342,7 +343,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
             dofs_corrector(_f)
             return _f
 
-        super().__init__(solution, evaluation, future)
+        super().__init__(solution, evaluation, future, overwrite)
 
     @classmethod
     def from_function(
@@ -355,6 +356,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         future: bool = False,
+        overwrite: bool = False,
     ):
         """from function"""
         def _create(
@@ -368,6 +370,7 @@ class InterpolationProblem(EvaluationProblem[FunctionSeries, LUCiFExFunction]):
                 jit, 
                 ffcx, 
                 future,
+                overwrite,
             )
         return _create
 

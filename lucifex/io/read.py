@@ -93,7 +93,7 @@ def _(
         case (_, _):
             u[:] = np.reshape(dofs, u.shape)
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(f'I/O with shape {u.shape} is not supported.')
 
 
 @_read.register(Function)

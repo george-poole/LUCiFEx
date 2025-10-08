@@ -206,8 +206,15 @@ def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
                 Series.FUTURE_INDEX - 2: -16 / 12,
                 Series.FUTURE_INDEX - 3: 5 / 12,
             }
+        case 4:
+            d = {
+                Series.FUTURE_INDEX: 55 / 24,
+                Series.FUTURE_INDEX - 1: -59 / 24,
+                Series.FUTURE_INDEX - 2: 37 / 24,
+                Series.FUTURE_INDEX - 3: -9 / 24,
+            }
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(f'Only implemented up to AB4.')
 
     if init is None:
         init = FE
@@ -217,7 +224,7 @@ def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
 
 AB1 = AB(1)
 AB2 = AB(2)
-
+AB3 = AB(3)
 
 def AM(
     n: int, 
@@ -238,8 +245,15 @@ def AM(
                 Series.FUTURE_INDEX - 1: 8 / 12,
                 Series.FUTURE_INDEX - 2: -1 / 12,
             }
+        case 4:
+            d = {
+                Series.FUTURE_INDEX: 9 / 24,
+                Series.FUTURE_INDEX - 1: -9 / 24,
+                Series.FUTURE_INDEX - 2: -5 / 24,
+                Series.FUTURE_INDEX - 3: 1 / 24,
+            }
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(f'Only implemented up to AM4.')
 
     if init is None:
         init = BE
@@ -249,6 +263,7 @@ def AM(
 
 AM1 = AM(1)
 AM2 = AM(2)
+AM3 = AM(3)
 
 
 def BDF(
@@ -274,8 +289,16 @@ def BDF(
                 Series.FUTURE_INDEX - 2: 1.5,
                 Series.FUTURE_INDEX - 3: -1 / 3,
             }
+        case 4:
+            d = {
+                Series.FUTURE_INDEX: 25 / 12,
+                Series.FUTURE_INDEX - 1: -4.0,
+                Series.FUTURE_INDEX - 2: 3.0,
+                Series.FUTURE_INDEX - 3: -4 / 3,
+                Series.FUTURE_INDEX - 4: 1 / 4,
+            }
         case _:
-            raise NotImplementedError
+            raise NotImplementedError(f'Only implemented up to BDF4.')
 
     if init is None:
         init = DT
@@ -285,6 +308,7 @@ def BDF(
 
 BDF1 = BDF(1)
 BDF2 = BDF(2)
+BDF3 = BDF(3)
 
 
 def THETA(theta: float) -> FiniteDifference:

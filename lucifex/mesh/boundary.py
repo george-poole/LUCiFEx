@@ -70,9 +70,9 @@ def mesh_boundary(
     """
     
     if verify or complete:
-        dim = mesh.geometry.dim - 1
         if mesh.comm.Get_size() > 1:
             raise NotImplementedError('Not supported in parallel.')
+        dim = mesh.geometry.dim - 1
         n_boundary_entities = [
             len(locate_entities_boundary(mesh, dim, as_spatial_marker(v)))
             for v in boundaries.values()

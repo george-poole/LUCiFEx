@@ -221,7 +221,6 @@ def navier_stokes_obstacle(
             u, p, dt[0], rho,
         )
         ns_solvers = [chorin1_solver, chorin2_solver, chorin3_solver]
-        raise NotImplementedError
     else:
         raise ValueError(f'{ns_scheme} not recognised')
     

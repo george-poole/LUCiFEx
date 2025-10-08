@@ -119,7 +119,9 @@ def quadrangulation(
 def _grid(
     f: Function,
     strict: bool = False,
-    jit: bool | None = None,
+    jit: bool = True,
+    use_map: bool = True,
+    mask: float = np.nan,
 ) -> np.ndarray:
     ...
 
@@ -152,7 +154,9 @@ def _(
 def _(
     f: Function,
     strict: bool = False,
-    jit: bool | None = None,
+    jit: bool = True,
+    use_map: bool = True,
+    mask: float = np.nan,
 ) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
     """Interpolates the finite element function to the `P₁` function space
     (which has identity vertex-to-DoF map) to evaluate the function at the vertex values,
@@ -167,17 +171,16 @@ def _(
     x_axes = grid(use_cache=True)(mesh, strict)
     f_vertices = dofs(f, ('P', 1), try_identity=True)
 
-    if jit is True:
-        _mesh_func = lambda l: numba.typed.List(vertices(l))
-        _grid_func = _grid_jit
-    elif jit is False:
-        _mesh_func = vertices
-        _grid_func = _grid_nojit
-    elif jit is None:
-        _mesh_func = vertex_to_grid_index_map
+    if use_map:
+        _mesh_func = lambda *a, **k: vertex_to_grid_index_map(*a, **k, jit=jit, strict=strict)
         _grid_func = _grid_from_map
     else:
-        raise ValueError
+        if jit:
+            _mesh_func = lambda m: numba.typed.List(vertices(m))
+            _grid_func = _grid_jit
+        else:
+            _mesh_func = vertices
+            _grid_func = _grid_nojit
 
     vertices_or_map = _mesh_func(mesh)
     if len(f_vertices) != len(vertices_or_map):
@@ -186,7 +189,7 @@ def _(
         Number of vertex values {vertices_or_map} does not 
         match number of points {f_vertices} """
         )
-    return _grid_func(f_vertices, vertices_or_map, x_axes)
+    return _grid_func(f_vertices, vertices_or_map, x_axes, mask)
 
 
 @numba.jit(nopython=True)
@@ -194,6 +197,7 @@ def _grid_jit(
     f_vertices: np.ndarray,
     x_vertices: list[tuple[float, ...]],
     x_axes: tuple[np.ndarray, ...],
+    mask: float,
 ) -> np.ndarray:
     """A JIT-compiled function that returns the vertex values on a
     Cartesian grid. See also `_function_grid_no_jit` for a slower, non-compiled version.
@@ -205,20 +209,20 @@ def _grid_jit(
     match dim:
         case 1:
             nx = len(x_axes[0])
-            f_grid = np.zeros(nx)
+            f_grid = np.full((nx, ), mask)
             for vertex_index in range(n_vertex):
                 x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
                 f_grid[x_index] = f_vertices[vertex_index]
         case 2:
             nx, ny = len(x_axes[0]), len(x_axes[1])
-            f_grid = np.zeros((nx, ny))
+            f_grid = np.full((nx, ny), mask)
             for vertex_index in range(n_vertex):
                 x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
                 y_index = np.where(x_axes[1] == x_vertices[vertex_index][1])[0][0]
                 f_grid[x_index, y_index] = f_vertices[vertex_index]
         case 3:
             nx, ny, nz = len(x_axes[0]), len(x_axes[1]), len(x_axes[2])
-            f_grid = np.zeros((nx, ny, nz))
+            f_grid = np.full((nx, ny, nz), mask)
             for vertex_index in range(n_vertex):
                 x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
                 y_index = np.where(x_axes[1] == x_vertices[vertex_index][1])[0][0]
@@ -234,14 +238,15 @@ def _grid_nojit(
     f_vertices: np.ndarray,
     x_vertices: list[tuple[float, ...]],
     x_axes: tuple[np.ndarray, ...],
+    mask: float,
 ) -> np.ndarray:
     """
     A function that returns the vertex values on a Cartesian
     grid. See also `_function_grid_jit` for a faster, JIT-compiled version.
     """
     dim = len(x_axes)
-    nx = [len(i) for i in x_axes]
-    f_grid = np.zeros(nx)
+    nx = tuple(len(i) for i in x_axes)
+    f_grid = np.full(nx, mask)
 
     for vertex_index, x_vertex in enumerate(x_vertices):
         x_index = [np.where(x_axes[i] == x_vertex[i])[0][0] for i in range(dim)]
@@ -254,9 +259,10 @@ def _grid_from_map(
     f_vertices: np.ndarray,
     vertex_grid_map: dict[int, int | tuple[int, ...]],
     x_axes: tuple[np.ndarray, ...],
+    mask: float,
 ) -> np.ndarray:
     nx = tuple(len(i) for i in x_axes)
-    f_grid = np.zeros(nx)
+    f_grid = np.full(nx, mask)
 
     for vertex_index, x_index in vertex_grid_map.items():
         f_grid[x_index] = f_vertices[vertex_index]
@@ -270,12 +276,13 @@ grid = optional_lru_cache(_grid)
 def vertex_to_grid_index_map(
     mesh: Mesh,
     jit: bool = True,
+    strict: bool = False,
 ) -> dict[int, int | tuple[int, ...]]:
     """
     LRU-cached and JIT-compiled under the hood. JIT-compilation
     requires a `numba` installation.
     """
-    if not is_cartesian(mesh):
+    if strict and not is_cartesian(mesh):
         raise ValueError("Mesh must be Cartesian")
     return _vertex_to_grid_index_map(mesh, jit)
 
@@ -448,6 +455,11 @@ def cross_section(
     use_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> tuple[np.ndarray, np.ndarray, float] | tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    """
+    `x_axis, y_line, y_value` in 2D
+
+    `x_axis, y_axis, z_grid, z_value` in 3D
+    """
     
     if fraction:
         f_fraction = value

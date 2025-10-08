@@ -1,3 +1,4 @@
+from enum import Enum
 from collections import defaultdict
 from typing import (
     Callable,
@@ -11,6 +12,12 @@ from typing import (
 from functools import lru_cache, update_wrapper, wraps
 from inspect import signature
 import time
+
+
+# TODO just Enum instead of str, Enum?
+class StrEnum(str, Enum):
+    def __repr__(self) -> str:
+        return repr(self.value)
 
 
 class classproperty:
@@ -46,26 +53,32 @@ R = TypeVar('R')
 def log_texec(
     func: Callable[P, R], 
     logged: dict[str, list[float]],
-    name: str | None = None, 
+    key: str | None = None,
+    n: int = 1, 
+    overwrite: bool = False,
 ) -> Callable[P, R]:
     """
     Mutates `logged`
     """
-    
-    if name is None:
-        name = func.__name__
+    if key is None:
+        key = func.__name__
 
-    assert name not in logged
+    n = int(n)
+    assert n > 0
+
+    if not overwrite:
+        assert key not in logged
 
     @wraps(func)
     def _(*args: P.args, **kwargs: P.kwargs):
-        t_start = time.perf_counter()
-        r = func(*args, **kwargs)
-        t_stop = time.perf_counter()
-        dt_exec = t_stop - t_start
-        if name not in logged:
-            logged[name] = []
-        logged[name].append(dt_exec)
+        for _ in range(n):
+            t_start = time.perf_counter()
+            r = func(*args, **kwargs)
+            t_stop = time.perf_counter()
+            dt_exec = t_stop - t_start
+            if key not in logged:
+                logged[key] = []
+            logged[key].append(dt_exec)
         return r
     
     return _

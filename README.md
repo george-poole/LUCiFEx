@@ -151,10 +151,10 @@ integrate(simulation, n_stop, t_stop, stoppers=...)
 
 and conditions for stopping the integration can be specified by `n_stop`, `t_stop` and `stoppers`.
 
-In a script designed to be run from the command line, the `integrate_from_cli` routine can instead be used with a function `simulation_factory` that returns a `Simulation` object
+In a script designed to be run from the command line, the `integrate_from_cli` routine can instead be used with a function `create_simulation` that returns a `Simulation` object
 
 ```python
-integrate_from_cli(simulation_factory)
+integrate_from_cli(create_simulation)
 ```
 
 to create a command line interface into which arguments for configuring, creating and integrating the simulation can be passed.

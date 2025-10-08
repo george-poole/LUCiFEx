@@ -25,6 +25,7 @@ from ..utils.dofs_utils import (
     SpatialMarkerTypes,
     SpatialExpression,
     SubspaceIndex,
+    DofsMethodType,
 )
 
 Value: TypeAlias = (
@@ -48,7 +49,7 @@ def periodic_relation(m: SpatialMarkerTypes, v: SpatialMarkerTypes):
 class BoundaryConditions:
     """
     The `'neumann'` boundary type with boundary value `g` assumes a form
-    `+∫ v·g ds` for the boundary term in the variational formulation
+    `+∫ v·g ds` for the boundary term in the variational formulation.
 
     More complicated boundary terms should instead be specified in the forms function.
     """
@@ -58,11 +59,17 @@ class BoundaryConditions:
         | tuple[BoundaryType, SpatialMarkerTypes, Value, SubspaceIndex]
         | tuple[SpatialMarkerTypes, Value]
         | tuple[SpatialMarkerTypes, Value, SubspaceIndex],
+        dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
     ):
         self._markers: list[SpatialMarkerTypes] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
+        
+        if isinstance(dofs_method, str):
+            dofs_method = [dofs_method] * len(bcs)
+        assert len(dofs_method) == len(bcs)
+        self._dofs_method = [DofsMethodType(i) for i in dofs_method]
 
         for bc in bcs:
             match bc:
@@ -93,15 +100,14 @@ class BoundaryConditions:
         """
         Strongly enforced boundary condition `u = uD` on `∂Ω`
         """
-        
         dirichlet = []
 
-        for uD, b, m, i in zip(
-            self._values, self._btypes, self._markers, self._subindices, 
+        for uD, b, m, i, d in zip(
+            self._values, self._btypes, self._markers, self._subindices, self._dofs_method,
             strict=True,
         ):
             if b in (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL):
-                dofs = dofs_indices(function_space, m, i)
+                dofs = dofs_indices(function_space, m, i, d)
                 if isinstance(uD, Constant):
                     if i is None:
                         dbc = dirichletbc(uD, dofs, function_space)
@@ -270,39 +276,3 @@ def create_enumerated_measure(
 
     mesh_tags = meshtags(mesh, fdim, facet_indices_sorted, facet_tags)
     return Measure(measure, domain=mesh, subdomain_data=mesh_tags)
-
-
-# def create_marked_dx(
-#     mesh: Mesh,
-#     markers: list[SpatialMarker] | None = None,
-#     tags: list[int] | None = None,
-# ) -> ufl.Measure:
-#     if not markers is None:
-#         return ufl.Measure("dx", domain=mesh)
-    
-#     if tags is None:
-#         tags = list(range(len(markers)))
-
-#     for t, m in zip(tags, markers, strict=True):
-#         m = as_spatial_indicator_func(m)
-#         cell_indices = locate_entities(mesh, mesh.topology.dim, m)
-#         raise NotImplementedError  # TODO
-
-#     mesh_tags = ...
-#     return ufl.Measure("dx", domain=mesh, subdomain_data=mesh_tags)
-
-
-# # alternative method 1 - this gets facets for the ENTIRE mesh boundary
-# function_space.mesh.domain.topology.create_connectivity(edim, tdim)
-# facets = dfx.mesh.exterior_facet_indices(function_space.mesh.topology)
-
-# # alernative method 2 - is this pointless when considering one (vs many) BC??
-# facet_indices = dfx.mesh.locate_entities(
-#     function_space.mesh, edim, self._marker
-# )
-# facet_indices = np.argsort(facet_indices)
-# facet_ids = np.full_like(facets, boundary_id)
-# facet_tags = dfx.mesh.meshtags(
-#     function_space.mesh, edim, facet_indices, facet_ids
-# )
-# facets = facet_tags.find(boundary_id)

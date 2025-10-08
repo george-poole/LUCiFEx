@@ -1,14 +1,7 @@
-from enum import Enum
-
 from dolfinx.mesh import CellType as DolfinxCellType
 from dolfinx.mesh import DiagonalType as DolfinxDiagonalType
 
-
-# TODO just Enum instead of str, Enum?
-class StrEnum(str, Enum):
-
-    def __repr__(self) -> str:
-        return repr(self.value)
+from .py_utils import StrEnum
 
 
 class CellType(StrEnum): 

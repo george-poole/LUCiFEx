@@ -58,7 +58,7 @@ def assemble_matrix(
     bcs: list[DirichletBCMetaClass] | None = None,
     mpc: MultiPointConstraint | None = None,
     diag: float = 1.0,
-    cache: bool | EllipsisType = ...,
+    cache: bool | EllipsisType = Ellipsis,
 ) -> None:
     if bcs is None:
         bcs = []
@@ -67,27 +67,19 @@ def assemble_matrix(
     coeffs_old = m.getAttr(ATTR_COEFFICIENTS)
     consts_new = None
     coeffs_new = None
-    if cache is ... or cache is True:
-        # TODO better as a dict? would need need all constants and funcs uniquely named
-        # consts_new = {i.name: i.value.copy() for i in a.ufl_constants}
-        # coeffs_new = {i.name: i.x.array.copy() for i in a.ufl_coefficients}
+    if cache is Ellipsis or cache is True:
         consts_new = [i.value.copy() for i in a.ufl_constants]
         coeffs_new = [i.x.array.copy() for i in a.ufl_coefficients]
 
-
-    if (consts_old is None and coeffs_old is None) or not (
-        cache is ...
-        and np.isclose(consts_old, consts_new).all()
-        # and np.isclose(coeffs_old, coeffs_new).all() # TODO handle vector-valued constants
-        and all(np.isclose(i, j).all() for i, j in zip(coeffs_old, coeffs_new, strict=True))
+    if (cache is False 
+        or (cache is True and (consts_old is None and coeffs_old is None))
+        or cache is Ellipsis and (np.isclose(consts_old, consts_new).all() and all(np.isclose(i, j).all() for i, j in zip(coeffs_old, coeffs_new, strict=True)))
     ):
-        # first assembly or assembling again
         _assemble_matrix(m, a, bcs, mpc, diag)
         m.setAttr(ATTR_CONSTANTS, consts_new)
         m.setAttr(ATTR_COEFFICIENTS, coeffs_new)
         return
     else:
-        # not assembling again
         return
 
 
@@ -194,7 +186,7 @@ def array_matrix(
     if copy:
         _m = m.copy()
     else:
-        _m = m._matrix
+        _m = m
 
     if indices is None:
         return _m

@@ -5,18 +5,16 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 
-from .utils import optional_ax, set_legend, set_axes
+from ..utils import filter_kwargs
+from .utils import optional_fig_ax, set_legend, set_axes
 
 
-@optional_ax
+@optional_fig_ax
 def plot_bar(
     fig: Figure,
     ax: Axes, 
     y_data: Iterable[float | Iterable[float]],
     x_ticks: Iterable[str] = None,
-    y_label: str | None = None,
-    x_label: str | None = None,
-    title: str | None = None,
     widths: float | Iterable[float] = 1.0,
     pad: float = 0.5,
     colors: str | Iterable[str | Iterable[str]] = "lightgrey",
@@ -25,7 +23,7 @@ def plot_bar(
     legend_title: str | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    set_axes(ax, x_label=x_label, y_label=y_label, title=title)
+    filter_kwargs(set_axes)(ax, **kwargs)
 
     y_data = [[y] if not isinstance(y, Iterable) else y for y in y_data]
 
@@ -43,6 +41,7 @@ def plot_bar(
         centres[i] = (
             centres[i - 1] + pad + 0.5 * (widths_block[i] + widths_block[i - 1])
         )
+    x_ticks = [str(i) for i in x_ticks]
     ax.set_xticks(centres, x_ticks)
 
     for y, xc, w, c, ec in zip(

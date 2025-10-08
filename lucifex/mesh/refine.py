@@ -4,24 +4,28 @@ from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
 from ..utils import as_spatial_marker, SpatialMarkerOrExpression
 from .cartesian import CellType
-from .utils import overload_mesh, copy_mesh
 
 
-@overload_mesh
 def refine(
     mesh: Mesh,
     marker: SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression],
     n_stop: int = 1,
     condition: Callable[[Mesh], bool] = None,
     redistribute: bool = True,
-) -> None:
-    assert is_simplex_mesh(mesh)
+    name: str | None = None,
+) -> Mesh:
+    """
+    For simplex meshes only.
+    """
+    if not is_simplex_mesh(mesh):
+        raise ValueError('Only implemented for simplex meshes.')
+    
     marker = as_spatial_marker(marker)
 
     if condition is None:
         condition = lambda _: False
 
-    mesh_refined = copy_mesh(mesh)
+    mesh_refined = mesh
     _n = 0
     while _n < n_stop and not condition(mesh_refined):
         fdim = mesh.topology.dim - 1
@@ -30,12 +34,10 @@ def refine(
         mesh_refined = dolfinx_refine(mesh_refined, facets, redistribute)
         _n += 1
 
-    mesh.__init__(
-        mesh_refined.comm,
-        mesh_refined.topology,
-        mesh_refined.geometry,
-        mesh_refined.ufl_domain(),
-    )
+    if name is not None:
+        mesh_refined.name = name
+
+    return mesh_refined
 
 
 def is_simplex_mesh(mesh: Mesh) -> bool:
@@ -49,3 +51,16 @@ def is_simplex_mesh(mesh: Mesh) -> bool:
             return cell_name == CellType.TRIANGLE
         case 3:
             return cell_name == CellType.TETRAHEDRON
+
+
+def copy_mesh(
+    mesh: Mesh, 
+    name: str | None = None,
+) -> Mesh:
+    """
+    For simplex meshes only
+    """
+    # TODO dolfinx 0.7.0+ features to handle non-simplex meshes
+    nothing_marker = lambda x: (x[0] > 0) & (x[0] < 0) 
+    mesh_copied = refine(mesh, nothing_marker, name=name)
+    return mesh_copied
