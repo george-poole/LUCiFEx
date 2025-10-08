@@ -1,10 +1,10 @@
-from ufl.core.expr import Expr
+import numpy as np
 from ufl import dx, Form, grad, inner, TestFunction
 
-from lucifex.fem import LUCiFExConstant as Constant, LUCiFExFunction as Function
-from lucifex.fdm import DT, CN, FiniteDifference, ConstantSeries, FunctionSeries
+from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fdm import DT, FiniteDifference, ConstantSeries, FunctionSeries
 from lucifex.mesh import interval_mesh
-from lucifex.solver import BoundaryConditions, bvp_solver, dx_solver, eval_solver
+from lucifex.solver import BoundaryConditions, ibvp_solver, dx_solver, eval_solver
 from lucifex.sim import configure_simulation
 from lucifex.utils import maximum
 
@@ -21,31 +21,34 @@ def diffusion(
 
 
 @configure_simulation(
-    write_step=1, 
+    store_step=None,
+    write_step=None, 
     write_file='series',
     dir_base='./data',
-    dir_params=('Lx, Nx'),
+    dir_params=('Lx', 'Nx'),
 )
-def diffusion_simulation_1d(
+def diffusion_simulation_interval(
     Lx: float, 
     Nx: int, 
     dt: float, 
     m_exponent: float,
     D_fdm: FiniteDifference,
 ):
+    order = max(D_fdm.order, 2)
     mesh = interval_mesh(Lx, Nx)
-    u = FunctionSeries((mesh, 'P',  1), "u", D_fdm.order)
-    t = ConstantSeries(mesh, 't', D_fdm.order)
+    u = FunctionSeries((mesh, 'P',  1), "u", order)
+    t = ConstantSeries(mesh, 't', order, ics=0.0)
     dt = Constant(mesh, dt, 'dt')
     bcs = BoundaryConditions(
-        ('dirichlet', lambda x: x[0], 0.0)
-        ('dirichlet', lambda x: x[0] - Lx, 0.0)
+        ('dirichlet', lambda x: x[0], 0.0),
+        ('dirichlet', lambda x: x[0] - Lx, 0.0),
     )
-    bvp = bvp_solver(diffusion, bcs)(u, dt, D_fdm)
-    m = ConstantSeries(mesh, "m", D_fdm.order)
+    ics = lambda x: np.exp(-(x[0] - Lx/2)**2 / (0.01 * Lx))
+    u_solver = ibvp_solver(diffusion, ics, bcs)(u, dt, D_fdm)
+    m = ConstantSeries(mesh, "m", order)
     m_integrand = lambda u, n: u ** n
     m_solver = dx_solver(m, m_integrand)(u[0], m_exponent)
-    uMax = ConstantSeries(mesh, "uMinMax", D_fdm.order)
-    uMax_solver = eval_solver(uMax, maximum(u[0]))
-    solvers = [bvp, m_solver, uMax_solver]
+    uMax = ConstantSeries(mesh, "uMax", order)
+    uMax_solver = eval_solver(uMax, maximum)(u[0])
+    solvers = [u_solver, m_solver, uMax_solver]
     return solvers, t, dt

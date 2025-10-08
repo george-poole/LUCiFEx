@@ -27,7 +27,7 @@ def set_fem_function(
 
 
 @singledispatch
-def _set_fem_function(value):
+def _set_fem_function(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
@@ -83,7 +83,7 @@ def interpolate_fem_function(
 
 
 @singledispatch
-def _interpolate_fem_function(u, *_):
+def _interpolate_fem_function(u, *_, **__):
     raise MultipleDispatchTypeError(u)
 
 
@@ -134,7 +134,7 @@ def set_fem_constant(
 
 
 @singledispatch
-def _set_fem_constant(value):
+def _set_fem_constant(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
@@ -162,7 +162,7 @@ def set_value(obj: Function | Constant, value: Any) -> None:
 
 
 @singledispatch
-def _set_value(obj, _):
+def _set_value(obj, *_, **__):
     raise MultipleDispatchTypeError(obj)
 
 

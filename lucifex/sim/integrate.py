@@ -46,9 +46,9 @@ def integrate(
     if (n_stop, t_stop).count(None) == 2:
         raise ValueError('Must provide at least one of `n_stop` and `t_stop`')
     
-    _stoppers: list[Stopper] = [as_stopper(s) for s in stoppers]
+    _stoppers: list[Stopper] = [as_stopper(s, simulation) for s in stoppers]
     _stoppers.extend(simulation.stoppers)
-    _writers: list[Writer] = [as_writer(w) for w in writers]
+    _writers: list[Writer] = [as_writer(w, simulation) for w in writers]
     _writers.extend(simulation.writers)
 
     n_init_solvers = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
@@ -95,10 +95,11 @@ def integrate(
         _dt = dt
 
     _n = 0
+    _time_stoppers: list[Stopper] = []
     if n_stop is not None:
-        _stoppers.append(Stopper(lambda: not _n < n_stop))
+        _time_stoppers.append(Stopper(lambda: not _n < n_stop))
     if t_stop is not None:
-        _stoppers.append(Stopper(lambda: not t[0].value < t_stop))
+        _time_stoppers.append(Stopper(lambda: not t[0].value < t_stop))
 
     _texec = {} if texec is True else texec if isinstance(texec, dict) else None
     if isinstance(_texec, dict):
@@ -107,7 +108,7 @@ def integrate(
         for w in _writers:
             w.write = log_texec(w.write, _texec, f'{w.name}_{w.write.__name__}')
 
-    while all(not s.stop(t[0]) for s in _stoppers):
+    while all(not s.stop(t[0]) for s in _time_stoppers):
         if _n < n_init:
             _solvers = solvers_init
         else:
@@ -115,6 +116,8 @@ def integrate(
         [s.solve() for s in _solvers]
         t.update(t[0].value + _dt.value, future=True)
         [w.write(t[0]) for w in _writers]
+        if any(s.stop(t[0]) for s in _stoppers):
+            break
         [s.forward(t[0]) for s in simulation.series]
         t.forward(t[0])
         _n += 1

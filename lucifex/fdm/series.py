@@ -4,7 +4,7 @@ from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpe
 from typing_extensions import Self
 
 import numpy as np
-from ufl import TestFunction, TrialFunction, split
+from ufl import split
 from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Function, Constant, Expression
 from dolfinx.mesh import Mesh

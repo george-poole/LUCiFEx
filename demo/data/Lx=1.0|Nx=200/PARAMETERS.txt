@@ -1,0 +1,6 @@
+n_stop = 100
+t_stop = None
+dt_init = None
+n_init = 0
+resume = False
+write_step = {}
