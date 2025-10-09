@@ -27,7 +27,7 @@ def diffusion(
     dir_base='./data',
     dir_params=('Lx', 'Nx'),
 )
-def diffusion_simulation_interval(
+def diffusion_simulation_1d(
     Lx: float, 
     Nx: int, 
     dt: float, 

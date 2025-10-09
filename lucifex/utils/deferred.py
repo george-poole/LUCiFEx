@@ -22,13 +22,6 @@ class DeferredCondition(Generic[P]):
         condition: Callable[P, bool],
     ):        
         self._condition = condition
-
-    @classmethod
-    def from_args(
-        cls, 
-        evaluation: Callable[A, bool],
-    ) -> Callable[A, Self]: # FIXME Self[[]]
-        return lambda *a, **k: cls(defer(evaluation)(*a, **k))
     
     def evaluate(self, *args: P.args, **kwargs: P.kwargs) -> bool:
         return self._condition(*args, **kwargs)
@@ -36,8 +29,6 @@ class DeferredCondition(Generic[P]):
     
 Q = ParamSpec('Q')
 P = ParamSpec('P')
-B = ParamSpec('B')
-A = ParamSpec('A')
 class DeferredRoutine(DeferredCondition[P], Generic[Q, P]):
     def __init__(
         self,
@@ -47,20 +38,6 @@ class DeferredRoutine(DeferredCondition[P], Generic[Q, P]):
         super().__init__(condition)
         self._routine = routine
 
-    @classmethod
-    def from_args(
-        cls, 
-        routine: Callable[B, bool],
-        condition: Callable[A, bool],
-    ) -> Callable[B, Callable[A, Self]]: # FIXME Self[[], []]
-        def _(*args, **kwargs):
-            r = defer(routine)(*args, **kwargs)
-            def _inner(*a, **k):
-                c = defer(condition)(*a, *k)
-                return cls(r, c)
-            return _inner
-        return _
-    
     def execute(
         self, 
         *args: Q.args, 

@@ -16,7 +16,10 @@ from ..io.checkpoint import write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_texec
 
 from ..utils.deferred import Writer, Stopper
-from .deferred import StopperFactory, WriterFactory, as_stopper, as_writer, is_factory
+from .deferred import (
+    StopperFromSimulation, WriterFromSimulation, 
+    as_stopper, as_writer, is_from_simulation,
+)
 from .simulation import configure_simulation, Simulation
 from .utils import write_texec, signature_name_collision
 
@@ -30,8 +33,8 @@ def integrate(
     resume: bool = False, 
     overwrite: bool | None = None,
     texec: bool | dict = False,
-    stoppers: Iterable[Stopper | Callable[[], bool] | StopperFactory] = (),
-    writers: Iterable[Writer | Callable[[], None] | WriterFactory] = (),
+    stoppers: Iterable[Stopper | Callable[[], bool] | StopperFromSimulation] = (),
+    writers: Iterable[Writer | Callable[[], None] | WriterFromSimulation] = (),
 ) -> None:
     """
     Mutates `simulation`
@@ -131,8 +134,8 @@ def integrate(
 def integrate_from_cli(
     simulation_func: Callable[..., Simulation] | Callable[..., Callable[..., Simulation]],
     description: str = 'Run a simulation from the command line',
-    stoppers: Iterable[StopperFactory | Callable[..., StopperFactory]] = (),
-    writers: Iterable[WriterFactory | Callable[..., WriterFactory]] = (),
+    stoppers: Iterable[StopperFromSimulation | Callable[..., StopperFromSimulation]] = (),
+    writers: Iterable[WriterFromSimulation | Callable[..., WriterFromSimulation]] = (),
     eval_locals: Iterable[object | tuple[str, object]] | None = None,
 ) -> Simulation:
     """Note that if single quotations are used to enclose a Python code snippet entered at the
@@ -160,10 +163,10 @@ def integrate_from_cli(
             )
         )
 
-    stoppers_from_sim: list[StopperFactory] =  [s for s in stoppers if is_factory(s)]
-    stoppers_from_cli: list[Callable[..., StopperFactory]] = [s for s in stoppers if not is_factory(s)]
-    writers_from_sim: list[WriterFactory] =  [w for w in writers if is_factory(w)]
-    writers_from_cli: list[Callable[..., WriterFactory]]= [w for w in writers if not is_factory(w)]
+    stoppers_from_sim: list[StopperFromSimulation] =  [s for s in stoppers if is_from_simulation(s)]
+    stoppers_from_cli: list[Callable[..., StopperFromSimulation]] = [s for s in stoppers if not is_from_simulation(s)]
+    writers_from_sim: list[WriterFromSimulation] =  [w for w in writers if is_from_simulation(w)]
+    writers_from_cli: list[Callable[..., WriterFromSimulation]]= [w for w in writers if not is_from_simulation(w)]
 
     if signature_name_collision(simulation_func, integrate, *stoppers_from_cli, *writers_from_cli):
         raise TypeError('Parameter names must be unique to each callable.')
@@ -209,9 +212,9 @@ def integrate_from_cli(
     else:
         simulation = simulation_func(**solvers_kwargs)
 
-    stoppers: list[StopperFactory] = [s(**k) for s, k in zip(stoppers_from_cli, stop_kwargs)]
+    stoppers: list[StopperFromSimulation] = [s(**k) for s, k in zip(stoppers_from_cli, stop_kwargs)]
     stoppers.extend([s(simulation) for s in stoppers_from_sim])
-    writers: list[WriterFactory] = [s(**k) for s, k in zip(writers_from_cli, write_kwargs)]
+    writers: list[WriterFromSimulation] = [s(**k) for s, k in zip(writers_from_cli, write_kwargs)]
     writers.extend([w(simulation) for w in writers_from_sim])
 
     integrate(simulation, **integrate_kwargs, stoppers=stoppers, writers=writers)

@@ -1,57 +1,58 @@
 from collections.abc import Callable
 from inspect import Signature, signature
-from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias, Protocol, Generic, TypeAlias
+from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias
 
 from dolfinx.fem import Constant, Function
 
 from ..fdm import FunctionSeries, ConstantSeries
 from ..io import write
-from ..utils.deferred import Stopper, Writer
+from ..utils.deferred import Stopper, Writer, defer
 from .simulation import Simulation
 
 
+T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-StopperFactory: TypeAlias = Callable[[Simulation], Stopper]
+StopperFromSimulation: TypeAlias = Callable[[Simulation], Stopper]
 
 @overload
-def create_stopper(
-    u: FunctionSeries | ConstantSeries | Function | Constant,
-    condition: Callable[Concatenate[FunctionSeries | ConstantSeries | Function | Constant, P], bool],
+def simulation_stopper(
+    u: T,
+    condition: Callable[Concatenate[T, P], bool],
 ) -> Callable[P, Stopper]:
     ...
 
 @overload
-def create_stopper(
+def simulation_stopper(
     u: str,
-    condition: Callable[Concatenate[FunctionSeries | ConstantSeries | Function | Constant, P], bool],
-) -> Callable[P, StopperFactory]:
+    condition: Callable[Concatenate[T, P], bool],
+) -> Callable[P, StopperFromSimulation]:
     ...
 
-def create_stopper(
-    u: FunctionSeries | ConstantSeries | str,
-    condition: Callable[..., bool],
+def simulation_stopper(
+    u: str | T,
+    condition: Callable[Concatenate[T, P], bool],
 ):  
     paramspec_params = list(signature(condition).parameters.values())[1:]
 
-    def _inner(*args: P.args, **kwargs: P.kwargs):
+    def _(*args: P.args, **kwargs: P.kwargs):
+        nonlocal condition
         if isinstance(u, str):
-            _inner.__signature__ = Signature(paramspec_params, return_annotation=Callable[[Simulation], Stopper])
-            _lambda = lambda sim: Stopper.from_args(condition)(sim[u], *args, **kwargs)
-            return _lambda
+            _.__signature__ = Signature(paramspec_params, return_annotation=Callable[[Simulation], Stopper])
+            return lambda sim: simulation_stopper(sim[u], condition)(*args, **kwargs)
         else:
-            _inner.__signature__ = Signature(paramspec_params, return_annotation=Stopper)
-            return Stopper.from_args(condition)(u, *args, **kwargs)
+            _.__signature__ = Signature(paramspec_params, return_annotation=Stopper)
+            return Stopper(defer(condition)(u, *args, **kwargs))
 
-    return _inner
+    return _
             
 
 def as_stopper(
-    arg: Stopper | Callable[[], bool] | StopperFactory,
+    arg: Stopper | Callable[[], bool] | StopperFromSimulation,
     sim: Simulation,
 ) -> Stopper:
     if isinstance(arg, Stopper):
         return arg
-    elif is_factory(arg):
+    elif is_from_simulation(arg):
         return arg(sim)
     else:
         return Stopper(arg)
@@ -59,122 +60,113 @@ def as_stopper(
 
 T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-WriterFactory: TypeAlias = Callable[[Simulation], Writer]
-R = TypeVar('R', Writer, WriterFactory)
-
-class WriterFromStep(Generic[R], Protocol):
-    def __call__(
-        self, 
-        dir_path: str | None = None,
-        file_name: str | None = None,
-        step: int | float | None = None
-    ) -> R:
-        ...
-
-
-class WriterFromParamspec(Generic[R, P],Protocol):
-    def __call__(
-        self, 
-        dir_path: str | None = None,
-        file_name: str | None = None,
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> R:
-        ...
-
+WriterFromSimulation: TypeAlias = Callable[[Simulation], Writer]
 
 @overload
-def create_writer(
-    u: FunctionSeries | ConstantSeries | Function | Constant,
-    *,
-    routine: Callable[[float, FunctionSeries | ConstantSeries], None] | None = None,
-) -> WriterFromStep[Writer]:
+def simulation_writer(
+    u: T,
+    condition: Callable[Concatenate[T, P], bool],
+    routine: Callable[[float, T], None] | None = None,
+    dir_path: str | None = None,
+    file_name: str | None = None,
+) -> Callable[P, Writer]:
     ...
 
 
 @overload
-def create_writer(
-    u: FunctionSeries | ConstantSeries | Function | Constant,
-    condition: Callable[Concatenate[FunctionSeries | ConstantSeries | Function | Constant, P], bool],
-    *,
-    routine: Callable[[float, FunctionSeries | ConstantSeries], None] | None = None,
-) -> WriterFromParamspec[Writer, P]:
+def simulation_writer(
+    u: T,
+    condition: int | float | None = None,
+    routine: Callable[[float, T], None] | None = None,
+    dir_path: str | None = None,
+    file_name: str | None = None,
+) -> Writer:
     ...
 
+
 @overload
-def create_writer(
+def simulation_writer(
     u: str,
-    *,
-    routine: Callable[[float, FunctionSeries | ConstantSeries], None] | None = None,
-) -> WriterFromStep[WriterFactory]:
+    condition: Callable[Concatenate[T, P], bool],
+    routine: Callable[[float, T], None] | None = None,
+    dir_path: str | None = None,
+    file_name: str | None = None,
+) -> Callable[P, WriterFromSimulation]:
     ...
 
 @overload
-def create_writer(
+def simulation_writer(
     u: str,
-    condition: Callable[Concatenate[FunctionSeries | ConstantSeries | Function | Constant, P], bool],
-    *,
-    routine: Callable[[float, FunctionSeries | ConstantSeries], None] | None = None,
-) -> WriterFromParamspec[WriterFactory, P]:
+    condition: int | float | None = None,
+    routine: Callable[[float, T], None] | None = None,
+    dir_path: str | None = None,
+    file_name: str | None = None,
+) -> WriterFromSimulation:
     ...
 
-def create_writer(
-    u: FunctionSeries | ConstantSeries | Function | Constant | str,
-    condition: Callable[..., bool] | None = None,
-    *,
-    routine: Callable[..., None] | None = None,
+
+def simulation_writer(
+    u: str | T,
+    condition: Callable[Concatenate[T, P], bool] | int | float |  None = None,
+    routine: Callable[[float, T], None] | None = None,
+    dir_path: str | None = None,
+    file_name: str | None = None,
 ):
-
-    def _inner(
-        dir_path=None,
-        file_name=None,
-        *args,
-        **kwargs,
-        ):
-        nonlocal routine
+    if isinstance(condition, (int, float)) or condition is None:
         if isinstance(u, str):
-            def _(sim: Simulation) -> Writer:
-                if dir_path is None:
-                    dir_path = sim.dir_path
-                return create_writer(sim[u], condition, routine=routine)(dir_path, file_name, *args, **kwargs)
+            def _(sim: Simulation) -> Stopper:
+                return simulation_writer(
+                sim[u], 
+                condition, 
+                routine, 
+                sim.dir_path if dir_path is None else dir_path,
+                file_name,
+            )
             return _
         else:
-            if condition is not None:
-                _condition = lambda: condition(*args, **kwargs)
-            else:
-                _condition = condition
             if routine is None:
-                routine = lambda t: write(u, file_name, dir_path, t, 'a', u.mesh.comm)
+                _routine = lambda t: write(u, file_name, dir_path, t, 'a', u.mesh.comm)
             else:
-                routine = lambda t: routine(t, u)
-            return Writer(routine, _condition, u.name)
-
-    # FIXME      
-    # if condition is None:
-    #     params = list(signature(WriterFromStep.__call__).parameters.values())[1:]
-    #     _inner.__signature__ = Signature(params)
-    # else:
-    #     params = [*list(signature(WriterFromStep.__call__).parameters.values())[1:3],
-    #               *list(signature(condition).parameters.values())[1:],
-    #             ]
-    #     _inner.__signature__ = Signature(params)
-    
-    return _inner
+                _routine = lambda t: routine(t, u)
+            return Writer(_routine, condition, u)
+    else:
+        paramspec_params = list(signature(condition).parameters.values())[1:]
+        def _(
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ):
+            if isinstance(u, str):
+                _.__signature__ = Signature(paramspec_params, return_annotation=Callable[[Simulation], Writer])
+                return lambda sim: simulation_writer(
+                    sim[u], 
+                    condition, 
+                    routine, 
+                    sim.dir_path if dir_path is None else dir_path,
+                    file_name,
+                )(*args, **kwargs)
+            else:
+                _.__signature__ = Signature(paramspec_params, return_annotation=Writer)
+                if routine is None:
+                    _routine = lambda t: write(u, file_name, dir_path, t, 'a', u.mesh.comm)
+                else:
+                    _routine = lambda t: routine(t, u)
+                return Writer(_routine, defer(condition)(u, *args, **kwargs), u.name)
+        return _
 
 
 def as_writer(
-    arg: Writer | Callable[[], bool] | WriterFactory,
+    arg: Writer | Callable[[], bool] | WriterFromSimulation,
     sim: Simulation,
 ) -> Writer:
     if isinstance(arg, Writer):
         return arg
-    elif is_factory(arg):
+    elif is_from_simulation(arg):
         return arg(sim)
     else:
         return Writer(arg)
     
 
-def is_factory(func: Callable) -> bool:
+def is_from_simulation(func: Callable) -> bool:
     assert callable(func)
     if len(signature(func).parameters) != 1:
         return False
