@@ -83,7 +83,7 @@ def mesh_boundary(
                     raise ValueError(f"'{list(boundaries.keys())[i]}' is not on the mesh boundary.")
         if complete:
             marker_all = lambda x: np.full_like(x[0], True)
-            n_total = locate_entities_boundary(mesh, dim, marker_all)
+            n_total = len(locate_entities_boundary(mesh, dim, marker_all))
             if n_total != sum(n_boundary_entities):
                 raise ValueError('Boundaries do not cover the complete mesh boundary')
             

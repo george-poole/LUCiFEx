@@ -1,13 +1,15 @@
-NOTEBOOK=${1:-0}
+GLOB=$1
+IPYNB=($(find . -name "${GLOB}*.ipynb"))
 
-if [ $NOTEBOOK -eq 0 ]
-then
-    IPYNB=($(find . -name "*.ipynb"))
-    echo "${IPYNB[@]}"
-    for i in "${IPYNB[@]}"
+for i in "${IPYNB[@]}"
     do 
+        echo $i found
+    done
+
+echo 
+
+for i in "${IPYNB[@]}"
+    do 
+        echo $i executing ...
         jupyter nbconvert --execute --to notebook --inplace "${i}" --allow-errors  
     done
-else
-   jupyter nbconvert --execute --to notebook --inplace $NOTEBOOK --allow-errors  
-fi

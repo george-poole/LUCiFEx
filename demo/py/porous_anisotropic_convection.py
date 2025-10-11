@@ -9,7 +9,8 @@ from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import Simulation, configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
 
-from py.porous_convection import porous_convection_simulation, rectangle_domain
+from .porous import porous_convection_simulation
+from .utils import rectangle_domain
 
 
 def permeability_cross_bedded(
@@ -17,6 +18,12 @@ def permeability_cross_bedded(
     kappa,
     vartheta,
 ):
+    """
+    `𝖪(ϕ) = K(ϕ) (
+        (cos²ϑ + κsin²ϑ , (1 - κ)cosϑsinϑ), 
+        ((1 - κ)cosϑsinϑ , κcos²ϑ + sin²ϑ), 
+    )`
+    """
     cs = cos(vartheta)
     sn = sin(vartheta)  
     tensor = as_tensor(
@@ -32,7 +39,7 @@ def permeability_cross_bedded(
     store_step=1,
     write_step=None,
 )
-def porous_convection_anisotropic_rectangle(
+def porous_anisotropic_convection_rectangle(
     # domain
     Lx: float = 2.0,
     Ly: float = 1.0,

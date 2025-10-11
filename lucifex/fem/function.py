@@ -8,7 +8,7 @@ from dolfinx.fem import Function
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import fem_function_space, SpatialPerturbation
+from ..utils import fem_function_space, SpatialPerturbation, set_fem_function
 from .unsolved import UnsolvedType
 
 

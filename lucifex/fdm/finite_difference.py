@@ -400,3 +400,25 @@ def apply_finite_difference(
         return D_fdm(expr, trial)
     if isinstance(D_fdm, tuple):
         return finite_difference_argwise(D_fdm, expr, trial)
+    
+
+def ImplicitDiscretizationError(
+    D_fdm: FiniteDifference,
+    msg: str = '',
+):
+    return DiscretizationError('Implicit', D_fdm, msg)
+
+
+def ExplicitDiscretizationError(
+    D_fdm: FiniteDifference,
+    msg: str = '',
+):
+    return DiscretizationError('Explicit', D_fdm, msg)
+
+
+def DiscretizationError(
+    required: str,
+    D_fdm: FiniteDifference,
+    msg: str = '',
+):
+    raise RuntimeError(f"{required} discretization required, not {D_fdm}'. {msg}")

@@ -32,7 +32,7 @@ class DiagonalType(StrEnum):
     
 
 class BoundaryType(StrEnum): 
-    """Enumeration class of implemented boundary condition types"""
+    """Enumeration class containing implemented boundary condition types"""
 
     DIRICHLET = "dirichlet"
     NEUMANN = "neumann"

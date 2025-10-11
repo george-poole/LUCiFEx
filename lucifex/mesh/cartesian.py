@@ -33,7 +33,7 @@ def rectangle_mesh(
     Nx: int,
     Ny: int,
     name: str | None = None,
-    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.QUADRILATERAL,
+    cell: CellType | DiagonalType = CellType.QUADRILATERAL,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
     **kwargs,
 ) -> Mesh:
@@ -52,7 +52,10 @@ def rectangle_mesh(
         mesh = create_rectangle(
         comm, (bottom_left, top_right), (Nx, Ny), cell.cpp_type, **kwargs,)
     else:
-        diagonal = DiagonalType(cell)
+        if cell == CellType.TRIANGLE:
+            diagonal = DiagonalType.RIGHT
+        else:
+            diagonal = DiagonalType(cell)
         mesh = create_rectangle(
             comm, 
             (bottom_left, top_right), 
@@ -76,7 +79,7 @@ def box_mesh(
     Ny: int,
     Nz: int,
     name: str | None = None,
-    cell: DiagonalType | Literal[CellType.QUADRILATERAL] = CellType.HEXAHEDRON,
+    cell: CellType = CellType.HEXAHEDRON,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
     **kwargs,
 ) -> Mesh:

@@ -4,13 +4,13 @@ from types import EllipsisType
 import numpy as np
 from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
-from ufl import (dx, Form, FacetNormal, inner,
+from ufl import (dx, Form, FacetNormal, inner, as_vector, inv, div,
                  as_matrix, Dx, TrialFunction, TestFunction,
-                 det, transpose,  as_matrix)
+                 det, transpose,  as_matrix, TrialFunctions, TestFunctions)
 
-from lucifex.fdm import DT, FiniteDifference
+from lucifex.fdm import DT, FiniteDifference, apply_finite_difference
 from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
-from lucifex.mesh import MeshBoundary, rectangle_mesh, mesh_boundary
+from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 
     ExprSeries, finite_difference_order, cfl_timestep,
@@ -23,41 +23,11 @@ from lucifex.solver import (
 from lucifex.utils import extremum, is_tensor
 from lucifex.sim import Simulation
 
-
-def rectangle_domain(
-    Lx: float,
-    Ly: float,
-    Nx: int,
-    Ny: int,
-    cell: str,
-    name: str = 'LxLy',
-    clockwise_names: tuple[str, str, str, str] = ('upper', 'right', 'lower', 'left'),
-) -> tuple[Mesh, MeshBoundary]:
-    
-    mesh = rectangle_mesh(Lx, Ly, Nx, Ny, name, cell)
-    boundary = mesh_boundary(
-        mesh,
-        {
-            clockwise_names[0]: lambda x: x[1] - Ly,
-            clockwise_names[1]: lambda x: x[0] - Lx,
-            clockwise_names[2]: lambda x: x[1],
-            clockwise_names[3]: lambda x: x[0],
-        },
-    )
-
-    return mesh, boundary
+from .utils import flux
 
 
-def flux(
-    c: Function,
-    u: Function | Constant,
-    d: Function,
-    Ra: Constant
-) -> tuple[Expr, Expr]:
-    flux_adv = inner(u, grad(c))
-    n = FacetNormal(c.function_space.mesh)
-    flux_diff =  (1/Ra) * inner(n, d * grad(c))
-    return flux_adv, flux_diff
+def streamfunction_velocity(psi: Function) -> Expr:
+    return as_matrix([[0, 1], [-1, 0]]) * grad(psi)
 
 
 def darcy_streamfunction(
@@ -84,8 +54,40 @@ def darcy_streamfunction(
     return forms
 
 
-def streamfunction_velocity(psi: Function) -> Expr:
-    return as_matrix([[0, 1], [-1, 0]]) * grad(psi)
+def darcy_incompressible(
+    up: Function | FunctionSeries,
+    rho: Expr | Function | Constant,
+    k: Expr | Function | Constant,
+    mu: Expr | Function | Constant,
+    egx: Expr | Function | Constant | float,
+    egy: Expr | Function | Constant | float,
+    p_bcs: BoundaryConditions | None = None,
+) -> list[Form]:
+    """
+    `𝐮 = -(K/μ)⋅(∇p + ρe₉)` \\
+    `∇⋅𝐮 = 0`
+    """
+    v, q = TestFunctions(up.function_space)
+    u, p = TrialFunctions(up.function_space)
+    n = FacetNormal(up.function_space.mesh)
+    eg = as_vector([egx, egy])
+
+    if is_tensor(k):
+        F_velocity = inner(v, mu * inv(k) * u) * dx
+    else:
+        F_velocity = inner(v, mu * u / k) * dx
+    F_pres = -p * div(v) * dx
+    F_buoy = inner(v, eg) * rho * dx
+    F_div = q * div(u) * dx
+
+    forms = [F_velocity, F_pres, F_buoy, F_div]
+
+    if p_bcs is not None:
+        ds, p_natural = p_bcs.boundary_data(up.function_space, 'natural')
+        F_bcs = sum([inner(v, n) * pN * ds(i) for i, pN in p_natural])
+        forms.append(F_bcs)
+
+    return forms
 
 
 def porous_advection_diffusion(
@@ -93,13 +95,16 @@ def porous_advection_diffusion(
     dt: Constant,
     phi: Series | Function | Expr,
     u: FunctionSeries,
-    Ra: Constant,
+    Pe: Constant,
     d: Series | Function | Expr,
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
     D_diff: FiniteDifference,
     D_phi: FiniteDifference = AB1,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
+    """
+    `ϕ∂c/∂t + 𝐮·∇c = 1/Pe ∇·(D·∇c)`
+    """
     v = TestFunction(c.function_space)
 
     if isinstance(phi, Series):
@@ -116,15 +121,48 @@ def porous_advection_diffusion(
             adv = (1 / phi) * D_adv(inner(u, grad(c)))
     F_adv = v * adv * dx
 
-    F_diff = (1/Ra) * inner(grad(v / phi), d * grad(D_diff(c))) * dx
+    F_diff = (1/Pe) * inner(grad(v / phi), d * grad(D_diff(c))) * dx
 
     forms = [F_dcdt, F_adv, F_diff]
 
     if bcs is not None:
         ds, c_neumann = bcs.boundary_data(c.function_space, 'neumann')
-        F_neumann = sum([-(1 / Ra) * v * cN * ds(i) for i, cN in c_neumann])
+        F_neumann = sum([-(1 / Pe) * v * cN * ds(i) for i, cN in c_neumann])
         forms.append(F_neumann)
 
+    return forms
+
+
+def porous_advection_diffusion_reaction(
+    c: FunctionSeries,
+    dt: Constant,
+    phi: Series | Function | Expr,
+    u: FunctionSeries,
+    Pe: Constant,
+    d: Series | Function | Expr,
+    Ki: Constant,
+    r: Function | Expr | Series | tuple[Callable, tuple],
+    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
+    D_diff: FiniteDifference,
+    D_reac: FiniteDifference,
+    D_phi: FiniteDifference = AB1,
+    bcs: BoundaryConditions | None = None,
+) -> list[Form]:
+    """
+    `ϕ∂c/∂t + 𝐮·∇c = 1/Pe ∇·(D·∇c) + Ki R`
+    """
+    forms = porous_advection_diffusion(c, dt, phi, u, Pe, d, D_adv, D_diff, D_phi, bcs)
+    if np.isclose(float(Ki), 0):
+        return forms
+    
+    if isinstance(phi, Series):
+        phi = D_phi(phi)
+
+    v = TestFunction(c.function_space)
+    r = apply_finite_difference(D_reac, r, c)
+    F_reac = -v * Ki * r  * (1 / phi)  * dx
+
+    forms.append(F_reac)
     return forms
 
 
@@ -178,22 +216,26 @@ def porous_convection_simulation(
     Default constitutive relations are uniform porosity `ϕ = 1`, 
     isotropic quadratic permeability `K(ϕ) = ϕ²`, isotropic linear solutal
     dispersion `D(ϕ) = ϕ` and uniform viscosity `μ = 1`.
-    """    
-
+    """ 
+    # time
     order = finite_difference_order(D_adv, D_diff)
+    t = ConstantSeries(Omega, "t", order, ics=0.0)  
+    dt = ConstantSeries(Omega, 'dt')
 
-    # flow fields
+    # constants
+    Ra = Constant(Omega, Ra, 'Ra')
+
+    # default boundary conditions
+    c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
+    psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0)) if psi_bcs is Ellipsis else psi_bcs
+
+    # flow
     psi_deg = 2
     psi = FunctionSeries((Omega, 'P', psi_deg), 'psi')
     u = FunctionSeries((Omega, "P", psi_deg - 1, 2), "u", order)
-
-    # transport field
-    t = ConstantSeries(Omega, "t", order, ics=0.0)  
-    dt = ConstantSeries(Omega, 'dt')
-    Ra = Constant(Omega, Ra, 'Ra')
+    # transport
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
-
-    # constitutive relations
+    # constitutive
     phi = Function((Omega, 'P', 1), porosity, 'phi')
     k: Expr = permeability(phi)
     try:
@@ -202,28 +244,18 @@ def porous_convection_simulation(
         d: Expr = dispersion(phi)
     rho = ExprSeries(density(c), 'rho')
     mu = ExprSeries(viscosity(c), 'mu')
-    
-    namespace = [Ra, phi, ('k', k), ('d', d), rho, mu]
 
-    # flow solvers
-    psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0)) if psi_bcs is Ellipsis else psi_bcs
+    # solvers
     psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(psi, k, mu[0], rho[0], egx, egy)
     u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
-
-    # timestep solver
     dt_solver = eval_solver(dt, cfl_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
-
-    # transport solver
-    c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
     c_solver = ibvp_solver(porous_advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
         c, dt, phi, u, Ra, d[0] if isinstance(d, ExprSeries) else d, D_adv, D_diff,
     )
-
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
 
-    # optional solvers
     if secondary:
         solvers.extend(
             [
@@ -233,5 +265,6 @@ def porous_convection_simulation(
                 ds_solver(ConstantSeries(Omega, "fOmega", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0], Ra),
             ]
         )
-    
+
+    namespace = [Ra, phi, ('k', k), ('d', d), rho, mu]
     return Simulation(solvers, t, dt, namespace)

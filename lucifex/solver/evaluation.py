@@ -2,7 +2,7 @@ from typing import Callable, ParamSpec, Iterable, Generic, TypeVar, Any, Literal
 from typing_extensions import Self
 import numpy as np
 
-from dolfinx.fem import Function, Constant, assemble_scalar, Expression
+from dolfinx.fem import Function, Constant, assemble_scalar, Expression, form, assemble
 from ufl import Form, Measure, TestFunction, TrialFunction, inner
 from ufl.restriction import Restricted
 from ufl.core.expr import Expr
@@ -12,7 +12,6 @@ from ..utils import set_value, replicate_callable, SpatialMarkerTypes, as_dofs_s
 from ..fem import LUCiFExConstant, LUCiFExFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 
-from .petsc import form
 from .pde import BoundaryValueProblem, OptionsPETSc, OptionsFFCX, OptionsJIT
 from .bcs import create_enumerated_measure, BoundaryConditions, Value, SubspaceIndex
 
@@ -24,7 +23,7 @@ class EvaluationProblem(Generic[S, T]):
     
     def __init__(
         self,
-        solution: S | T,
+        solution: S | T ,
         evaluation: Callable[[], Any],
         future: bool = False,
         overwrite: bool = False,
@@ -141,10 +140,6 @@ class IntegrationProblem(EvaluationProblem[ConstantSeries | FunctionSeries, LUCi
 
         self._measure = dx
         super().__init__(solution, evaluation, future)
-        # TODO parallel version
-        # self._mesh.comm.gather(dfx.fem.assemble_scalar(self._compiled), root=0)
-        # self._scalar = dfx.f.assemble_scalar(self._compiled)
-        # self._mesh = ct.function_space.mesh
 
     @property
     def measure(self) -> Measure | None:
