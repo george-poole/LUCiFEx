@@ -1,5 +1,6 @@
 from enum import Enum
 
+import numpy as np
 from basix.ufl_wrapper import BasixElement
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
@@ -32,7 +33,9 @@ def is_shape(
     f: Function | Constant | FunctionSpace | Expr,
     shape: tuple[int | None, ...],
 ):
-    if isinstance(f, FunctionSpace):
+    if isinstance(f, (tuple, list, float, int, np.ndarray)):
+        _shape = np.array(f).shape
+    elif isinstance(f, FunctionSpace):
         _shape = f.ufl_element().value_shape()
     else:
         _shape = f.ufl_shape

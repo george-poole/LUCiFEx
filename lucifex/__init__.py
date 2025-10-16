@@ -4,3 +4,4 @@ from . import fdm
 from . import sim
 from . import viz
 from . import utils
+from . import pde

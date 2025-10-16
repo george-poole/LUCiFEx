@@ -13,11 +13,8 @@ from lucifex.solver import (
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
-from .navier_stokes import (
-    ipcs_solvers,
-    newtonian_stress,
-    advection_diffusion,
-)
+from lucifex.pde.navier_stokes import ipcs_solvers, newtonian_stress
+from lucifex.pde.transport import advection_diffusion
 
 
 @configure_simulation(
@@ -26,15 +23,14 @@ from .navier_stokes import (
 )
 def navier_stokes_double_diffusive_rectangle(
     # domain
-    Lx: float,
-    Ly: float,
-    Nx: int,
-    Ny: int,
+    Lx: float = 2.0,
+    Nx: int = 64,
+    Ny: int = 64,
     cell: str = 'quadrilateral',
     # physical
     Le = 1.0,
     Pr = 1.0,
-    Ra = 1e3,
+    Ra = 1e2,
     beta = 1.0,
     # initial perturbation
     noise_eps: float = 1e-6,
@@ -51,6 +47,18 @@ def navier_stokes_double_diffusive_rectangle(
     D_adv_ad: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
     D_diff_ad: FiniteDifference = CN,
 ):
+    """
+    Non-dimensionalization choosing `ℒ` as rectangle depth, 
+    `𝒰` as diffusive speed and `𝒯` constructed from `ℒ` and `𝒰`.
+
+    `∂c/∂t + 𝐮·∇c = ∇²c`
+
+    `∂θ/∂t + 𝐮·∇θ = 1/Le ∇²θ`
+
+    `∇·𝐮 = 0`
+
+    `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) - PrRa(c - βθ)𝐞ʸ`
+    """
     # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
@@ -59,6 +67,7 @@ def navier_stokes_double_diffusive_rectangle(
     dt = ConstantSeries(Omega, 'dt')
 
     # space
+    Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -114,16 +123,17 @@ def navier_stokes_double_diffusive_rectangle(
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
     theta = FunctionSeries((Omega, 'P', 1), 'theta', order, ics=theta_ics)
     # constitutive
+    stress = lambda u, p: Pr * newtonian_stress(u, p, 1)
     rho = ExprSeries(c - beta * theta, 'rho')
     eg = as_vector([0, -1])
-    f = Ra * rho * eg
+    f = Pr * Ra * rho * eg
 
     # solvers
     dt_solver = eval_solver(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], 1/Pr, 1, newtonian_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs,
+        u, p, dt[0], stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs,
     )
     c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_ad, D_diff_ad,

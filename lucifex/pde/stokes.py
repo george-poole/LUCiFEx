@@ -1,0 +1,72 @@
+from typing import Callable
+
+from ufl import (Form, FacetNormal, CellDiameter, dx, dS,
+    TestFunction, TrialFunction, TestFunctions, TrialFunctions,
+    inner, grad, div, avg, jump, Dx,
+)
+from ufl.core.expr import Expr
+
+from lucifex.solver import BoundaryConditions
+from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+
+
+def stokes_incompressible(
+    up: Function,
+    stress: Callable[[Function, Function], Expr],
+    f: Function | Constant | None = None,
+    bcs: BoundaryConditions | None = None
+) -> list[Form]:
+    v, q = TestFunctions(up.function_space)
+    u, p = TrialFunctions(up.function_space) 
+
+    F_incomp = q * div(u) * dx
+    # F_velocity = mu * inner(grad(v), grad(u)) * dx
+    # F_pressure = -p * div(v) * dx
+    sigma = stress(u, p)
+    F_stress = inner(grad(v), sigma) * dx 
+
+    if f is None:
+        f = Constant(up.function_space.mesh, 0.0, shape=u.ufl_shape)
+    F_force = -inner(v, f) * dx
+
+    forms = [F_incomp, F_stress, F_force]
+
+    if bcs is not None:
+        ds, natural =  bcs.boundary_data(up.function_space, 'natural')
+        F_bcs = sum([-inner(v, sigmaN) * ds(i) for i, sigmaN in natural])
+        forms.append(F_bcs)
+
+    return forms
+
+
+
+def stokes_streamfunction(
+    psi: Function,
+    alpha: Constant,
+    fx: Function | None = None,
+    fy: Function | None = None,
+) -> list[Form]:
+    """
+    `∇⁴ψ = ∂fʸ/∂x - ∂fˣ/∂y`
+    """
+    v = TestFunction(psi.function_space)
+    psi_trial = TrialFunction(psi.function_space)
+    n = FacetNormal(psi.function_space.mesh)
+    h = CellDiameter(psi.function_space.mesh)
+
+    F_dx = div(grad(v)) * div(grad(psi_trial)) * dx
+
+    F_dS = (alpha / avg(h)) * inner(jump(grad(v), n), jump(grad(psi_trial), n)) * dS
+    F_dS -= inner(jump(grad(v), n), avg(div(grad(psi_trial)))) * dS
+    F_dS -= inner(avg(div(grad(v))), jump(grad(psi_trial), n)) * dS
+
+    forms = [F_dx, F_dS]
+
+    if fx is not None:
+        F_fx = v * Dx(fx, 1) * dx
+        forms.append(F_fx)
+    if fy is not None:
+        F_fy = -v * Dx(fy, 0) * dx
+        forms.append(F_fy)
+
+    return forms

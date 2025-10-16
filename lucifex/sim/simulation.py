@@ -290,7 +290,9 @@ def configure_simulation(
                 return _inner
             else:
                 error_params = [i for i in kwargs if not i in simulation_func_params]
-                if error_params:
+                if len(error_params) == 1:
+                    raise TypeError(f'Unrecognised keyword argument: {error_params[0]}.')
+                if len(error_params) > 1:
                     raise TypeError(f'Unrecognised keyword arguments: {tuple(error_params)}.')
                 return _(petsc=petsc, jit=jit, ffcx=ffcx, store_step=store_step, 
                                 write_step=write_step, dir_base=dir_base, dir_params=dir_params,

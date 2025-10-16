@@ -16,24 +16,24 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/figures/A10_darcy_streamfunction_k_streamlines.png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> Darcy flow through a lens of low permeability </td>
-    <td align="left"> Darcy flow across an anticline of heterogeneous permeability </td>
+    <td align="left"> pressure-driven flow of a Darcy fluid through a lens of low permeability </td>
+    <td align="left"> injection-driven flow of a Darcy fluid across an anticline of heterogeneous permeability </td>
   </tr>
   <tr>
     <td><img src="demo/figures/A15a_rayleigh_benard_rectangle_c(t=15.75).png" width="400"/></td>
     <td><img src="demo/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> porous Rayleigh-Bénard convection in a rectangle </td>
-    <td align="left"> porous Rayleigh-Bénard convection in a semicircle </td>
+    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </td>
+    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </td>
   </tr>
     <tr>
     <td><img src="demo/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
     <td><img src="demo/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> porous Rayleigh-Bénard convection in an annulus </td>
-    <td align="left"> porous convection in an inclined domain </td>
+    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </td>
+    <td align="left"> convection of a Darcy fluid in an inclined domain </td>
   </tr>
   </tr>
     <tr>
@@ -41,8 +41,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/figures/A19_marangoni_convection_c(t=1.96e-02).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> pure fluid double diffusive convection </td>
-    <td align="left"> pure fluid Marangoni convection </td>
+    <td align="left"> double-diffusive convection of a Navier-Stokes fluid </td>
+    <td align="left"> Marangoni convection of a Navier-Stokes fluid </td>
   </tr>
   </tr>
     <tr>
@@ -50,8 +50,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/figures/A20_saffman_taylor_c(t=0.36).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> pure fluid Rayleigh-Taylor instability </td>
-    <td align="left"> porous Saffman-Taylor instability </td>
+    <td align="left"> Rayleigh-Taylor instability of a Navier-Stokes fluid  </td>
+    <td align="left"> Saffman-Taylor instability of a Darcy fluid </td>
   </tr>
 </table>
 
@@ -211,4 +211,4 @@ These features are outside the scope of current development, but could be of int
 
 + adaptive mesh refinement
 + time-dependent domains and boundaries
-+ time-stepping with Runge-Kutta methods
++ time-stepping with implicit Runge-Kutta methods

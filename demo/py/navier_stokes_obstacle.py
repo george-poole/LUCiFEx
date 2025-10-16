@@ -9,7 +9,7 @@ from lucifex.solver import (
 from lucifex.mesh import ellipse_obstacle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
 
-from.navier_stokes import ipcs_solvers, chorin_solvers, newtonian_stress
+from lucifex.pde.navier_stokes import ipcs_solvers, chorin_solvers, newtonian_stress
 
 
 @configure_simulation(
@@ -60,6 +60,9 @@ def navier_stokes_circle_obstacle(
     rho = Constant(Omega, rho, 'rho')
     mu = Constant(Omega, mu, 'mu')
 
+    # constitutive
+    stress = lambda u, p: (1/rho) * newtonian_stress(u, p, mu)
+
     # boundary conditions
     u_bcs = BoundaryConditions(
         ('dirichlet', dOmega['upper', 'lower', 'obstacle'], u_zero),
@@ -79,9 +82,9 @@ def navier_stokes_circle_obstacle(
     )
     if ns_scheme == 'ipcs':
         ns_solvers = ipcs_solvers(
-            u, p, dt[0], rho, mu, newtonian_stress, D_adv, D_visc, u_bcs=u_bcs, p_bcs=p_bcs)
+            u, p, dt[0], stress, D_adv, D_visc, u_bcs=u_bcs, p_bcs=p_bcs)
     elif ns_scheme == 'chorin':
-        ns_solvers = chorin_solvers(u, p, dt[0], rho, mu, D_adv, D_visc, u_bcs=u_bcs, p_bcs=p_bcs)
+        ns_solvers = chorin_solvers(u, p, dt[0], stress, D_adv, D_visc, u_bcs=u_bcs, p_bcs=p_bcs)
     else:
         raise ValueError(f"Navier-Stokes scheme '{ns_scheme}' not implemented.")
     
