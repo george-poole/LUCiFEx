@@ -62,10 +62,10 @@ def stokes_streamfunction(
 
     forms = [F_dx, F_dS]
 
-    if fx is not None:
+    if not fx in (None, 0):
         F_fx = v * Dx(fx, 1) * dx
         forms.append(F_fx)
-    if fy is not None:
+    if not fy in (None, 0):
         F_fy = -v * Dx(fy, 0) * dx
         forms.append(F_fy)
 

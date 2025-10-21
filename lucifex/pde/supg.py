@@ -10,7 +10,7 @@ from lucifex.fdm.ufl_operators import inner, grad
 
 # FIXME tensor d
 def supg_velocity(
-    u: Function, 
+    a: Function, 
     d: Function | Constant,
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
     D_diff: FiniteDifference,
@@ -23,11 +23,11 @@ def supg_velocity(
         case D_adv_u, D_adv_c:
             if D_adv_c.is_explicit:
                 raise ImplicitDiscretizationError(D_adv_c, 'Advection term must be implicit w.r.t. concentration')
-            u_future = D_adv_u(u) * D_adv_c.explicit_coeff
+            u_future = D_adv_u(a) * D_adv_c.explicit_coeff
         case D_adv:
             if D_adv.is_explicit:
                 raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. concentration')
-            u_future = u[1] * D_adv.explicit_coeff
+            u_future = a[1] * D_adv.explicit_coeff
 
     u_eff = u_future - grad(d) * D_diff.explicit_coeff
     return u_eff
@@ -101,7 +101,7 @@ def tau_shakib(U_eff, D_eff, R_eff, h) -> Expr:
 
 def tau_upwind(U_eff, D_eff, h) -> Expr:
     u = sqrt(inner(U_eff, U_eff))
-    return (0.5 * h / u) * xi(Pe(u, h, D_eff))
+    return (0.5 * h / u) * xi(peclet(u, h, D_eff))
 
 
 def tau_upwind_xy(U_eff, D_eff, hx, hy) -> Expr:
@@ -111,13 +111,19 @@ def tau_upwind_xy(U_eff, D_eff, hx, hy) -> Expr:
     Uy = inner(ey, U_eff)
     ux = sqrt(inner(Ux, Ux))
     uy = sqrt(inner(Uy, Uy))
-    xi_x = xi(Pe(ux, hx, D_eff))
-    xi_y = xi(Pe(uy, hy, D_eff))
+    xi_x = xi(peclet(ux, hx, D_eff))
+    xi_y = xi(peclet(uy, hy, D_eff))
     return 0.5 * (xi_x * ux * hx + xi_y * uy * hy) / inner(U_eff, U_eff)
 
 
-def Pe(u, h, D):
-    return 0.5 * u * h / D
+def peclet(a, h, D):
+    return 0.5 * a * h / D
+
+
+def peclet(h, a, eps) -> Expr | float:
+    if all(isinstance(i, (float, int)) for i in (h, a, eps)):
+        return 0.5 * a * h / eps
+    return 0.5 * sqrt(inner(a, a)) * h / eps
 
 
 def xi(Pe):

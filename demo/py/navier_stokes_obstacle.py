@@ -9,7 +9,8 @@ from lucifex.solver import (
 from lucifex.mesh import ellipse_obstacle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
 
-from lucifex.pde.navier_stokes import ipcs_solvers, chorin_solvers, newtonian_stress
+from lucifex.pde.navier_stokes import ipcs_solvers, chorin_solvers
+from lucifex.pde.constitutive import newtonian_stress
 
 
 @configure_simulation(

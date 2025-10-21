@@ -21,8 +21,10 @@ from dolfinx.fem.petsc import (
 from dolfinx.cpp.fem.petsc import insert_diagonal
 from dolfinx.cpp.la.petsc import create_matrix as cpp_create_matrix
 from dolfinx_mpc import (
-    assemble_matrix as mpc_assemble_matrix,
     MultiPointConstraint,
+    assemble_matrix as mpc_assemble_matrix,
+    assemble_vector as mpc_assemble_vector,
+    apply_lifting as mpc_apply_lifting,
     create_sparsity_pattern,
 )
 from petsc4py import PETSc
@@ -96,7 +98,7 @@ def _assemble_matrix(
     if mpc is None:
         dolfinx_assemble_matrix(m, a, bcs, diag)
     else:
-        mpc_assemble_matrix(a, mpc, bcs, diag, A=m)
+        mpc_assemble_matrix(a, mpc, bcs, diag, m)
     m.assemble()
     assembly_count = m.getAttr(ATTR_ASSEMBLY_COUNT)
     if assembly_count is None:
@@ -109,14 +111,21 @@ def assemble_vector(
     v: PETScVec,
     l: FormMetaClass,
     bcs_a: tuple[list[DirichletBCMetaClass], FormMetaClass] = None,
+    mpc: MultiPointConstraint | None = None,
 ) -> None:
     with v.localForm() as local:
         local.set(0)
-    dolfinx_assemble_vector(v, l)
+    if mpc is None:
+        dolfinx_assemble_vector(v, l)
+    else:
+        mpc_assemble_vector(l, mpc, v)
     # modifying vector to apply essential boundary conditions
     if bcs_a is not None:
         bcs, a = bcs_a
-        apply_lifting(v, [a], [bcs])
+        if mpc is None:
+            apply_lifting(v, [a], [bcs])
+        else:
+            mpc_apply_lifting(v, [a], [bcs], mpc)
         v.ghostUpdate(
             addv=PETSc.InsertMode.ADD,
             mode=PETSc.ScatterMode.REVERSE,

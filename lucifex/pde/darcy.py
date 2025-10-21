@@ -34,10 +34,10 @@ def darcy_streamfunction(
     else:
         F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
     forms = [F_lhs]
-    if fx is not None:
+    if not fx in (None, 0):
         F_egx = -v * Dx(fx, 1) * dx
         forms.append(F_egx)
-    if fy is not None:
+    if not fy in (None, 0):
         F_egy = v * Dx(fy, 0) * dx
         forms.append(F_egy)
     return forms

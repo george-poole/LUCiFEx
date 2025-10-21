@@ -32,8 +32,8 @@ def darcy_convection_generic(
     Omega: Mesh,
     dOmega: MeshBoundary,
     # gravity
-    egx: Expr | Function | Constant | float | None = None,
-    egy: Expr | Function | Constant | float = -1.0,
+    egx: Expr | Function | Constant | float = 0,
+    egy: Expr | Function | Constant | float = -1,
     # initial conditions
     c_ics = None,
     # boundary conditions
@@ -104,7 +104,7 @@ def darcy_convection_generic(
 
     # solvers
     psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(
-        psi, k, mu[0], rho[0] * egx, rho[0] * egy,
+        psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
     u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
     dt_solver = eval_solver(dt, cfl_timestep)(

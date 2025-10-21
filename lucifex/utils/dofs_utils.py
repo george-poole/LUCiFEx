@@ -94,8 +94,8 @@ def as_spatial_marker(
     m: SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression]
 ) -> SpatialMarker:
     """
-    Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)` 
-    such that `f(x) = 0` defines the boundary to a function returning `True` 
+    Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)`, 
+    such that `f(x) = 0`, defines the boundary to a function returning `True` 
     if `x` is on the boundary and `False` otherwise.
     """
     

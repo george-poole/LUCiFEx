@@ -37,6 +37,7 @@ from .petsc import (
     PETScVec,
 )
 
+
 P = ParamSpec("P")
 class BoundaryValueProblem:
 
@@ -107,8 +108,7 @@ class BoundaryValueProblem:
         forms = [i[1] if isinstance(i, tuple) else i for i in forms]
 
         self._bcs = bcs.create_strong_bcs(solution.function_space)        
-        # TODO when dof affected by more than one mpc
-        self._mpc = bcs.create_periodic_bcs(solution.function_space, self._bcs)
+        self._mpc = bcs.create_periodic_bcs(solution.function_space)
         
         if isinstance(dofs_corrector, tuple):
             self._dofs_corrector = lambda u: dofs_limits_corrector(u, dofs_corrector)
@@ -286,11 +286,12 @@ class BoundaryValueProblem:
                 self._v_sum,
                 self._l_sum_compiled,
                 (self._bcs, self._a_sum_compiled),
+                self._mpc,
             )
             self._vector = self._v_sum
         else:
             [
-                assemble_vector(v, l, (self._bcs, a))
+                assemble_vector(v, l, (self._bcs, a), self._mpc)
                 for v, l, a in zip(self._v_forms, self._l_forms_compiled, self._a_forms_compiled, strict=True)
                 if (v, l, a) != (None, None, None)
             ]
@@ -336,6 +337,8 @@ class BoundaryValueProblem:
         
     def get_solver(self) -> PETSc.KSP | None:
         return self._solver
+    
+
     
     @property
     def cache_matrix(self) -> bool | EllipsisType | Iterable[bool | EllipsisType]:

@@ -14,38 +14,42 @@ from lucifex.fdm.ufl_operators import inner, grad
 
 # TODO debug and test
 def advection_diffusion_dg(
-    c: FunctionSeries,
-    dt: Constant,
-    phi: Function | Expr | Series,
-    Ad: Constant, 
     u: FunctionSeries,
-    Pe: Constant,
+    dt: Constant,
+    a: FunctionSeries,
     d: Function | Expr | Series, 
-    alpha: float,
-    gamma: float,
+    alpha: Constant | float,
+    gamma: Constant | float,
     D_adv: tuple[FiniteDifference, FiniteDifference],
     D_diff: FiniteDifference,
     D_phi: FiniteDifference = AB1,
+    phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     if bcs is None:
         bcs = BoundaryConditions()
-    ds, c_dirichlet, c_neumann = bcs.boundary_data(c.function_space, 'dirichlet', 'neumann')
+    ds, c_dirichlet, c_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
 
     if isinstance(phi, Series):
         phi = D_phi(phi)
     if isinstance(d, Series):
         d = D_phi(d)
 
-    v = TestFunction(c.function_space)
-    h = CellDiameter(c.function_space.mesh)
-    n = FacetNormal(c.function_space.mesh)
+    v = TestFunction(u.function_space)
+    h = CellDiameter(u.function_space.mesh)
+    n = FacetNormal(u.function_space.mesh)
+    if isinstance(alpha, float):
+        alpha = Constant(u.function_space.mesh, alpha)
+    if isinstance(beta, float):
+        beta = Constant(u.function_space.mesh, beta)
 
-    F_dcdt = v * DT(c, dt) * dx
+    F_dcdt = v * DT(u, dt) * dx
+
+    Pe = ... # FIXME
 
     D_adv_u, D_adv_c = D_adv
-    uEff = (Ad/phi) * (D_adv_u(u) - (1/Pe) * grad(phi))
-    cAdv = D_adv_c(c)
+    uEff = (1/phi) * (D_adv_u(a) - (1/Pe) * grad(phi))
+    cAdv = D_adv_c(u)
     outflow = conditional(gt(dot(uEff, n), 0), 1, 0)
 
     F_adv_dx = -inner(grad(v), uEff * cAdv) * dx
@@ -61,7 +65,7 @@ def advection_diffusion_dg(
     ####
     F_adv = F_adv_dx + F_adv_dS + F_adv_ds
 
-    cDiff = D_diff(c)
+    cDiff = D_diff(u)
     # + ∫ ∇v⋅∇c dx
     F_diff_dx = inner(grad(v), grad(cDiff)) * dx
     # - ∫ [vn]⋅{∇c} dS
@@ -80,13 +84,10 @@ def advection_diffusion_dg(
 
 
 def advection_diffusion_reaction_dg(
-    c: FunctionSeries,
+    u: FunctionSeries,
     dt: Constant,
-    phi: Function | Expr | Series,
-    u,
-    Ra: Constant,
+    a,
     d,
-    Da: Constant,
     r,
     alpha: float,
     gamma: float,
@@ -94,20 +95,21 @@ def advection_diffusion_reaction_dg(
     D_diff: FiniteDifference,
     D_reac: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
     D_phi: FiniteDifference = AB1,
+    phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     
-    forms = advection_diffusion_dg(c, dt, phi, u, Ra, d, D_adv, D_diff, D_phi, alpha, gamma, bcs)
+    forms = advection_diffusion_dg(u, dt, phi, a, d, D_adv, D_diff, D_phi, alpha, gamma, bcs)
 
-    if np.isclose(float(Da), 0):
-        return forms
+    # if np.isclose(float(Da), 0):
+    #     return forms
     
     if isinstance(phi, Series):
         phi = D_phi(phi)
 
-    r = apply_finite_difference(D_reac, r, c)
-    v = TestFunction(c.function_space)
-    F_reac = -v * Da * (r / phi) * dx
+    r = apply_finite_difference(D_reac, r, u)
+    v = TestFunction(u.function_space)
+    F_reac = -v  * (r / phi) * dx
     forms.append(F_reac)
 
     return forms

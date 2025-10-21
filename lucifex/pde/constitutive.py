@@ -26,9 +26,9 @@ def newtonian_stress(
 
 
 def permeability_cross_bedded(
-    Kphi,
-    kappa,
-    vartheta,
+    k: Function | Expr,
+    kappa: Constant,
+    vartheta: Constant,
 ):
     """
     `𝖪(ϕ) = K(ϕ) (
@@ -44,4 +44,4 @@ def permeability_cross_bedded(
             ((1 - kappa)*cs*sn, kappa*cs**2 + sn**2), 
         ),
     )
-    return Kphi * tensor
+    return k * tensor

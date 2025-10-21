@@ -17,7 +17,9 @@ from lucifex.solver import (
     bvp_solver, ibvp_solver,
 )
 
-from .constitutive import strain, newtonian_stress
+from .classic import poisson
+from .transport import advection_diffusion_reaction
+from .constitutive import strain
 
 
 def ipcs_1(
@@ -201,18 +203,14 @@ def chorin_solvers(
     return chorin1_solver, chorin2_solver, chorin3_solver
 
 
-def streamfunction_vorticity_poisson(
+def vorticity_poisson(
     psi: Function,
     omega: Function,
 ) -> tuple[Form, Form]:
-    v = TestFunction(psi.function_space)
-    psi_trial = TrialFunction(psi.function_space)
-    F_lhs = -inner(grad(v), grad(psi_trial)) * dx
-    F_rhs = -v * omega * dx
-    return F_lhs, F_rhs
+    return poisson(psi, omega)
 
 
-def vorticity_advection_diffusion(
+def vorticity_transport(
     omega: FunctionSeries,
     dt: Constant,
     u: FunctionSeries,
@@ -220,18 +218,15 @@ def vorticity_advection_diffusion(
     mu: Constant,
     D_adv: FiniteDifference,
     D_diff: FiniteDifference,
+    D_reac: FiniteDifference = FE,
     fx: Function | None = None,
     fy: Function | None = None,
-) ->list[Form]:
-    v = TestFunction(omega.function_space)
-    Ft = v * rho * DT(omega, dt) * dx
-    Fa = v * rho * D_adv(inner(u, grad(omega))) * dx
-    Fd = inner(grad(v), mu * grad(D_diff(omega))) * dx
-    forms = [Ft, Fa, Fd]
-    if fx is not None:
-        F_fx = v * Dx(fx, 1) * dx
-        forms.append(F_fx)
-    if fy is not None:
-        F_fy = -v * Dx(fy, 0) * dx
-        forms.append(F_fy)
-    return forms
+) -> list[Form]:
+    
+    d = mu / rho
+    r = 0
+    if not fx in (None, 0):
+        r -= Dx(fx, 1) / rho
+    if not fy is not (None, 0):
+        r += Dx(fy, 0) / rho
+    return advection_diffusion_reaction(omega, dt, u, d, r, D_adv, D_diff, D_reac)

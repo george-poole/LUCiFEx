@@ -37,14 +37,6 @@ Value: TypeAlias = (
     | Expr
 )
 
-# TODO understand master-slaves dof relations, single vs double periodic bc
-def periodic_relation(m: SpatialMarkerTypes, v: SpatialMarkerTypes): 
-    def _rltn(x: np.ndarray):
-        x_master = x.copy()
-        x_master = m(v(x))
-        return x_master
-    return _rltn
-
 
 class BoundaryConditions:
     """
@@ -91,8 +83,7 @@ class BoundaryConditions:
             self._values.append(value)
             self._btypes.append(BoundaryType(btype))
             self._subindices.append(subindex)
-
-    # TODO test all cases
+            
     def create_strong_bcs(
         self,
         function_space: FunctionSpace,
@@ -123,24 +114,32 @@ class BoundaryConditions:
                 
         return dirichlet
 
-    # TODO fix and test
     def create_periodic_bcs(
         self,
         function_space: FunctionSpace,
         bcs: list[DirichletBCMetaClass] | None = None,
     ) -> MultiPointConstraint | None:
+        """
+        Implements periodic and antiperiodic boundary conditions via a geometrical constraint
+        """
     
         if bcs is None:
-            bcs = self.create_strong_bcs(function_space)
+            bcs = []
         
         mpc = MultiPointConstraint(function_space)
         n_constraint = 0
 
-        for b, m, g in zip(self._btypes, self._markers, self._values):
+        for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
+            if i is not None:
+                raise NotImplementedError
             if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
-                g = as_spatial_marker(g)
+                scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
                 mpc.create_periodic_constraint_geometrical(
-                    function_space, m, periodic_relation(m, g), bcs
+                    function_space, 
+                    as_spatial_marker(m),
+                    reln,
+                    bcs=bcs,
+                    scale=scale,
                 )
                 n_constraint += 1
 

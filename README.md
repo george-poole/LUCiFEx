@@ -57,7 +57,7 @@ Development has primarily been motivated by the numerical study of fluid dynamic
 
 ## Documentation
 
-See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to PDEs from fluid dynamics and porous media), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the LUCiFEx package). Fluid dynamics examples shown in `demo` include:
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to fluid dynamics), `F` (fundamentals of solving PDEs numerically), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the LUCiFEx package). Fluid dynamics examples include:
 * Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$)
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
 * Stokes equations
