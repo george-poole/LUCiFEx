@@ -24,20 +24,27 @@ from .constitutive import strain
 
 def ipcs_1(
     u: FunctionSeries,
+    p: FunctionSeries,
     dt: ConstantSeries | Constant,
-    sigma: Function | Expr,
+    deviatoric_stress: Callable[[Function], Expr],
     D_adv: FiniteDifference,
+    D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
     sigma_bcs: BoundaryConditions | None = None,
     adv_coeff:  Constant | float = 1,
+    p_coeff: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     n = FacetNormal(u.function_space.mesh)
+    dim = u.shape[0]
     epsilon = strain(v)
 
     F_dudt = inner(v, DT(u, dt)) * dx
     F_adv = adv_coeff * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
+    tau = deviatoric_stress(D_visc(u))
+    sigma = -p_coeff * p[0] * Identity(dim) + tau
+
     F_stress = inner(epsilon, sigma) * dx 
     if sigma_bcs is None:
         F_ds = -inner(v, dot(n, sigma)) * ds
@@ -86,7 +93,7 @@ def ipcs_solvers(
     u: FunctionSeries,
     p: FunctionSeries,
     dt: Constant,
-    stress: Callable[[Function, Function], Expr],
+    deviatoric_stress: Callable[[Function], Expr],
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
@@ -99,14 +106,13 @@ def ipcs_solvers(
 ) -> tuple[IBVP, BVP, BVP]:
     """
     `∇·𝐮 = 0` \\
-    `∂𝐮/∂t + 𝐮·∇𝐮 = ∇·σ + 𝐟`
+    `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇·𝜏(𝐮) + 𝐟`
 
     If `adv_coeff` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
     If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
-    sigma = stress(D_visc(u), p[0])
     ipcs1_solver = ibvp_solver(ipcs_1, bcs=u_bcs)(
-        u, dt, sigma, D_adv, D_force, f, sigma_bcs, adv_coeff,
+        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, f, sigma_bcs, adv_coeff, p_coeff,
     )
     ipcs2_solver = bvp_solver(ipcs_2, bcs=p_bcs, future=True)(
         p, u, dt, p_coeff,
@@ -120,17 +126,18 @@ def ipcs_solvers(
 def chorin_1(
     u: FunctionSeries,
     dt: ConstantSeries | Constant,
+    deviatoric_stress: Callable[[Function], Expr],
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
     adv_coeff: Constant | float = 1,
-    visc_coeff: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     F_dudt = inner(v, DT(u, dt)) * dx
     F_adv = adv_coeff * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
-    F_visc = visc_coeff * inner(grad(v), grad(D_visc(u))) * dx
+    tau = deviatoric_stress(D_visc(u))
+    F_visc = inner(grad(v), tau) * dx
     
     forms = [F_dudt, F_adv, F_visc]
 
@@ -173,6 +180,7 @@ def chorin_solvers(
     u: FunctionSeries,
     p: FunctionSeries,
     dt: Constant,
+    deviatoric_stress: Callable[[Function], Expr],
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
@@ -180,19 +188,18 @@ def chorin_solvers(
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,    
     adv_coeff: Constant | float = 1,
-    visc_coeff: Constant | float = 1,
     p_coeff: Constant | float = 1,
 ):
     """
-    `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇²𝐮 + 𝐟` \\
-    `∇·𝐮 = 0` (dimensional)
+    `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇·𝜏(𝐮) + 𝐟` \\
+    `∇·𝐮 = 0`
 
     If `adv_coeff` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
     If `visc_coeff` argument specified, then `∇²𝐮 -> V ∇²𝐮` with constant `V`. \\
     If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
     chorin1_solver = ibvp_solver(chorin_1, bcs=u_bcs)(
-        u, dt, D_adv, D_visc, D_force, f, adv_coeff, visc_coeff,
+        u, dt, deviatoric_stress, D_adv, D_visc, D_force, f, adv_coeff,
     )
     chorin2_solver = bvp_solver(chorin_2, bcs=p_bcs, future=True)(
         p, u, dt, p_coeff,
@@ -222,11 +229,11 @@ def vorticity_transport(
     fx: Function | None = None,
     fy: Function | None = None,
 ) -> list[Form]:
-    
+    _none = (None, 0)
     d = mu / rho
     r = 0
-    if not fx in (None, 0):
+    if not fx in _none:
         r -= Dx(fx, 1) / rho
-    if not fy is not (None, 0):
+    if not fy is not _none:
         r += Dx(fy, 0) / rho
     return advection_diffusion_reaction(omega, dt, u, d, r, D_adv, D_diff, D_reac)

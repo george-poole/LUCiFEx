@@ -302,7 +302,7 @@ def _(
     slc=slice(0, None), 
     mode='a',
     sep = '__',
-    axes: tuple[str, ...] = ('x', 'y', 'z'),
+    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
 ): 
     file_path = file_path_ext(dir_path, file_name, 'npz')
 
@@ -313,7 +313,7 @@ def _(
     if mode == 'a' and os.path.exists(file_path):
         d.update(np.load(file_path).items())
     d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.series)))
-    d.update({_create_npz_key(u.name, k, sep): v for k, v in zip(axes, u.axes)})
+    d.update({_create_npz_key(u.name, k, sep): v for k, v in zip(axis_names, u.axes)})
     np.savez(file_path, **d)
 
 

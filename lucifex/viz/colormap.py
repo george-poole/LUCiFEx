@@ -59,32 +59,32 @@ def _plot_colormap(
     ...
 
 
-def _plot_colormap(
+@singledispatch
+def _plot_colormap(f, *_, **__):
+    raise MultipleDispatchTypeError(f, _plot_colormap)
+
+
+@_plot_colormap.register(Figure)
+def _(
     fig: Figure,
-    ax: Axes, 
-    f,
-    colorbar = True,
+    ax: Axes,
+    arg,
     *args,
     **kwargs,
-) -> None:
-    return __plot_colormap(f, fig, ax, colorbar, *args, **kwargs)
+):
+    return _plot_colormap(arg, fig, ax, *args, **kwargs)
 
 
-@singledispatch
-def __plot_colormap(f, *_, **__):
-    raise MultipleDispatchTypeError(f, __plot_colormap)
-
-
-@__plot_colormap.register(Function)
+@_plot_colormap.register(Function)
 def _(
     f: Function,
     fig: Figure,
     ax: Axes,
-    colorbar: bool | tuple[float, float],
+    colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
-    use_cache: bool = False,
+    use_cache: tuple[bool, bool] = (True, False),
     **kwargs,
-) -> tuple[Figure, Axes]:
+):
     if not is_scalar(f):
         raise ValueError("Colormap plotting is for scalar-valued functions only.")
 
@@ -92,16 +92,16 @@ def _(
     cell_type = mesh.topology.cell_name()
 
     if cartesian is None:
-        cartesian = is_cartesian(use_cache=True)(mesh)
+        cartesian = is_cartesian(use_cache=use_cache[0])(mesh)
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, False:
-            trigl = triangulation(use_cache=True)(f.function_space.mesh)
-            f_tri = triangulation(use_cache=use_cache)(f)
+            trigl = triangulation(use_cache=use_cache[0])(f.function_space.mesh)
+            f_tri = triangulation(use_cache=use_cache[1])(f)
             xyz = (trigl, f_tri)
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
-            x, y = grid(use_cache=True)(f.function_space.mesh)
-            f_grid = grid(use_cache=use_cache)(f)
+            x, y = grid(use_cache=use_cache[0])(f.function_space.mesh)
+            f_grid = grid(use_cache=use_cache[1])(f)
             xyz = (x, y, f_grid)
         case CellType.QUADRILATERAL, False:
             raise NotImplementedError(
@@ -112,41 +112,42 @@ def _(
         case _:
             raise ValueError
 
-    return __plot_colormap(
+    return _plot_colormap(
         xyz, fig, ax, colorbar, cartesian, **kwargs
     )
 
 
-@__plot_colormap.register(Expr)
+@_plot_colormap.register(Expr)
 def _(
     expr: Expr,
     fig: Figure,
     ax: Axes,
-    colorbar: bool | tuple[float, float],
+    colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
     use_cache: bool = False,
     mesh: Mesh | None = None,
     **kwargs,
-) -> tuple[Figure, Axes]:
+):
     if mesh is None:
         mesh = extract_mesh(expr)
-    func = fem_function((mesh, 'P', 1), expr, use_cache=use_cache)
-    return __plot_colormap(
-        func,
+    f = fem_function((mesh, 'P', 1), expr)
+    return _plot_colormap(
+        f,
         fig, 
         ax,
         colorbar,
         cartesian,
+        use_cache,
         **kwargs
     )
 
 
-@__plot_colormap.register(tuple)
+@_plot_colormap.register(tuple)
 def _(
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     fig: Figure,
     ax: Axes,
-    colorbar: bool | tuple[float, float],
+    colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
     **kwargs,
 ):
@@ -185,7 +186,6 @@ def _(
             cmap.set_clim(*colorbar)
 
 
-# FIXME syntax highlight as function not variable
 plot_colormap = optional_fig_ax(_plot_colormap)
 
 
@@ -194,7 +194,7 @@ def plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     levels: Iterable[float] | int | None = None,
-    use_cache: bool = False,
+    use_cache: tuple[bool, bool] = (True, False),
     **kwargs,
 ) -> None:
     """Plots contours of a scalar-valued function"""
@@ -205,7 +205,7 @@ def _plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     levels: Iterable[float] | int | None,
-    use_cache: bool,
+    use_cache: tuple[bool, bool],
     **kwargs,
 ) -> None:
     if isinstance(f, tuple):
@@ -231,13 +231,13 @@ def _plot_contours(
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
 
     else:
-        cartesian = is_cartesian(use_cache=use_cache)(f.function_space.mesh)
+        cartesian = is_cartesian(use_cache=use_cache[0])(f.function_space.mesh)
         if not cartesian:
-            trigl = triangulation(use_cache=True)(f.function_space.mesh)
-            f_trigl = triangulation(use_cache=use_cache)(f)
-            return _plot_contours(ax, (trigl, f_trigl), levels, use_cache, **kwargs)
+            trigl = triangulation(use_cache=use_cache[0])(f.function_space.mesh)
+            f_trigl = triangulation(use_cache=use_cache[1])(f)
+            return _plot_contours(ax, (trigl, f_trigl), levels, **kwargs)
         else:
-            x, y = grid(use_cache=True)(f.function_space.mesh)
-            f_grid = grid(use_cache=use_cache)(f)
+            x, y = grid(use_cache=use_cache[0])(f.function_space.mesh)
+            f_grid = grid(use_cache=use_cache[1])(f)
             return _plot_contours(ax, (x, y, f_grid), levels, use_cache, **kwargs)
         

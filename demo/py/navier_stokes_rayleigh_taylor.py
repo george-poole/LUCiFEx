@@ -53,13 +53,6 @@ def navier_stokes_rayleigh_taylor_rectangle(
 
     `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) + PrRa ρ 𝐞₉`
     """
-    # time
-    order = finite_difference_order(
-        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
-    )
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Lx = 2.0
     Ly = 1.0
@@ -75,6 +68,14 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
+
+    # time
+    order = finite_difference_order(
+        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
+    )
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
+
 
     # constants
     Pr = Constant(Omega, Pr, 'Pr')

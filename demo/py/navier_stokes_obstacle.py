@@ -37,11 +37,6 @@ def navier_stokes_circle_obstacle(
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
 ):
-    # time
-    order = finite_difference_order(D_adv, D_visc)
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Omega = ellipse_obstacle_mesh(dx, 'triangle')(Lx, Ly, r, c)
     dOmega = mesh_boundary(
@@ -51,18 +46,23 @@ def navier_stokes_circle_obstacle(
             'upper': lambda x: x[1] - Ly,
             'lower': lambda x: x[1],
             'left': lambda x: x[0],
-            'right': lambda x: x[1] - Lx,
+            'right': lambda x: x[0] - Lx,
         }
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
+
+    # time
+    order = finite_difference_order(D_adv, D_visc)
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
 
     # constants
     rho = Constant(Omega, rho, 'rho')
     mu = Constant(Omega, mu, 'mu')
 
     # constitutive
-    stress = lambda u, p: (1/rho) * newtonian_stress(u, p, mu)
+    stress = lambda u: (1/rho) * newtonian_stress(u, mu)
 
     # boundary conditions
     u_bcs = BoundaryConditions(

@@ -54,13 +54,6 @@ def porous_abc_convection_rectangle(
     psi_petsc: OptionsPETSc | None = None,
     abc_petsc: OptionsPETSc | None = None,   
 ):
-    # time
-    order = finite_difference_order(
-        D_adv, D_diff, D_reac,
-    )
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
     dOmega = mesh_boundary(
@@ -72,6 +65,13 @@ def porous_abc_convection_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+
+    # time
+    order = finite_difference_order(
+        D_adv, D_diff, D_reac,
+    )
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
 
     # constants
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')

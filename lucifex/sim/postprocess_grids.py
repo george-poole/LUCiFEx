@@ -64,8 +64,8 @@ def _(
     grid_file_name: str = GridSeries.__name__,
     numeric_file_name: str = NumericSeries.__name__,
 ):
-    grid_series = [i.series for i in sim.solvers if isinstance(i.series, FunctionSeries)]
-    numeric_series = [i.series for i in sim.solvers if isinstance(i.series, ConstantSeries)]
+    grid_series = [i.series for i in sim.problems if isinstance(i.series, FunctionSeries)]
+    numeric_series = [i.series for i in sim.problems if isinstance(i.series, ConstantSeries)]
     
     if include:
         _include = lambda n: n in include and not n in exclude

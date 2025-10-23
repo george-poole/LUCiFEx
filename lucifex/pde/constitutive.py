@@ -15,14 +15,12 @@ def strain(u: Function | Expr) -> Expr:
 
 def newtonian_stress(
     u: Function | Expr, 
-    p: Function | Expr,
     mu: Constant | float,
 ) -> Expr:
     """
-    `σ(𝐮, p) = -pI + 2με(𝐮)`
+    `𝜏(𝐮) = 2με(𝐮) = μ(∇𝐮 + ∇𝐮ᵀ)`
     """
-    dim = u.ufl_shape[0]
-    return -p * Identity(dim) + 2 * mu * strain(u)
+    return 2 * mu * strain(u)
 
 
 def permeability_cross_bedded(

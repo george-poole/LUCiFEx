@@ -2,8 +2,8 @@
 objects to `numpy.ndarray` objects for postprocessing """
 
 from functools import singledispatch
+import operator
 from typing import overload, Literal, Callable, Iterable
-from functools import lru_cache
 
 from dolfinx.fem import Function
 from dolfinx.mesh import Mesh
@@ -15,7 +15,7 @@ import numpy as np
 from .enum_types import CellType
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
-from .mesh_utils import vertices, coordinates, axes, is_cartesian
+from .mesh_utils import mesh_vertices, mesh_coordinates, mesh_axes, is_cartesian, CartesianMeshError
 from .fem_utils import is_scalar, ScalarError
 
 
@@ -31,15 +31,11 @@ def _triangulation(
 ) -> np.ndarray:
     ...
 
-def _triangulation(obj):
-    return __triangulation(obj)
-
-
 @singledispatch
-def __triangulation(obj):
-    raise MultipleDispatchTypeError(obj)
+def _triangulation(arg, *_, **__):
+    raise MultipleDispatchTypeError(arg)
 
-@__triangulation.register
+@_triangulation.register
 def _(mesh: Mesh):
     if not mesh.geometry.dim == 2:
         raise ValueError(
@@ -55,7 +51,7 @@ def _(mesh: Mesh):
         {mesh.topology.cell_name()} """
         )
 
-    x_coordinates, y_coordinates = coordinates(mesh)
+    x_coordinates, y_coordinates = mesh_coordinates(mesh)
 
     # coordinates of each vertex in a given triangle cell
     connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
@@ -66,7 +62,7 @@ def _(mesh: Mesh):
 
     return trigl
 
-@__triangulation.register
+@_triangulation.register
 def _(f: Function):
     """Interpolates function to P₁ (which has identity vertex-to-dof map)
     to evaluate the function at the vertex values.
@@ -100,10 +96,9 @@ def quadrangulation(
 
     xy_coordinates = mesh.geometry.x[:, :2]
 
-    # coordinates of each vertex in a given quadrilateral cell
     connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
     n_cells = connec.num_nodes
-    quads = [reorder_local_vertices(connec.links(i)) for i in range(n_cells)]
+    quads = [reorder_quad_vertices(connec.links(i)) for i in range(n_cells)]
 
     vertices = xy_coordinates[quads]
 
@@ -114,18 +109,6 @@ def quadrangulation(
     return quadl
 
 
-
-@overload
-def _grid(
-    f: Function,
-    strict: bool = False,
-    jit: bool = True,
-    use_map: bool = True,
-    mask: float = np.nan,
-) -> np.ndarray:
-    ...
-
-
 @overload
 def _grid(
     mesh: Mesh,
@@ -133,29 +116,35 @@ def _grid(
 ) -> tuple[np.ndarray, ...]:
     ...
 
-def _grid(*args ,**kwargs):
-    return __grid(*args, **kwargs)
-
+@overload
+def _grid(
+    f: Function,
+    strict: bool = False,
+    jit: bool = True,
+    use_mesh_map: bool = False,
+    use_mesh_cache: bool = True,
+    mask: float = np.nan,
+) -> np.ndarray:
+    ...
 
 @singledispatch
-def __grid(obj):
-    raise MultipleDispatchTypeError(obj)
+def _grid(arg, *_, **__):
+    raise MultipleDispatchTypeError(arg)
 
-
-@__grid.register
+@_grid.register
 def _(
     mesh: Mesh, 
     strict: bool = False,
 ):
-    return axes(mesh, strict)
+    return mesh_axes(mesh, strict)
 
-
-@__grid.register(Function)
+@_grid.register(Function)
 def _(
     f: Function,
     strict: bool = False,
     jit: bool = True,
-    use_map: bool = True,
+    use_mesh_map: bool = False,
+    use_mesh_cache: bool = True,
     mask: float = np.nan,
 ) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
     """Interpolates the finite element function to the `P₁` function space
@@ -168,96 +157,96 @@ def _(
         raise ScalarError(f)
     
     mesh = f.function_space.mesh
-    x_axes = grid(use_cache=True)(mesh, strict)
-    f_vertices = dofs(f, ('P', 1), try_identity=True)
+    axes = mesh_axes(use_cache=use_mesh_cache)(mesh, strict)
+    vertices = mesh_vertices(mesh)
+    vertex_values = dofs(f, ('P', 1), try_identity=True)
 
-    if use_map:
-        _mesh_func = lambda *a, **k: vertex_to_grid_index_map(*a, **k, jit=jit, strict=strict)
-        _grid_func = _grid_from_map
-    else:
-        if jit:
-            _mesh_func = lambda m: numba.typed.List(vertices(m))
-            _grid_func = _grid_jit
-        else:
-            _mesh_func = vertices
-            _grid_func = _grid_nojit
-
-    vertices_or_map = _mesh_func(mesh)
-    if len(f_vertices) != len(vertices_or_map):
+    n_vertices = len(vertices)
+    n_values = len(vertex_values)
+    if n_vertices != n_values:
         raise ValueError(
             f""" 
-        Number of vertex values {vertices_or_map} does not 
-        match number of points {f_vertices} """
+        Number of vertex values {n_values} does not 
+        match number of vertices {n_vertices} """
         )
-    return _grid_func(f_vertices, vertices_or_map, x_axes, mask)
+
+    if use_mesh_map:
+        mapping = vertex_to_grid_index_map(use_cache=use_mesh_cache)(mesh, strict, jit, use_mesh_cache)
+        return _grid_from_map(mapping, vertex_values, axes, mask)
+    else:
+        if jit:
+            return _grid_jit(vertex_values, numba.typed.List(vertices), axes, mask)
+        else:
+            return _grid_nojit(vertex_values, vertices, axes, mask)
 
 
 @numba.jit(nopython=True)
 def _grid_jit(
-    f_vertices: np.ndarray,
-    x_vertices: list[tuple[float, ...]],
-    x_axes: tuple[np.ndarray, ...],
+    vertex_values: np.ndarray,
+    vertices: list[tuple[float, ...]],
+    axes: tuple[np.ndarray, ...],
     mask: float,
 ) -> np.ndarray:
-    """A JIT-compiled function that returns the vertex values on a
-    Cartesian grid. See also `_function_grid_no_jit` for a slower, non-compiled version.
+    """Returns the vertex values on a Cartesian grid.
+    See also `_grid_nojit` for a slower, non-compiled version.
     """
 
-    n_vertex = len(f_vertices)
-    dim = len(x_axes)
+    n_vertex = len(vertex_values)
+    dim = len(axes)
 
-    match dim:
-        case 1:
-            nx = len(x_axes[0])
-            f_grid = np.full((nx, ), mask)
-            for vertex_index in range(n_vertex):
-                x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
-                f_grid[x_index] = f_vertices[vertex_index]
-        case 2:
-            nx, ny = len(x_axes[0]), len(x_axes[1])
+    if dim ==1 :
+        nx = len(axes[0])
+        f_grid = np.full((nx, ), mask)
+        for vertex_index in range(n_vertex):
+            x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
+            f_grid[x_index] = vertex_values[vertex_index]
+
+    elif dim == 2:
+            nx, ny = len(axes[0]), len(axes[1])
             f_grid = np.full((nx, ny), mask)
             for vertex_index in range(n_vertex):
-                x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
-                y_index = np.where(x_axes[1] == x_vertices[vertex_index][1])[0][0]
-                f_grid[x_index, y_index] = f_vertices[vertex_index]
-        case 3:
-            nx, ny, nz = len(x_axes[0]), len(x_axes[1]), len(x_axes[2])
-            f_grid = np.full((nx, ny, nz), mask)
-            for vertex_index in range(n_vertex):
-                x_index = np.where(x_axes[0] == x_vertices[vertex_index][0])[0][0]
-                y_index = np.where(x_axes[1] == x_vertices[vertex_index][1])[0][0]
-                z_index = np.where(x_axes[2] == x_vertices[vertex_index][2])[0][0]
-                f_grid[x_index, y_index, z_index] = f_vertices[vertex_index]
-        case _:
-            raise ValueError(f"Spatial dimension should be 1, 2 or 3, not {dim}")
+                x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
+                y_index = np.searchsorted(axes[1], vertices[vertex_index][1])
+                f_grid[x_index, y_index] = vertex_values[vertex_index]
+    elif dim == 3:
+        nx, ny, nz = len(axes[0]), len(axes[1]), len(axes[2])
+        f_grid = np.full((nx, ny, nz), mask)
+        for vertex_index in range(n_vertex):
+            x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
+            y_index = np.searchsorted(axes[1], vertices[vertex_index][1])
+            z_index = np.searchsorted(axes[2], vertices[vertex_index][2])
+            f_grid[x_index, y_index, z_index] = vertex_values[vertex_index]
+    else:
+        raise ValueError(f"Spatial dimension should be 1, 2 or 3, not {dim}")
 
     return f_grid
 
 
 def _grid_nojit(
-    f_vertices: np.ndarray,
-    x_vertices: list[tuple[float, ...]],
-    x_axes: tuple[np.ndarray, ...],
+    vertex_values: np.ndarray,
+    vertices: list[tuple[float, ...]],
+    axes: tuple[np.ndarray, ...],
     mask: float,
 ) -> np.ndarray:
     """
-    A function that returns the vertex values on a Cartesian
-    grid. See also `_function_grid_jit` for a faster, JIT-compiled version.
+    Returns the vertex values on a Cartesian grid. 
+    See also `_grid_jit` for a faster, JIT-compiled version.
     """
-    dim = len(x_axes)
-    nx = tuple(len(i) for i in x_axes)
-    f_grid = np.full(nx, mask)
+    return _grid_jit.__wrapped__(vertex_values, vertices, axes, mask)
+    # dim = len(axes)
+    # nx = tuple(len(i) for i in axes)
+    # f_grid = np.full(nx, mask)
 
-    for vertex_index, x_vertex in enumerate(x_vertices):
-        x_index = [np.where(x_axes[i] == x_vertex[i])[0][0] for i in range(dim)]
-        f_grid[tuple(x_index)] = f_vertices[vertex_index]
+    # for vertex_index, x_vertex in enumerate(vertices):
+    #     x_index = [np.where(axes[i] == x_vertex[i])[0][0] for i in range(dim)]
+    #     f_grid[tuple(x_index)] = vertex_values[vertex_index]
 
-    return f_grid
+    # return f_grid
 
 
 def _grid_from_map(
-    f_vertices: np.ndarray,
-    vertex_grid_map: dict[int, int | tuple[int, ...]],
+    vertex_grid_map: np.ndarray,
+    vertex_values: np.ndarray,
     x_axes: tuple[np.ndarray, ...],
     mask: float,
 ) -> np.ndarray:
@@ -265,7 +254,7 @@ def _grid_from_map(
     f_grid = np.full(nx, mask)
 
     for vertex_index, x_index in vertex_grid_map.items():
-        f_grid[x_index] = f_vertices[vertex_index]
+        f_grid[x_index] = vertex_values[vertex_index]
 
     return f_grid
 
@@ -273,87 +262,54 @@ def _grid_from_map(
 grid = optional_lru_cache(_grid)
 
 
+@optional_lru_cache
 def vertex_to_grid_index_map(
     mesh: Mesh,
-    jit: bool = True,
     strict: bool = False,
-) -> dict[int, int | tuple[int, ...]]:
-    """
-    LRU-cached and JIT-compiled under the hood. JIT-compilation
-    requires a `numba` installation.
-    """
-    if strict and not is_cartesian(mesh):
-        raise ValueError("Mesh must be Cartesian")
-    return _vertex_to_grid_index_map(mesh, jit)
-
-
-@lru_cache
-def _vertex_to_grid_index_map(
-    mesh: Mesh, 
-    jit: bool,
-) -> dict[int, int | tuple[int, ...]]:
-    grid_vertices = vertices(mesh)
-    grid_axes = grid(use_cache=True)(mesh)
+    jit: bool = True,
+    use_cache: bool = True,
+) -> dict[int, tuple[int, ...]]:
+    axes = mesh_axes(use_cache=use_cache)(mesh, strict)
+    vertices = mesh_vertices(mesh)
     if jit:
-        return _vertex_to_grid_index_map_jit(numba.typed.List(grid_vertices), grid_axes)
+        map_array = _vertex_to_grid_index_map_jit(numba.typed.List(vertices), axes)
     else:
-        return _vertex_to_grid_index_map_nojit(grid_vertices, grid_axes)
+        map_array = _vertex_to_grid_index_map_nojit(vertices, axes)
+    return {i: tuple(map_array[i]) for i in range(len(map_array))}
 
 
 @numba.jit(nopython=True)
 def _vertex_to_grid_index_map_jit(
-    grid_vertices, 
-    grid_axes,
-) -> dict[int, tuple[int, ...]]:
-    n_vertices = len(grid_vertices)
-    dim = len(grid_axes)
-    vertex_mapping = {}
+    vertices: list[tuple[float, ...]],
+    axes: tuple[np.ndarray, ...],
+) -> np.ndarray:
+    n_vertices = len(vertices)
+    dim = len(axes)
+    map_array = np.empty((n_vertices, dim), dtype=np.int64)
 
-    match dim:
-        case 1:
-            for vertex_index in range(n_vertices):
-                x_index = np.where(grid_axes[0] == grid_vertices[vertex_index][0])[0][0]
-                vertex_mapping[vertex_index] = (x_index,)
-        case 2:
-            for vertex_index in range(n_vertices):
-                x_index = np.where(grid_axes[0] == grid_vertices[vertex_index][0])[0][0]
-                y_index = np.where(grid_axes[1] == grid_vertices[vertex_index][1])[0][0]
-                vertex_mapping[vertex_index] = (x_index, y_index)
-        case 3:
-            for vertex_index in range(n_vertices):
-                x_index = np.where(grid_axes[0] == grid_vertices[vertex_index][0])[0][0]
-                y_index = np.where(grid_axes[1] == grid_vertices[vertex_index][1])[0][0]
-                z_index = np.where(grid_axes[2] == grid_vertices[vertex_index][2])[0][0]
-                vertex_mapping[vertex_index] = (x_index, y_index, z_index)
-        case _:
-            raise ValueError(f"Spatial dimension should be 1, 2 or 3, not {dim}")
+    for vertex_index in range(n_vertices):
+        for d in range(dim):
+            map_array[vertex_index, d] = np.searchsorted(axes[d], vertices[vertex_index][d])
 
-    return vertex_mapping
+    return map_array
 
 
 def _vertex_to_grid_index_map_nojit(
-    grid_vertices: list[tuple[float, ...]],
-    grid_axes: tuple[np.ndarray, ...],
-) -> dict[int, tuple[int, ...]]:
-    dim = len(grid_axes)
-    vertex_mapping = {}
-
-    for vertex_index, x_vertex in enumerate(grid_vertices):
-        x_index = [np.where(grid_axes[i] == x_vertex[i])[0][0] for i in range(dim)]
-        vertex_mapping[vertex_index] = tuple(x_index)
-
-    return vertex_mapping
-
-
-# TODO what about gmsh meshes?
-def reorder_local_vertices(
-    cell_vertices: np.ndarray,
-    start: Literal["N", "Z"] = "N",
-    finish: Literal["clockwise", "anticlockwise"] = "clockwise",
+    vertices: list[tuple[float, ...]],
+    axes: tuple[np.ndarray, ...],
 ) -> np.ndarray:
-    """ "
+    return _vertex_to_grid_index_map_jit.__wrapped__(vertices, axes)
+
+
+def reorder_quad_vertices(
+    cell_vertices: np.ndarray,
+    initial_ordering: Literal["N", "Z"] = "N",
+    final_ordering: Literal["clockwise", "anticlockwise"] = "clockwise",
+) -> np.ndarray:
+    """
     Quadrilateral meshes generated by `dolfinx` have a local
-    indexing of cell vertices forming an N-shape
+    indexing of cell vertices that is self-intersecting 
+    (e.g. forming an N-shape or Z-shape)
 
     ```
     1 _______ 3
@@ -362,8 +318,8 @@ def reorder_local_vertices(
     0 ‾‾‾‾‾‾‾ 2
     ```
 
-    A quadrangulation requires vertices to have a local
-    indexing that is non-self-intersecting (i.e. clockwise
+    A `matplotlib` quadrangulation requires local indexing
+    of cell vertices to be non-self-intersecting (i.e. clockwise
     or anticlockwise)
 
     ```
@@ -375,74 +331,107 @@ def reorder_local_vertices(
 
     """
     assert len(cell_vertices) == 4
-    assert start == "N"
 
-    reordered = np.zeros(len(cell_vertices), dtype=np.int32)
-    if finish == "clockwise":
-        reordered[0] = cell_vertices[0]
-        reordered[1] = cell_vertices[1]
-        reordered[2] = cell_vertices[3]
-        reordered[3] = cell_vertices[2]
-    elif finish == "anticlockwise":
-        reordered[0] = cell_vertices[0]
-        reordered[1] = cell_vertices[2]
-        reordered[2] = cell_vertices[3]
-        reordered[3] = cell_vertices[1]
+    if initial_ordering == 'N':
+        if final_ordering == "clockwise":
+            initial_final_map = {
+                0: 0, 
+                1: 1,
+                2: 3,
+                3: 2,
+            }
+        elif final_ordering == "anticlockwise":
+            initial_final_map = {
+                0: 0, 
+                1: 2,
+                2: 3,
+                3: 1,
+            }
+        else:
+            raise ValueError(f'{final_ordering} not recognised')
+        
+    elif initial_ordering == 'Z':
+        raise NotImplementedError
+    
     else:
-        raise ValueError
-
+        raise ValueError(f'{initial_ordering} not recognised')
+    
+    reordered = np.zeros(len(cell_vertices), dtype=np.int32)
+    for initial, final in initial_final_map.items():
+        reordered[initial] = cell_vertices[final]
+    
     return reordered
 
 
 def where_on_grid(
     f: Function,
     condition: Callable[[np.ndarray], np.ndarray],
-    use_cache: bool = False,
+    use_cache: tuple[bool, bool] = (True, False),
 ) -> tuple[np.ndarray, ...]:
-    f_grid = grid(use_cache=use_cache)(f)
-    axes = grid(use_cache=True)(f.function_space.mesh)
+    axes = mesh_axes(use_cache=use_cache[0])(f.function_space.mesh)
+    f_grid = grid(use_cache=use_cache[1])(f)
     indices = np.where(condition(f_grid))
     return tuple(x[i] for x, i in zip(axes, indices))
 
 
 def as_index(
-    u: np.ndarray | Iterable[float],
-    i: int | float,
+    arr: np.ndarray | Iterable[float],
+    target: int | float,
     tol: float | None = None,
+    compare: Literal['lt', 'gt'] | None = None,
 ) -> int:
-    if isinstance(i, int):
-        return i
-    else:
-        u_diff = np.abs([ui - i for ui in u])
-        if tol is not None:
-            if np.min(u_diff) > tol:
-                raise ValueError(
-                    f'No values found within tolerance {tol} of target value {i}.'
-                )
-        return np.argmin(u_diff)
+    if isinstance(target, int):
+        return target
+    
+    if isinstance(compare, str):
+        compare = getattr(operator, compare)
+        if compare is operator.lt:
+            index_shift = -1
+        elif compare is operator.gt:
+            index_shift = 1
+        else:
+            raise ValueError(f'{compare} operator not valid')
+        
+    if compare is not None:
+        arr = np.sort(arr)
+
+    arr_diff = np.abs([i - target for i in arr])
+    if tol is not None and np.min(arr_diff) > tol:
+        raise ValueError(
+            f'No values found within tolerance {tol} of target value {target}.'
+        ) 
+           
+    target_index = np.argmin(arr_diff)
+
+    if compare is not None:
+        if not compare(target, arr[target_index]):
+            target_index += index_shift
+        assert compare(target, arr[target_index])
+
+    return target_index
 
 
 def as_indices(
-    u: np.ndarray | Iterable[float],
-    i: range | list[int | float] | int | StrSlice,
+    arr: np.ndarray | Iterable[float],
+    targets: range | list[int | float] | int | StrSlice,
     tol: float | None = None,
     window: bool = False,
 ) -> Iterable[int]:
-    if isinstance(i, range):
-        indices = i
-    elif isinstance(i, StrSlice):
-        slc = as_slice(i)
+    if isinstance(targets, range):
+        indices = targets
+    elif isinstance(targets, StrSlice):
+        slc = as_slice(targets)
         indices = range(slc.start, slc.stop, slc.step)
-    elif isinstance(i, int):
-        stop = len(u)
-        step = stop // i
+    elif isinstance(targets, int):
+        stop = len(arr)
+        step = stop // targets
         indices = range(0, stop, step)
     else:
-        indices = [as_index(u, i, tol) for i in i]
+        indices = [as_index(arr, i, tol) for i in targets]
         if window:
-            if indices[0] < i[0]:
+            if indices[0] < targets[0]:
                 indices[0] += 1
-            if indices[1] > i[-1]:
+            if indices[1] > targets[-1]:
                 indices[0] -= 1
     return indices
 
@@ -452,10 +441,12 @@ def cross_section(
     axis: str | Literal[0, 1, 2],
     value: float | None = None,
     fraction: bool = True,
-    use_cache: bool = True,
+    use_cache: tuple[bool, bool] = (True, False),
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> tuple[np.ndarray, np.ndarray, float] | tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     """
+    Returns 
+    
     `x_axis, y_line, y_value` in 2D
 
     `x_axis, y_axis, z_grid, z_value` in 3D
@@ -476,18 +467,18 @@ def cross_section(
         axis_index = axis
 
     if isinstance(fxyz, Function):
-        x = grid(use_cache=True)(fxyz.function_space.mesh)
-        f_grid = grid(use_cache=use_cache)(fxyz)
+        axes = grid(use_cache=use_cache[0])(fxyz.function_space.mesh)
+        f_grid = grid(use_cache=use_cache[1])(fxyz)
         dim = fxyz.function_space.mesh.geometry.dim
     else:
         f_grid = fxyz[0]
-        x = fxyz[1:]
-        dim = len(x)
+        axes = tuple(fxyz[1:])
+        dim = len(axes)
 
     if dim == 2:
-        return _cross_section_line(f_grid, x, f_fraction, f_value, axis_index)
+        return _cross_section_line(f_grid, axes, f_fraction, f_value, axis_index)
     elif dim == 3:
-        return _cross_section_colormap(f_grid, x, f_fraction, f_value, axis_index)
+        return _cross_section_colormap(f_grid, axes, f_fraction, f_value, axis_index)
     else:
         raise ValueError(f'Cannot get a cross-section in d={dim}.')
 
@@ -559,7 +550,7 @@ def spacetime_grid(
     axis: str | Literal[0, 1, 2],
     value: float | None = None,
     fraction: bool = True,
-    use_cache: bool = True,
+    use_cache: tuple[bool, bool] = (True, False),
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> np.ndarray:
     _cross_sections = []

@@ -33,11 +33,11 @@ from .fem_perturbation import (
     cubic_noise, sinusoid_noise, rescale,
 )
 from .mesh_utils import(
-    axes,
-    vertices_tensor,
-    vertices,
-    coordinates,
-    axes_spacing,
+    mesh_axes,
+    mesh_vertices_tensor,
+    mesh_vertices,
+    mesh_coordinates,
+    mesh_axes_spacing,
     cell_sizes,
     cell_size_quantity,
     cell_aspect_ratios,

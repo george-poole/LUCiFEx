@@ -7,7 +7,7 @@ from dolfinx.mesh import Mesh
 
 from ..mesh.cartesian import CellType
 from ..utils import (
-    coordinates,
+    mesh_coordinates,
     is_cartesian,
     quadrangulation,
     triangulation,
@@ -21,15 +21,15 @@ from .utils import optional_ax, set_axes
 def plot_mesh(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
+    use_cache: bool = True,
     **plt_kwargs,
 ) -> None:
     dim = mesh.geometry.dim
     match dim:
         case 1:
-            _plot_interval_mesh(ax, mesh, title, **plt_kwargs)
+            _plot_interval_mesh(ax, mesh, use_cache, **plt_kwargs)
         case 2:
-            _plot_rectangle_mesh(ax, mesh, title, **plt_kwargs)
+            _plot_rectangle_mesh(ax, mesh, use_cache, **plt_kwargs)
         case 3:
             raise ValueError("3D plotting not supported.")
         case _:
@@ -39,7 +39,6 @@ def plot_mesh(
 def _plot_interval_mesh(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
     raise FixMeError()
@@ -48,7 +47,7 @@ def _plot_interval_mesh(
 def _plot_rectangle_mesh(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
+    use_cache: bool,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
     cell_type = mesh.topology.cell_name()
@@ -56,11 +55,11 @@ def _plot_rectangle_mesh(
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, True | False:
-            _plot_triangulation(ax, mesh, title, **plt_kwargs)
+            _plot_triangulation(ax, mesh, use_cache, **plt_kwargs)
         case CellType.QUADRILATERAL, True:
-            _plot_grid(ax, mesh, title, **plt_kwargs)
+            _plot_grid(ax, mesh, use_cache, **plt_kwargs)
         case CellType.QUADRILATERAL, False:
-            _plot_quadrangulation(ax, mesh, title, **plt_kwargs)
+            _plot_quadrangulation(ax, mesh, use_cache, **plt_kwargs)
         case _:
             raise ValueError
 
@@ -68,7 +67,7 @@ def _plot_rectangle_mesh(
 def _plot_triangulation(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
+    use_cache: bool,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable for Cartesian and unstructured meshes"""
@@ -78,12 +77,11 @@ def _plot_triangulation(
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
-    trigl = triangulation(mesh)
+    trigl = triangulation(use_cache=use_cache)(mesh)
     filter_kwargs(set_axes)(
         ax,
         x_lims=trigl.x,
         y_lims=trigl.y,
-        title=title,
         **_kwargs,
     )
     filter_kwargs(ax.triplot, Line2D)(trigl, **_kwargs)
@@ -92,7 +90,7 @@ def _plot_triangulation(
 def _plot_quadrangulation(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
+    use_cache: bool,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable for Cartesian and unstructured meshes"""
@@ -102,7 +100,7 @@ def _plot_quadrangulation(
     _kwargs = _poly_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
-    quadl = quadrangulation(mesh)
+    quadl = quadrangulation(use_cache=use_cache)(mesh)
     quadl = filter_kwargs(quadrangulation, Collection)(mesh, **_kwargs)
 
     for attr, value in _kwargs.items():
@@ -110,12 +108,11 @@ def _plot_quadrangulation(
         if hasattr(quadl, setter):
             getattr(quadl, setter)(value)
 
-    x_coordinates, y_coordinates = coordinates(mesh)
+    x_coordinates, y_coordinates = mesh_coordinates(mesh)
     filter_kwargs(set_axes)(
         ax,
         x_lims=x_coordinates,
         y_lims=y_coordinates,
-        title=title,
         **_kwargs,
     )
     ax.add_collection(quadl)
@@ -124,7 +121,7 @@ def _plot_quadrangulation(
 def _plot_grid(
     ax: Axes, 
     mesh: Mesh,
-    title: str | None = None,
+    use_cache: bool,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """Suitable only for Cartesian meshes"""
@@ -134,7 +131,7 @@ def _plot_grid(
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
-    x, y = grid(use_cache=True)(mesh)
+    x, y = grid(use_cache=use_cache)(mesh)
     xlim = (np.min(x), np.max(x))
     ylim = (np.min(y), np.max(y))
 
@@ -142,7 +139,6 @@ def _plot_grid(
         ax,
         x_lims=x, 
         y_lims=y, 
-        title=title, 
         **_kwargs,
     )
 

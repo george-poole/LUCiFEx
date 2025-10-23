@@ -8,13 +8,13 @@ from dolfinx.fem import Function
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import fem_function_space, SpatialPerturbation, set_fem_function
+from ..utils import fem_function_space, SpatialPerturbation
 from .unsolved import UnsolvedType
 
 
 class LUCiFExFunction(Function):
     """
-    Subclass of `dolfinx.fem.Function` with additional conveniences.
+    Subclass of `dolfinx.fem.Function` with additional utilities.
     """
     def __init__(
         self,

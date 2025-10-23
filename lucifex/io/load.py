@@ -219,41 +219,58 @@ def load_npz_dict(
     dir_path: str,
     file_name: str,
     sep: str = '__',
+    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
     *,
-    search: str | None = None,
+    target_name: str | None = None,
 ) -> dict[str, float | np.ndarray | NumericSeries | GridSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
-    d: dict[str, float | np.ndarray | dict[str, float] | dict[str | float, float | np.ndarray]] = {}
+    dict_load: dict[
+        str, 
+        float | np.ndarray | dict[str | float, float | np.ndarray],
+    ] = {}
+
     for k, v in npz_dict.items():
-        if search is not None and not k.startswith(search):
+        if target_name is not None and not k.startswith(target_name):
             continue
         if isinstance(v, np.ndarray) and v.shape == ():
-            v = v[()]
+            v = v.item()
         match k.split(sep):
-            case n, axis_or_time: 
-                if n not in d:
-                    d[n] = {}
-                try:
-                    d[n].update({float(axis_or_time): v}) 
-                except ValueError:
-                    d[n].update({axis_or_time: v}) 
-            case _:
-                d[k] = v 
+            case (name, axis) if axis in axis_names: 
+                if name not in dict_load:
+                    dict_load[name] = {}
+                dict_load[name].update({axis: v}) 
+            case (name, time): 
+                if name not in dict_load:
+                    dict_load[name] = {}
+                dict_load[name].update({float(time): v}) 
+            case name:
+                dict_load[name] = v 
 
-    rtrn: dict[str, float | np.ndarray | NumericSeries | GridSeries] = {}
-    for k, v in d.items():
-        if isinstance(v, dict):
-            series = {i: j for i, j in v.items() if isinstance(i, float)}
-            axes = {i: j for i, j in v.items() if isinstance(i, str)}
+    dict_return: dict[
+        str, 
+        float | np.ndarray | NumericSeries | GridSeries,
+    ] = {}
+
+    for name, value in dict_load.items():
+        if isinstance(value, dict):
+            time_series: list[float] = []
+            series: list[np.ndarray] = []
+            axes: list[np.ndarray] = []
+            for i, j in value.items():
+                if isinstance(i, float):
+                   time_series.append(i)
+                   series.append(j)
+                else:
+                    axes.append(j)
             if axes:
-                v = GridSeries(list(series.values()), list(series.keys()), tuple(axes.values()), k)
+                value = GridSeries(series, time_series, tuple(axes), name)
             else:
-                v = NumericSeries(list(series.values()), list(series.keys()), k)
-        rtrn[k] = v
+                value = NumericSeries(series, time_series, name)
+        dict_return[name] = value
 
-    return rtrn
+    return dict_return
 
 
 def load_figure(

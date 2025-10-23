@@ -12,4 +12,4 @@ from .write import write
 from .proxy import proxy, co_proxy
 from .post import postprocess, co_postprocess
 from .dataset import find_dataset, find_by_id, find_by_parameters, find_by_tags, filter_by_parameters, filter_by_tags
-from .utils import create_path, file_path_ext, file_name_ext
+from .utils import create_path, file_path_ext, file_name_ext, get_ipynb_file_name

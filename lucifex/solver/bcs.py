@@ -11,7 +11,6 @@ from dolfinx.fem import (
     Function,
     FunctionSpace,
     Constant,
-    Expression,
     DirichletBCMetaClass,
     dirichletbc,
 )
@@ -118,6 +117,7 @@ class BoundaryConditions:
         self,
         function_space: FunctionSpace,
         bcs: list[DirichletBCMetaClass] | None = None,
+        finalize: bool = True,
     ) -> MultiPointConstraint | None:
         """
         Implements periodic and antiperiodic boundary conditions via a geometrical constraint
@@ -130,9 +130,9 @@ class BoundaryConditions:
         n_constraint = 0
 
         for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
-            if i is not None:
-                raise NotImplementedError
             if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
+                if i is not None:
+                    raise NotImplementedError
                 scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
                 mpc.create_periodic_constraint_geometrical(
                     function_space, 
@@ -146,7 +146,8 @@ class BoundaryConditions:
         if n_constraint == 0:
             return None
         else:
-            mpc.finalize()
+            if finalize:
+                mpc.finalize()
             return mpc
 
 

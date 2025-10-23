@@ -12,11 +12,15 @@ import numpy as np
 from ufl import Form, lhs, rhs
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant, Function, FunctionSpace
-from dolfinx.fem.petsc import create_matrix, create_vector
+from dolfinx.fem.petsc import create_vector, DirichletBCMetaClass
+from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
 from slepc4py import SLEPc
 
-from ..utils import Perturbation, replicate_callable, MultipleDispatchTypeError, dofs_limits_corrector, fem_function_space
+from ..utils import (
+    Perturbation, replicate_callable, MultipleDispatchTypeError, 
+    dofs_limits_corrector, fem_function_space,
+)
 from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
 
 from .bcs import BoundaryConditions
@@ -27,8 +31,8 @@ from .options import (
 from .petsc import (
     form,
     assemble_matrix,
-    create_mpc_matrix,
     assemble_vector,
+    create_matrix,
     sum_matrix,
     sum_vector,
     array_matrix,
@@ -66,7 +70,10 @@ class BoundaryValueProblem:
         self,
         solution: Function | FunctionSeries,
         forms: Form | Iterable[Form | tuple[Constant | float, Form]],
-        bcs: BoundaryConditions | None = None,
+        bcs: BoundaryConditions 
+        | list[DirichletBCMetaClass] 
+        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -87,9 +94,6 @@ class BoundaryValueProblem:
             solution = Function(solution.function_space, name=series.name)
         else:
             raise MultipleDispatchTypeError(solution)
-        
-        if bcs is None:
-            bcs = BoundaryConditions()
 
         if petsc is None:
             petsc = self.petsc_default
@@ -101,34 +105,42 @@ class BoundaryValueProblem:
         jit = dict(jit)
         ffcx = dict(ffcx)
 
-        forms_weak_bcs = bcs.create_weak_bcs(solution.function_space)
-        forms = (*forms, *forms_weak_bcs)
-        scalings = [i[0] if isinstance(i, tuple) else 1.0 for i in forms]
-        self._scalings = scalings
-        forms = [i[1] if isinstance(i, tuple) else i for i in forms]
-
-        self._bcs = bcs.create_strong_bcs(solution.function_space)        
-        self._mpc = bcs.create_periodic_bcs(solution.function_space)
-        
         if isinstance(dofs_corrector, tuple):
             self._dofs_corrector = lambda u: dofs_limits_corrector(u, dofs_corrector)
         else:
             self._dofs_corrector = dofs_corrector
+
+        if bcs is None:
+            bcs = []
+        if isinstance(bcs, list):
+            self._bcs = bcs
+            self._mpc = None
+        elif isinstance(bcs, tuple):
+            self._bcs, self._mpc = bcs
+        else:
+            forms_weak_bcs = bcs.create_weak_bcs(solution.function_space)
+            forms = (*forms, *forms_weak_bcs)
+            self._bcs = bcs.create_strong_bcs(solution.function_space)        
+            self._mpc = bcs.create_periodic_bcs(solution.function_space)
+
+        if self._mpc is not None and not self._mpc.finalized:
+            self._mpc.finalize()
+
+        scalings = [i[0] if isinstance(i, tuple) else 1.0 for i in forms]
+        self._scalings = scalings
+        forms = [i[1] if isinstance(i, tuple) else i for i in forms]
 
         _form = partial(
             form,
             jit_options=jit,
             form_compiler_options=ffcx,
         )
-        if self._mpc:
-            _create_matrix = partial(create_mpc_matrix, mpc=self._mpc)
-        else:
-            _create_matrix = create_matrix
+        _create_matrix = partial(create_matrix, mpc=self._mpc)
 
         self._a_forms = [lhs(i) if len(i.arguments()) == 2 else None for i in forms]
         self._a_sum_unscaled: Form = sum([i for i in self._a_forms if i is not None])
         if self._a_sum_unscaled == 0:
-            raise RuntimeError('Variational problem with test and trial functions `v, u` must have a bilinear form `a(u,v)`.')
+            raise RuntimeError(f'{self.__class__.__name__} requires must have a bilinear form `a(u,v)` with test and trial functions `v, u`.')
         self._a_sum = sum(
             [i * j for i, j in zip(self._scalings, self._a_forms, strict=True) if j is not None]
         )
@@ -145,7 +157,7 @@ class BoundaryValueProblem:
         self._l_forms = [rhs(i) if not rhs(i).empty() else None for i in forms]
         self._l_sum_unscaled: Form = sum([i for i in self._l_forms if i is not None])
         if self._l_sum_unscaled == 0:
-            raise RuntimeError('Variational problem with test and trial functions `v, u` must have a linear form `l(v)`.')
+            raise RuntimeError(f'{self.__class__.__name__} requires must have a linear form `l(v)` with test function `v`.')
         self._l_sum = sum(
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
@@ -196,7 +208,10 @@ class BoundaryValueProblem:
     def from_forms_func(
         cls,
         forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
-        bcs: BoundaryConditions | None = None,
+        bcs: BoundaryConditions 
+        | list[DirichletBCMetaClass] 
+        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -249,9 +264,9 @@ class BoundaryValueProblem:
         if overwrite is None:
             overwrite = self._overwrite
         if cache_matrix is None:
-            cache_matrix = self.cache_matrix
+            cache_matrix = self._cache_matrix
         if use_partition is None:
-            use_partition = self.use_partition
+            use_partition = self._use_partition
         use_matrix_partition, use_vector_partition = use_partition
 
         if not use_matrix_partition:
@@ -334,11 +349,30 @@ class BoundaryValueProblem:
         if self._vector is None:
             return None
         return array_vector(self._vector, indices, copy)
-        
-    def get_solver(self) -> PETSc.KSP | None:
+
+    @property 
+    def solver(self) -> PETSc.KSP | None:
         return self._solver
     
-
+    @property
+    def bcs(self) -> list[DirichletBCMetaClass]:
+        return self._bcs
+    
+    @property
+    def mpc(self) -> MultiPointConstraint | None:
+        return self._mpc
+    
+    @property
+    def bilinear_forms(self) -> list[Form]:
+        return self._a_forms
+    
+    @property
+    def linear_forms(self) -> list[Form]:
+        return self._l_forms
+    
+    @property
+    def scalings(self) -> list[float | Constant]:
+        return self._scalings
     
     @property
     def cache_matrix(self) -> bool | EllipsisType | Iterable[bool | EllipsisType]:
@@ -612,7 +646,10 @@ class EigenvalueProblem:
         self,
         solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int],
         forms: tuple[Form, Form],
-        bcs: BoundaryConditions | None = None,
+        bcs: BoundaryConditions 
+        | list[DirichletBCMetaClass] 
+        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | None = None,
         slepc: OptionsSLEPc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -652,21 +689,38 @@ class EigenvalueProblem:
             eigenseries = [FunctionSeries(function_space) for _ in range(nev)]
         
         if bcs is None:
-            bcs = BoundaryConditions()
+            bcs = []
+        if isinstance(bcs, list):
+            self._bcs = bcs
+            self._mpc = None
+        elif isinstance(bcs, tuple):
+            self._bcs, self._mpc = bcs
+        else:
+            if bcs.create_weak_bcs(function_space):
+                raise RuntimeError(f'{self.__class__.__name__} cannot have a linear form `l(v)` with test function `v`.')
+            self._bcs = bcs.create_strong_bcs(function_space)        
+            self._mpc = bcs.create_periodic_bcs(function_space)
 
-        self._bcs = bcs.create_strong_bcs(function_space)  
+        if self._mpc is not None and not self._mpc.finalized:
+            self._mpc.finalize()
 
         _form = partial(
             form,
             jit_options=jit,
             form_compiler_options=ffcx,
         )
+        _create_matrix = partial(create_matrix, mpc=self._mpc)
+
+        for f in forms:
+            if not rhs(f).empty():
+                raise RuntimeError(f'{self.__class__.__name__} cannot have a linear form `l(v)` with test function `v`.')
 
         form_lhs, form_rhs = forms
+        self._forms = form_lhs, form_rhs
         self._form_lhs_compiled = _form(form_lhs)
         self._form_rhs_compiled = _form(form_rhs)
-        self._matrix_lhs = create_matrix(self._form_lhs_compiled)
-        self._matrix_rhs = create_matrix(self._form_rhs_compiled)
+        self._matrix_lhs = _create_matrix(self._form_lhs_compiled)
+        self._matrix_rhs = _create_matrix(self._form_rhs_compiled)
 
         prefix = f"{self.__class__.__name__}_{id(self)}"
         self._solver = SLEPc.EPS().create(function_space.mesh.comm)
@@ -764,9 +818,14 @@ class EigenvalueProblem:
             array_matrix(self._matrix_lhs, indices, copy), 
             array_matrix(self._matrix_rhs, indices, copy), 
         )
-        
-    def get_solver(self) -> SLEPc.EPS:
+
+    @property    
+    def solver(self) -> SLEPc.EPS:
         return self._solver
+    
+    @property
+    def bilinear_forms(self) -> tuple[Form, Form]:
+        return self._forms
     
     @property
     def cache_matrix(self) -> bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType]:

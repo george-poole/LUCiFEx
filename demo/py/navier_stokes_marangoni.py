@@ -49,13 +49,6 @@ def navier_stokes_marangoni(
     D_adv_c: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
     D_diff_c: FiniteDifference = CN,
 ):
-    # time
-    order = finite_difference_order(
-        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_c, D_diff_c,
-    )
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
@@ -69,6 +62,14 @@ def navier_stokes_marangoni(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
+
+    # time
+    order = finite_difference_order(
+        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_c, D_diff_c,
+    )
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
+
 
     # constants
     Pr = Constant(Omega, Pr, 'Pr')

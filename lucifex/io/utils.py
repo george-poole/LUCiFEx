@@ -93,3 +93,17 @@ def io_array_dim(
             return dim0 * dim1
         case _:
             raise NotImplementedError(f'I/O with shape {shape} is not supported.')
+        
+
+def get_ipynb_file_name(
+    key: str = '__vsc_ipynb_file__',
+) -> str:
+    try:
+        from IPython import get_ipython
+        ip = get_ipython()
+        if ip is not None:
+            _globals = ip.user_global_ns 
+    except Exception:
+        _globals = globals()
+        
+    return os.path.basename(_globals[key])

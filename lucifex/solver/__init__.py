@@ -43,5 +43,5 @@ from typing import TypeAlias
 PDE: TypeAlias = BVP | IBVP | IVP | EVP
 """Alias to `BVP | IBVP | IVP`"""
 
-Solver: TypeAlias = PDE | EvaluationProblem
+Problem: TypeAlias = PDE | EvaluationProblem
 """Alias to `PDE | ExpressionSolver`"""

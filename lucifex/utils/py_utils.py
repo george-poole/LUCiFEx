@@ -8,6 +8,7 @@ from typing import (
     TypeAlias,
     Any,
     Iterable,
+    Hashable,
 )
 from functools import lru_cache, update_wrapper, wraps
 from inspect import signature
@@ -31,6 +32,15 @@ class classproperty:
 P = ParamSpec("P")
 R = TypeVar('R')
 def replicate_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
+    """
+    For example, to replicate the callable `func`
+
+    ```
+    @replicate_callable(func)
+    def dummy_func():
+        pass
+    ```
+    """
     def _decorator(dummy: Callable[[], None]):
         assert dummy() is None
         def _wrapper(*args, **kwargs):
@@ -41,7 +51,8 @@ def replicate_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P,
         else:
             _wrapper.__doc__ = dummy.__doc__
         update_wrapper(_wrapper, func, assigned)
-        _wrapper.__name__ = dummy.__name__ # TODO __qualname__ too?
+        _wrapper.__name__ = dummy.__name__
+        _wrapper.__qualname__ = dummy.__qualname__
         _wrapper.__defaults__ = func.__defaults__ 
         _wrapper.__module__ = func.__module__
         return _wrapper
@@ -52,8 +63,8 @@ P = ParamSpec('P')
 R = TypeVar('R')
 def log_texec(
     func: Callable[P, R], 
-    logged: dict[str, list[float]],
-    key: str | None = None,
+    logged: dict[Hashable, list[float]],
+    key: Hashable | None = None,
     n: int = 1, 
     overwrite: bool = False,
 ) -> Callable[P, R]:
@@ -102,28 +113,62 @@ def optional_lru_cache(
         *,
         use_cache: bool = False,
         clear_cache: bool = False,
+        canonicalize: bool = False,
     ) -> Callable[P, R]:
         ...
 
-    func_lru_cache = lru_cache(func)
     USE = 'use_cache'
     CLEAR = 'clear_cache'
-    cache_kwargs_default = {USE: False, CLEAR: False}
-        
+    CANON = 'canonicalize'
+    cache_kwargs_default = {USE: False, CLEAR: False, CANON: False}
+    
+    func_lru_cache = lru_cache(func)
+    func_lru_cache_canon = lru_cache(canonicalize_args(func))
+
     @wraps(func)
     def _(*args, **kwargs):
         if len(args) == 0 and len(kwargs) > 0 and all(i in cache_kwargs_default for i in kwargs):
-            cache_kwargs = cache_kwargs_default.copy()
-            cache_kwargs.update(kwargs)
-            if cache_kwargs[CLEAR]:
-                func_lru_cache.cache_clear()
-            if cache_kwargs[USE]:
-                return lambda *a, **k: func_lru_cache(*a, **k)
+            _kwargs = cache_kwargs_default.copy()
+            _kwargs.update(kwargs)
+            if _kwargs[CANON]:
+                _func_lru_cache = func_lru_cache_canon
+            else:
+                _func_lru_cache = func_lru_cache
+            if _kwargs[CLEAR]:
+                _func_lru_cache.cache_clear()
+            if _kwargs[USE]:
+                return lambda *a, **k: _func_lru_cache(*a, **k)
             else:
                 return lambda *a, **k: func(*a, **k)
         else:
             return _(**cache_kwargs_default)(*args, **kwargs)
     
+    return _
+
+
+# TODO get_overloads in python 3.11+
+P = ParamSpec("P")
+R = TypeVar('R')
+def canonicalize_args(
+    func: Callable[P, R],
+) -> Callable[P, R]:
+
+    @wraps(func)
+    def _(*args, **kwargs):
+        sig = signature(func)
+        defaults = [v.default for v in sig.parameters.values() if v.default is not v.empty]
+        indices = {name: i for i, name in enumerate(sig.parameters)}
+                                                            
+        _args = []
+        _args.extend(args)
+        _args.extend(defaults)
+        if not len(_args) == len(sig.parameters):
+            raise RuntimeError(f'Arguments {_args} cannot be matched to signature {sig.parameters}.')
+        for name, value in kwargs.items():
+            _args[indices[name]] = value
+
+        return func(*_args)
+
     return _
 
 
@@ -159,12 +204,6 @@ def MultipleDispatchTypeError(arg, sd_func: Callable | None = None) -> TypeError
     return TypeError(msg)
 
 
-def FixMeError(
-    msg: str = 'Working on it! Coming soon...',
-) -> NotImplementedError:
-    return NotImplementedError(msg)
-
-
 StrSlice: TypeAlias = str | slice
 """
 Type alias for strings representing slices 
@@ -173,6 +212,7 @@ e.g. `"start:stop"` or `"start:stop:step"`
 
 COLON = ':'
 DOUBLE_COLON = f'{COLON}{COLON}'
+
 
 # TODO slice[int, int, int] Python 3.11+
 def as_slice(s: str | slice) -> slice:
@@ -236,3 +276,9 @@ def nested_dict(
         return defaultdict(dict)
     assert order > 2
     return nested_dict(nested_dict(order - 1))
+
+
+def FixMeError(
+    msg: str = 'Working on it! Coming soon...',
+) -> NotImplementedError:
+    return NotImplementedError(msg)

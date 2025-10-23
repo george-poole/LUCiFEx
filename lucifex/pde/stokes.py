@@ -12,28 +12,31 @@ from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
 
 def stokes_incompressible(
     up: Function,
-    stress: Callable[[Function, Function], Expr],
+    deviatoric_stress: Callable[[Function], Expr],
     f: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None
 ) -> list[Form]:
+    """
+    `∇·𝐮 = 0` \\
+    `𝟎 = -∇p + ∇·𝜏(𝐮) + 𝐟`
+    """
     v, q = TestFunctions(up.function_space)
     u, p = TrialFunctions(up.function_space) 
 
     F_incomp = q * div(u) * dx
-    # F_velocity = mu * inner(grad(v), grad(u)) * dx
-    # F_pressure = -p * div(v) * dx
-    sigma = stress(u, p)
-    F_stress = inner(grad(v), sigma) * dx 
+    F_pressure = -p * div(v) * dx
+    tau = deviatoric_stress(u)
+    F_stress = inner(grad(v), tau) * dx 
 
     if f is None:
         f = Constant(up.function_space.mesh, 0.0, shape=u.ufl_shape)
     F_force = -inner(v, f) * dx
 
-    forms = [F_incomp, F_stress, F_force]
+    forms = [F_incomp, F_pressure, F_stress, F_force]
 
     if bcs is not None:
         ds, natural =  bcs.boundary_data(up.function_space, 'natural')
-        F_bcs = sum([-inner(v, sigmaN) * ds(i) for i, sigmaN in natural])
+        F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in natural])
         forms.append(F_bcs)
 
     return forms
@@ -49,6 +52,7 @@ def stokes_streamfunction(
     """
     `∇⁴ψ = ∂fʸ/∂x - ∂fˣ/∂y`
     """
+    _none = (None, 0)
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
     n = FacetNormal(psi.function_space.mesh)
@@ -62,10 +66,10 @@ def stokes_streamfunction(
 
     forms = [F_dx, F_dS]
 
-    if not fx in (None, 0):
+    if not fx in _none:
         F_fx = v * Dx(fx, 1) * dx
         forms.append(F_fx)
-    if not fy in (None, 0):
+    if not fy in _none:
         F_fy = -v * Dx(fy, 0) * dx
         forms.append(F_fy)
 

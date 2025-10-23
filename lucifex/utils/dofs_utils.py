@@ -112,7 +112,6 @@ def as_spatial_marker(
         return lambda x: np.any([_as_marker(mi)(x) for mi in m], axis=0)
     
     
-# @optional_lru_cache
 def dofs(
     u: Function | Expr,
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[str, int] | None = None,
@@ -134,7 +133,7 @@ def dofs(
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
         u = fem_function(fs, u, use_cache=use_cache, try_identity=try_identity)
-        return u.x.array[:]  # TODO or .vector[:] ?
+        return u.x.array[:]
     elif l2_norm and is_vector(u):
         scalars = fem_function_components(fs, u, use_cache=True)
         scalar_dofs = np.stack([dofs(i, fs, use_cache=False, try_identity=False) for i in scalars], axis=1)

@@ -27,6 +27,7 @@ def darcy_streamfunction(
 
     for scalar-valued `K`.
     """
+    _none = (None, 0) 
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
     if is_tensor(k):
@@ -34,12 +35,15 @@ def darcy_streamfunction(
     else:
         F_lhs = -(mu / k) * inner(grad(v), grad(psi_trial)) * dx
     forms = [F_lhs]
-    if not fx in (None, 0):
+    if not fx in _none:
         F_egx = -v * Dx(fx, 1) * dx
         forms.append(F_egx)
-    if not fy in (None, 0):
+    if not fy in _none:
         F_egy = v * Dx(fy, 0) * dx
         forms.append(F_egy)
+    if fx in _none and fy in _none:
+        F_zero = v * Constant(psi.function_space.mesh, 0.0) * dx
+        forms.append(F_zero)
     return forms
 
 

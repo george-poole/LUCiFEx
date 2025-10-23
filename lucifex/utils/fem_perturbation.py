@@ -11,7 +11,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpo
 
 from .enum_types import BoundaryType
 from .dofs_utils import as_dofs_setter, SpatialMarkerTypes
-from .mesh_utils import coordinates, vertices
+from .mesh_utils import mesh_coordinates, mesh_vertices
 from .fem_typecasting import fem_function, fem_function_space
 from .fem_mutation import set_fem_function
 
@@ -100,8 +100,8 @@ class DofsPerturbation:
             dofs = self._rng.uniform(*self._amplitude, len(f.x.array))
         else:
             method = 'linear' if method is None else method
-            vs = vertices(function_space.mesh)
-            xs = coordinates(function_space.mesh)
+            vs = mesh_vertices(function_space.mesh)
+            xs = mesh_coordinates(function_space.mesh)
             xlims = [(np.min(i), np.max(i)) for i in xs]
             x_coarse = [np.linspace(*lim, num=f) for lim, f in zip(xlims, freq, strict=True)]
             noise = self._rng.uniform(*self._amplitude, freq)

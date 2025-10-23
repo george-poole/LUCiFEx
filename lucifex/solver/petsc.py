@@ -15,6 +15,7 @@ from dolfinx.fem import (
 from dolfinx.fem.petsc import (
     assemble_matrix as dolfinx_assemble_matrix,
     assemble_vector as dolfinx_assemble_vector,
+    create_matrix as dolfinx_create_matrix,
     apply_lifting,
     set_bc,
 )
@@ -222,10 +223,15 @@ def array_vector(
         return _v.getArray()
     else:
         return _v.getValues(indices)
+    
 
-
-def create_mpc_matrix(a: FormMetaClass, mpc: MultiPointConstraint):
-    pattern = create_sparsity_pattern(a, mpc)
-    pattern.assemble()
-    return cpp_create_matrix(mpc.function_space.mesh.comm, pattern)
-
+def create_matrix(
+   a: FormMetaClass, 
+   mpc: MultiPointConstraint | None = None,  
+) -> PETScMat:
+    if mpc is None:
+        return dolfinx_create_matrix(a)
+    else:
+        pattern = create_sparsity_pattern(a, mpc)
+        pattern.assemble()
+        return cpp_create_matrix(mpc.function_space.mesh.comm, pattern)

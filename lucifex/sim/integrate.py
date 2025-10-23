@@ -10,7 +10,7 @@ from collections.abc import Iterable
 from dolfinx.fem import Constant
 
 from ..fdm.series import ConstantSeries
-from ..solver import Solver, EvaluationProblem, IBVP, IVP
+from ..solver import Problem, EvaluationProblem, IBVP, IVP
 from ..io.write import write
 from ..io.checkpoint import write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_texec
@@ -25,7 +25,7 @@ from .utils import write_texec, signature_name_collision
 
 
 def integrate(
-    simulation: Simulation | tuple[Iterable[Solver], ConstantSeries, ConstantSeries | Constant],
+    simulation: Simulation | tuple[Iterable[Problem], ConstantSeries, ConstantSeries | Constant],
     n_stop: int | None = None,
     t_stop: float | None = None,
     dt_init: float | None = None,
@@ -54,7 +54,7 @@ def integrate(
     _writers: list[Writer] = [as_writer(w, simulation) for w in writers]
     _writers.extend(simulation.writers)
 
-    n_init_solvers = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
+    n_init_solvers = max(s.n_init for s in simulation.problems if isinstance(s, (IBVP, IVP)))
     if n_init is not None:
         if not n_init > n_init_solvers:
             raise ValueError("Overridden `n_init` value must be greater than simulation's finite difference discretization order")
@@ -67,15 +67,15 @@ def integrate(
         if isinstance(dt, Constant):
             dt_solver_init = EvaluationProblem(dt, lambda: dt.value)
         else:
-            dt_solver_init = simulation.solvers[simulation.index(dt.name)]
+            dt_solver_init = simulation.problems[simulation.index(dt.name)]
 
     solvers_init = [
         s.init if isinstance(s, (IBVP, IVP)) and s.init is not None 
         else dt_solver_init if s.series is dt 
-        else s for s in simulation.solvers
+        else s for s in simulation.problems
     ]
 
-    series_ics = [t, *[s.series for s in simulation.solvers if s.series.ics is not None]]
+    series_ics = [t, *[s.series for s in simulation.problems if s.series.ics is not None]]
     if resume:
         n_init = 0
         read_checkpoint(series_ics, simulation.dir_path, simulation.checkpoint_file)
@@ -106,7 +106,7 @@ def integrate(
 
     _texec = {} if texec is True else texec if isinstance(texec, dict) else None
     if isinstance(_texec, dict):
-        for s in set((*simulation.solvers, *solvers_init)):
+        for s in set((*simulation.problems, *solvers_init)):
             s.solve = log_texec(s.solve, _texec, f'{s.series.name}_{s.solve.__name__}')
         for w in _writers:
             w.write = log_texec(w.write, _texec, f'{w.name}_{w.write.__name__}')
@@ -115,7 +115,7 @@ def integrate(
         if _n < n_init:
             _solvers = solvers_init
         else:
-            _solvers = simulation.solvers
+            _solvers = simulation.problems
         [s.solve() for s in _solvers]
         t.update(t[0].value + _dt.value, future=True)
         [w.write(t[0]) for w in _writers]

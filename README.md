@@ -8,32 +8,31 @@ Development has primarily been motivated by the numerical study of fluid dynamic
 
 ## Gallery
 
-<!-- ![LUCiFEx](demo/figures/A12_convection_onset_highres.png) -->
-
 <table>
   <tr>
-    <td><img src="demo/figures/A09_darcy_p.png" width="400"/></td>
+    <td><img src="demo/figures/A01_darcy_lens_p.png" width="400"/></td>
     <td><img src="demo/figures/A10_darcy_streamfunction_k_streamlines.png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> pressure-driven flow of a Darcy fluid through a lens of low permeability </td>
-    <td align="left"> injection-driven flow of a Darcy fluid across an anticline of heterogeneous permeability </td>
+    <td align="left"> <a href="demo/A01.1_darcy_lens.ipynb"> flow of a Darcy fluid through a lens of low permeability </a> </td>
+    <td align="left"> <a href="demo/A01.1_darcy_lens.ipynb"> flow of a Darcy fluid across an anticline of heterogeneous permeability </a> </td>
   </tr>
   <tr>
     <td><img src="demo/figures/A15a_rayleigh_benard_rectangle_c(t=15.75).png" width="400"/></td>
     <td><img src="demo/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
   </tr>
-  <tr>
-    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </td>
-    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </td>
+  <tr> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle
+    <td align="left"> <a href="demo/A04.1_darcy_convection_rayleigh_benard_rectangle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </a> </td>
+    Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle
+    <td align="left"> <a href="demo/A04.2_darcy_convection_rayleigh_benard_semicircle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </a> </td>
   </tr>
     <tr>
     <td><img src="demo/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
     <td><img src="demo/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </td>
-    <td align="left"> convection of a Darcy fluid in an inclined domain </td>
+    <td align="left"> <a href="demo/A04.3_darcy_convection_rayleigh_benard_annulus.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </a> </td>
+    <td align="left"> <a href="demo/A05.4_darcy_convection_evolving_inclined.ipynb"> convection of a Darcy fluid in an inclined domain </a> </td>
   </tr>
   </tr>
     <tr>
@@ -41,8 +40,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/figures/A19_marangoni_convection_c(t=1.96e-02).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> double-diffusive convection of a Navier-Stokes fluid </td>
-    <td align="left"> Marangoni convection of a Navier-Stokes fluid </td>
+    <td align="left"> <a href="demo/A09.1_navier_stokes_double_diffusive.ipynb"> double-diffusive convection of a Navier-Stokes fluid in a rectangle </a> </td>
+    <td align="left"> <a href="demo/A09.2_navier_stokes_rayleigh_taylor.ipynb"> Marangoni convection of a Navier-Stokes fluid </a> </td>
   </tr>
   </tr>
     <tr>
@@ -50,8 +49,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/figures/A20_saffman_taylor_c(t=0.36).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> Rayleigh-Taylor instability of a Navier-Stokes fluid  </td>
-    <td align="left"> Saffman-Taylor instability of a Darcy fluid </td>
+    <td align="left"> <a href="demo/A09.2_navier_stokes_rayleigh_taylor.ipynb"> Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle </a> </td>
+    <td align="left"> <a href="demo/A08_darcy_saffman_taylor.ipynb"> Saffman-Taylor instability of a Darcy fluid in a porous rectangl </a> </td>
   </tr>
 </table>
 

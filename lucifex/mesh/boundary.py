@@ -68,7 +68,6 @@ def mesh_boundary(
     """
     `{∂Ωᵢ}ᵢ`
     """
-    
     if verify or complete:
         if mesh.comm.Get_size() > 1:
             raise NotImplementedError('Not supported in parallel.')

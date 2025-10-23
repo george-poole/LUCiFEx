@@ -15,6 +15,7 @@ def plot_quiver(
     ax: Axes,
     f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     n_arrow: tuple[int, int] = (30, 30),
+    use_cache: tuple[bool, bool] = (True, False),
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """
@@ -35,16 +36,16 @@ def plot_quiver(
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Quiver plots on non-structured meshes are not supported.")
     
-    x, y = grid(use_cache=True)(fx.function_space.mesh)
-    fx_grid = grid(fx)
-    fy_grid = grid(fy)
+    x, y = grid(use_cache=use_cache[0])(fx.function_space.mesh)
+    fx_grid = grid(use_cache=use_cache[1])(fx)
+    fy_grid = grid(use_cache=use_cache[1])(fy)
 
     return _plot_quiver(ax, (x, y, fx_grid, fy_grid), n_arrow, **kwargs)
 
 
 def _plot_quiver(
     ax: Axes,
-    f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    f: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     n_arrow: tuple[int, int] = (30, 30),
     **kwargs,
 ) -> tuple[Figure, Axes]:
@@ -69,6 +70,7 @@ def plot_streamlines(
     f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     density: float = 1.0,
     color: str | tuple[str, Callable]= 'black',
+    use_cache: tuple[bool, bool] = (True, False),
     **kwargs,
 ):
     """
@@ -89,9 +91,9 @@ def plot_streamlines(
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Streamline plots on unstructured meshes are not supported.")
 
-    x, y = grid(use_cache=True)(fx.function_space.mesh)
-    fx_grid = grid(fx)
-    fy_grid = grid(fy)
+    x, y = grid(use_cache=use_cache[0])(fx.function_space.mesh)
+    fx_grid = grid(use_cache=use_cache[1])(fx)
+    fy_grid = grid(use_cache=use_cache[1])(fy)
 
     return _plot_streamlines(ax, (x, y, fx_grid, fy_grid), density, color, **kwargs)
 

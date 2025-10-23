@@ -15,7 +15,7 @@ from dolfinx.fem import Function, Constant
 from ..utils import MultipleDispatchTypeError, filter_kwargs
 from ..fdm.series import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver.options import OptionsFFCX, OptionsJIT, OptionsPETSc
-from ..solver import (Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem,
+from ..solver import (Problem, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem,
                    ProjectionProblem, InterpolationProblem)
 from ..io import create_path, write
 from ..utils.deferred import Writer, Stopper
@@ -26,7 +26,7 @@ T = TypeVar('T', int | None, str | None, float | None)
 class Simulation:
     def __init__(
         self,
-        solvers: Iterable[Solver],
+        problems: Iterable[Problem],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
         namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr]] = (),
@@ -40,7 +40,7 @@ class Simulation:
         checkpoint_file: str | None = None,
         texec_file: str | None = None,
     ):
-        self.solvers = list(solvers)
+        self.problems = list(problems)
         self.t = t 
         self.dt = dt
         self.namespace_extras = list(namespace)
@@ -82,12 +82,12 @@ class Simulation:
             raise TypeError
         
     def __iter__(self):
-        for i in (self.solvers, self.t, self.dt, self.namespace_extras):
+        for i in (self.problems, self.t, self.dt, self.namespace_extras):
             yield i
 
     def index(self, name: str) -> int | tuple[int, ...]:
         indices = []
-        for i, s in enumerate(self.solvers):
+        for i, s in enumerate(self.problems):
             if s.series.name == name:
                 return indices.append(i)
     
@@ -131,7 +131,7 @@ class Simulation:
         `len(series) ≤ len(solvers)` because a series may be solved for by more 
         than one solvers (e.g. in splitting or linearization schemes)
         """
-        return list({s.series for s in self.solvers})
+        return list({s.series for s in self.problems})
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
@@ -220,8 +220,8 @@ def configure_simulation(
     def _decorator(
         simulation_func: Callable[
             P, 
-            tuple[Iterable[Solver], ConstantSeries, ConstantSeries] 
-            | tuple[Iterable[Solver], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
+            tuple[Iterable[Problem], ConstantSeries, ConstantSeries] 
+            | tuple[Iterable[Problem], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
             | Simulation],
     ):
         

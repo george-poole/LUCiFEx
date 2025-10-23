@@ -10,7 +10,7 @@ from .dofs_utils import dofs
 from .py_utils import optional_lru_cache
 
 
-def vertices(
+def mesh_vertices(
     mesh: Mesh,
     dim: int = None,
 ) -> list[tuple[float, ...]]:
@@ -21,7 +21,7 @@ def vertices(
     return vertices
 
 
-def coordinates(
+def mesh_coordinates(
     mesh: Mesh,
     dim: int | None = None,
 ) -> tuple[np.ndarray, ...]:
@@ -33,28 +33,29 @@ def coordinates(
     return tuple(mesh.geometry.x[:, i] for i in range(dim))
 
 
-def axes(
+@optional_lru_cache
+def mesh_axes(
     mesh: Mesh,
     strict: bool = False,
 )-> tuple[np.ndarray, ...]:
     """
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
-    if strict:
-        assert is_cartesian(mesh)
-    return tuple(np.sort(np.unique(i)) for i in coordinates(mesh))
+    if strict and not is_cartesian(mesh):
+        raise CartesianMeshError()
+    return tuple(np.sort(np.unique(i)) for i in mesh_coordinates(mesh))
 
 
-def vertices_tensor(
+def mesh_vertices_tensor(
     mesh: Mesh,
     strict: bool = False,
 ) -> np.ndarray:
     """
     Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
-    if strict:
-        assert is_cartesian(mesh)
-    mesh_axes = axes(mesh)
+    if strict and not is_cartesian(mesh):
+        raise CartesianMeshError()
+    mesh_axes = mesh_axes(mesh)
     if len(mesh_axes) == 2:
         x, y = mesh_axes
         return np.array([[(i, j) for j in y] for i in x])
@@ -65,23 +66,23 @@ def vertices_tensor(
         raise ValueError
     
 
-def axes_spacing(
+def mesh_axes_spacing(
     mesh: Mesh,
     strict: bool = False,
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
-    if strict:
-        assert is_cartesian(mesh)
-    return tuple(np.diff(i) for i in axes(mesh))
+    if strict and not is_cartesian(mesh):
+        raise CartesianMeshError()
+    return tuple(np.diff(i) for i in mesh_axes(mesh))
 
 
 @optional_lru_cache
 def is_cartesian(
     mesh: Mesh,
 ) -> bool:
-    mesh_axes = axes(mesh, strict=False)
+    axes = mesh_axes(mesh, strict=False)
     n_vertices = len(mesh.geometry.x)
-    n_axes = [len(i) for i in mesh_axes]
+    n_axes = [len(i) for i in axes]
     n_vertices_cartesian = np.prod(n_axes)
     return bool(n_vertices == n_vertices_cartesian)
 
@@ -92,7 +93,7 @@ def is_uniform_cartesian(
 ) -> bool:
     if not is_cartesian(mesh):
         return False
-    return all(all(np.isclose(dx[0], dx)) for dx in axes_spacing(mesh))
+    return all(all(np.isclose(dx[0], dx)) for dx in mesh_axes_spacing(mesh))
 
 
 def n_entities(
@@ -162,3 +163,7 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
         return sizes[h](mesh)
     except KeyError:
         raise ValueError(f'Invalid cell size quantity {h}.')
+    
+
+def CartesianMeshError():
+    return ValueError("Mesh vertices must form a Cartesian grid.")

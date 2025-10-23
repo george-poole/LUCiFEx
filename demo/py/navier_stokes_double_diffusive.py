@@ -59,13 +59,6 @@ def navier_stokes_double_diffusive_rectangle(
 
     `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) - PrRa(c - βθ)𝐞ʸ`
     """
-    # time
-    order = finite_difference_order(
-        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
-    )
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
@@ -80,6 +73,13 @@ def navier_stokes_double_diffusive_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
+
+    # time
+    order = finite_difference_order(
+        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
+    )
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
 
     # constants
     Le = Constant(Omega, Le, 'Le')  

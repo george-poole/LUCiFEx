@@ -96,7 +96,8 @@ class FiniteDifference:
             trial = self.trial if isinstance(u, FunctionSeries) else trial
 
         if trial:
-            assert isinstance(u, FunctionSeries)
+            if not isinstance(u, FunctionSeries):
+                raise TypeError(f'Expected `FunctionSeries` type, not `{type(u)}`.')
             _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
         else:
             _u = lambda n: u[n]
@@ -397,8 +398,12 @@ def apply_finite_difference(
     if isinstance(expr, (Function, Expr, Constant)):
         return expr
     if isinstance(D_fdm, FiniteDifference):
+        if isinstance(trial, FunctionSeries):
+            trial = None
+        assert isinstance(trial, bool) or trial is None
         return D_fdm(expr, trial)
     if isinstance(D_fdm, tuple):
+        assert isinstance(trial, FunctionSeries) or trial is None
         return finite_difference_argwise(D_fdm, expr, trial)
     
 

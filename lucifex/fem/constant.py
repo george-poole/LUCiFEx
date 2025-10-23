@@ -11,7 +11,7 @@ from .function import unicode_superscript
 
 class LUCiFExConstant(Constant):
     """
-    Subclass of `dolfinx.fem.Constant` with additional conveniences.
+    Subclass of `dolfinx.fem.Constant` with additional utilities.
     """
     def __init__(
         self,
