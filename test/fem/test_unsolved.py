@@ -2,8 +2,8 @@ import pytest
 
 from lucifex.mesh import interval_mesh
 from lucifex.fem import (
-    LUCiFExFunction as Function, 
-    LUCiFExConstant as Constant,
+    Function, 
+    Constant,
     is_unsolved, Unsolved,
 )
 

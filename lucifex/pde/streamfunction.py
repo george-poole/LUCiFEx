@@ -1,7 +1,7 @@
 from ufl.core.expr import Expr
 from ufl import as_matrix, grad
 
-from lucifex.fem import LUCiFExFunction as Function
+from lucifex.fem import Function
 
 
 def streamfunction_velocity(psi: Function) -> Expr:

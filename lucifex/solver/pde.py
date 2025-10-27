@@ -9,7 +9,8 @@ from typing_extensions import Self
 from functools import partial
 
 import numpy as np
-from ufl import Form, lhs, rhs
+from ufl import Form, lhs, rhs, Measure, TestFunction, TrialFunction
+from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant, Function, FunctionSpace
 from dolfinx.fem.petsc import create_vector, DirichletBCMetaClass
@@ -19,11 +20,13 @@ from slepc4py import SLEPc
 
 from ..utils import (
     Perturbation, replicate_callable, MultipleDispatchTypeError, 
-    dofs_limits_corrector, fem_function_space,
+    dofs_limits_corrector, fem_function_space, Marker, SubspaceIndex
 )
 from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
+from ..fdm.ufl_operators import inner
+from ..fem import SpatialFunction
 
-from .bcs import BoundaryConditions
+from .bcs import BoundaryConditions, Value, SubspaceIndex
 from .options import (
     OptionsPETSc, OptionsSLEPc,
     OptionsFFCX, OptionsJIT, set_from_options,
@@ -856,19 +859,100 @@ class EigenvalueProblem:
     def eigenseries(self) -> list[FunctionSeries]:
         return self._eigenseries
         
-    
+
+
+P = ParamSpec("P")
+class Projection(BoundaryValueProblem):
+
+    petsc_default = OptionsPETSc.default()
+    jit_default = OptionsJIT.default()
+    ffcx_default = OptionsFFCX.default()
+
+    def __init__(
+        self, 
+        solution: SpatialFunction | FunctionSeries,
+        expression: Function | Expr,
+        bcs: BoundaryConditions | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] | None = None, 
+        petsc: OptionsPETSc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        dofs_corrector: Callable[[Function], None] | None = None,
+        future: bool = False,
+        overwrite: bool = False,
+    ):
+
+        v = TestFunction(solution.function_space)
+        u = TrialFunction(solution.function_space)
+        dx = Measure('dx')
+        F_lhs = inner(v, u) * dx
+        F_rhs = inner(v, expression) * dx
+        forms = [F_lhs, -F_rhs]
+
+        if isinstance(bcs, Iterable):
+            bcs = BoundaryConditions(*bcs)
+
+        super().__init__(
+            solution, 
+            forms, 
+            bcs, 
+            petsc, 
+            jit, 
+            ffcx, 
+            dofs_corrector, 
+            cache_matrix=True, 
+            use_partition=(False, False), 
+            future=future, 
+            overwrite=overwrite,
+        )
+
+    @classmethod
+    def from_function(
+        cls,
+        solution: Function | FunctionSeries, 
+        expression_func: Callable[P, Function | Expr],
+        bcs: BoundaryConditions | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] | None = None, 
+        petsc: OptionsPETSc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        dofs_corrector: Callable[[Function], None] | None = None,
+        future: bool = False,
+        overwrite: bool = False,
+    ):
+        """from function"""
+        def _create(
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> Self:
+            return cls(
+                solution, 
+                expression_func(*args, **kwargs), 
+                bcs, 
+                petsc, 
+                jit, 
+                ffcx, 
+                dofs_corrector,
+                future,
+                overwrite,
+            )
+        return _create
+
+
 @replicate_callable(BoundaryValueProblem.from_forms_func)
-def bvp_solver():
+def bvp():
     pass
 
 @replicate_callable(InitialBoundaryValueProblem.from_forms_func)
-def ibvp_solver():
+def ibvp():
     pass
 
 @replicate_callable(InitialValueProblem.from_forms_func)
-def ivp_solver():
+def ivp():
     pass
 
 @replicate_callable(EigenvalueProblem.from_forms_func)
-def evp_solver():
+def evp():
+    pass
+
+@replicate_callable(Projection.from_function)
+def projection():
     pass

@@ -1,20 +1,21 @@
 from ufl import as_vector
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, ibvp_solver, eval_solver,
+    BoundaryConditions, ibvp, evaluation,
 )
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
-from lucifex.pde.navier_stokes import ipcs_solvers, newtonian_stress
+from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.transport import advection_diffusion
+from lucifex.pde.constitutive import newtonian_stress
 
 
 @configure_simulation(
@@ -123,22 +124,22 @@ def navier_stokes_double_diffusive_rectangle(
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
     theta = FunctionSeries((Omega, 'P', 1), 'theta', order, ics=theta_ics)
     # constitutive
-    stress = lambda u, p: Pr * newtonian_stress(u, p, 1)
+    deviatoric_stress = lambda u: Pr * newtonian_stress(u, 1)
     rho = ExprSeries(c - beta * theta, 'rho')
     eg = as_vector([0, -1])
     f = Pr * Ra * rho * eg
 
     # solvers
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs, p_coeff=Pr,
     )
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs)(
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_ad, D_diff_ad,
     )
-    theta_solver = ibvp_solver(advection_diffusion, bcs=theta_bcs)(
+    theta_solver = ibvp(advection_diffusion, bcs=theta_bcs)(
         theta, dt[0], u, 1/Le, D_adv_ad, D_diff_ad,
     )
 

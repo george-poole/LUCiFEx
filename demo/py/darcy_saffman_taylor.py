@@ -3,7 +3,7 @@ import scipy.special as sp
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import FiniteDifference, AB2, CN
 from lucifex.fdm.ufl_operators import exp
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise
@@ -31,10 +31,6 @@ def saffman_taylor_rectangle(
     D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
     D_diff: FiniteDifference = CN,
 ):
-    # time
-
-    
-    # space
     Omega = rectangle_mesh(
         (-0.5 * Lx, 0.5 * Lx), 
         (0, Ly), 

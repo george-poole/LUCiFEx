@@ -4,5 +4,6 @@ from .finite_difference import (
     BDF1, BDF2, BDF3, finite_difference_order, finite_difference_argwise,
     apply_finite_difference, ExplicitDiscretizationError, ImplicitDiscretizationError,
 )
-from .series import FunctionSeries, ConstantSeries, Series, ExprSeries, GridSeries, NumericSeries
+from .series import FunctionSeries, ConstantSeries, Series, ExprSeries
+from .numpy_series import GridSeries, NumericSeries, TriangulationSeries
 from .timestep import cfl_timestep, reactive_timestep, cflr_timestep, diffusive_timestep

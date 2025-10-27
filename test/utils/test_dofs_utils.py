@@ -1,7 +1,7 @@
 import pytest
 
 import numpy as np
-from lucifex.fem import LUCiFExFunction as Function
+from lucifex.fem import Function
 from lucifex.mesh import rectangle_mesh
 from lucifex.utils import minimum, maximum
 

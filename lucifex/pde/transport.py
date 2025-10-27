@@ -4,13 +4,14 @@ from ufl.core.expr import Expr
 from ufl import dx, Form, inner, TestFunction, div, FacetNormal
 
 from lucifex.fdm import DT, FiniteDifference, apply_finite_difference
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries,
     FiniteDifference, AB1, Series, 
 )
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
+from lucifex.utils import integral
 
 from .supg import supg_diffusivity, supg_velocity, supg_tau, supg_reaction
 
@@ -135,51 +136,37 @@ def advection_diffusion_residuals(
     return dudt, adv, diff
 
 
+@integral
 def advective_flux(
     u: Function,
     a: Function | Constant,
 ) -> Expr:
     """
-    `fᵁ = (𝐧·𝐚)u`
-
-    for the flux integral
-
-    `Fᵁ = ∫ fᵁ ds` 
+    `Fᵁ = ∫ (𝐧·𝐚)u ds` 
     """
     n = FacetNormal(u.function_space.mesh)
     return inner(n, a * u)
 
 
+@integral
 def diffusive_flux(
     u: Function,
     d: Function | Constant,
 ) -> Expr:
     """
-    `fᴰ = 𝐧·(D·∇u)`
-
-    for the flux integral
-
-    `Fᴰ = ∫ fᴰ ds`
+    `Fᴰ = ∫ 𝐧·(D·∇u) ds`
     """
     n = FacetNormal(u.function_space.mesh)
     return inner(n, d * grad(u))
 
 
+@integral
 def flux(
     u: Function,
     a: Function | Constant, 
     d: Function,
 ) -> tuple[Expr, Expr]:
     """
-    Advective flux 
-    `fᵁ = (𝐧·𝐚)u`
-
-    and diffusive flux
-    `fᴰ = 𝐧·(D·∇u)`
-
-    for the flux integrals
-
-    `Fᵁ = ∫ fᵁ ds`, `Fᴰ = ∫ fᴰ ds`
+    `Fᵁ = ∫ (𝐧·𝐚)u ds`, `Fᴰ = ∫ 𝐧·(D·∇u) ds`
     """
     return advective_flux(u, a), diffusive_flux(u, d)
-

@@ -5,7 +5,7 @@ from ufl import cos, sin
 
 from lucifex.mesh import mesh_boundary, rectangle_mesh
 from lucifex.fdm import FiniteDifference, AB2, CN
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import Simulation, configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, cubic_noise

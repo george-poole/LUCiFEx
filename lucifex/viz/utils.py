@@ -1,11 +1,11 @@
 from inspect import signature
-from enum import Enum
 from typing import Callable, Iterable, ParamSpec, Concatenate, Literal
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from cycler import Cycler, cycler
 
 
 plt.rc("text", usetex=True)
@@ -67,6 +67,37 @@ def _optional_fig_and_or_ax(
             return fig, ax
 
     return _inner
+
+
+def create_cycler(
+    cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None,
+    num: int | None = None,
+) -> Cycler:
+    if isinstance(cyc, Cycler):
+        return cyc
+
+    if cyc is None:
+        cyc = 'black'
+
+    if cyc == 'black':
+        ncyc = len(STYLES)
+        cyc = cycler(linestyle=STYLES, color=["black"] * ncyc, linewidth=[LW] * ncyc)
+    elif cyc == "color":
+        ncyc = len(COLORS)
+        cyc = cycler(color=COLORS, linestyle=["-"] * ncyc, linewidth=[LW] * ncyc)
+    elif cyc in ('marker', 'markerline'):
+        if cyc == 'markerline':
+            ls = '-'
+        else:
+            ls = '' 
+        ncyc = len(MARKERS)
+        cyc = cycler(marker=MARKERS, color=["black"] * ncyc, linewidth=[LW] * ncyc, linestyle=[ls] * ncyc, s=[MS] * ncyc)
+    else:
+        assert num is not None
+        cmap = getattr(plt.cm, cyc)
+        cyc = cycler(color=cmap(np.linspace(0, 1, num)), linewidth=[LW] * num)
+
+    return cyc
 
 
 def set_axes(
@@ -159,7 +190,7 @@ TEX_SYMBOLS = (
     )
 
 
-def tex(
+def tex_format(
     label: str | float | int | None,
     escape: str = "/",
 ) -> str:
@@ -184,14 +215,14 @@ def tex(
     return label
 
 
-def detex(
+def detex_format(
     label: str | None,
     strip_wspace: bool = True,
 ) -> str:
     if label == "" or label is None:
         return ""
     if label[0] == '$' and label[-1] == '$':
-        return detex(label[1:-1])
+        return detex_format(label[1:-1])
     
     for i in TEX_SYMBOLS:
         if f'\\{i}' in label:
@@ -203,7 +234,7 @@ def detex(
     return label
     
 
-def exponential_notation(
+def exponential_format(
     number: float | int,
     n_digits: int = 3,
     ignore: Iterable[int] = (-1, 0, 1, 2),

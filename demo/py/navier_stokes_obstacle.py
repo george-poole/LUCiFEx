@@ -2,9 +2,9 @@ from lucifex.fdm import (
     FiniteDifference, cfl_timestep, 
     FunctionSeries, ConstantSeries, finite_difference_order,
 )
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.solver import (
-    BoundaryConditions, eval_solver,
+    BoundaryConditions, evaluation,
 )
 from lucifex.mesh import ellipse_obstacle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
@@ -78,7 +78,7 @@ def navier_stokes_circle_obstacle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
 
     # solvers
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     if ns_scheme == 'ipcs':

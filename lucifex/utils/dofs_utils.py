@@ -12,7 +12,7 @@ from dolfinx.fem import (
 )
 from ufl.core.expr import Expr
 
-from .py_utils import StrEnum
+from .enum_types import DofsMethodType
 from .fem_typecasting import fem_function, fem_function_components
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
 from .fem_mutation import set_fem_function
@@ -32,26 +32,21 @@ Function of coordinates `x = (x₀, x₁, x₂)` returning `True` or `False`
 e.g. `lambda x: np.isclose(x[1], Ly)` if a boundary is defined by `y = Ly`
 """
 
-SpatialMarkerOrExpression: TypeAlias = SpatialMarker | SpatialExpression
+MarkerOrExpression: TypeAlias = SpatialMarker | SpatialExpression
 """
 Function of coordinates `x = (x₀, x₁, x₂)` either returning expression `f(x)` 
 such that `f(x) = 0` defines the boundary, or `True` if `x` is on the boundary and `False` otherwise.
 """
 
 # TODO int and str markers from mesh tags (especially irregular gmsh meshes)?
-SpatialMarkerTypes: TypeAlias = SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression]
+Marker: TypeAlias = MarkerOrExpression | Iterable[MarkerOrExpression]
 
 SubspaceIndex: TypeAlias = int | None 
 
 
-class DofsMethodType(StrEnum):
-    GEOMETRICAL = 'geometrical'
-    TOPOLOGICAL = 'topological'
-
-
 def dofs_indices(
     function_space: FunctionSpace,
-    dofs_marker: SpatialMarkerTypes,
+    dofs_marker: Marker,
     subspace_index: int | None = None,
     method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
 ) -> np.ndarray | list[np.ndarray]:
@@ -91,7 +86,7 @@ def dofs_indices(
 
 
 def as_spatial_marker(
-    m: SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression]
+    m: MarkerOrExpression | Iterable[MarkerOrExpression]
 ) -> SpatialMarker:
     """
     Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)`, 
@@ -99,7 +94,7 @@ def as_spatial_marker(
     if `x` is on the boundary and `False` otherwise.
     """
     
-    def _as_marker(m: SpatialMarkerOrExpression) -> SpatialMarker:
+    def _as_marker(m: MarkerOrExpression) -> SpatialMarker:
         x_test = np.array([0.0, 0.0, 0.0])
         if isinstance(m(x_test), (bool, np.bool_)):
             return m
@@ -178,7 +173,7 @@ def maximum(
 
 def as_dofs_setter(
     setter: Callable[[Function], None] 
-    | Iterable[tuple[SpatialMarkerTypes, float | Constant] | tuple[SpatialMarkerTypes, float | Constant, int]]
+    | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, int]]
     | None,
 ) -> Callable[[Function], None]:
     

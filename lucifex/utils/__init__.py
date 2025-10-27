@@ -4,9 +4,9 @@ from .fem_utils import (is_scalar, is_vector, is_tensor, extract_mesh, extract_m
                         is_mixed_space, is_same_element, is_family_alias, extract_integrands,
                         extract_integrand)
 from .dofs_utils import (
-    SpatialMarkerTypes,
+    Marker,
     SpatialMarker, 
-    SpatialMarkerOrExpression,
+    MarkerOrExpression,
     SpatialExpression,
     dofs_indices,
     dofs,
@@ -32,6 +32,7 @@ from .fem_perturbation import (
     SpatialPerturbation, DofsPerturbation, Perturbation, 
     cubic_noise, sinusoid_noise, rescale,
 )
+from .measure_utils import create_tagged_measure, integral
 from .mesh_utils import(
     mesh_axes,
     mesh_vertices_tensor,

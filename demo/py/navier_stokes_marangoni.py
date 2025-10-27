@@ -7,9 +7,9 @@ from lucifex.fdm import (
     BE, FE, CN, FiniteDifference, cfl_timestep, 
     FunctionSeries, ConstantSeries, ExprSeries, finite_difference_order,
 )
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.solver import (
-    BoundaryConditions, ibvp_solver, eval_solver,
+    BoundaryConditions, ibvp, evaluation,
 )
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
@@ -104,7 +104,7 @@ def navier_stokes_marangoni(
         ('natural', dOmega['upper'], as_vector([-Ma * Dx(c[0], 0), 0.0])),
     )
 
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
 
@@ -112,7 +112,7 @@ def navier_stokes_marangoni(
         u, p, dt[0], 1/Pr, 1, newtonian_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, sigma_bcs=sigma_bcs,
     )
 
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs)(
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_c, D_diff_c,
     )
 

@@ -4,13 +4,14 @@ from types import EllipsisType, UnionType
 import pickle as pkl
 
 import numpy as np
+from matplotlib.tri.triangulation import Triangulation
 from matplotlib.figure import Figure
 from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, classproperty, optional_lru_cache
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
 from .read import read
 from .utils import file_path_ext
 
@@ -164,10 +165,24 @@ def load_grid_series(
     name: str,
     dir_path: str,
     file_name: str,
-    sep: str = '__'
+    sep: str = '__',
+    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
 ) -> GridSeries:
     try:
-        return load_npz_dict(dir_path, file_name, sep, search=name)[name]
+        return load_npz_dict(dir_path, file_name, sep, axis_names, target_name=name)[name]
+    except KeyError:
+        raise ValueError(f"'{name}' not found in {file_name}.")
+    
+
+@optional_lru_cache
+def load_triangulation_series(
+    name: str,
+    dir_path: str,
+    file_name: str,
+    sep: str = '__',
+) -> TriangulationSeries:
+    try:
+        return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
 
@@ -177,10 +192,10 @@ def load_numeric_series(
     name: str,
     dir_path: str,
     file_name: str,
-    sep: str = '__'
+    sep: str = '__',
 ) -> NumericSeries:
     try:
-        return load_npz_dict(dir_path, file_name, sep, search=name)[name]
+        return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
 
@@ -220,9 +235,10 @@ def load_npz_dict(
     file_name: str,
     sep: str = '__',
     axis_names: tuple[str, ...] = ('x', 'y', 'z'),
+    trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
     *,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | NumericSeries | GridSeries]:
+) -> dict[str, float | np.ndarray | NumericSeries | GridSeries | TriangulationSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -237,10 +253,10 @@ def load_npz_dict(
         if isinstance(v, np.ndarray) and v.shape == ():
             v = v.item()
         match k.split(sep):
-            case (name, axis) if axis in axis_names: 
+            case (name, spatial_attr) if spatial_attr in (*axis_names, *trigl_attrs): 
                 if name not in dict_load:
                     dict_load[name] = {}
-                dict_load[name].update({axis: v}) 
+                dict_load[name].update({spatial_attr: v}) 
             case (name, time): 
                 if name not in dict_load:
                     dict_load[name] = {}
@@ -257,15 +273,21 @@ def load_npz_dict(
         if isinstance(value, dict):
             time_series: list[float] = []
             series: list[np.ndarray] = []
-            axes: list[np.ndarray] = []
+            spatial_attrs: list[str] = []
+            spatial_arrays: list[np.ndarray] = []
             for i, j in value.items():
                 if isinstance(i, float):
                    time_series.append(i)
                    series.append(j)
                 else:
-                    axes.append(j)
-            if axes:
-                value = GridSeries(series, time_series, tuple(axes), name)
+                    spatial_attrs.append(i)
+                    spatial_arrays.append(j)
+            if spatial_arrays:
+                if all(i in trigl_attrs for i in spatial_attrs):
+                    trigl = Triangulation(*spatial_arrays)
+                    value = TriangulationSeries(series, time_series, trigl, name)
+                else:
+                    value = GridSeries(series, time_series, tuple(spatial_arrays), name)
             else:
                 value = NumericSeries(series, time_series, name)
         dict_return[name] = value
@@ -292,7 +314,7 @@ def load_value(
     try:
         d = load_txt_dict(dir_path, file_name, *args, **kwargs)
     except FileNotFoundError:
-        d = load_npz_dict(dir_path, file_name, *args, **kwargs, search=name)
+        d = load_npz_dict(dir_path, file_name, *args, **kwargs, target_name=name)
     if name in d:
         return d[name]
     raise  ValueError(f"'{name}' not found in {file_name}.")

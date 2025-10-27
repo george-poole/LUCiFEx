@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 from lucifex.fdm import cfl_timestep
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.mesh import rectangle_mesh
 from lucifex.utils import maximum, cell_sizes
 

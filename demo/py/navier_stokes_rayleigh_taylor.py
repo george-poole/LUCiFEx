@@ -1,14 +1,14 @@
 from ufl import as_vector
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, ibvp_solver, eval_solver,
+    BoundaryConditions, ibvp, evaluation,
 )
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
@@ -105,13 +105,13 @@ def navier_stokes_rayleigh_taylor_rectangle(
     f = Pr * Ra * rho * as_vector([0, -1]) 
 
     # solvers
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, 
     )
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs)(
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_ad, D_diff_ad,
     )
 

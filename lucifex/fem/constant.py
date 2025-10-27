@@ -9,7 +9,7 @@ from .unsolved import UnsolvedType
 from .function import unicode_superscript
 
 
-class LUCiFExConstant(Constant):
+class SpatialConstant(Constant):
     """
     Subclass of `dolfinx.fem.Constant` with additional utilities.
     """
@@ -21,6 +21,9 @@ class LUCiFExConstant(Constant):
         shape: tuple[int, ...] = (),
         index: int | None = None,
     ):
+        """
+        A constant with respect to a mesh, but not necessarily with respect to time.
+        """
         self._mesh = mesh
 
         if name is None:
@@ -53,7 +56,7 @@ class LUCiFExConstant(Constant):
         self._name = n
 
     def copy(self) -> Self:
-        c = LUCiFExConstant(self.mesh, self.value.copy())
+        c = SpatialConstant(self.mesh, self.value.copy())
         c.name = self.name
         return c
     

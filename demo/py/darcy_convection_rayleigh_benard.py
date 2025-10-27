@@ -2,7 +2,7 @@ import numpy as np
 from ufl import SpatialCoordinate, sqrt
 
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.fdm import FiniteDifference, AB2, CN
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation

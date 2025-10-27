@@ -2,13 +2,13 @@ from typing import Callable, Iterable
 
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
-from ..utils import as_spatial_marker, SpatialMarkerOrExpression
+from ..utils import as_spatial_marker, MarkerOrExpression
 from .cartesian import CellType
 
 
 def refine(
     mesh: Mesh,
-    marker: SpatialMarkerOrExpression | Iterable[SpatialMarkerOrExpression],
+    marker: MarkerOrExpression | Iterable[MarkerOrExpression],
     n_stop: int = 1,
     condition: Callable[[Mesh], bool] = None,
     redistribute: bool = True,

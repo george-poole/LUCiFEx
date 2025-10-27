@@ -6,15 +6,15 @@ from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
 
 from lucifex.fdm import FiniteDifference
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, OptionsPETSc, bvp_solver, ibvp_solver, eval_solver, 
-    ds_solver, interpolation_solver
+    BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
+    ds_solver, interpolation
 )
 from lucifex.utils import extremum
 from lucifex.sim import Simulation
@@ -103,14 +103,14 @@ def darcy_convection_generic(
     mu = ExprSeries(viscosity(c), 'mu')
 
     # solvers
-    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(
+    psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
-    u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    dt_solver = evaluation(dt, cfl_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
@@ -118,9 +118,9 @@ def darcy_convection_generic(
     if secondary:
         solvers.extend(
             [
-                eval_solver(ConstantSeries(Omega, "uMinMax", shape=(2,)), extremum)(u[0]),
-                eval_solver(ConstantSeries(Omega, "cMinMax", shape=(2,)), extremum)(c[0]),
-                eval_solver(ConstantSeries(Omega, "dtCFL"), cfl_timestep)(u[0], cfl_h),
+                evaluation(ConstantSeries(Omega, "uMinMax", shape=(2,)), extremum)(u[0]),
+                evaluation(ConstantSeries(Omega, "cMinMax", shape=(2,)), extremum)(c[0]),
+                evaluation(ConstantSeries(Omega, "dtCFL"), cfl_timestep)(u[0], cfl_h),
                 ds_solver(ConstantSeries(Omega, "fOmega", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0]),
             ]
         )

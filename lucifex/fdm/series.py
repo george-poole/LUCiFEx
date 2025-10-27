@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from functools import cached_property
 from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec
 from typing_extensions import Self
 
@@ -9,12 +8,10 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Function, Constant, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_fem_function, extract_mesh, fem_function_space, grid
-from ..utils.fem_utils import ScalarVectorError
-from ..utils.fem_typecasting import fem_function_components
+from ..utils import set_fem_constant, set_fem_function, extract_mesh, fem_function_space
 from ..utils.deferred import Writer
 from ..utils.fem_perturbation import Perturbation
-from ..fem import LUCiFExFunction, LUCiFExConstant, Unsolved, UnsolvedType, is_unsolved
+from ..fem import SpatialFunction, SpatialConstant, Unsolved, UnsolvedType, is_unsolved
 
 
 T = TypeVar('T')
@@ -28,16 +25,26 @@ class Series(ABC, Generic[T]):
     def __init__(
         self,
         create_container: Callable[[int], T],
-        name: str | None,
+        name: str | tuple[str, Iterable[str]] | None,
         order: int,
     ):
         assert order >= 1
         self._future = create_container(self.FUTURE_INDEX)
         self._present = create_container(self.FUTURE_INDEX - 1)
         self._previous = [create_container(i) for i in range(-1, -order, -1)][::-1]
+
+        if isinstance(name, tuple):
+            name, subnames = name
+            subnames = tuple(subnames)
+        else:
+            subnames = None
+
         if name is None:
             name = self.__class__.__name__
+
         self.name = name
+        self._subnames = subnames
+        self._create_subname = lambda i: self._subnames[i] if self._subnames else f'{self.name}_{i}'
     
     @property
     @abstractmethod
@@ -65,7 +72,6 @@ class Series(ABC, Generic[T]):
     ) -> tuple[T, ...]:
         return tuple((*self._previous, self._present, self._future))
     
-
     def __getitem__(
         self,
         index: int,
@@ -198,9 +204,12 @@ class ExprSeries(
             return None
 
     @property
-    def mesh(self) -> Mesh:
-        return extract_mesh(self._present)
-    
+    def mesh(self) -> Mesh | None:
+        try:
+            return extract_mesh(self._present)
+        except ValueError:
+            return None 
+
     @property
     def shape(self) -> tuple[int, ...]:
         return self.sequence[0].ufl_shape
@@ -223,7 +232,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
     def __init__(
         self, 
         create_container: Callable[[int], T],
-        name: str | None,
+        name: str | tuple[str, Iterable[str]] | None,
         order: int,
         store: int | float | Callable | None = None,
         ics: I | T | U | None = None,
@@ -326,7 +335,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
 class FunctionSeries(
     ContainerSeries[
-        LUCiFExFunction, 
+        SpatialFunction, 
         Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float], 
         Perturbation,
     ],
@@ -337,7 +346,7 @@ class FunctionSeries(
         function_space: FunctionSpace
         | tuple[Mesh, str, int]
         | tuple[Mesh, str, int, int],
-        name: str | None = None,
+        name: str | tuple[str, Iterable[str]] | None,
         order: int = 1,
         store: int | float | Callable[[], bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
@@ -345,13 +354,15 @@ class FunctionSeries(
         function_space = fem_function_space(function_space)
         self._function_space = function_space
         self._ics_perturbation = None
-        super().__init__(lambda i: LUCiFExFunction(function_space, Unsolved, index=i), name, order, store, ics)
+        super().__init__(lambda i: SpatialFunction(function_space, Unsolved, index=i), name, order, store, ics)
+        if self._subnames:
+            assert len(self._subnames) == self._function_space.num_sub_spaces
 
     @staticmethod
-    def _set_container(container: LUCiFExFunction, value):
+    def _set_container(container: SpatialFunction, value):
         if value is Unsolved:
             return set_fem_function(container, value.value, dofs_indices=':')
-        elif isinstance(value, LUCiFExFunction) and value.function_space == container.function_space:
+        elif isinstance(value, SpatialFunction) and value.function_space == container.function_space:
             return set_fem_function(container, value, dofs_indices=':')
         else:
             return set_fem_function(container, value)
@@ -373,12 +384,12 @@ class FunctionSeries(
         return self._function_space.ufl_element().value_shape()
 
     @property
-    def ics_perturbation(self) -> tuple[LUCiFExFunction, LUCiFExFunction] | None:
-        return self._ics_perturbation
-
-    @property
     def dofs_series(self) -> list[np.ndarray]:
         return [i.x.array for i in self.series]
+
+    @property
+    def ics_perturbation(self) -> tuple[SpatialFunction, SpatialFunction] | None:
+        return self._ics_perturbation
 
     def initialize_from_ics(
         self,
@@ -392,62 +403,23 @@ class FunctionSeries(
 
     def sub(
         self, 
-        subspace_index: int, 
-        name: str | None,
+        index: int, 
+        name: str | None = None,
     ) -> 'SubFunctionSeries':
         if name is None:
-            name = f'{self.name}_{subspace_index}'
-        return SubFunctionSeries(self, subspace_index, name)
+            name = self._create_subname(index)
+        return SubFunctionSeries(self, index, name)
     
     def split(
         self,
-        names: Iterable[str] | None,
+        names: Iterable[str] | None = None,
     ) -> tuple['SubFunctionSeries', ...]:
         subspace_indices = tuple(range(self.function_space.num_sub_spaces))
         if names is None:
-            names = [f'{self.name}_{i}' for i in subspace_indices]
-        return tuple(SubFunctionSeries(self, i, n) for i, n in zip(subspace_indices, names, strict=True))
+            names = [None] * self.function_space.num_sub_spaces
+        return tuple(self.sub(i, n) for i, n in zip(subspace_indices, names, strict=True))
 
-
-class ConstantSeries(
-    ContainerSeries[LUCiFExConstant, Constant | float | Iterable[float], None],
-):
-    def __init__(
-        self,
-        mesh: Mesh,
-        name: str | None = None,
-        order: int = 1,
-        shape: tuple[int, ...] = (),
-        store: int | float | Callable[[], bool] | None = None,
-        ics: LUCiFExConstant | float | Iterable[float] | None = None,
-    ):
-        super().__init__(lambda i: LUCiFExConstant(mesh, Unsolved, shape=shape, index=i), name, order, store, ics)
-        self._mesh = mesh
-        self._shape = shape
-
-    @staticmethod
-    def _set_container(container: LUCiFExConstant, value):
-        if value is Unsolved:
-            return set_fem_constant(container, value.value)
-        else:
-            return set_fem_constant(container, value)
-
-    @property
-    def mesh(self) -> Mesh:
-        return self._mesh
-
-    @property
-    def shape(self) -> tuple[int, ...]:
-        return self._shape
-
-    @property
-    def value_series(self) -> list[float | np.ndarray]:
-        return [
-            i.value.item() if i.value.shape == () else i.value
-            for i in self.series
-        ]
         
-
 class SubFunctionSeries(Series[Expr]):
     
     def __init__(
@@ -480,7 +452,7 @@ class SubFunctionSeries(Series[Expr]):
         return self.function_space.mesh
 
     @property
-    def series(self, collapse: bool = True) -> list[LUCiFExFunction]:
+    def series(self, collapse: bool = True) -> list[SpatialFunction]:
         return [i.sub(self._subspace_index, self.name, collapse) for i in self._mixed.series]
     
     @property
@@ -488,99 +460,80 @@ class SubFunctionSeries(Series[Expr]):
         return self._mixed.time_series
 
 
-class NumericSeries:
+class ConstantSeries(
+    ContainerSeries[SpatialConstant, Constant | float | Iterable[float], None],
+):
     def __init__(
-        self, 
-        series: Iterable[float | int | np.ndarray], 
-        t: Iterable[float] | np.ndarray,
-        name: str | None = None,
-    ): 
-        assert len(series) == len(t)
-        self._series = list(series)
-        self._time_series = list(t)
-        if name is None:
-            name = self.__class__.__name__
-        self.name = name
+        self,
+        mesh: Mesh,
+        name: str | tuple[str, Iterable[str]] | None,
+        order: int = 1,
+        shape: tuple[int, ...] = (),
+        store: int | float | Callable[[], bool] | None = None,
+        ics: SpatialConstant | float | Iterable[float] | None = None,
+    ):
+        super().__init__(lambda i: SpatialConstant(mesh, Unsolved, shape=shape, index=i), name, order, store, ics)
+        self._mesh = mesh
+        self._shape = shape
+        if self._subnames:
+            if self.shape == ():
+                raise SubSeriesError()
+            assert len(self._subnames) == self.shape[0]
 
-    @classmethod
-    def from_series(
-        cls, 
-        u: ConstantSeries,
-    ) -> Self:
-        return cls(u.value_series, u.time_series, u.name)
-    
-    @property
-    def series(self) -> list[float | int | np.ndarray]:
-        return self._series
-
-    @property
-    def time_series(self) -> list[float]:
-        return self._time_series
-    
-    @property
-    def name(self) -> str | None:
-        return self._name
-    
-    @name.setter
-    def name(self, value):
-        assert isinstance(value, str)
-        assert '__' not in value
-        self._name = value
-    
-    @cached_property
-    def shape(self) -> tuple[int, ...] | list[tuple[int, ...]] | None:
-        if not self.series:
-            return None
-        get_shape = lambda x: () if isinstance(x, (float, int)) else x.shape
-        shapes = [get_shape(i) for i in self.series]
-        if len(set(shapes)) == 1:
-            return shapes[0]
+    @staticmethod
+    def _set_container(container: SpatialConstant, value):
+        if value is Unsolved:
+            return set_fem_constant(container, value.value)
         else:
-            return shapes
-        
-    @property
-    def is_homogeneous(self) -> bool:
-        return not isinstance(self.shape, list)
+            return set_fem_constant(container, value)
 
+    @property
+    def mesh(self) -> Mesh:
+        return self._mesh
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        return self._shape
+
+    @property
+    def value_series(self) -> list[float | np.ndarray]:
+        return [
+            i.value.item() if i.value.shape == () else i.value
+            for i in self.series
+        ]
     
-class GridSeries(NumericSeries):
-    def __init__(
+    def sub(
         self, 
-        series: list[np.ndarray], 
-        t: list[float], 
-        x: tuple[np.ndarray, ...],
+        index: int, 
         name: str | None = None,
-    ): 
-        super().__init__(series, t, name)
-        self._axes = x
-
-    @property
-    def series(self) -> list[np.ndarray]:
-        return self._series
-    
-    @classmethod
-    def from_series(
-        cls, 
-        u: FunctionSeries,
-        strict: bool = False,
-        jit: bool | None = None,
     ) -> Self:
-        match u.shape:
-            case ():
-                series = [grid(i, strict, jit) for i in u.series]
-            case (dim, ):
-                uxyz_series = [fem_function_components(('P', 1), i) for i in u.series]
-                series = [np.array([grid(j) for j in i[:dim]]) for i in uxyz_series]
-            case _:
-                raise ScalarVectorError(u)
-            
-        return cls(
-            series,
-            u.time_series,
-            grid(u.mesh, strict), 
-            u.name,
-        )
+        if self.shape == ():
+            raise SubSeriesError()
+
+        if name is None:
+            name = self._create_subname(index)
+        
+        subseries = ConstantSeries(self.mesh, name, self.order, self.shape[1:], store=1)
+        for c, t in zip(self.series, self.time_series):
+            subseries.update(c.value[index])
+            subseries.forward(t)
+        subseries.store = self.store
+
+        return subseries
     
-    @property
-    def axes(self) -> tuple[np.ndarray, ...]:
-        return self._axes
+    def split(
+        self,
+        names: Iterable[str] | None = None,
+    ) -> tuple[Self, ...]:
+        if self.shape == ():
+            raise SubSeriesError()
+        subseries_indices = tuple(range(self.shape[0]))
+        if names is None:
+            names = [None] * self.shape[0]
+        return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
+    
+
+def SubSeriesError():
+    return RuntimeError('Scalar-valued series cannot have a subseries.')
+
+

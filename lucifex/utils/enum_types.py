@@ -42,3 +42,8 @@ class BoundaryType(StrEnum):
     PERIODIC = "periodic"
     ANTIPERIODIC = "antiperiodic"
     WEAK_DIRICHLET = "weak_dirichlet"
+
+
+class DofsMethodType(StrEnum):
+    GEOMETRICAL = 'geometrical'
+    TOPOLOGICAL = 'topological'

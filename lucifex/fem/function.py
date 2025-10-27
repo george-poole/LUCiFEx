@@ -12,7 +12,7 @@ from ..utils import fem_function_space, SpatialPerturbation
 from .unsolved import UnsolvedType
 
 
-class LUCiFExFunction(Function):
+class SpatialFunction(Function):
     """
     Subclass of `dolfinx.fem.Function` with additional utilities.
     """
@@ -81,7 +81,7 @@ class LUCiFExFunction(Function):
     ) -> Self:
         if name is None:
             name = f'{self.name}_{subspace_index}'
-        f = LUCiFExFunction(
+        f = SpatialFunction(
             self.function_space.sub(subspace_index), 
             self.x, 
             name, 
@@ -108,7 +108,7 @@ class LUCiFExFunction(Function):
     def collapse(self) -> Self:
         u = self._cpp_object.collapse()
         fs = FunctionSpace(None, self.ufl_element(), u.function_space)
-        return LUCiFExFunction(fs, u.x, self.name, index=self.index)
+        return SpatialFunction(fs, u.x, self.name, index=self.index)
         
 
 def unicode_superscript(name: str, n: int) -> str:

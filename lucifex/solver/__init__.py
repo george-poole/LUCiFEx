@@ -1,28 +1,24 @@
-from .bcs import BoundaryConditions, BoundaryType, create_enumerated_measure
+from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure
 from .pde import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,
     InitialValueProblem,
     EigenvalueProblem,
-    bvp_solver,
-    ibvp_solver,
-    ivp_solver,
-    evp_solver,
+    bvp,
+    ibvp,
+    ivp,
+    evp,
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
-from .evaluation import (
-    EvaluationProblem,
-    FacetIntegrationProblem,
-    CellIntegrationProblem,
-    InteriorFacetIntegrationProblem,
-    dx_solver,
-    ds_solver,
-    dS_solver,
-    eval_solver,
-    InterpolationProblem,
-    interpolation_solver,
-    ProjectionProblem,
-    projection_solver,
+from .eval import (
+    Evaluation,
+    Interpolation,
+    Projection,
+    Integration,
+    evaluation,
+    interpolation,
+    projection,
+    integration,
 )
 
 
@@ -43,5 +39,5 @@ from typing import TypeAlias
 PDE: TypeAlias = BVP | IBVP | IVP | EVP
 """Alias to `BVP | IBVP | IVP`"""
 
-Problem: TypeAlias = PDE | EvaluationProblem
-"""Alias to `PDE | ExpressionSolver`"""
+Problem: TypeAlias = PDE | Evaluation
+"""Alias to `PDE | EvaluationProblem`"""

@@ -8,7 +8,7 @@ from dolfinx.mesh import Mesh
 
 from ..utils import is_cartesian, MultipleDispatchTypeError
 from ..utils.fem_utils import ScalarVectorError, is_discontinuous_lagrange
-from ..fdm.series import ConstantSeries, FunctionSeries, GridSeries, NumericSeries
+from ..fdm import ConstantSeries, FunctionSeries, GridSeries, NumericSeries
 from ..io import write, load_mesh, load_function_series, load_constant_series
 
 from .simulation import Simulation
@@ -64,8 +64,8 @@ def _(
     grid_file_name: str = GridSeries.__name__,
     numeric_file_name: str = NumericSeries.__name__,
 ):
-    grid_series = [i.series for i in sim.problems if isinstance(i.series, FunctionSeries)]
-    numeric_series = [i.series for i in sim.problems if isinstance(i.series, ConstantSeries)]
+    grid_series = [i.series for i in sim.solvers if isinstance(i.series, FunctionSeries)]
+    numeric_series = [i.series for i in sim.solvers if isinstance(i.series, ConstantSeries)]
     
     if include:
         _include = lambda n: n in include and not n in exclude

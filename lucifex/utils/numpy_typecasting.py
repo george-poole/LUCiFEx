@@ -15,7 +15,7 @@ import numpy as np
 from .enum_types import CellType
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
-from .mesh_utils import mesh_vertices, mesh_coordinates, mesh_axes, is_cartesian, CartesianMeshError
+from .mesh_utils import mesh_vertices, mesh_coordinates, mesh_axes
 from .fem_utils import is_scalar, ScalarError
 
 
@@ -378,22 +378,21 @@ def as_index(
     arr: np.ndarray | Iterable[float],
     target: int | float,
     tol: float | None = None,
-    compare: Literal['lt', 'gt'] | None = None,
+    less_than: bool | None = None,
 ) -> int:
     if isinstance(target, int):
         return target
     
-    if isinstance(compare, str):
-        compare = getattr(operator, compare)
-        if compare is operator.lt:
-            index_shift = -1
-        elif compare is operator.gt:
-            index_shift = 1
-        else:
-            raise ValueError(f'{compare} operator not valid')
-        
-    if compare is not None:
+    if less_than is None:
+        func = None
+    else:
         arr = np.sort(arr)
+        if less_than:
+            func = operator.lt
+            index_shift = -1
+        else:
+            func = operator.ge
+            index_shift = 1
 
     arr_diff = np.abs([i - target for i in arr])
     if tol is not None and np.min(arr_diff) > tol:
@@ -403,10 +402,10 @@ def as_index(
            
     target_index = np.argmin(arr_diff)
 
-    if compare is not None:
-        if not compare(target, arr[target_index]):
+    if func is not None:
+        if not func(arr[target_index], target):
             target_index += index_shift
-        assert compare(target, arr[target_index])
+        assert func(arr[target_index], target)
 
     return target_index
 

@@ -9,7 +9,7 @@ from dolfinx.fem import FunctionSpace
 from lucifex.fdm import (
     DT, FiniteDifference, FunctionSeries,
 )
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.solver import BoundaryConditions
 
 

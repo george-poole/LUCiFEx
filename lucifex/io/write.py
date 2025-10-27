@@ -15,8 +15,8 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
 from ..utils import extract_mesh, MultipleDispatchTypeError, set_fem_function, StrSlice, as_slice
-from ..fem import LUCiFExConstant
-from ..fdm.series import FunctionSeries, ConstantSeries, GridSeries, NumericSeries
+from ..fem import SpatialConstant
+from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
 
 from .utils import file_path_ext, io_array_dim
 
@@ -36,7 +36,7 @@ class WriteFunctionType(Protocol):
 
 @overload
 def write(
-    u: Function | LUCiFExConstant | Mesh,
+    u: Function | SpatialConstant | Mesh,
     file_name: str | None = None,
     dir_path: str | None = None,
     t: float | Constant | None = None,
@@ -248,9 +248,9 @@ def _(
         xdmf.write_function(u, t)
 
 
-@_write.register(LUCiFExConstant)
+@_write.register(SpatialConstant)
 def _(
-    c: LUCiFExConstant,
+    c: SpatialConstant,
     file_name: str,
     dir_path,
     t=None,
@@ -301,7 +301,7 @@ def _(
     dir_path,
     slc=slice(0, None), 
     mode='a',
-    sep = '__',
+    sep='__',
     axis_names: tuple[str, ...] = ('x', 'y', 'z'),
 ): 
     file_path = file_path_ext(dir_path, file_name, 'npz')
@@ -317,6 +317,29 @@ def _(
     np.savez(file_path, **d)
 
 
+@_write.register(TriangulationSeries)
+def _(
+    u: TriangulationSeries,
+    file_name: str,
+    dir_path,
+    slc=slice(0, None), 
+    mode='a',
+    sep='__',
+): 
+    file_path = file_path_ext(dir_path, file_name, 'npz')
+    trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
+
+    slc = as_slice(slc)
+    u = TriangulationSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
+
+    d = {}
+    if mode == 'a' and os.path.exists(file_path):
+        d.update(np.load(file_path).items())
+    d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.series)))
+    d.update({_create_npz_key(u.name, attr, sep): getattr(u.triangulation, attr) for attr in trigl_attrs})
+    np.savez(file_path, **d)
+
+
 @_write.register(NumericSeries)
 def _(
     u: NumericSeries,
@@ -324,7 +347,7 @@ def _(
     dir_path,
     slc = slice(0, None), 
     mode = 'a',
-    sep = '__',
+    sep='__',
 ): 
     file_path = file_path_ext(dir_path, file_name, 'npz')
 
@@ -502,9 +525,9 @@ def _(
 
 @lru_cache
 def _cached_dp0_function(
-    c: Function | LUCiFExConstant,
+    c: Function | SpatialConstant,
 ) -> Function:
-    if isinstance(c, LUCiFExConstant):
+    if isinstance(c, SpatialConstant):
         mesh = c.mesh
         dim = io_array_dim(c.ufl_shape)
     elif isinstance(c, Function):

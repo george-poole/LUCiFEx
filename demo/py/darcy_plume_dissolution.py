@@ -2,15 +2,15 @@ import numpy as np
 from ufl.core.expr import Expr
 
 from lucifex.fdm import FiniteDifference
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, OptionsPETSc, bvp_solver, ibvp_solver, 
-    eval_solver, interpolation_solver
+    BoundaryConditions, OptionsPETSc, bvp, ibvp, 
+    evaluation, interpolation
 )
 from lucifex.utils import CellType
 from lucifex.sim import configure_simulation
@@ -59,11 +59,6 @@ def darcy_plume_dissolution_rectangle(
     c_petsc: OptionsPETSc | None = None,
     b_petsc: OptionsPETSc | None = None,
 ):
-    # time
-    order = finite_difference_order(D_adv, D_diff)
-    t = ConstantSeries(Omega, "t", order, ics=0.0)  
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Omega = rectangle_mesh((-Lx/2, Lx/2), Ly, Nx, Ny, cell=cell)
     dOmega = mesh_boundary(
@@ -76,6 +71,11 @@ def darcy_plume_dissolution_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+
+    # time
+    order = finite_difference_order(D_adv, D_diff)
+    t = ConstantSeries(Omega, "t", order, ics=0.0)  
+    dt = ConstantSeries(Omega, 'dt')
 
     # boundary conditions
     c_bcs = BoundaryConditions(
@@ -122,20 +122,20 @@ def darcy_plume_dissolution_rectangle(
     # solvers
     up_petsc = OptionsPETSc("gmres", "lu") if up_petsc is None else up_petsc
     up_petsc['pc_factor_mat_solver_type'] = 'mumps'
-    up_solver = bvp_solver(darcy_incompressible, u_bcs, petsc=up_petsc)(
+    up_solver = bvp(darcy_incompressible, u_bcs, petsc=up_petsc)(
         up, Bu * rho[0], k[0], 1, egx, egy,
     )
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
 
-    c_solver = ibvp_solver(advection_diffusion_reaction, bcs=c_bcs, petsc=c_petsc)(
+    c_solver = ibvp(advection_diffusion_reaction, bcs=c_bcs, petsc=c_petsc)(
         c, dt[0], u, 1, Ki * r, D_adv, D_diff, D_reac, phi=phi,
     )
-    b_solver = ibvp_solver(advection_diffusion, bcs=b_bcs, petsc=b_petsc)(
+    b_solver = ibvp(advection_diffusion, bcs=b_bcs, petsc=b_petsc)(
         c, dt[0], phi, u, Bu, 1, D_adv, D_diff, phi=phi,
     )
-    s_solver = interpolation_solver(s, evolution_expression)(
+    s_solver = interpolation(s, evolution_expression)(
         s, dt[0], -epsilon * Ki * (1 / varphi) * r , D_evol,
     )
 

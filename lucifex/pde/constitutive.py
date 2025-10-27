@@ -3,7 +3,7 @@ from ufl.core.expr import Expr
 
 
 from lucifex.fdm.ufl_operators import nabla_grad
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 
 
 def strain(u: Function | Expr) -> Expr:

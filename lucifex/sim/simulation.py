@@ -16,7 +16,7 @@ from ..utils import MultipleDispatchTypeError, filter_kwargs
 from ..fdm.series import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver.options import OptionsFFCX, OptionsJIT, OptionsPETSc
 from ..solver import (Problem, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem,
-                   ProjectionProblem, InterpolationProblem)
+                   Projection, Interpolation)
 from ..io import create_path, write
 from ..utils.deferred import Writer, Stopper
 from .utils import signature_name_collision
@@ -26,7 +26,7 @@ T = TypeVar('T', int | None, str | None, float | None)
 class Simulation:
     def __init__(
         self,
-        problems: Iterable[Problem],
+        solvers: Iterable[Problem],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
         namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr]] = (),
@@ -40,7 +40,7 @@ class Simulation:
         checkpoint_file: str | None = None,
         texec_file: str | None = None,
     ):
-        self.problems = list(problems)
+        self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
         self.namespace_extras = list(namespace)
@@ -82,12 +82,12 @@ class Simulation:
             raise TypeError
         
     def __iter__(self):
-        for i in (self.problems, self.t, self.dt, self.namespace_extras):
+        for i in (self.solvers, self.t, self.dt, self.namespace_extras):
             yield i
 
     def index(self, name: str) -> int | tuple[int, ...]:
         indices = []
-        for i, s in enumerate(self.problems):
+        for i, s in enumerate(self.solvers):
             if s.series.name == name:
                 return indices.append(i)
     
@@ -131,7 +131,7 @@ class Simulation:
         `len(series) ≤ len(solvers)` because a series may be solved for by more 
         than one solvers (e.g. in splitting or linearization schemes)
         """
-        return list({s.series for s in self.problems})
+        return list({s.series for s in self.solvers})
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
@@ -262,7 +262,7 @@ def configure_simulation(
 
                 def _inner(*sim_func_args, **sim_func_kwargs):
                     classes = (BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-                               ProjectionProblem, InterpolationProblem)
+                               Projection, Interpolation)
                     [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
                     simulation_func_return = simulation_func(*sim_func_args, **sim_func_kwargs)
                     [cls.set_defaults() for cls in classes]

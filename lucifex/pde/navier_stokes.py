@@ -11,10 +11,10 @@ from lucifex.fdm import (
     FunctionSeries, ConstantSeries, Series,
 )
 from lucifex.fdm.ufl_operators import inner, div, nabla_grad, dot, grad
-from lucifex.fem import LUCiFExFunction as Function, LUCiFExConstant as Constant
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.solver import (
     BoundaryConditions, BVP, IBVP,
-    bvp_solver, ibvp_solver,
+    bvp, ibvp,
 )
 
 from .classic import poisson
@@ -111,13 +111,13 @@ def ipcs_solvers(
     If `adv_coeff` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
     If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
-    ipcs1_solver = ibvp_solver(ipcs_1, bcs=u_bcs)(
+    ipcs1_solver = ibvp(ipcs_1, bcs=u_bcs)(
         u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, f, sigma_bcs, adv_coeff, p_coeff,
     )
-    ipcs2_solver = bvp_solver(ipcs_2, bcs=p_bcs, future=True)(
+    ipcs2_solver = bvp(ipcs_2, bcs=p_bcs, future=True)(
         p, u, dt, p_coeff,
     )
-    ipcs3_solver = bvp_solver(ipcs_3, future=True, overwrite=True)(
+    ipcs3_solver = bvp(ipcs_3, future=True, overwrite=True)(
         u, p, dt, p_coeff,
     )
     return ipcs1_solver, ipcs2_solver, ipcs3_solver
@@ -198,13 +198,13 @@ def chorin_solvers(
     If `visc_coeff` argument specified, then `∇²𝐮 -> V ∇²𝐮` with constant `V`. \\
     If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
-    chorin1_solver = ibvp_solver(chorin_1, bcs=u_bcs)(
+    chorin1_solver = ibvp(chorin_1, bcs=u_bcs)(
         u, dt, deviatoric_stress, D_adv, D_visc, D_force, f, adv_coeff,
     )
-    chorin2_solver = bvp_solver(chorin_2, bcs=p_bcs, future=True)(
+    chorin2_solver = bvp(chorin_2, bcs=p_bcs, future=True)(
         p, u, dt, p_coeff,
     )
-    chorin3_solver = bvp_solver(chorin_3, future=True, overwrite=True)(
+    chorin3_solver = bvp(chorin_3, future=True, overwrite=True)(
         u, p, dt, p_coeff,
     )
     return chorin1_solver, chorin2_solver, chorin3_solver

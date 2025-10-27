@@ -5,10 +5,10 @@ from lucifex.fdm import (
     FunctionSeries, FiniteDifference, AB1, ConstantSeries, 
     finite_difference_order, ExprSeries, cfl_timestep,
 )
-from lucifex.fem import LUCiFExConstant as Constant
+from lucifex.fem import Constant
 from lucifex.solver import(
-    BoundaryConditions, OptionsPETSc, interpolation_solver,
-    ibvp_solver, bvp_solver, eval_solver,
+    BoundaryConditions, OptionsPETSc, interpolation,
+    ibvp, bvp, evaluation,
 )
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
@@ -114,21 +114,21 @@ def porous_abc_convection_rectangle(
     r = ExprSeries(a * b, 'r')
 
     # solvers
-    psi_solver = bvp_solver(darcy_streamfunction, psi_bcs, psi_petsc)(
+    psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, 1, 1, fy=-rho[0],
     )
-    u_solver = interpolation_solver(u, streamfunction_velocity)(psi[0])
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    dt_solver = evaluation(dt, cfl_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
 
-    a_solver = ibvp_solver(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc)(
+    a_solver = ibvp(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc)(
         a, dt, 1, u, 1, 1, 1, r, D_adv, D_diff, D_reac,
     )
-    b_solver = ibvp_solver(advection_diffusion_reaction, bcs=b_bcs, petsc=abc_petsc)(
+    b_solver = ibvp(advection_diffusion_reaction, bcs=b_bcs, petsc=abc_petsc)(
         a, dt, 1, u, 1, delta_b, 1, r, D_adv, D_diff, D_reac,
     )
-    c_solver = ibvp_solver(advection_diffusion_reaction, bcs=c_bcs, petsc=abc_petsc)(
+    c_solver = ibvp(advection_diffusion_reaction, bcs=c_bcs, petsc=abc_petsc)(
         a, dt, 1, u, 1, delta_c, 1, r, D_adv, D_diff, D_reac,
     )
 

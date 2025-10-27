@@ -5,7 +5,7 @@ import h5py
 from dolfinx.fem import Function
 import numpy as np
 
-from ..fem import LUCiFExConstant, is_unsolved
+from ..fem import SpatialConstant, is_unsolved
 from ..fdm import FunctionSeries, ConstantSeries
 from ..utils import (MultipleDispatchTypeError, is_continuous_lagrange, is_discontinuous_lagrange, 
                      StrSlice, as_slice)
@@ -27,7 +27,7 @@ class ReadObject(Protocol):
 
 @overload
 def read(
-    u: Function | LUCiFExConstant,
+    u: Function | SpatialConstant,
     dir_path: str | None = None,
     file_name: str | None = None,
 ) -> None:
@@ -53,7 +53,7 @@ def read(
 
 
 def read(
-    u: Function | LUCiFExConstant | FunctionSeries | ConstantSeries,
+    u: Function | SpatialConstant | FunctionSeries | ConstantSeries,
     dir_path = None,
     file_name = None,
     *args,
@@ -111,9 +111,9 @@ def _(
     return _read(u.x.array, dofs=dofs)
 
 
-@_read.register(LUCiFExConstant)
+@_read.register(SpatialConstant)
 def _(
-    u: LUCiFExConstant,
+    u: SpatialConstant,
     file_path,
     *,
     dofs=None,
@@ -136,7 +136,7 @@ def _(
         slc = as_slice(slc)
 
     if isinstance(u, ConstantSeries):
-        container = LUCiFExConstant(u.mesh, name=u.name, shape=u.shape)
+        container = SpatialConstant(u.mesh, name=u.name, shape=u.shape)
     elif isinstance(u, FunctionSeries):
         assert is_continuous_lagrange(u.function_space, 1) or is_discontinuous_lagrange(u.function_space, 0)
         container = Function(u.function_space, name=u.name)

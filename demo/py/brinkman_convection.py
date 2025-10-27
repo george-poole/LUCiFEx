@@ -1,14 +1,14 @@
 from ufl import as_vector, sqrt
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import LUCiFExConstant as Constant, LUCiFExFunction as Function
+from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, ibvp_solver, eval_solver,
+    BoundaryConditions, ibvp, evaluation,
 )
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
@@ -54,13 +54,6 @@ def brinkman_convection_rayleigh_benard_rectangle(
     `∇⋅𝐮 = 0` \\
     `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + (Pr/Ra)¹ᐟ² ∇²𝐮 + c𝐞ʸ -  (K/Da)(Pr/Ra)¹ᐟ² 𝐮`
     """
-    # time
-    order = finite_difference_order(
-        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
-    )
-    t = ConstantSeries(Omega, 't', ics=0.0)
-    dt = ConstantSeries(Omega, 'dt')
-
     # space
     Lx = 2.0
     Ly = 1.0
@@ -76,6 +69,14 @@ def brinkman_convection_rayleigh_benard_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
+
+    # time
+    order = finite_difference_order(
+        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
+    )
+    t = ConstantSeries(Omega, 't', ics=0.0)
+    dt = ConstantSeries(Omega, 'dt')
+
 
     # constants
     Pr = Constant(Omega, Pr, 'Pr')
@@ -111,13 +112,13 @@ def brinkman_convection_rayleigh_benard_rectangle(
     f = D_buoy_ns(rho * eg) - D_darcy_ns(u) * chi * sqrt(Pr / Ra) / Da
 
     # solvers
-    dt_solver = eval_solver(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], 1, sqrt(Pr/ Ra), newtonian_stress, D_adv_ns, D_visc_ns, f=f, u_bcs=u_bcs, 
     )
-    c_solver = ibvp_solver(advection_diffusion, bcs=c_bcs)(
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, sqrt(Ra * Pr), D_adv_ad, D_diff_ad,
     )
 

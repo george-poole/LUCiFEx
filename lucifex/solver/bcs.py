@@ -1,12 +1,10 @@
-from typing import TypeAlias, Literal
+from typing import TypeAlias
 from collections.abc import Iterable
 from typing_extensions import Unpack
 
-import numpy as np
 from ufl import Measure, Form, TestFunction, inner
 from ufl.core.expr import Expr
 from dolfinx_mpc import MultiPointConstraint
-from dolfinx.mesh import Mesh, locate_entities, meshtags
 from dolfinx.fem import (
     Function,
     FunctionSpace,
@@ -18,10 +16,11 @@ from dolfinx.fem import (
 from ..utils.fem_utils import is_scalar, is_vector
 from ..utils.enum_types import BoundaryType
 from ..utils.fem_typecasting import fem_function, fem_constant
+from ..utils.measure_utils import create_tagged_measure
 from ..utils.dofs_utils import (
     as_spatial_marker,
     dofs_indices,
-    SpatialMarkerTypes,
+    Marker,
     SpatialExpression,
     SubspaceIndex,
     DofsMethodType,
@@ -46,13 +45,13 @@ class BoundaryConditions:
     """
     def __init__(
         self,
-        *bcs: tuple[BoundaryType, SpatialMarkerTypes, Value]
-        | tuple[BoundaryType, SpatialMarkerTypes, Value, SubspaceIndex]
-        | tuple[SpatialMarkerTypes, Value]
-        | tuple[SpatialMarkerTypes, Value, SubspaceIndex],
+        *bcs: tuple[BoundaryType, Marker, Value]
+        | tuple[BoundaryType, Marker, Value, SubspaceIndex]
+        | tuple[Marker, Value]
+        | tuple[Marker, Value, SubspaceIndex],
         dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
     ):
-        self._markers: list[SpatialMarkerTypes] = []
+        self._markers: list[Marker] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
@@ -201,8 +200,8 @@ class BoundaryConditions:
         
         boundary_types = [BoundaryType(i) for i in boundary_types]
 
-        num = 0
-        nums = {b: [] for b in boundary_types}
+        tag = 0
+        tags = {b: [] for b in boundary_types}
         exprs = {b: [] for b in boundary_types}
         markers = {b: [] for b in boundary_types}
 
@@ -223,56 +222,15 @@ class BoundaryConditions:
                 else:
                     g = fem_function(function_space, g, i)
 
-                nums[b].append(num)
-                exprs[b].append(g)
+                tags[b].append(tag)
                 markers[b].append(m)
-                num += 1
+                exprs[b].append(g)
+                tag += 1
 
-        nums_all = [n for ns in nums.values() for n in ns]
-        markers_all = [m for ms in markers.values() for m in ms]
-        ds = create_enumerated_measure('ds', function_space.mesh, markers_all, nums_all)
-        nums_markers_all = [[(t, e) for t, e in zip(nums[b], exprs[b])] for b in boundary_types]
+        nums_all = [t for _tags in tags.values() for t in _tags]
+        markers_all = [m for _markers in markers.values() for m in _markers]
+        ds = create_tagged_measure('ds', function_space.mesh, markers_all, nums_all)
+        tags_exprs = [[(t, e) for t, e in zip(tags[b], exprs[b])] for b in boundary_types]
 
-        return ds, *nums_markers_all
+        return ds, *tags_exprs
 
-
-def create_enumerated_measure(
-    measure: Literal['dx', 'ds', 'dS'],
-    mesh: Mesh,
-    markers: Iterable[SpatialMarkerTypes] = (),
-    nums: Iterable[int] | None = None,
-    num_unmarked: int | None = None,
-) -> Measure:
-    if len(markers) == 0:
-        return Measure(measure, domain=mesh)
-    
-    if nums is None:
-        nums = list(range(len(markers)))
-
-    if num_unmarked is None:
-        num_unmarked = max(nums) + 1
-
-    assert num_unmarked not in nums
-
-    gdim = mesh.topology.dim
-    fdim = gdim - 1
-    mesh.topology.create_entities(fdim)
-    facet_index_map = mesh.topology.index_map(fdim)
-    num_facets = facet_index_map.size_local + facet_index_map.num_ghosts
-    facet_indices_sorted = np.arange(num_facets)
-    facet_tags = np.arange(num_facets, dtype=np.intc)
-    facet_indices_tagged = []
-
-    for t, m in zip(nums, markers, strict=True):
-        m = as_spatial_marker(m)
-        facet_indices = locate_entities(mesh, fdim, m)
-        facet_tags[facet_indices] = t
-        facet_indices_tagged.extend(facet_indices)
-
-    facet_indices_unmarked = set(facet_indices_sorted).difference(
-        facet_indices_tagged
-    )
-    facet_tags[list(facet_indices_unmarked)] = num_unmarked
-
-    mesh_tags = meshtags(mesh, fdim, facet_indices_sorted, facet_tags)
-    return Measure(measure, domain=mesh, subdomain_data=mesh_tags)
