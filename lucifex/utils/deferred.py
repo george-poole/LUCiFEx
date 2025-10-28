@@ -1,5 +1,4 @@
 from typing import Callable, ParamSpec, TypeVar, ParamSpec, Generic, TypeVar
-from typing_extensions import Self
 from math import floor
 from inspect import signature
 
@@ -15,47 +14,59 @@ def defer(func: Callable[P, R]) -> Callable[P, Callable[[], R]]:
 
 
 P = ParamSpec('P')
-A = ParamSpec('A')
-class DeferredCondition(Generic[P]):
+R = TypeVar('R')
+class DeferredEvaluation(Generic[P, R]):
     def __init__(
         self,
-        condition: Callable[P, bool],
+        func: Callable[P, R],
     ):        
-        self._condition = condition
+        self._func = func
     
-    def evaluate(self, *args: P.args, **kwargs: P.kwargs) -> bool:
-        return self._condition(*args, **kwargs)
+    def evaluate(self, *args: P.args, **kwargs: P.kwargs) -> R:
+        return self._func(*args, **kwargs)
+    
 
-    
-Q = ParamSpec('Q')
 P = ParamSpec('P')
-class DeferredRoutine(DeferredCondition[P], Generic[Q, P]):
+class DeferredCondition(DeferredEvaluation[P, bool], Generic[P]):
+    pass
+
+
+P = ParamSpec('P')
+class DeferredRoutine(DeferredEvaluation[P, None], Generic[P]):
+    pass
+
+
+P = ParamSpec('P')
+Q = ParamSpec('Q')
+R = TypeVar('R')
+class DeferredConditionalEvaluation(DeferredEvaluation[P, R], Generic[P, Q, R]):
     def __init__(
         self,
-        routine: Callable[Q, None],
-        condition: Callable[P, bool],
+        func: Callable[P, R],
+        condition: Callable[Q, bool],
     ):
-        super().__init__(condition)
-        self._routine = routine
+        super().__init__(func)
+        self._condition = DeferredCondition(condition)
 
-    def execute(
+    def evaluate_conditional(
+        self, 
+        *args: P.args, 
+        **kwargs: P.kwargs,
+    ) -> Callable[Q, R | None]:
+        return lambda *a, **k: self._func(*args, **kwargs) if self._condition.evaluate(*a, **k) else None
+    
+    def conditional_evaluate(
         self, 
         *args: Q.args, 
         **kwargs: Q.kwargs,
-    ) -> Callable[P, None]:
-        return  lambda *a, **k: self._routine(*args, **kwargs) if self.evaluate(*a, **k) else None
+    ) -> Callable[P, R | None]:
+        return lambda *a, **k: self._func(*a, **k) if self._condition.evaluate(*args, **kwargs) else None
     
 
-def inject_time_arg(
-    condition: Callable[[], bool] | Callable[[float], bool],
-) -> Callable[[float], bool]:
-    n_args = len(signature(condition).parameters)
-    if n_args == 0:
-        return lambda _: condition()
-    else:
-        if not n_args == 1:
-            raise TypeError('Expected callable with at most one argument.')
-        return lambda t: condition(t)
+P = ParamSpec('P')
+Q = ParamSpec('Q')
+class DeferredConditionalRoutine(DeferredConditionalEvaluation[P, Q, None], Generic[P, Q]):
+    pass
     
 
 class Stopper(DeferredCondition[[float]]):
@@ -85,7 +96,7 @@ class Stopper(DeferredCondition[[float]]):
         return self.evaluate(float(t))
     
 
-class Writer(DeferredRoutine[[float], [float]]):
+class Writer(DeferredConditionalRoutine[[float], [float]]):
     def __init__(
         self,
         routine: Callable[[], None] | Callable[[float], None],
@@ -130,7 +141,51 @@ class Writer(DeferredRoutine[[float], [float]]):
 
     def write(self, t: float | Constant | np.ndarray) -> None:
         t = float(t)
-        self.execute(t)(t)
+        self.evaluate_conditional(t)(t)
+
+
+def inject_time_arg(
+    condition: Callable[[], bool] | Callable[[float], bool],
+) -> Callable[[float], bool]:
+    n_args = len(signature(condition).parameters)
+    if n_args == 0:
+        return lambda _: condition()
+    else:
+        if not n_args == 1:
+            raise TypeError('Expected callable with at most one argument.')
+        return lambda t: condition(t)
+    
+
+
+# P = ParamSpec('P')
+# class DeferredCondition(Generic[P]):
+#     def __init__(
+#         self,
+#         condition: Callable[P, bool],
+#     ):        
+#         self._condition = condition
+    
+#     def evaluate(self, *args: P.args, **kwargs: P.kwargs) -> bool:
+#         return self._condition(*args, **kwargs)
+
+    
+# Q = ParamSpec('Q')
+# P = ParamSpec('P')
+# class DeferredRoutine(DeferredCondition[P], Generic[Q, P]):
+#     def __init__(
+#         self,
+#         routine: Callable[Q, None],
+#         condition: Callable[P, bool],
+#     ):
+#         super().__init__(condition)
+#         self._routine = routine
+
+#     def execute(
+#         self, 
+#         *args: Q.args, 
+#         **kwargs: Q.kwargs,
+#     ) -> Callable[P, None]:
+#         return  lambda *a, **k: self._routine(*args, **kwargs) if self.evaluate(*a, **k) else None
     
 
 

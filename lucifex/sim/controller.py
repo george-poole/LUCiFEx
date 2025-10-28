@@ -12,33 +12,32 @@ from .simulation import Simulation
 
 T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-StopperFromSimulation: TypeAlias = Callable[[Simulation], Stopper]
+CreateStopper: TypeAlias = Callable[[Simulation], Stopper]
 
 @overload
-def simulation_stopper(
+def stopper(
     u: T,
     condition: Callable[Concatenate[T, P], bool],
 ) -> Callable[P, Stopper]:
     ...
 
 @overload
-def simulation_stopper(
+def stopper(
     u: str,
     condition: Callable[Concatenate[T, P], bool],
-) -> Callable[P, StopperFromSimulation]:
+) -> Callable[P, CreateStopper]:
     ...
 
-def simulation_stopper(
+def stopper(
     u: str | T,
     condition: Callable[Concatenate[T, P], bool],
 ):  
     paramspec_params = list(signature(condition).parameters.values())[1:]
 
     def _(*args: P.args, **kwargs: P.kwargs):
-        nonlocal condition
         if isinstance(u, str):
             _.__signature__ = Signature(paramspec_params, return_annotation=Callable[[Simulation], Stopper])
-            return lambda sim: simulation_stopper(sim[u], condition)(*args, **kwargs)
+            return lambda sim: stopper(sim[u], condition)(*args, **kwargs)
         else:
             _.__signature__ = Signature(paramspec_params, return_annotation=Stopper)
             return Stopper(defer(condition)(u, *args, **kwargs))
@@ -47,12 +46,12 @@ def simulation_stopper(
             
 
 def as_stopper(
-    arg: Stopper | Callable[[], bool] | StopperFromSimulation,
+    arg: Stopper | Callable[[], bool] | CreateStopper,
     sim: Simulation,
 ) -> Stopper:
     if isinstance(arg, Stopper):
         return arg
-    elif is_from_simulation(arg):
+    elif has_simulation_arg(arg):
         return arg(sim)
     else:
         return Stopper(arg)
@@ -60,10 +59,10 @@ def as_stopper(
 
 T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
 P = ParamSpec('P')
-WriterFromSimulation: TypeAlias = Callable[[Simulation], Writer]
+CreateWriter: TypeAlias = Callable[[Simulation], Writer]
 
 @overload
-def simulation_writer(
+def writer(
     u: T,
     condition: Callable[Concatenate[T, P], bool],
     routine: Callable[[float, T], None] | None = None,
@@ -74,7 +73,7 @@ def simulation_writer(
 
 
 @overload
-def simulation_writer(
+def writer(
     u: T,
     condition: int | float | None = None,
     routine: Callable[[float, T], None] | None = None,
@@ -85,27 +84,27 @@ def simulation_writer(
 
 
 @overload
-def simulation_writer(
+def writer(
     u: str,
     condition: Callable[Concatenate[T, P], bool],
     routine: Callable[[float, T], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
-) -> Callable[P, WriterFromSimulation]:
+) -> Callable[P, CreateWriter]:
     ...
 
 @overload
-def simulation_writer(
+def writer(
     u: str,
     condition: int | float | None = None,
     routine: Callable[[float, T], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
-) -> WriterFromSimulation:
+) -> CreateWriter:
     ...
 
 
-def simulation_writer(
+def writer(
     u: str | T,
     condition: Callable[Concatenate[T, P], bool] | int | float |  None = None,
     routine: Callable[[float, T], None] | None = None,
@@ -115,7 +114,7 @@ def simulation_writer(
     if isinstance(condition, (int, float)) or condition is None:
         if isinstance(u, str):
             def _(sim: Simulation) -> Stopper:
-                return simulation_writer(
+                return writer(
                 sim[u], 
                 condition, 
                 routine, 
@@ -137,7 +136,7 @@ def simulation_writer(
         ):
             if isinstance(u, str):
                 _.__signature__ = Signature(paramspec_params, return_annotation=Callable[[Simulation], Writer])
-                return lambda sim: simulation_writer(
+                return lambda sim: writer(
                     sim[u], 
                     condition, 
                     routine, 
@@ -155,18 +154,18 @@ def simulation_writer(
 
 
 def as_writer(
-    arg: Writer | Callable[[], bool] | WriterFromSimulation,
+    arg: Writer | Callable[[], bool] | CreateWriter,
     sim: Simulation,
 ) -> Writer:
     if isinstance(arg, Writer):
         return arg
-    elif is_from_simulation(arg):
+    elif has_simulation_arg(arg):
         return arg(sim)
     else:
         return Writer(arg)
     
 
-def is_from_simulation(func: Callable) -> bool:
+def has_simulation_arg(func: Callable) -> bool:
     assert callable(func)
     if len(signature(func).parameters) != 1:
         return False

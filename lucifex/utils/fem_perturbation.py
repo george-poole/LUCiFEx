@@ -12,8 +12,8 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpo
 from .enum_types import BoundaryType
 from .dofs_utils import as_dofs_setter, Marker
 from .mesh_utils import mesh_coordinates, mesh_vertices
-from .fem_typecasting import fem_function, fem_function_space
-from .fem_mutation import set_fem_function
+from .fem_typecast import fem_function, fem_function_space
+from .fem_mutate import set_fem_function
 
 
 @runtime_checkable

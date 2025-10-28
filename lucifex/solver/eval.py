@@ -9,7 +9,7 @@ from dolfinx.fem import Function, Constant, Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils import set_value, replicate_callable, Marker, SubspaceIndex, as_dofs_setter
+from ..utils import set_value, replicate_callable, Marker, as_dofs_setter
 from ..fem import SpatialConstant, SpatialFunction
 from ..fdm.series import ConstantSeries, FunctionSeries
 

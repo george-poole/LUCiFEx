@@ -565,3 +565,11 @@ def spacetime_grid(
         _cross_sections.append(_csec)
 
     return np.array(_cross_sections).T
+
+
+class UnstructuredQuadError(NotImplementedError):
+    def __init__(self):
+        msg = 'Converting data defined on an ' \
+        'unstructured quadrilateral mesh to a format compatible ' \
+        'with `numpy` and/or `matplotlib` is not supported.'
+        super().__init__(msg)

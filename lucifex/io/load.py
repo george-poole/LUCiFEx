@@ -283,7 +283,7 @@ def load_npz_dict(
                     spatial_attrs.append(i)
                     spatial_arrays.append(j)
             if spatial_arrays:
-                if all(i in trigl_attrs for i in spatial_attrs):
+                if set(spatial_attrs) == set(trigl_attrs):
                     trigl = Triangulation(*spatial_arrays)
                     value = TriangulationSeries(series, time_series, trigl, name)
                 else:

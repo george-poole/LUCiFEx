@@ -8,7 +8,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..utils import grid, triangulation
 from ..utils.fem_utils import ScalarVectorError
-from ..utils.fem_typecasting import fem_function_components
+from ..utils.fem_typecast import fem_function_components
 from .series import ConstantSeries, FunctionSeries, SubSeriesError
 
 
@@ -91,7 +91,7 @@ class NumpySeriesABC(ABC, Generic[T]):
         names: Iterable[str] | None = None,
     ) -> tuple[Self, ...]:
         if self.shape == ():
-            raise SubSeriesError()
+            raise SubSeriesError
         subseries_indices = tuple(range(self.shape[0]))
         if names is None:
             names = [f'{self.name}_{i}' for i in subseries_indices]
@@ -112,7 +112,7 @@ class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
         name: str | None = None,
     ) -> Self:
         if self.shape == ():
-            raise SubSeriesError()
+            raise SubSeriesError
         if name is None:
             name = self._create_subname(index)
         return NumericSeries([i[index] for i in self.series], self.time_series, name)
@@ -140,8 +140,12 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
             case ():
                 series = [grid(use_cache=use_cache[1])(i, **grid_kwargs) for i in u.series]
             case (dim, ):
+                print('getting components...')
                 uxyz_series = [fem_function_components(('P', 1), i) for i in u.series]
-                series = [np.array([grid(use_cache=use_cache[1])(j, **grid_kwargs,) for j in i[:dim]]) for i in uxyz_series]
+                print('componnets gotten')
+                print('getting series...')
+                series = [np.array([grid(use_cache=use_cache[1])(j, **grid_kwargs) for j in i[:dim]]) for i in uxyz_series]
+                print('series gotten')
             case _:
                 raise ScalarVectorError(u)
             

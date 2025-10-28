@@ -4,20 +4,20 @@ from .pde import (
     InitialBoundaryValueProblem,
     InitialValueProblem,
     EigenvalueProblem,
+    Projection,
     bvp,
     ibvp,
     ivp,
     evp,
+    projection,
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
 from .eval import (
     Evaluation,
     Interpolation,
-    Projection,
     Integration,
     evaluation,
     interpolation,
-    projection,
     integration,
 )
 
@@ -39,5 +39,5 @@ from typing import TypeAlias
 PDE: TypeAlias = BVP | IBVP | IVP | EVP
 """Alias to `BVP | IBVP | IVP`"""
 
-Problem: TypeAlias = PDE | Evaluation
+Solver: TypeAlias = PDE | Evaluation
 """Alias to `PDE | EvaluationProblem`"""

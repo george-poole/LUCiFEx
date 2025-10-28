@@ -11,9 +11,10 @@ from ..utils import (
     is_cartesian,
     quadrangulation,
     triangulation,
+    grid, 
+    filter_kwargs, 
+    ToDoError,
 )
-
-from ..utils import grid, filter_kwargs, FixMeError
 from .utils import optional_ax, set_axes
 
 
@@ -41,7 +42,7 @@ def _plot_interval_mesh(
     mesh: Mesh,
     **plt_kwargs,
 ) -> tuple[Figure, Axes]:
-    raise FixMeError()
+    raise ToDoError
 
 
 def _plot_rectangle_mesh(

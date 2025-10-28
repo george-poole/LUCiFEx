@@ -13,9 +13,9 @@ from dolfinx.fem import (
 from ufl.core.expr import Expr
 
 from .enum_types import DofsMethodType
-from .fem_typecasting import fem_function, fem_function_components
+from .fem_typecast import fem_function, fem_function_components
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
-from .fem_mutation import set_fem_function
+from .fem_mutate import set_fem_function
 
 
 SpatialExpression = Callable[[np.ndarray], np.ndarray]

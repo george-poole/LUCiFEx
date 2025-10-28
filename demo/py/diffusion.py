@@ -22,8 +22,8 @@ def diffusion(
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None, 
+    store_delta=1,
+    write_delta=None, 
     write_file='FunctionSeries',
     dir_base='./data',
     dir_params=('Lx', 'Nx'),

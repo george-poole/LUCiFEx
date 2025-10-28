@@ -49,23 +49,28 @@ def is_shape(
         return shape == _shape
     
 
-def ShapeError(
-    u: Function | Constant | Expr, 
-    shape: str | tuple,
-):
-    return ValueError(f'Expected {shape}, not shape {u.ufl_shape}.')
+class ShapeError(ValueError):
+    def __init__(
+        self,
+        u: Function | Constant | Expr, 
+        shape: str | tuple,
+    ):
+        super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
 
 
-def ScalarError(u):
-    return ShapeError(u, 'scalar')
+class ScalarError(ShapeError):
+    def __init__(self, u):
+        super().__init__(u, "'scalar'")
 
 
-def VectorError(u):
-    return ShapeError(u, 'vector')
+class VectorError(ShapeError):
+    def __init__(self, u):
+        super().__init__(u, "'vector'")
 
 
-def ScalarVectorError(u):
-    return ShapeError(u, 'scalar or vector')
+class ScalarVectorError(ShapeError):
+    def __init__(self, u):
+        super().__init__(u, "'scalar or vector'")
 
 
 def is_mixed_space(function_space: FunctionSpace) -> bool:

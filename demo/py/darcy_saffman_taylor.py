@@ -11,8 +11,8 @@ from .darcy_convection_generic import darcy_convection_generic
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def saffman_taylor_rectangle(
     Lx: float = 2.0,

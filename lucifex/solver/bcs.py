@@ -15,7 +15,7 @@ from dolfinx.fem import (
 
 from ..utils.fem_utils import is_scalar, is_vector
 from ..utils.enum_types import BoundaryType
-from ..utils.fem_typecasting import fem_function, fem_constant
+from ..utils.fem_typecast import fem_function, fem_constant
 from ..utils.measure_utils import create_tagged_measure
 from ..utils.dofs_utils import (
     as_spatial_marker,

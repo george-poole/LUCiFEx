@@ -21,8 +21,8 @@ from lucifex.pde.evolution import evolution_expression
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def darcy_plume_dissolution_rectangle(
     # domain

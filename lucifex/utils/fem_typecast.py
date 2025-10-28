@@ -10,7 +10,7 @@ from ufl import FiniteElement, MixedElement, VectorElement
 
 from .fem_utils import is_same_element, extract_mesh, is_vector, is_component_space, VectorError
 from .py_utils import MultipleDispatchTypeError, optional_lru_cache
-from .fem_mutation import set_fem_function
+from .fem_mutate import set_fem_function
 
 
 def fem_function_space(
@@ -57,23 +57,6 @@ def fem_function_space(
     return function_space
 
 
-def fs_from_elem(
-    elem: tuple[str, int] | tuple[Mesh, str, int], 
-    u: Function | Expr,
-) -> tuple[Mesh, str, int]:
-    if isinstance(elem, tuple) and not isinstance(elem[0], Mesh):
-        if isinstance(u, Function):
-            mesh = u.function_space.mesh
-        elif isinstance(u, (Expression, Expr)):
-            mesh = extract_mesh(u)
-        else:
-            raise ValueError('Cannot deduce mesh from `u`. Provide function space as `tuple[Mesh, str, int]`')
-        fs = (mesh, *elem)
-    else:
-        fs = elem
-    return fs
-
-
 @optional_lru_cache
 def _create_fem_function(
     fs: FunctionSpace | tuple[Mesh, str, int], 
@@ -96,19 +79,15 @@ def fem_function(
     Typecast to `dolfinx.fem.Function` 
     """
             
-    fs = fs_from_elem(fs, value)
+    if isinstance(fs, tuple):
+        fs = _mesh_fam_deg(fs, value)
 
     if try_identity and isinstance(value, Function):
         if isinstance(fs, FunctionSpace) and value.function_space == fs:
             return value
         if isinstance(fs, tuple):
-            if isinstance(fs[0], Mesh):
-                mesh = fs[0]
-                _fs = fs[1:]
-            else:
-                mesh = None
-                _fs = fs
-            if is_same_element(value, *_fs, mesh=mesh):
+            mesh, *element = fs
+            if is_same_element(value, *element, mesh=mesh):
                 return value
         
     if name is None:
@@ -141,7 +120,9 @@ def fem_function_components(
     if not is_vector(u):
         raise VectorError(u)
     
-    fs = fs_from_elem(fs, u)
+    if isinstance(fs, tuple):
+        fs = _mesh_fam_deg(fs, u)
+
     dim = u.ufl_shape[0]
     
     if names is None:
@@ -193,3 +174,32 @@ def _(value: Iterable[float], mesh: Mesh):
         return Constant(mesh, value)
     else:
         raise TypeError('Expected an iterable of numbers')
+
+
+def _mesh_fam_deg(
+    elem: tuple[str, int] | tuple[Mesh, str, int], 
+    u: Function | Expr,
+) -> tuple[Mesh, str, int]:
+    
+    match elem:
+        case mesh, fam, deg:
+            return elem
+        case fam, deg:
+            mesh = extract_mesh(u)
+            return mesh, fam, deg
+        case _:
+            raise TypeError
+
+
+
+    if isinstance(elem, tuple) and not isinstance(elem[0], Mesh):
+        if isinstance(u, Function):
+            mesh = u.function_space.mesh
+        elif isinstance(u, (Expression, Expr)):
+            mesh = extract_mesh(u)
+        else:
+            raise ValueError('Cannot deduce mesh from `u`. Provide function space as `tuple[Mesh, str, int]`')
+        fs = (mesh, *elem)
+    else:
+        fs = elem
+    return fs

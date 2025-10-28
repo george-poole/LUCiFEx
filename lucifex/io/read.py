@@ -7,8 +7,13 @@ import numpy as np
 
 from ..fem import SpatialConstant, is_unsolved
 from ..fdm import FunctionSeries, ConstantSeries
-from ..utils import (MultipleDispatchTypeError, is_continuous_lagrange, is_discontinuous_lagrange, 
-                     StrSlice, as_slice)
+from ..utils import (
+    MultipleDispatchTypeError, 
+    is_continuous_lagrange, 
+    is_discontinuous_lagrange, 
+    as_slice,
+    StrSlice,
+)
 from .utils import file_path_ext, io_array_dim
 
 

@@ -13,7 +13,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..mesh.cartesian import CellType
 from ..utils import (is_scalar, grid, triangulation, fem_function, is_cartesian, 
-                     filter_kwargs, MultipleDispatchTypeError, extract_mesh)
+                     filter_kwargs, MultipleDispatchTypeError, UnstructuredQuadError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax
 
@@ -86,7 +86,7 @@ def _(
     **kwargs,
 ):
     if not is_scalar(f):
-        raise ValueError("Colormap plotting is for scalar-valued functions only.")
+        raise ValueError("Colormap plots must be of scalar-valued quantities.")
 
     mesh = f.function_space.mesh
     cell_type = mesh.topology.cell_name()
@@ -104,13 +104,9 @@ def _(
             f_grid = grid(use_cache=use_cache[1])(f)
             xyz = (x, y, f_grid)
         case CellType.QUADRILATERAL, False:
-            raise NotImplementedError(
-                """ Plotting colormaps on unstructured quadrilateral meshes 
-            is not supported by the `matplotlib` backend. Consider using
-            `pyvista` instead. """
-            )
+            raise UnstructuredQuadError
         case _:
-            raise ValueError
+            raise ValueError(f'Unexpected cell type {cell_type}')
 
     return _plot_colormap(
         xyz, fig, ax, colorbar, cartesian, **kwargs

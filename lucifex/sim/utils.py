@@ -6,17 +6,30 @@ from collections.abc import Iterable
 from ..io.utils import file_path_ext
 
 
-def signature_name_collision(*callables: Iterable[Callable]) -> bool:
-    sig_names = list(signature(callables[0]).parameters)
+def arg_name_collisions(
+    *callables: Iterable[Callable],
+) -> list[str]:
+    names = list(signature(callables[0]).parameters)
+    collisions = []
 
     for c in callables[1:]:
-        new_names = tuple(signature(c).parameters)
-        for n in new_names:
-            if n in sig_names:
-                return True
-        sig_names.extend(new_names)
+        _names = tuple(signature(c).parameters)
+        for n in _names:
+            if n in names:
+                collisions.append(n)
+        names.extend(_names)
 
-    return False
+    return collisions
+   
+
+class ArgNameCollisionError(RuntimeError):
+    def __init__(self, collisions: list[str]):
+        msg = 'Argument names must be unique to each callable'
+        if len(collisions) == 1:
+            msg = f"{msg}, but '{collisions[0]}' is shared"
+        if len(collisions) > 1:
+            msg = f"{msg}, but {tuple(collisions)} are shared"
+        super().__init__(msg)
 
 
 def write_texec(
@@ -55,3 +68,4 @@ def load_texec(
                 [texec_log[k].append(float(i)) for k, i in zip(keys, row, strict=True) if i != '']
 
     return texec_log
+

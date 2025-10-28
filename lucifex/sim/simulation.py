@@ -5,6 +5,7 @@ from typing import (
     Callable,
     TypeVar,
     ParamSpec,
+    TypeAlias,
     overload,
 )
 from types import EllipsisType
@@ -15,26 +16,28 @@ from dolfinx.fem import Function, Constant
 from ..utils import MultipleDispatchTypeError, filter_kwargs
 from ..fdm.series import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver.options import OptionsFFCX, OptionsJIT, OptionsPETSc
-from ..solver import (Problem, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem,
-                   Projection, Interpolation)
-from ..io import create_path, write
+from ..solver import (
+    Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
+    Interpolation, Projection,
+)
+from ..io import create_dir_path, write
 from ..utils.deferred import Writer, Stopper
-from .utils import signature_name_collision
+from .utils import arg_name_collisions, ArgNameCollisionError
 
 
 T = TypeVar('T', int | None, str | None, float | None)
 class Simulation:
     def __init__(
         self,
-        solvers: Iterable[Problem],
+        solvers: Iterable[Solver],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
         namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
-        store_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | EllipsisType | None = ...,
-        write_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = None,
+        store_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | EllipsisType | None = ...,
+        write_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = None,
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
         parameter_file: str | None = None,
         checkpoint_file: str | None = None,
@@ -49,8 +52,8 @@ class Simulation:
         self.parameter_file = parameter_file
         self.checkpoint_file = checkpoint_file
         self.texec_file = texec_file
-        self.store_step = store_step
-        self.write_step = write_step
+        self.store_delta = store_delta
+        self.write_delta = write_delta
         self.write_file = write_file
 
     @overload
@@ -89,7 +92,7 @@ class Simulation:
         indices = []
         for i, s in enumerate(self.solvers):
             if s.series.name == name:
-                return indices.append(i)
+                indices.append(i)
     
         if len(indices) == 0:   
             raise ValueError(f"{name} not found in simulation's solvers.")
@@ -142,25 +145,25 @@ class Simulation:
         return d
     
     @property
-    def store_step(self) -> dict[str, int | float | None]:
-        return self._store_step
+    def store_delta(self) -> dict[str, int | float | None]:
+        return self._store_delta
     
-    @store_step.setter
-    def store_step(self, value):
+    @store_delta.setter
+    def store_delta(self, value):
         if value is Ellipsis:
-            self._store_step = {s.name: s.store for s in self.series}
+            self._store_delta = {s.name: s.store for s in self.series}
         else:
-            self._store_step = self._map_to_solver_series(value)
-            for name, store in self._store_step.items():
+            self._store_delta = self._map_to_solver_series(value)
+            for name, store in self._store_delta.items():
                     self[name].store = store
 
     @property
-    def write_step(self) -> dict[str, int | float | None]:
-        return self._write_step
+    def write_delta(self) -> dict[str, int | float | None]:
+        return self._write_delta
     
-    @write_step.setter
-    def write_step(self, value):
-        self._write_step = self._map_to_solver_series(value)
+    @write_delta.setter
+    def write_delta(self, value):
+        self._write_delta = self._map_to_solver_series(value)
     
     @property
     def write_file(self) -> dict[str, str | None]:
@@ -177,8 +180,8 @@ class Simulation:
             return lambda t: write(u[0], file_name, self.dir_path, t, 'a', u.mesh.comm)
 
         _writers = []
-        _write_step = {k: v for k, v in self.write_step.items() if v is not None}
-        for name, step in _write_step.items():
+        _write_delta = {k: v for k, v in self.write_delta.items() if v is not None}
+        for name, step in _write_delta.items():
             file_name = self.write_file.get(name)
             if file_name is None:
                 file_name = name
@@ -188,19 +191,22 @@ class Simulation:
         return _writers
     
 
+FunctionSeriesDelta: TypeAlias = int | float | None
+ConstantSeriesDelta: TypeAlias = int | float | None
 def configure_simulation(
     petsc: OptionsPETSc | dict | None = None,
     jit: OptionsJIT | dict | None = None,
     ffcx: OptionsFFCX | dict | None = None,
-    store_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = None,
-    write_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = None,
+    store_delta: int | float | tuple[FunctionSeriesDelta, ConstantSeriesDelta] | dict[str | Iterable[str], int | float] | None = None,
+    write_delta: int | float | tuple[FunctionSeriesDelta, ConstantSeriesDelta] | dict[str | Iterable[str], int | float] | None = None,
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
     parameter_file: str = 'PARAMETERS',
     checkpoint_file: str = 'CHECKPOINT',
     texec_file: str = 'TEXEC',
     dir_base: str = './',
     dir_params: Iterable[str] | str = '',
-    dir_label: str | None = None,
+    dir_prefix: str | None = None,
+    dir_suffix: str | None = None,
     dir_timestamp: bool = False,
 ):
     if petsc is None:
@@ -213,19 +219,26 @@ def configure_simulation(
     
     configure_simulation_sig = signature(configure_simulation)
     configure_simulation_params = configure_simulation_sig.parameters
-    configure_simulation_params_new = [Parameter(p.name, p.kind, default=kwargs_default[p.name], annotation=p.annotation) for p in configure_simulation_params.values()]
-    configure_simulation_sig_new = Signature(configure_simulation_params_new, return_annotation=configure_simulation_sig.return_annotation)
+    configure_simulation_params_new = [
+        Parameter(p.name, p.kind, default=kwargs_default[p.name], annotation=p.annotation) 
+        for p in configure_simulation_params.values()
+    ]
+    configure_simulation_sig_new = Signature(
+        configure_simulation_params_new, 
+        return_annotation=configure_simulation_sig.return_annotation,
+    )
 
     P = ParamSpec('P')
     def _decorator(
         simulation_func: Callable[
             P, 
-            tuple[Iterable[Problem], ConstantSeries, ConstantSeries] 
-            | tuple[Iterable[Problem], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
+            tuple[Iterable[Solver], ConstantSeries, ConstantSeries] 
+            | tuple[Iterable[Solver], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
             | Simulation],
     ):
-        
-        assert not signature_name_collision(simulation_func, configure_simulation)
+        _collisions = arg_name_collisions(simulation_func, configure_simulation)
+        if _collisions:
+            raise ArgNameCollisionError(_collisions)
 
         # TODO python 3.11+ typing.get_overloads a better solution?
         setattr(configure_simulation, simulation_func.__name__, configure_simulation_sig_new)
@@ -240,15 +253,16 @@ def configure_simulation(
             *,
             petsc: dict | OptionsPETSc = ...,
             jit: dict | OptionsJIT = ...,
-            store_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
-            write_step: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
+            store_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
+            write_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
             write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = ...,
             parameter_file: str = ...,
             checkpoint_file: str = ...,
             texec_file: str = ...,
             dir_base: str = ...,
             dir_params: Iterable[str] | str = ...,
-            dir_label: str | None = ...,
+            dir_prefix: str | None = ...,   
+            dir_suffix: str | None = ...,
             dir_timestamp: bool = ...,
         ) -> Callable[P, Simulation]:
             ...
@@ -261,8 +275,10 @@ def configure_simulation(
                 kwargs_complete.update(kwargs)
 
                 def _inner(*sim_func_args, **sim_func_kwargs):
-                    classes = (BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-                               Projection, Interpolation)
+                    classes = (
+                        BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
+                        Projection, Interpolation,
+                    )
                     [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
                     simulation_func_return = simulation_func(*sim_func_args, **sim_func_kwargs)
                     [cls.set_defaults() for cls in classes]
@@ -274,7 +290,7 @@ def configure_simulation(
                     }
                     sim_parameters.update({k: v for k, v in zip(simulation_func_params, sim_func_args)})
                     sim_parameters.update(sim_func_kwargs)
-                    dir_path = filter_kwargs(create_path)(sim_parameters, **kwargs_complete)
+                    dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
                     simulation = filter_kwargs(Simulation)(*simulation_func_return, dir_path=dir_path, **kwargs_complete)
                     
                     if simulation.writers:
@@ -294,10 +310,22 @@ def configure_simulation(
                     raise TypeError(f'Unrecognised keyword argument: {error_params[0]}.')
                 if len(error_params) > 1:
                     raise TypeError(f'Unrecognised keyword arguments: {tuple(error_params)}.')
-                return _(petsc=petsc, jit=jit, ffcx=ffcx, store_step=store_step, 
-                                write_step=write_step, dir_base=dir_base, dir_params=dir_params,
-                                dir_label=dir_label, dir_timestamp=dir_timestamp, 
-                        write_file=write_file, parameter_file=parameter_file, checkpoint_file=checkpoint_file, texec_file=texec_file)(*args, **kwargs)
+                return _(
+                    petsc=petsc, 
+                    jit=jit, 
+                    ffcx=ffcx, 
+                    store_delta=store_delta, 
+                    write_delta=write_delta, 
+                    dir_base=dir_base, 
+                    dir_params=dir_params,
+                    dir_prefix=dir_prefix, 
+                    dir_suffix=dir_suffix, 
+                    dir_timestamp=dir_timestamp, 
+                    write_file=write_file, 
+                    parameter_file=parameter_file, 
+                    checkpoint_file=checkpoint_file, 
+                    texec_file=texec_file,
+                )(*args, **kwargs)
         
         return _
     

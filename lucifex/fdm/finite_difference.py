@@ -407,23 +407,30 @@ def apply_finite_difference(
         return finite_difference_argwise(D_fdm, expr, trial)
     
 
-def ImplicitDiscretizationError(
-    D_fdm: FiniteDifference,
-    msg: str = '',
-):
-    return DiscretizationError('Implicit', D_fdm, msg)
+class DiscretizationError(RuntimeError):
+    def __init__(
+        self, 
+        required: str,
+        D_fdm: FiniteDifference,
+        msg: str = '',
+    ):
+        super().__init__(f"{required} discretization required, not {D_fdm}'. {msg}")
 
 
-def ExplicitDiscretizationError(
-    D_fdm: FiniteDifference,
-    msg: str = '',
-):
-    return DiscretizationError('Explicit', D_fdm, msg)
+class ImplicitDiscretizationError(DiscretizationError):
+    def __init__(
+        self, 
+        D_fdm: FiniteDifference,
+        msg: str = '',
+    ):
+        super().__init__('Implicit', D_fdm, msg)
 
 
-def DiscretizationError(
-    required: str,
-    D_fdm: FiniteDifference,
-    msg: str = '',
-):
-    raise RuntimeError(f"{required} discretization required, not {D_fdm}'. {msg}")
+class ExplicitDiscretizationError(DiscretizationError):
+    def __init__(
+        self, 
+        D_fdm: FiniteDifference,
+        msg: str = '',
+    ):
+        super().__init__('Explicit', D_fdm, msg)
+

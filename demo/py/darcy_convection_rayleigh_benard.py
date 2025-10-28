@@ -12,8 +12,8 @@ from .darcy_convection_generic import darcy_convection_generic
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def darcy_convection_rayleigh_benard_rectangle(
     # domain
@@ -92,8 +92,8 @@ def darcy_convection_rayleigh_benard_rectangle(
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def darcy_convection_rayleigh_benard_annulus(
     Rinner: float = 1.0,
@@ -165,8 +165,8 @@ def darcy_convection_rayleigh_benard_annulus(
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def darcy_convection_rayleigh_benard_semicircle(
     Nradial: int = 100,

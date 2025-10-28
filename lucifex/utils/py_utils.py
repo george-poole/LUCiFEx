@@ -15,7 +15,6 @@ from inspect import signature
 import time
 
 
-# TODO just Enum instead of str, Enum?
 class StrEnum(str, Enum):
     def __repr__(self) -> str:
         return repr(self.value)
@@ -146,7 +145,7 @@ def optional_lru_cache(
     return _
 
 
-# TODO get_overloads in python 3.11+
+# TODO get_overloads in Python 3.11+
 P = ParamSpec("P")
 R = TypeVar('R')
 def canonicalize_args(
@@ -196,12 +195,18 @@ def filter_kwargs(
     return _
 
 
-def MultipleDispatchTypeError(arg, sd_func: Callable | None = None) -> TypeError:
-    msg = f"Unexpected type {type(arg)}."
-    if sd_func is not None:
-        registered_types = tuple(sd_func.registry)[1:]
-        msg = f"{msg} Expected one of {registered_types}."
-    return TypeError(msg)
+
+class MultipleDispatchTypeError(TypeError):
+    def __init__(
+        self,
+        arg: Any, 
+        sd_func: Callable | None = None
+    ):
+        msg = f"Unexpected argument type {type(arg)}."
+        if sd_func is not None:
+            registered_types = tuple(sd_func.registry)[1:]
+            msg = f"{msg} Expected one of {registered_types}."
+        super().__init__(msg)
 
 
 StrSlice: TypeAlias = str | slice
@@ -214,7 +219,7 @@ COLON = ':'
 DOUBLE_COLON = f'{COLON}{COLON}'
 
 
-# TODO slice[int, int, int] Python 3.11+
+# TODO slice[int, int, int] in Python 3.11+
 def as_slice(s: str | slice) -> slice:
     if not is_slice(s):
         raise ValueError(f'Invalid string {s} representing a slice.')
@@ -277,8 +282,7 @@ def nested_dict(
     assert order > 2
     return nested_dict(nested_dict(order - 1))
 
-
-def FixMeError(
-    msg: str = 'Working on it! Coming soon...',
-) -> NotImplementedError:
-    return NotImplementedError(msg)
+    
+class ToDoError(NotImplementedError):
+    def __init__(self):
+        super().__init__('Working on it! Coming soon...')

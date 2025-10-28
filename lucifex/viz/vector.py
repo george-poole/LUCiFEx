@@ -27,14 +27,14 @@ def plot_quiver(
     if isinstance(f, Function):
         if not is_vector(f, dim=2):
             raise ValueError(
-                "Quiver plots are for vector-valued functions of dimension 2 only."
+                "Quiver plots must be of 2D vector-valued quantities."
             )
         fx, fy = fem_function_components(('P', 1), f)
     else:
         fx, fy = (fem_function(('P', 1), i) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
-        raise ValueError("Quiver plots on non-structured meshes are not supported.")
+        raise ValueError("Quiver plots on unstructured meshes are not supported.")
     
     x, y = grid(use_cache=use_cache[0])(fx.function_space.mesh)
     fx_grid = grid(use_cache=use_cache[1])(fx)
@@ -82,7 +82,7 @@ def plot_streamlines(
     if isinstance(f, Function):
         if not is_vector(f, dim=2):
             raise ValueError(
-                "Streamline plots are for vector-valued functions of dimension 2 only."
+                "Streamline plots must be of 2D vector-valued quantities."
             )
         fx, fy = fem_function_components(('P', 1), f)
     else:

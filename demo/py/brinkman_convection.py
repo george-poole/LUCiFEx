@@ -18,8 +18,8 @@ from lucifex.pde.transport import advection_diffusion
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def brinkman_convection_rayleigh_benard_rectangle(    
     # domain
@@ -129,8 +129,8 @@ def brinkman_convection_rayleigh_benard_rectangle(
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def brinkman_convection_rayleigh_taylor_rectangle(    
     # domain

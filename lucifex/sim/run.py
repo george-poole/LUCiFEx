@@ -10,22 +10,22 @@ from collections.abc import Iterable
 from dolfinx.fem import Constant
 
 from ..fdm.series import ConstantSeries
-from ..solver import Problem, Evaluation, IBVP, IVP
+from ..solver import Solver, Evaluation, IBVP, IVP
 from ..io.write import write
 from ..io.checkpoint import write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_texec
 
 from ..utils.deferred import Writer, Stopper
-from .deferred import (
-    StopperFromSimulation, WriterFromSimulation, 
-    as_stopper, as_writer, is_from_simulation,
+from .controller import (
+    CreateStopper, CreateWriter, 
+    as_stopper, as_writer, has_simulation_arg,
 )
 from .simulation import configure_simulation, Simulation
-from .utils import write_texec, signature_name_collision
+from .utils import write_texec, arg_name_collisions, ArgNameCollisionError
 
 
-def integrate(
-    simulation: Simulation | tuple[Iterable[Problem], ConstantSeries, ConstantSeries | Constant],
+def run(
+    simulation: Simulation | tuple[Iterable[Solver], ConstantSeries, ConstantSeries | Constant],
     n_stop: int | None = None,
     t_stop: float | None = None,
     dt_init: float | None = None,
@@ -33,13 +33,9 @@ def integrate(
     resume: bool = False, 
     overwrite: bool | None = None,
     texec: bool | dict = False,
-    stoppers: Iterable[Stopper | Callable[[], bool] | StopperFromSimulation] = (),
-    writers: Iterable[Writer | Callable[[], None] | WriterFromSimulation] = (),
-) -> None:
-    """
-    Mutates `simulation`
-    """
-    
+    stoppers: Iterable[Stopper | Callable[[], bool] | CreateStopper] = (),
+    writers: Iterable[Writer | Callable[[], None] | CreateWriter] = (),
+) -> None:    
     if isinstance(simulation, tuple):
         simulation = Simulation(*simulation)
 
@@ -54,12 +50,12 @@ def integrate(
     _writers: list[Writer] = [as_writer(w, simulation) for w in writers]
     _writers.extend(simulation.writers)
 
-    n_init_solvers = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
+    n_init_min = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
     if n_init is not None:
-        if not n_init > n_init_solvers:
-            raise ValueError("Overridden `n_init` value must be greater than simulation's finite difference discretization order")
+        if n_init < n_init_min:
+            raise ValueError("`n_init` must be greater than or equal to the highest finite difference discretization order.")
     else:
-        n_init = n_init_solvers
+        n_init = n_init_min
 
     if dt_init is not None:
         dt_solver_init = Evaluation(dt, lambda: dt_init)
@@ -89,7 +85,7 @@ def integrate(
             n_init=n_init, 
             resume=resume,
         )
-        parameters.update(write_step={k: v for k, v in simulation.write_step.items() if v is not None})
+        parameters.update(write_delta={k: v for k, v in simulation.write_delta.items() if v is not None})
         write(parameters, simulation.parameter_file, simulation.dir_path, mode='a')
 
     if isinstance(dt, ConstantSeries):
@@ -131,13 +127,14 @@ def integrate(
             write_texec(_texec, simulation.dir_path, simulation.texec_file)
 
 
-def integrate_from_cli(
+def run_from_cli(
     simulation_func: Callable[..., Simulation] | Callable[..., Callable[..., Simulation]],
-    description: str = 'Run a simulation from the command line',
-    stoppers: Iterable[StopperFromSimulation | Callable[..., StopperFromSimulation]] = (),
-    writers: Iterable[WriterFromSimulation | Callable[..., WriterFromSimulation]] = (),
+    posthook: Callable[[Simulation], None] | None = None,
+    stoppers: Iterable[CreateStopper | Callable[..., CreateStopper]] = (),
+    writers: Iterable[CreateWriter | Callable[..., CreateWriter]] = (),
     eval_locals: Iterable[object | tuple[str, object]] | None = None,
-) -> Simulation:
+    description: str = 'Run a simulation from the command line',
+) -> None:
     """Note that if single quotations are used to enclose a Python code snippet entered at the
     command line interface, any strings within that code snippet must be enclosed by double quotations, or vice versa.
     
@@ -163,13 +160,14 @@ def integrate_from_cli(
             )
         )
 
-    stoppers_from_sim: list[StopperFromSimulation] =  [s for s in stoppers if is_from_simulation(s)]
-    stoppers_from_cli: list[Callable[..., StopperFromSimulation]] = [s for s in stoppers if not is_from_simulation(s)]
-    writers_from_sim: list[WriterFromSimulation] =  [w for w in writers if is_from_simulation(w)]
-    writers_from_cli: list[Callable[..., WriterFromSimulation]]= [w for w in writers if not is_from_simulation(w)]
+    stoppers_from_sim: list[CreateStopper] =  [s for s in stoppers if has_simulation_arg(s)]
+    stoppers_from_cli: list[Callable[..., CreateStopper]] = [s for s in stoppers if not has_simulation_arg(s)]
+    writers_from_sim: list[CreateWriter] =  [w for w in writers if has_simulation_arg(w)]
+    writers_from_cli: list[Callable[..., CreateWriter]]= [w for w in writers if not has_simulation_arg(w)]
 
-    if signature_name_collision(simulation_func, integrate, *stoppers_from_cli, *writers_from_cli):
-        raise TypeError('Parameter names must be unique to each callable.')
+    _collisions = arg_name_collisions(simulation_func, run, *stoppers_from_cli, *writers_from_cli)
+    if _collisions:
+        raise ArgNameCollisionError(_collisions)
 
     parser = argparse.ArgumentParser(
         description=description,
@@ -177,17 +175,28 @@ def integrate_from_cli(
     )
 
     if hasattr(configure_simulation, simulation_func.__name__):
-        sig_simulation: Signature = getattr(configure_simulation, simulation_func.__name__)
-        params_simulation = sig_simulation.parameters
+        sig_config: Signature = getattr(configure_simulation, simulation_func.__name__)
+        params_config = sig_config.parameters
     else:
-        params_simulation = signature(configure_simulation).parameters
-    params_solvers = signature(simulation_func).parameters
-    params_integrate = {k: v for k, v in list(signature(integrate).parameters.items())[1:-2]}
+        params_config = signature(configure_simulation).parameters
+    params_simulation = signature(simulation_func).parameters
+    params_run = {k: v for k, v in list(signature(run).parameters.items())[1:-2]}
     params_stoppers = [signature(s).parameters for s in stoppers_from_cli]
     params_writers = [signature(w).parameters for w in writers_from_cli]
+    if posthook is not None:
+        params_hook = {k: v for k, v in list(signature(posthook).parameters.items())[1:]}
+    else:
+        params_hook = {}
 
     params_cli: dict[str, Parameter] = {}
-    for p in (params_simulation, params_solvers, params_integrate, *params_stoppers, *params_writers):
+    for p in (
+        params_config, 
+        params_simulation, 
+        params_run, 
+        *params_stoppers, 
+        *params_writers, 
+        params_hook,
+    ):
         params_cli.update(p)
 
     for name, prm in params_cli.items():
@@ -197,29 +206,36 @@ def integrate_from_cli(
             if dflt is None:
                 raise RuntimeError('A parameter without type annotation must have a default.')
             annt = type(dflt)
-        parser.add_argument(f'--{name}', type=cli_type_conversion(dflt, eval_locals), default=dflt, help=cli_type_name(annt))
+        parser.add_argument(
+            f'--{name}', 
+            type=cli_type_conversion(dflt, eval_locals),
+            default=dflt, 
+            help=cli_type_name(annt),
+        )
 
     kwargs = vars(parser.parse_args())
     get_subset = lambda p: {k: v for k, v in kwargs.items() if k in p}
-    simulation_kwargs = get_subset(params_simulation)
-    solvers_kwargs = get_subset(params_solvers)
-    integrate_kwargs = get_subset(params_integrate)
-    stop_kwargs = [get_subset(i) for i in params_stoppers]
-    write_kwargs = [get_subset(i) for i in params_writers]
+    kwargs_config = get_subset(params_config)
+    kwargs_simulation = get_subset(params_simulation)
+    kwargs_run = get_subset(params_run)
+    kwargs_stop = [get_subset(i) for i in params_stoppers]
+    kwargs_write = [get_subset(i) for i in params_writers]
+    kwargs_hook = get_subset(params_hook)
 
-    if simulation_kwargs:
-        simulation = simulation_func(**simulation_kwargs)(**solvers_kwargs)
+    if kwargs_config:
+        simulation = simulation_func(**kwargs_config)(**kwargs_simulation)
     else:
-        simulation = simulation_func(**solvers_kwargs)
+        simulation = simulation_func(**kwargs_simulation)
 
-    stoppers: list[StopperFromSimulation] = [s(**k) for s, k in zip(stoppers_from_cli, stop_kwargs)]
+    stoppers: list[CreateStopper] = [s(**k) for s, k in zip(stoppers_from_cli, kwargs_stop)]
     stoppers.extend([s(simulation) for s in stoppers_from_sim])
-    writers: list[WriterFromSimulation] = [s(**k) for s, k in zip(writers_from_cli, write_kwargs)]
+    writers: list[CreateWriter] = [s(**k) for s, k in zip(writers_from_cli, kwargs_write)]
     writers.extend([w(simulation) for w in writers_from_sim])
 
-    integrate(simulation, **integrate_kwargs, stoppers=stoppers, writers=writers)
+    run(simulation, **kwargs_run, stoppers=stoppers, writers=writers)
 
-    return simulation
+    if posthook is not None:
+        posthook(simulation, **kwargs_hook)
 
 
 def cli_type_conversion(

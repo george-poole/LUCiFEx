@@ -18,8 +18,8 @@ from lucifex.pde.darcy import darcy_streamfunction, streamfunction_velocity
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def porous_abc_convection_rectangle(
     # domain

@@ -8,7 +8,7 @@ from petsc4py import PETSc
 from ufl.core.expr import Expr
 import numpy as np
 
-from .fem_utils import is_scalar
+from .fem_utils import is_scalar, ShapeError
 from .py_utils import StrSlice, as_slice, MultipleDispatchTypeError
 
 
@@ -18,7 +18,9 @@ def set_fem_function(
     value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
-    """Mutates `f`, does not mutate `value`"""
+    """
+    Mutates `f`, does not mutate `value`.
+    """
     if isinstance(dofs_indices, StrSlice):
         dofs_indices = as_slice(dofs_indices)
     elif isinstance(dofs_indices, Iterable):
@@ -54,7 +56,8 @@ def _(value: Constant, f: Function, indices: np.ndarray | None):
         _set_fem_function(value.value.item(), f, indices)
     else:
         assert indices is None
-        assert value.value.shape == f.ufl_shape
+        if not f.ufl_shape == value.value.shape:
+            raise ShapeError(f, value.value.shape)
         interpolate_fem_function(f, value)
 
 
@@ -78,7 +81,9 @@ def interpolate_fem_function(
     f: Function,
     value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
 ) -> None:
-    """Mutates `f` by calling its `interpolate` method"""
+    """
+    Mutates `f` by calling its `interpolate` method, does not mutate `value`.
+    """
     return _interpolate_fem_function(value, f)
 
 
@@ -129,7 +134,9 @@ def set_fem_constant(
     c: Constant,
     value: Constant | float | np.ndarray | Iterable[float],
 ) -> None:
-    """Mutates `c`"""
+    """
+    Mutates `c`, does not mutate `value`.
+    """
     return _set_fem_constant(value, c)
 
 
@@ -150,7 +157,8 @@ def _(value, const: Constant):
 
 @_set_fem_constant.register(np.ndarray)
 def _(value: np.ndarray, const: Constant):
-    assert const.value.shape == value.shape
+    if not const.value.shape == value.shape:
+        raise ShapeError(const, value.shape)
     const.value = value
 
 @_set_fem_constant.register(Iterable)

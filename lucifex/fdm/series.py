@@ -477,7 +477,7 @@ class ConstantSeries(
         self._shape = shape
         if self._subnames:
             if self.shape == ():
-                raise SubSeriesError()
+                raise SubSeriesError
             assert len(self._subnames) == self.shape[0]
 
     @staticmethod
@@ -508,7 +508,7 @@ class ConstantSeries(
         name: str | None = None,
     ) -> Self:
         if self.shape == ():
-            raise SubSeriesError()
+            raise SubSeriesError
 
         if name is None:
             name = self._create_subname(index)
@@ -526,14 +526,15 @@ class ConstantSeries(
         names: Iterable[str] | None = None,
     ) -> tuple[Self, ...]:
         if self.shape == ():
-            raise SubSeriesError()
+            raise SubSeriesError
         subseries_indices = tuple(range(self.shape[0]))
         if names is None:
             names = [None] * self.shape[0]
         return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
     
 
-def SubSeriesError():
-    return RuntimeError('Scalar-valued series cannot have a subseries.')
+class SubSeriesError(RuntimeError):
+    def __init__(self):
+        super().__init__('Scalar-valued series cannot have a subseries.')
 
 

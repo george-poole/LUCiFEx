@@ -20,7 +20,7 @@ from slepc4py import SLEPc
 
 from ..utils import (
     Perturbation, replicate_callable, MultipleDispatchTypeError, 
-    dofs_limits_corrector, fem_function_space, Marker, SubspaceIndex
+    dofs_limits_corrector, fem_function_space, Marker
 )
 from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner

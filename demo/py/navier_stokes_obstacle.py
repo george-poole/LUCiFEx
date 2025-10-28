@@ -14,8 +14,8 @@ from lucifex.pde.constitutive import newtonian_stress
 
 
 @configure_simulation(
-    store_step=1,
-    write_step=None,
+    store_delta=1,
+    write_delta=None,
 )
 def navier_stokes_circle_obstacle(
     # domain
