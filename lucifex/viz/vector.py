@@ -36,9 +36,10 @@ def plot_quiver(
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Quiver plots on unstructured meshes are not supported.")
     
-    x, y = grid(use_cache=use_cache[0])(fx.function_space.mesh)
-    fx_grid = grid(use_cache=use_cache[1])(fx)
-    fy_grid = grid(use_cache=use_cache[1])(fy)
+    use_mesh_cache = use_func_cache = use_cache
+    x, y = grid(use_cache=use_mesh_cache)(fx.function_space.mesh)
+    fx_grid = grid(use_cache=use_func_cache)(fx)
+    fy_grid = grid(use_cache=use_func_cache)(fy)
 
     return _plot_quiver(ax, (x, y, fx_grid, fy_grid), n_arrow, **kwargs)
 
@@ -91,9 +92,10 @@ def plot_streamlines(
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Streamline plots on unstructured meshes are not supported.")
 
-    x, y = grid(use_cache=use_cache[0])(fx.function_space.mesh)
-    fx_grid = grid(use_cache=use_cache[1])(fx)
-    fy_grid = grid(use_cache=use_cache[1])(fy)
+    use_mesh_cache = use_func_cache = use_cache
+    x, y = grid(use_cache=use_mesh_cache)(fx.function_space.mesh)
+    fx_grid = grid(use_cache=use_func_cache)(fx)
+    fy_grid = grid(use_cache=use_func_cache)(fy)
 
     return _plot_streamlines(ax, (x, y, fx_grid, fy_grid), density, color, **kwargs)
 

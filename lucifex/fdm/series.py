@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec
+from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec, overload
 from typing_extensions import Self
 
 import numpy as np
@@ -107,7 +107,7 @@ class Series(ABC, Generic[T]):
         return f"{self.__class__.__name__}({seq_repr})"
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return self.name
 
     def __iter__(self):
         return iter(self.sequence)
@@ -163,8 +163,6 @@ P = ParamSpec('P')
 class ExprSeries(
     Series[Expr | Function | Constant],
 ):
-    
-    _func = None
     _func_args = None
 
     def __init__(
@@ -180,26 +178,51 @@ class ExprSeries(
             order = len(arg) - 1
             super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
 
+    @overload
     @classmethod
-    def from_relation(
+    def from_args(
         cls, 
         func: Callable[P, Self], 
+        *,
         name: str | None = None,
     ) -> Callable[P, Self]:
-        def _(*args: P.args, **kwargs: P.kwargs):
-            if kwargs:
-                raise NotImplementedError('Provide positional arguments only.')
-            expr = func(*args, **kwargs)
-            obj = cls(expr, name)
-            obj._func = func
-            obj._func_args = args
-            return obj
-        return _
+        ...
 
+    @overload
+    @classmethod
+    def from_args(
+        cls, 
+        *args: Any | Callable[..., Self],
+        name: str | None = None,
+    ) -> Self:
+        ...
+
+    @classmethod
+    def from_args(
+        cls, 
+        *args,
+        name: str | None = None,
+    ):
+        if not args:
+            raise TypeError
+        
+        def _(f, *a, **k):
+            expr = f(*a, **k)
+            obj = cls(expr, name)
+            obj._func_args = (f, a, k)
+            return obj
+        
+        if len(args) > 1:
+            *args, func = args
+            return _(func, *args)
+        else:
+            func = args[0]
+            return lambda *a, **k: _(func, *a, **k)
+    
     @property
-    def relation(self) -> tuple[Callable, tuple] | None:
-        if self._func is not None:
-            return self._func, self._func_args
+    def expression(self) -> tuple[Callable, tuple[Any, ...], dict[str, Any]] | None:
+        if self._func_args is not None:
+            return self._func_args
         else:
             return None
 
@@ -340,7 +363,6 @@ class FunctionSeries(
         Perturbation,
     ],
 ):
-
     def __init__(
         self,
         fs: FunctionSpace

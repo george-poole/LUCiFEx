@@ -195,7 +195,6 @@ def filter_kwargs(
     return _
 
 
-
 class MultipleDispatchTypeError(TypeError):
     def __init__(
         self,

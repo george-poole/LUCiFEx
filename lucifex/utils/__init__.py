@@ -4,13 +4,10 @@ from .fem_utils import (is_scalar, is_vector, is_tensor, extract_mesh, extract_m
                         is_mixed_space, is_same_element, is_family_alias, extract_integrands,
                         extract_integrand)
 from .dofs_utils import (
-    Marker,
+    SpatialMarkerAlias,
     SpatialMarker, 
-    MarkerOrExpression,
-    SpatialExpression,
     dofs_indices,
     dofs,
-    dofs_transformation,
     extremum,
     maximum,
     minimum,
@@ -53,4 +50,5 @@ from .fem_typecast import finite_element_constant, finite_element_function, func
 from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
 from .py_utils import (filter_kwargs, log_texec, replicate_callable, ToDoError,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
+from .str_utils import str_indexed
 from .norm import L_norm, l_norm, div_norm

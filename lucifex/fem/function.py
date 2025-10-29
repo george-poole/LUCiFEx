@@ -8,7 +8,7 @@ from dolfinx.fem import Function as DOLFINxFunction
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import function_space, SpatialPerturbation
+from ..utils import function_space, SpatialPerturbation, str_indexed
 from .unsolved import UnsolvedType
 
 
@@ -37,7 +37,7 @@ class Function(DOLFINxFunction):
         fs = function_space(fs)
 
         if name is None:
-            name = f'f{id(self)}'
+            name = f'{self.__class__.__name__}{id(self)}'
 
         if isinstance(x, (DOLFINxFunction, Expression, Callable, SpatialPerturbation, int, float, UnsolvedType)):
             super().__init__(fs, None, name, dtype)
@@ -71,7 +71,7 @@ class Function(DOLFINxFunction):
         if self.index is None:
             return name
         else:
-            return unicode_superscript(name, self.index)
+            return str_indexed(name, self.index, 'superscript', True)
         
     def sub(
         self, 
@@ -109,33 +109,4 @@ class Function(DOLFINxFunction):
         u = self._cpp_object.collapse()
         fs = FunctionSpace(None, self.ufl_element(), u.function_space)
         return Function(fs, u.x, self.name, index=self.index)
-        
-
-def unicode_superscript(name: str, n: int) -> str:
-    digits_supers = {
-        '0': '⁰', 
-        '1': '¹', 
-        '2': '²', 
-        '3': '³', 
-        '4': '⁴', 
-        '5': '⁵', 
-        '6': '⁶',
-        '7': '⁷', 
-        '8': '⁸', 
-        '9': '⁹',
-    }
-    n_str = str(n)
-    if '-' in n_str:
-        n_str = n_str.replace('-', '')
-        
-    superscript = ''
-    for _s in n_str:
-        superscript = f'{superscript}{digits_supers[_s]}'
-
-    if n < 0:
-        superscript = f'⁻{superscript}'
-    if n > 0:
-        superscript = f'⁺{superscript}'
-
-    return f'{name}⁽{superscript}⁾'
 

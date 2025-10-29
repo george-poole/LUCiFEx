@@ -11,14 +11,14 @@ from dolfinx.mesh import Mesh, locate_entities, meshtags
 from .fem_utils import extract_mesh
 from .dofs_utils import (
     as_spatial_marker,
-    Marker,
+    SpatialMarkerAlias,
 )
 
 
 def create_tagged_measure(
     measure: Literal['dx', 'ds', 'dS'],
     mesh: Mesh,
-    markers: Iterable[Marker] = (),
+    markers: Iterable[SpatialMarkerAlias] = (),
     tags: Iterable[int] | None = None,
     tag_unmarked: int | None = None,
     **metadata,
@@ -75,7 +75,7 @@ def integral(
     @overload
     def _(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
-        *markers: Marker,
+        *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         **metadata,
     ) -> Callable[P, float | np.ndarray]:
@@ -84,7 +84,7 @@ def integral(
 
     def _overload(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
-        *markers: Marker,
+        *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         **metadata,
     ):

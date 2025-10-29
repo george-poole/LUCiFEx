@@ -1,5 +1,7 @@
 from collections.abc import Callable, Iterable
-from functools import singledispatch
+from typing import overload
+from types import EllipsisType
+from functools import singledispatch, lru_cache
 
 import numpy as np
 from ufl.core.expr import Expr
@@ -16,17 +18,33 @@ from .py_utils import MultipleDispatchTypeError, optional_lru_cache
 from .fem_mutate import set_finite_element_function
 
 
+@overload
 def function_space(
-    fs: FunctionSpace
-        | tuple[Mesh, str, int]
-        | tuple[Mesh, str, int]
-        | tuple[Mesh, str, int, int]
-        | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
+    fs: FunctionSpace,
+    subspace_index: int | None = None,
+) -> FunctionSpace:
+    ...
+
+
+@overload
+def function_space(
+    fs: tuple[Mesh, str, int]
+    | tuple[Mesh, str, int]
+    | tuple[Mesh, str, int, int]
+    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
     subspace_index: int | None = None,
     use_cache: bool = False,
 ) -> FunctionSpace:
+    ...
+
+
+def function_space(
+    fs,
+    subspace_index=None,
+    use_cache=False,
+) -> FunctionSpace:
     """
-    Typecast to `dolfinx.fem.FunctionSpace` 
+    Typecast to `dolfinx.fem.FunctionSpace`.
     """
     if isinstance(fs, FunctionSpace):
         return function_subspace(fs, subspace_index)
@@ -73,20 +91,22 @@ def finite_element_function(
     value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     subspace_index: int | None = None,
     name: str | None = None,
-    use_cache: bool | tuple[bool, bool] = False,
     try_identity: bool = False,
+    use_cache: bool | EllipsisType = False,
 ) -> Function:
     """
-    Typecast to `dolfinx.fem.Function` 
+    Typecast to `dolfinx.fem.Function`. 
+
+    `use_cache = True` will try to fetch a `Function` from the cache, based on the tuple-valued `fs`, 
+    `subspace_index` and `name` and then mutate that `Function`. \\
+    `use_cache = Ellipsis` will try to fetch a `FunctionSpace` from the cache, but create a new `Function`. \\
+    `use_cache = False` will create a new `FunctionSpace` and a new `Function`.
     """
     if name is None:
         try:
             name = value.name
         except AttributeError:
             pass
-
-    if isinstance(use_cache, bool):
-        use_cache = (use_cache, use_cache)
             
     if isinstance(fs, FunctionSpace):
         if try_identity and isinstance(value, Function) and value.function_space == fs:
@@ -97,19 +117,23 @@ def finite_element_function(
         fs = _as_function_space_tuple(fs, value)
         if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
             return value
-        use_func_cache, use_fs_cache = use_cache
-        f = _finite_element_function(use_cache=use_func_cache)(fs, name, use_fs_cache)
+        if use_cache is True:
+            f = _cached_finite_element_function(fs, subspace_index, name)
+        else:
+            fs = function_space(fs, subspace_index, bool(use_cache))
+            f = Function(fs, name=name)
+
     set_finite_element_function(f, value)
     return f
 
 
-@optional_lru_cache
-def _finite_element_function(
+@lru_cache
+def _cached_finite_element_function(
     fs_hashable: tuple, 
+    subspace_index: int | None,
     name: str | None,
-    use_fs_cache: bool,
 ) -> Function:
-    fs = _function_space(use_cache=use_fs_cache)(fs_hashable)
+    fs = _function_space(use_cache=True)(fs_hashable, subspace_index)
     return Function(fs, name=name)
 
 
@@ -128,7 +152,7 @@ def finite_element_function_components(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
-    use_cache: bool | tuple[bool, bool] = False,
+    use_cache: bool | EllipsisType = False,
 ) -> tuple[Function, ...]:
     
     if not is_vector(u):
@@ -143,23 +167,22 @@ def finite_element_function_components(
         try:
             u_name = u.name
         except AttributeError:
-            u_name = f'u{id(u)}'
+            u_name = f'{u.__class__.__name__}{id(u)}'
         names = tuple(f'{u_name}_{i}' for i in range(dim))
 
     if isinstance(u, Function) and is_component_space(u.function_space):
         # e.g. vector-valued u ∈ P⨯P
-        # fs = function_space(fs, use_cache=use_fs_cache)
-        # f = _finite_element_function_components(use_cache=use_cache)(fs, names)
-        ##### f = [_finite_element_function(use_cache=False)(fs, n, use_fs_cache) for n in names]
-        # u = [ui.collapse() for ui in u.split()]
-        # u = finite_element_subfunctions(u)
+        ## fs = function_space(fs, use_cache=use_fs_cache)
+        ## f = _finite_element_function_components(use_cache=use_cache)(fs, names)
+        ## u = [ui.collapse() for ui in u.split()]
+        ## u = finite_element_subfunctions(u)
         return tuple(
             finite_element_function(fs, i.collapse(), name=n, use_cache=use_cache) 
             for i, n in zip(u.split(), names, strict=True)
         )
     else:
         # e.g. vector-valued u ∈ BDM
-        u = finite_element_function((*fs, dim), u, use_cache=use_cache)
+        u = finite_element_function((*fs, dim), u, use_cache=Ellipsis)
         return finite_element_function_components(fs, u, names, use_cache)
 
 

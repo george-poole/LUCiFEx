@@ -1,7 +1,8 @@
-from typing import TypeAlias
+from typing import TypeAlias, Callable
 from collections.abc import Iterable
 from typing_extensions import Unpack
 
+import numpy as np
 from ufl import Measure, Form, TestFunction, inner
 from ufl.core.expr import Expr
 from dolfinx_mpc import MultiPointConstraint
@@ -18,8 +19,8 @@ from ..utils.measure_utils import create_tagged_measure
 from ..utils.dofs_utils import (
     as_spatial_marker,
     dofs_indices,
-    Marker,
-    SpatialExpression,
+    SpatialMarkerAlias,
+    SpatialMarker,
     SubspaceIndex,
     DofsMethodType,
 )
@@ -28,7 +29,7 @@ from ..fem import Function, Constant
 Value: TypeAlias = (
     Function
     | Constant
-    | SpatialExpression
+    | Callable[[np.ndarray], np.ndarray]
     | float
     | Iterable[float]
     | Expr
@@ -37,20 +38,22 @@ Value: TypeAlias = (
 
 class BoundaryConditions:
     """
-    The `'neumann'` boundary type with boundary value `g` assumes a form
-    `+∫ v·g ds` for the boundary term in the variational formulation.
+    A boundary condition of type `'natural'`, `'neumann'` or '`robin`' with 
+    boundary value `uN` will add to the variational forms a term `+∫ v·uN ds`, 
+    where `v` is the test function.
 
-    More complicated boundary terms should instead be specified in the forms function.
+    Weakly-enforced boundary conditions that cannnot be expressed by 
+    such a form should instead be specified in the forms function.
     """
     def __init__(
         self,
-        *bcs: tuple[BoundaryType, Marker, Value]
-        | tuple[BoundaryType, Marker, Value, SubspaceIndex]
-        | tuple[Marker, Value]
-        | tuple[Marker, Value, SubspaceIndex],
+        *bcs: tuple[BoundaryType, SpatialMarker | SpatialMarkerAlias, Value]
+        | tuple[BoundaryType, SpatialMarker | SpatialMarkerAlias, Value, SubspaceIndex]
+        | tuple[SpatialMarker | SpatialMarkerAlias, Value]
+        | tuple[SpatialMarker | SpatialMarkerAlias, Value, SubspaceIndex],
         dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
     ):
-        self._markers: list[Marker] = []
+        self._markers: list[SpatialMarker | SpatialMarkerAlias] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []

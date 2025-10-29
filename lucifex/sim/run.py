@@ -240,12 +240,23 @@ def cli_type_conversion(
     default: Any,
     eval_locals: Iterable[object | tuple[str, object]],
     ):
-    eval_locals = [(i.__name__, i) if not isinstance(i, tuple) else i for i in eval_locals]
+
+    def _name(obj) -> str:
+        if hasattr(obj, '__name__'):
+            return getattr(obj, '__name__')
+        elif hasattr(obj, 'name'):
+            return getattr(obj, 'name')
+        else:
+            return str(obj)
+
+    eval_locals = [(_name(i), i) if not isinstance(i, tuple) else i for i in eval_locals]
+
     def _inner(source: str):
         if source == default:
             return source
         else:
             return eval(source, globals(), dict(eval_locals))
+        
     return _inner
 
 

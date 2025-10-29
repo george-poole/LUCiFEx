@@ -136,28 +136,29 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
         use_cache: tuple[bool, bool] = (True, True),
         **grid_kwargs,
     ) -> Self:
+        use_mesh_cache, use_func_cache = use_cache
+
         match u.shape:
             case ():
-                series = [grid(use_cache=use_cache[1])(i, **grid_kwargs) for i in u.series]
+                series = [grid(use_cache=use_func_cache)(i, **grid_kwargs) for i in u.series]
             case (_, ):
 
                 series = [
                     np.array(
                         [
-                            grid(use_cache=use_cache[1])(j, **grid_kwargs) 
-                            for j in finite_element_function_components(('P', 1), i, use_cache=(True, True))
+                            grid(use_cache=use_func_cache)(j, **grid_kwargs) 
+                            for j in finite_element_function_components(('P', 1), i, use_cache=Ellipsis)
                         ]
                     ) 
                     for i in u.series
                 ]
-                print('series gotten')
             case _:
                 raise ScalarVectorError(u)
             
         return cls(
             series,
             u.time_series,
-            grid(use_cache=use_cache[0])(u.mesh), 
+            grid(use_cache=use_mesh_cache)(u.mesh), 
             u.name,
         )
     
@@ -196,14 +197,16 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
         u: FunctionSeries,
         use_cache: tuple[bool, bool] = (True, True),
     ) -> Self:
+        use_mesh_cache, use_func_cache = use_cache
+
         match u.shape:
             case ():
-                series = [triangulation(use_func_cache=use_cache[1])(i) for i in u.series]
+                series = [triangulation(use_func_cache=use_func_cache)(i) for i in u.series]
             case (_, ):
                 series = [
                     np.array(
                         [
-                            triangulation(use_func_cache=use_cache[1])(j) 
+                            triangulation(use_func_cache=use_func_cache)(j) 
                             for j in finite_element_function_components(('P', 1), i, use_cache=(True, True))
                         ]
                     )
@@ -215,7 +218,7 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
         return cls(
             series,
             u.time_series,
-            triangulation(use_cache=use_cache[0])(u.mesh), 
+            triangulation(use_cache=use_mesh_cache)(u.mesh), 
             u.name,
         )
     

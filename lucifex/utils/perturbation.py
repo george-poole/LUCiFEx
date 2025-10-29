@@ -10,7 +10,7 @@ from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpolator
 
 from .enum_types import BoundaryType
-from .dofs_utils import as_dofs_setter, Marker
+from .dofs_utils import as_dofs_setter, SpatialMarkerAlias
 from .mesh_utils import mesh_coordinates, mesh_vertices
 from .fem_typecast import finite_element_function, function_space
 from .fem_mutate import set_finite_element_function
@@ -64,7 +64,7 @@ class DofsPerturbation:
         amplitude: float | tuple[float, float],
         freq: tuple[int, ...] | None = None,
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, int]] 
+        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, int]] 
         | None = None,
     ):
         self._base = base
@@ -154,7 +154,7 @@ class SpatialPerturbation:
         domain_lims: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, int]] 
+        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, int]] 
         | None = None, #FIXME subspace case,
         **rescale_kwargs,
     ) -> None:

@@ -20,9 +20,9 @@ from slepc4py import SLEPc
 
 from ..utils import (
     Perturbation, replicate_callable, MultipleDispatchTypeError, 
-    dofs_limits_corrector, function_space, Marker
+    dofs_limits_corrector, function_space, SpatialMarkerAlias
 )
-from ..fdm import FiniteDifference, FunctionSeries, finite_difference_order
+from ..fdm import FiniteDifference, FiniteDifferenceTuple, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
 from ..fem import Function
 
@@ -568,19 +568,17 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             forms = forms_func(*args, **kwargs)
 
             def _init(arg):
-                if isinstance(arg, FiniteDifference):
+                if isinstance(arg, FiniteDifference, FiniteDifferenceTuple):
                     if arg.init is not None:
                         return arg.init
                     else:
                         return arg
-                elif isinstance(arg, (tuple, list)):
-                    return type(arg)((_init(i) for i in arg))
                 else:
                     return arg
 
             order = finite_difference_order(*args, *kwargs.values())
             if order is None:
-                raise ValueError('No `FiniteDifference` arguments from which to deduce order.')
+                raise ValueError(f'No `{FiniteDifference.__name__}` arguments from which to deduce order.')
             if order > 1:
                 args_init = [_init(i) for i in args]
                 kwargs_init = {k: _init(v) for k, v in kwargs.items()}
@@ -589,6 +587,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             else:
                 forms_init = None
                 n_init = None
+
             return cls(
                 solution, 
                 forms, 
@@ -605,6 +604,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                 future, 
                 overwrite,
             )
+        
         return _create
 
     @property
@@ -936,7 +936,7 @@ class Projection(BoundaryValueProblem):
         self, 
         solution: Function | FunctionSeries,
         expression: Function | Expr,
-        bcs: BoundaryConditions | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] | None = None, 
+        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerAlias, Value] | tuple[SpatialMarkerAlias, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -973,8 +973,8 @@ class Projection(BoundaryValueProblem):
     def from_function(
         cls,
         solution: Function | FunctionSeries, 
-        expression_func: Callable[P, Function | Expr],
-        bcs: BoundaryConditions | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] | None = None, 
+        expr_func: Callable[P, Function | Expr],
+        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerAlias, Value] | tuple[SpatialMarkerAlias, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -989,7 +989,7 @@ class Projection(BoundaryValueProblem):
         ) -> Self:
             return cls(
                 solution, 
-                expression_func(*args, **kwargs), 
+                expr_func(*args, **kwargs), 
                 bcs, 
                 petsc, 
                 jit, 

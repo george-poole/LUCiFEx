@@ -9,7 +9,7 @@ from dolfinx.fem import Function, Constant, Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils import set_value, replicate_callable, Marker, as_dofs_setter
+from ..utils import set_value, replicate_callable, SpatialMarkerAlias, as_dofs_setter
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries
 
@@ -111,9 +111,9 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
     def __init__(
         self,
         solution: Function | FunctionSeries,
-        expression: Function | Expr,
+        expr: Expr | Function,
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, SubspaceIndex]] 
+        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, SubspaceIndex]] 
         | None = None, 
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -127,9 +127,9 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
         jit = dict(jit)
         ffcx = dict(ffcx)
 
-        if isinstance(expression, Expr):
-            expression = Expression(
-                expression,
+        if isinstance(expr, Expr):
+            expr = Expression(
+                expr,
                 solution.function_space.element.interpolation_points(),
                 ffcx,
                 jit,
@@ -138,7 +138,7 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
         _f = Function(solution.function_space)
         dofs_corrector = as_dofs_setter(dofs_corrector)
         def evaluation() -> Function:
-            _f.interpolate(expression)
+            _f.interpolate(expr)
             dofs_corrector(_f)
             return _f
 
@@ -150,7 +150,7 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, Function | Expr],
         dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, SubspaceIndex]] 
+        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, SubspaceIndex]] 
         | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -183,7 +183,7 @@ class Integration(Evaluation[ConstantSeries | FunctionSeries, Constant | Functio
         solution: S | T, 
         func: Callable[P, Expr | tuple[Expr, ...]],
         measure: Literal['dx', 'ds', 'dS'] | Measure | None = None, 
-        *markers: Marker,
+        *markers: SpatialMarkerAlias,
         future: bool = False,
         overwrite: bool = False,
         facet_side: Literal['+', '-'] | None = None,

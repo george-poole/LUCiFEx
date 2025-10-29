@@ -4,7 +4,7 @@ from ufl.geometry import CellDiameter, MinCellEdgeLength, Circumradius
 from ufl.core.expr import Expr
 
 from lucifex.fem import Function, Constant
-from lucifex.fdm import DT, FiniteDifference, ImplicitDiscretizationError
+from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceTuple, ImplicitDiscretizationError
 from lucifex.fdm.ufl_operators import inner, grad
 
 
@@ -12,7 +12,7 @@ from lucifex.fdm.ufl_operators import inner, grad
 def supg_velocity(
     a: Function, 
     d: Function | Constant,
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference],
+    D_adv: FiniteDifference | FiniteDifferenceTuple,
     D_diff: FiniteDifference,
 ):
     """
@@ -44,7 +44,7 @@ def supg_diffusivity(
 def supg_reaction(
     dt: Constant,
     Da: Constant,
-    D_reac: FiniteDifference | tuple[FiniteDifference, ...],
+    D_reac: FiniteDifference | FiniteDifferenceTuple,
     r_factor: float = 0.1, # FIXME
 ):
     # NOTE assumes reaction such that `R(s,c) = R(s)R(c)` and `R(s,0) = R(s)`

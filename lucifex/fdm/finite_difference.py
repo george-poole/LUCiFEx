@@ -5,10 +5,14 @@ from ufl.core.expr import Expr
 from ufl import TrialFunction
 from dolfinx.fem import Function, Constant
 
+from ..utils.str_utils import str_indexed 
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 
 class FiniteDifference:
+    """
+    Finite difference operator for a time-dependent argument
+    """
 
     trial_default = True
 
@@ -46,7 +50,7 @@ class FiniteDifference:
             raise TypeError
         
         if name is None:
-            name = f'FD{id(self)}'
+            name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
 
         self.trial = self.trial_default
@@ -66,11 +70,6 @@ class FiniteDifference:
     @property
     def name(self) -> str:
         return self._name
-    
-    @property
-    def __name__(self) -> str: 
-        # mimicking cls.__name__
-        return self.name
 
     @property
     def init(self) -> Self | None:
@@ -83,15 +82,43 @@ class FiniteDifference:
     @property
     def is_explicit(self) -> bool:
         return not self.is_implicit
+    
+    def __str__(self):
+        return self.name
+    
+    @overload
+    def __call__(
+        self,
+        u: Expr | Function | Constant,
+        **kwargs,
+    ) -> Expr | Function | Constant:
+        ...
 
+    @overload
     def __call__(
         self,
         u: Series,
         trial: bool | None = None,
+        strict: bool = False,
     ) -> Expr:
+        ...
+
+    def __call__(
+        self,
+        u: Series | Expr | Function | Constant,
+        trial: bool | None = None,
+        strict: bool = False,
+    ) -> Expr:
+        """
+        `𝒟(u(x, tⁿ)) = Σⱼ αⱼu(x)ⁿ⁺ʲ` given a set of indices and 
+        coefficients `{(j, αⱼ)}` with `j ≤ 1`.
+        """
         if not isinstance(u, Series):
-            raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
-        
+            if strict:
+                raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
+            else:
+                return u
+
         if trial is None:
             trial = self.trial if isinstance(u, FunctionSeries) else trial
 
@@ -103,10 +130,16 @@ class FiniteDifference:
             _u = lambda n: u[n]
 
         return sum((c * _u(n) for n, c in self.coefficients.items()))
-
-    def __repr__(self) -> str:
-        return self.name
     
+    def __matmul__(self, other: Self) -> 'FiniteDifferenceTuple':
+        if not isinstance(other, FiniteDifference):
+            raise NotImplementedError
+        return FiniteDifferenceTuple(self, other)
+        
+    # def __rmatmul__(self, other: Self) -> 'FiniteDifferenceTuple':
+    #     return other.__matmul__(self)
+        
+        
 
 class FiniteDifferenceDerivative(FiniteDifference):
 
@@ -220,7 +253,7 @@ def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
     if init is None:
         init = FE
 
-    return FiniteDifference(d, init, f'AB{n}')
+    return FiniteDifference(d, init, str_indexed('AB', n, 'subscript'))
 
 
 AB1 = AB(1)
@@ -259,7 +292,7 @@ def AM(
     if init is None:
         init = BE
 
-    return FiniteDifference(d, init, f'AM{n}')
+    return FiniteDifference(d, init, str_indexed('AM', n, 'subscript'))
 
 
 AM1 = AM(1)
@@ -304,7 +337,7 @@ def BDF(
     if init is None:
         init = DT
 
-    return FiniteDifferenceDerivative(lambda dt: dt, d, init, f'BDF{n}')
+    return FiniteDifferenceDerivative(lambda dt: dt, d, init, str_indexed('BDF', n, 'subscript'))
 
 
 BDF1 = BDF(1)
@@ -329,108 +362,143 @@ def THETA(theta: float) -> FiniteDifference:
     )
 
 
-def finite_difference_order(*args: FiniteDifference | tuple[FiniteDifference, ...] | Any) -> int | None:
+class FiniteDifferenceTuple:
+    """
+    Argument-wise application of finite difference operators to time-dependent
+    arguments of an expression.
 
-    args_fd = [a for a in args if isinstance(a, FiniteDifference)]
-    for a in args:
-        if isinstance(a, tuple) and all(isinstance(i, FiniteDifference) for i in a):
-            args_fd.extend(a)
+    To combine individual `FiniteDifference` operators into a `FiniteDifferenceTuple`, 
+    use either the class constructor or `@` operation.
 
-    orders = [a.order for a in args_fd]
+    e.g. `FiniteDifferenceTuple(AB2, CN)` or `AB2 @ CN`
+    """
+    def __init__(
+        self, 
+        *args: FiniteDifference,
+        name: str | None = None,
+        **kws: FiniteDifference,
+    ):
+        self._fd_args = tuple(args)
+        self._fd_kws = kws.copy()
+        if name is None:
+            name = '◦'.join([fd.name for fd in self.finite_differences])
+        self._name = name
+        
+    def __call__(
+        self, 
+        expr: ExprSeries | tuple[Callable, tuple[Any, ...]], 
+        trial: FunctionSeries | None = None,
+        strict: bool = False,
+    ):
+        """
+        `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
+        """
+        if not isinstance(expr, Series):
+            if strict:
+                raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(expr)}.")
+            else:
+                return expr
+            
+        if isinstance(expr, tuple):
+            expr_func, expr_args = expr
+            expr_kws = {}
+        else:
+            assert isinstance(expr, ExprSeries)
+            assert expr.expression
+            expr_func, expr_args, expr_kws = expr.expression
+
+        _args = [fd(arg, arg is trial) for fd, arg in zip(self._fd_args, expr_args, strict=False)]
+        _kws = {k: fd(expr_kws[k], expr_kws[k] is trial) for k, fd in self._fd_kws.items()}
+        
+        return expr_func(*_args, **_kws)
+    
+    @property
+    def name(self) -> str:
+        return self._name
+    
+    @property
+    def finite_differences(self) -> tuple[FiniteDifference, ...]:
+        return tuple((*self._fd_args, *self._fd_kws.values()))
+    
+    @property
+    def order(self) -> int:
+        return max(i.order for i in self.finite_differences)
+    
+    @property
+    def init(self) -> Self | None:
+        if self.order <= 1:
+            return None
+        fd_args_init = [fd.init if fd.init is not None else fd for fd in self._fd_args]
+        fs_kws_init = {k: v.init if v.init is not None else v for k, v in self._fd_kws.items()}
+        return FiniteDifferenceTuple(*fd_args_init, **fs_kws_init)
+
+    def __iter__(self):
+        return iter(self.finite_differences)
+    
+    def __str__(self):
+        return self.name
+    
+    def __matmul__(
+        self, 
+        other: Self | FiniteDifference,
+    ) -> 'FiniteDifferenceTuple':
+        if isinstance(other, FiniteDifference):
+            return FiniteDifferenceTuple(*self._fd_args, other, **self._fd_kws)
+        if isinstance(other, FiniteDifferenceTuple):
+            return FiniteDifferenceTuple(
+                *self._fd_args,
+                *other._fd_args, 
+                **self._fd_kws,
+                **other._fd_kws,
+            )
+        raise NotImplementedError
+        
+    def __rmatmul__(
+        self, 
+        other: Self | FiniteDifference,
+    ) -> 'FiniteDifferenceTuple':
+        if isinstance(other, FiniteDifference):
+            return FiniteDifferenceTuple(other, *self._fd_args, other, **self._fd_kws)
+        if isinstance(other, FiniteDifferenceTuple):
+            return other.__matmul__(self)
+        raise NotImplementedError
+    
+
+def finite_difference_order(
+    *args: FiniteDifference | FiniteDifferenceTuple | Any,
+    minimum: int = 1,
+) -> int | None:
+    orders = [a.order for a in args if isinstance(a, (FiniteDifference, FiniteDifferenceTuple))]
     if orders:
-        return max(1, max(orders))
+        return max(minimum, max(orders))
     else:
         return None
-    
-
-def finite_difference_argwise(
-    D_fdm: tuple[FiniteDifference, ...],
-    expr: ExprSeries | tuple[Callable, tuple], 
-    trial: FunctionSeries | None = None,
-) -> Expr:
-    if isinstance(expr, tuple):
-        expr_func, expr_args = expr
-    else:
-        assert isinstance(expr, ExprSeries)
-        assert expr.relation
-        expr_func, expr_args = expr.relation
-    use_trial = [arg is trial for arg in expr_args]
-    return expr_func(
-        *(Di(arg, ut) for Di, arg, ut in zip(D_fdm, expr_args, use_trial, strict=False)),
-    )
-    
-
-@overload
-def apply_finite_difference(
-    D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
-    expr: Function | Expr | Constant, 
-) -> Function | Expr | Constant:
-    ...
-
-
-@overload
-def apply_finite_difference(
-    D_fdm: FiniteDifference,
-    expr: Series, 
-    trial: bool | None = None,
-) -> Expr:
-    ...
-
-
-@overload
-def apply_finite_difference(
-    D_fdm: tuple[FiniteDifference, ...],
-    expr: ExprSeries | tuple[Callable, tuple], 
-    trial: FunctionSeries | bool | None = None,
-) -> Expr:
-    ...
-    
-
-def apply_finite_difference(
-    D_fdm: FiniteDifference | tuple[FiniteDifference, ...],
-    expr: Function 
-    | Expr
-    | Constant 
-    | Series
-    | tuple[Callable[[tuple[Series, ...]], Expr], tuple[Series, ...]],
-    trial: FunctionSeries | bool | None = None,
-) -> Expr:
-    if isinstance(expr, (Function, Expr, Constant)):
-        return expr
-    if isinstance(D_fdm, FiniteDifference):
-        if isinstance(trial, FunctionSeries):
-            trial = None
-        assert isinstance(trial, bool) or trial is None
-        return D_fdm(expr, trial)
-    if isinstance(D_fdm, tuple):
-        assert isinstance(trial, FunctionSeries) or trial is None
-        return finite_difference_argwise(D_fdm, expr, trial)
-    
+        
 
 class DiscretizationError(RuntimeError):
     def __init__(
         self, 
         required: str,
-        D_fdm: FiniteDifference,
+        fd: FiniteDifference,
         msg: str = '',
     ):
-        super().__init__(f"{required} discretization required, not {D_fdm}'. {msg}")
+        super().__init__(f"{required} discretization required, not {fd}'. {msg}")
 
 
 class ImplicitDiscretizationError(DiscretizationError):
     def __init__(
         self, 
-        D_fdm: FiniteDifference,
+        fd: FiniteDifference,
         msg: str = '',
     ):
-        super().__init__('Implicit', D_fdm, msg)
+        super().__init__('Implicit', fd, msg)
 
 
 class ExplicitDiscretizationError(DiscretizationError):
     def __init__(
         self, 
-        D_fdm: FiniteDifference,
+        fd: FiniteDifference,
         msg: str = '',
     ):
-        super().__init__('Explicit', D_fdm, msg)
+        super().__init__('Explicit', fd, msg)
 

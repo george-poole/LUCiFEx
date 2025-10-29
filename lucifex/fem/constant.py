@@ -6,7 +6,7 @@ from dolfinx.fem import Constant as DOLFINxConstant
 import numpy as np
 
 from .unsolved import UnsolvedType
-from .function import unicode_superscript
+from .function import str_indexed
 
 
 class Constant(DOLFINxConstant):
@@ -27,7 +27,7 @@ class Constant(DOLFINxConstant):
         self._mesh = mesh
 
         if name is None:
-            name =  f'c{id(self)}'
+            name =  f'{self.__class__.__name__}{id(self)}'
         self._name = name
 
         if value is None:
@@ -69,7 +69,7 @@ class Constant(DOLFINxConstant):
         if self.time_index is None:
             return s
         else:
-            return unicode_superscript(s, self.time_index)
+            return str_indexed(s, self.time_index, 'superscript', True)
         
     def __bool__(self) -> bool:
         return not bool(np.all(self.value == 0))

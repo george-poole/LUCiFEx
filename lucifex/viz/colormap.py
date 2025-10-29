@@ -91,17 +91,19 @@ def _(
     mesh = f.function_space.mesh
     cell_type = mesh.topology.cell_name()
 
+    use_mesh_cache, use_func_cache = use_cache
+
     if cartesian is None:
-        cartesian = is_cartesian(use_cache=use_cache[0])(mesh)
+        cartesian = is_cartesian(use_cache=use_mesh_cache)(mesh)
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, False:
-            trigl = triangulation(use_cache=use_cache[0])(f.function_space.mesh)
-            f_tri = triangulation(use_cache=use_cache[1])(f)
+            trigl = triangulation(use_cache=use_mesh_cache)(f.function_space.mesh)
+            f_tri = triangulation(use_cache=use_func_cache)(f)
             xyz = (trigl, f_tri)
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
-            x, y = grid(use_cache=use_cache[0])(f.function_space.mesh)
-            f_grid = grid(use_cache=use_cache[1])(f)
+            x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
+            f_grid = grid(use_cache=use_func_cache)(f)
             xyz = (x, y, f_grid)
         case CellType.QUADRILATERAL, False:
             raise UnstructuredQuadError
@@ -227,13 +229,14 @@ def _plot_contours(
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
 
     else:
-        cartesian = is_cartesian(use_cache=use_cache[0])(f.function_space.mesh)
+        use_mesh_cache, use_func_cache = use_cache
+        cartesian = is_cartesian(use_cache=use_mesh_cache)(f.function_space.mesh)
         if not cartesian:
-            trigl = triangulation(use_cache=use_cache[0])(f.function_space.mesh)
-            f_trigl = triangulation(use_cache=use_cache[1])(f)
+            trigl = triangulation(use_cache=use_mesh_cache)(f.function_space.mesh)
+            f_trigl = triangulation(use_cache=use_func_cache)(f)
             return _plot_contours(ax, (trigl, f_trigl), levels, **kwargs)
         else:
-            x, y = grid(use_cache=use_cache[0])(f.function_space.mesh)
-            f_grid = grid(use_cache=use_cache[1])(f)
+            x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
+            f_grid = grid(use_cache=use_func_cache)(f)
             return _plot_contours(ax, (x, y, f_grid), levels, use_cache, **kwargs)
         

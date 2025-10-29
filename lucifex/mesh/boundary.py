@@ -3,38 +3,38 @@ from typing import overload
 import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
-from ..utils.dofs_utils import MarkerOrExpression, SpatialMarker, as_spatial_marker
+from ..utils.dofs_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
 
 
 class MeshBoundary:
-    def __init__(self, boundaries: dict[str | int, MarkerOrExpression]):
+    def __init__(self, boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias]):
         self._boundaries = boundaries
 
     @overload
     def __getitem__(
         self, 
         tag: str | int,
-    ) -> MarkerOrExpression:
+    ) -> SpatialMarker | SpatialMarkerAlias:
         ...
 
     @overload
     def __getitem__(
         self, 
         tag: tuple[str | int, ...],
-    ) -> list[MarkerOrExpression]:
+    ) -> list[SpatialMarker | SpatialMarkerAlias]:
         ...
 
     def __getitem__(
         self, 
         tag: str | int | tuple[str | int, ...],
-    ) -> MarkerOrExpression | list[MarkerOrExpression]:
+    ) -> SpatialMarker | SpatialMarkerAlias:
         if isinstance(tag, tuple):
             return [self._boundaries[t] for t in tag]
         else:
             return self._boundaries[tag]
 
     @property
-    def union(self) -> list[MarkerOrExpression]:
+    def union(self) -> list[SpatialMarker | SpatialMarkerAlias]:
         """
         `∪ᵢ∂Ωᵢ`
         """
@@ -55,13 +55,13 @@ class MeshBoundary:
         return tuple(self._boundaries.keys())
     
     @property
-    def markers(self) -> tuple[MarkerOrExpression, ...]:
+    def markers(self) -> tuple[SpatialMarker | SpatialMarkerAlias, ...]:
         return tuple(self._boundaries.values())
 
 
 def mesh_boundary(
     mesh: Mesh,
-    boundaries: dict[str | int, MarkerOrExpression],
+    boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias],
     verify: bool = True,
     complete: bool = False,
 ) -> MeshBoundary:

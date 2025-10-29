@@ -368,8 +368,9 @@ def where_on_grid(
     condition: Callable[[np.ndarray], np.ndarray],
     use_cache: tuple[bool, bool] = (True, False),
 ) -> tuple[np.ndarray, ...]:
-    axes = mesh_axes(use_cache=use_cache[0])(f.function_space.mesh)
-    f_grid = grid(use_cache=use_cache[1])(f)
+    use_mesh_cache, use_func_cache = use_cache
+    axes = mesh_axes(use_cache=use_mesh_cache)(f.function_space.mesh)
+    f_grid = grid(use_cache=use_func_cache)(f)
     indices = np.where(condition(f_grid))
     return tuple(x[i] for x, i in zip(axes, indices))
 
@@ -440,8 +441,8 @@ def cross_section(
     axis: str | Literal[0, 1, 2],
     value: float | None = None,
     fraction: bool = True,
-    use_cache: tuple[bool, bool] = (True, False),
     axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: tuple[bool, bool] = (True, False),
 ) -> tuple[np.ndarray, np.ndarray, float] | tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     """
     Returns 
@@ -466,8 +467,9 @@ def cross_section(
         axis_index = axis
 
     if isinstance(fxyz, Function):
-        axes = grid(use_cache=use_cache[0])(fxyz.function_space.mesh)
-        f_grid = grid(use_cache=use_cache[1])(fxyz)
+        use_mesh_cache, use_func_cache = use_cache
+        axes = grid(use_cache=use_mesh_cache)(fxyz.function_space.mesh)
+        f_grid = grid(use_cache=use_func_cache)(fxyz)
         dim = fxyz.function_space.mesh.geometry.dim
     else:
         f_grid = fxyz[0]
