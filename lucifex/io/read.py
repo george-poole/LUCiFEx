@@ -2,10 +2,9 @@ from functools import singledispatch
 from typing import overload, Iterable, Protocol, Any
 
 import h5py
-from dolfinx.fem import Function
 import numpy as np
 
-from ..fem import SpatialConstant, is_unsolved
+from ..fem import Constant, Function, is_unsolved
 from ..fdm import FunctionSeries, ConstantSeries
 from ..utils import (
     MultipleDispatchTypeError, 
@@ -32,7 +31,7 @@ class ReadObject(Protocol):
 
 @overload
 def read(
-    u: Function | SpatialConstant,
+    u: Function | Constant,
     dir_path: str | None = None,
     file_name: str | None = None,
 ) -> None:
@@ -58,7 +57,7 @@ def read(
 
 
 def read(
-    u: Function | SpatialConstant | FunctionSeries | ConstantSeries,
+    u: Function | Constant | FunctionSeries | ConstantSeries,
     dir_path = None,
     file_name = None,
     *args,
@@ -102,8 +101,9 @@ def _(
 
 
 @_read.register(Function)
+@_read.register(Constant)
 def _(
-    u: Function,
+    u: Function | Constant,
     file_path,
     *,
     dofs=None,
@@ -113,19 +113,10 @@ def _(
         with h5py.File(file_path, "r") as h5:
             dofs = _dofs_time_series(h5, u.name, dim)[0][0]
 
-    return _read(u.x.array, dofs=dofs)
-
-
-@_read.register(SpatialConstant)
-def _(
-    u: SpatialConstant,
-    file_path,
-    *,
-    dofs=None,
-):
-    with h5py.File(file_path, "r") as h5:
-        dofs = _dofs_time_series(h5, u.name, None)[0][0] # TODO or dim ?
-    return _read(u.value, dofs=dofs)
+    if isinstance(u, Function):
+        return _read(u.x.array, dofs=dofs)
+    else:
+        return _read(u.value, dofs=dofs)
 
 
 @_read.register(ConstantSeries)
@@ -141,7 +132,7 @@ def _(
         slc = as_slice(slc)
 
     if isinstance(u, ConstantSeries):
-        container = SpatialConstant(u.mesh, name=u.name, shape=u.shape)
+        container = Constant(u.mesh, name=u.name, shape=u.shape)
     elif isinstance(u, FunctionSeries):
         assert is_continuous_lagrange(u.function_space, 1) or is_discontinuous_lagrange(u.function_space, 0)
         container = Function(u.function_space, name=u.name)

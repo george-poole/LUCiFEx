@@ -8,7 +8,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..utils import grid, triangulation
 from ..utils.fem_utils import ScalarVectorError
-from ..utils.fem_typecast import fem_function_components
+from ..utils.fem_typecast import finite_element_function_components
 from .series import ConstantSeries, FunctionSeries, SubSeriesError
 
 
@@ -133,18 +133,23 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
     def from_series(
         cls, 
         u: FunctionSeries,
-        use_cache: tuple[bool, bool] = (True, False),
+        use_cache: tuple[bool, bool] = (True, True),
         **grid_kwargs,
     ) -> Self:
         match u.shape:
             case ():
                 series = [grid(use_cache=use_cache[1])(i, **grid_kwargs) for i in u.series]
-            case (dim, ):
-                print('getting components...')
-                uxyz_series = [fem_function_components(('P', 1), i) for i in u.series]
-                print('componnets gotten')
-                print('getting series...')
-                series = [np.array([grid(use_cache=use_cache[1])(j, **grid_kwargs) for j in i[:dim]]) for i in uxyz_series]
+            case (_, ):
+
+                series = [
+                    np.array(
+                        [
+                            grid(use_cache=use_cache[1])(j, **grid_kwargs) 
+                            for j in finite_element_function_components(('P', 1), i, use_cache=(True, True))
+                        ]
+                    ) 
+                    for i in u.series
+                ]
                 print('series gotten')
             case _:
                 raise ScalarVectorError(u)
@@ -189,14 +194,21 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
     def from_series(
         cls, 
         u: FunctionSeries,
-        use_cache: tuple[bool, bool] = (True, False),
+        use_cache: tuple[bool, bool] = (True, True),
     ) -> Self:
         match u.shape:
             case ():
                 series = [triangulation(use_func_cache=use_cache[1])(i) for i in u.series]
-            case (dim, ):
-                uxyz_series = [fem_function_components(('P', 1), i) for i in u.series]
-                series = [np.array([triangulation(use_func_cache=use_cache[1])(j) for j in i[:dim]]) for i in uxyz_series]
+            case (_, ):
+                series = [
+                    np.array(
+                        [
+                            triangulation(use_func_cache=use_cache[1])(j) 
+                            for j in finite_element_function_components(('P', 1), i, use_cache=(True, True))
+                        ]
+                    )
+                    for i in u.series
+                ]
             case _:
                 raise ScalarVectorError(u)
             

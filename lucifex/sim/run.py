@@ -7,12 +7,10 @@ from inspect import signature, Parameter, Signature
 from typing import Callable
 from collections.abc import Iterable
 
-from dolfinx.fem import Constant
-
-from ..fdm.series import ConstantSeries
+from ..fem import Constant
+from ..fdm import ConstantSeries
 from ..solver import Solver, Evaluation, IBVP, IVP
-from ..io.write import write
-from ..io.checkpoint import write_checkpoint, read_checkpoint, reset_directory
+from ..io import write, write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_texec
 
 from ..utils.deferred import Writer, Stopper

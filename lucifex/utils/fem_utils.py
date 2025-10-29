@@ -73,44 +73,54 @@ class ScalarVectorError(ShapeError):
         super().__init__(u, "'scalar or vector'")
 
 
-def is_mixed_space(function_space: FunctionSpace) -> bool:
+def is_mixed_space(fs: FunctionSpace) -> bool:
     """e.g. Returns `True` if the function space is mixed.
 
     `Pₖ × ... × Pₖ` -> `True` \\
     `BDMₖ x DPₖ₋₁` -> `True`
     """
-    return function_space.num_sub_spaces > 0
+    return fs.num_sub_spaces > 0
 
 
-def is_component_space(function_space: FunctionSpace) -> bool:
+def is_component_space(fs: FunctionSpace) -> bool:
     """Returns `True` if the function space is a mixed space 
     in which all subspaces are identical and scalar-valued.
     
     `Pₖ × ... × Pₖ` -> `True` \\
     `BDMₖ` -> `False`
     """
-    if not is_mixed_space(function_space):
+    if not is_mixed_space(fs):
         return False
     else:
-        subspaces = extract_subspaces(function_space)
+        subspaces = function_subspaces(fs)
         sub0 = subspaces[0]
         if not is_scalar(sub0):
             return False
         return all([sub.ufl_element() == sub0.ufl_element() for sub in subspaces])
+    
+
+def function_subspace(
+    fs: FunctionSpace,
+    subspace_index: int | None = None,
+    collapse: bool = True,
+) -> FunctionSpace:
+    if subspace_index is None:
+        return fs
+    fs_sub = fs.sub(subspace_index)
+    if collapse:
+        return fs_sub.collapse()[0]
+    else:
+        return fs_sub
 
 
-def extract_subspaces(
-    function_space: FunctionSpace,
+def function_subspaces(
+    fs: FunctionSpace,
     collapse: bool = True,
 ) -> tuple[FunctionSpace, ...]:
     subspaces = []
-    n_sub = function_space.num_sub_spaces
+    n_sub = fs.num_sub_spaces
     for n in range(n_sub):
-        if collapse:
-            sub, _ = function_space.sub(n).collapse()
-        else:
-            sub = function_space.sub(n)
-        subspaces.append(sub)
+        subspaces.append(function_subspace(fs, n, collapse))
     return tuple(subspaces)
 
 
@@ -207,7 +217,7 @@ def subspace_functions(
 
 
 def extract_mesh(
-    expr: Expr | Expression,
+    expr: Expr | Expression | Function,
 ) -> Mesh:
     meshes = extract_meshes(expr)
     if len(meshes) == 0:

@@ -35,10 +35,10 @@ def create_tagged_measure(
         return Measure(measure, domain=mesh, metadata=metadata)
     
     if tags is None:
-        marker_tags = list(range(len(markers)))
+        tags = list(range(len(markers)))
     if tag_unmarked is None:
-        tag_unmarked = max(marker_tags) + 1
-    assert tag_unmarked not in marker_tags
+        tag_unmarked = max(tags) + 1
+    assert tag_unmarked not in tags
 
     gdim = mesh.topology.dim
     fdim = gdim - 1
@@ -47,7 +47,7 @@ def create_tagged_measure(
     num_facets = facet_index_map.size_local + facet_index_map.num_ghosts
     facet_tags = np.full(num_facets, tag_unmarked, dtype=np.intc)
 
-    for t, m in zip(marker_tags, markers, strict=True):
+    for t, m in zip(tags, markers, strict=True):
         m = as_spatial_marker(m)
         facet_indices = locate_entities(mesh, fdim, m)
         facet_tags[facet_indices] = t

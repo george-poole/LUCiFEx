@@ -1,9 +1,9 @@
-from ufl import Identity, sym, cos, sin, as_tensor
+from ufl import sym, cos, sin, as_tensor
 from ufl.core.expr import Expr
 
 
 from lucifex.fdm.ufl_operators import nabla_grad
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 
 
 def strain(u: Function | Expr) -> Expr:

@@ -5,13 +5,13 @@ from typing_extensions import Self
 import numpy as np
 from ufl import split
 from ufl.core.expr import Expr
-from dolfinx.fem import FunctionSpace, Function, Constant, Expression
+from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_fem_function, extract_mesh, fem_function_space
+from ..utils import set_fem_constant, set_finite_element_function, extract_mesh, function_space
 from ..utils.deferred import Writer
-from ..utils.fem_perturbation import Perturbation
-from ..fem import SpatialFunction, SpatialConstant, Unsolved, UnsolvedType, is_unsolved
+from ..utils.perturbation import Perturbation
+from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 
 
 T = TypeVar('T')
@@ -335,15 +335,15 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
 class FunctionSeries(
     ContainerSeries[
-        SpatialFunction, 
-        Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float], 
+        Function, 
+        Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float], 
         Perturbation,
     ],
 ):
 
     def __init__(
         self,
-        function_space: FunctionSpace
+        fs: FunctionSpace
         | tuple[Mesh, str, int]
         | tuple[Mesh, str, int, int],
         name: str | tuple[str, Iterable[str]] | None,
@@ -351,21 +351,21 @@ class FunctionSeries(
         store: int | float | Callable[[], bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
     ):
-        function_space = fem_function_space(function_space)
-        self._function_space = function_space
+        fs = function_space(fs)
+        self._function_space = fs
         self._ics_perturbation = None
-        super().__init__(lambda i: SpatialFunction(function_space, Unsolved, index=i), name, order, store, ics)
+        super().__init__(lambda i: Function(fs, Unsolved, index=i), name, order, store, ics)
         if self._subnames:
             assert len(self._subnames) == self._function_space.num_sub_spaces
 
     @staticmethod
-    def _set_container(container: SpatialFunction, value):
+    def _set_container(container: Function, value):
         if value is Unsolved:
-            return set_fem_function(container, value.value, dofs_indices=':')
-        elif isinstance(value, SpatialFunction) and value.function_space == container.function_space:
-            return set_fem_function(container, value, dofs_indices=':')
+            return set_finite_element_function(container, value.value, dofs_indices=':')
+        elif isinstance(value, Function) and value.function_space == container.function_space:
+            return set_finite_element_function(container, value, dofs_indices=':')
         else:
-            return set_fem_function(container, value)
+            return set_finite_element_function(container, value)
 
     @property
     def function_space(
@@ -388,7 +388,7 @@ class FunctionSeries(
         return [i.x.array for i in self.series]
 
     @property
-    def ics_perturbation(self) -> tuple[SpatialFunction, SpatialFunction] | None:
+    def ics_perturbation(self) -> tuple[Function, Function] | None:
         return self._ics_perturbation
 
     def initialize_from_ics(
@@ -452,7 +452,7 @@ class SubFunctionSeries(Series[Expr]):
         return self.function_space.mesh
 
     @property
-    def series(self, collapse: bool = True) -> list[SpatialFunction]:
+    def series(self, collapse: bool = True) -> list[Function]:
         return [i.sub(self._subspace_index, self.name, collapse) for i in self._mixed.series]
     
     @property
@@ -461,7 +461,7 @@ class SubFunctionSeries(Series[Expr]):
 
 
 class ConstantSeries(
-    ContainerSeries[SpatialConstant, Constant | float | Iterable[float], None],
+    ContainerSeries[Constant, float | Iterable[float], None],
 ):
     def __init__(
         self,
@@ -470,9 +470,9 @@ class ConstantSeries(
         order: int = 1,
         shape: tuple[int, ...] = (),
         store: int | float | Callable[[], bool] | None = None,
-        ics: SpatialConstant | float | Iterable[float] | None = None,
+        ics: Constant | float | Iterable[float] | None = None,
     ):
-        super().__init__(lambda i: SpatialConstant(mesh, Unsolved, shape=shape, index=i), name, order, store, ics)
+        super().__init__(lambda i: Constant(mesh, Unsolved, shape=shape, index=i), name, order, store, ics)
         self._mesh = mesh
         self._shape = shape
         if self._subnames:
@@ -481,7 +481,7 @@ class ConstantSeries(
             assert len(self._subnames) == self.shape[0]
 
     @staticmethod
-    def _set_container(container: SpatialConstant, value):
+    def _set_container(container: Constant, value):
         if value is Unsolved:
             return set_fem_constant(container, value.value)
         else:

@@ -1,5 +1,5 @@
 from inspect import signature, Signature, Parameter
-import functools
+from functools import wraps
 from collections.abc import Iterable
 from typing import (
     Callable,
@@ -11,17 +11,16 @@ from typing import (
 from types import EllipsisType
 
 from ufl.core.expr import Expr
-from dolfinx.fem import Function, Constant
 
 from ..utils import MultipleDispatchTypeError, filter_kwargs
-from ..fdm.series import ExprSeries, ConstantSeries, FunctionSeries
-from ..solver.options import OptionsFFCX, OptionsJIT, OptionsPETSc
+from ..utils.deferred import Writer, Stopper
+from ..fem import Function, Constant
+from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
     Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-    Interpolation, Projection,
+    Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc
 )
 from ..io import create_dir_path, write
-from ..utils.deferred import Writer, Stopper
 from .utils import arg_name_collisions, ArgNameCollisionError
 
 
@@ -267,7 +266,7 @@ def configure_simulation(
         ) -> Callable[P, Simulation]:
             ...
 
-        @functools.wraps(simulation_func)
+        @wraps(simulation_func)
         def _(*args, **kwargs):
             if not args and kwargs and all(i in configure_simulation_sig.parameters for i in kwargs):
 

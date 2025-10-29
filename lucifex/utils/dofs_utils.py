@@ -13,9 +13,9 @@ from dolfinx.fem import (
 from ufl.core.expr import Expr
 
 from .enum_types import DofsMethodType
-from .fem_typecast import fem_function, fem_function_components
+from .fem_typecast import finite_element_function, finite_element_function_components
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
-from .fem_mutate import set_fem_function
+from .fem_mutate import set_finite_element_function
 
 
 SpatialExpression = Callable[[np.ndarray], np.ndarray]
@@ -45,7 +45,7 @@ SubspaceIndex: TypeAlias = int | None
 
 
 def dofs_indices(
-    function_space: FunctionSpace,
+    fs: FunctionSpace,
     dofs_marker: Marker,
     subspace_index: int | None = None,
     method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
@@ -56,26 +56,26 @@ def dofs_indices(
 
     if method == DofsMethodType.GEOMETRICAL:
         if subspace_index is None:
-            return locate_dofs_geometrical(function_space, _dofs_marker)
+            return locate_dofs_geometrical(fs, _dofs_marker)
         else:
-            function_subspace, _ = function_space.sub(subspace_index).collapse()
+            function_subspace, _ = fs.sub(subspace_index).collapse()
             return locate_dofs_geometrical(
-                [function_space.sub(subspace_index), function_subspace],
+                [fs.sub(subspace_index), function_subspace],
                 _dofs_marker,
             )
         
     if method == DofsMethodType.TOPOLOGICAL:
-        tdim = function_space.mesh.topology.dim
+        tdim = fs.mesh.topology.dim
         edim = tdim - 1
         facets = locate_entities(
-            function_space.mesh, edim, _dofs_marker
+            fs.mesh, edim, _dofs_marker
         )
         if subspace_index is None:
-            return locate_dofs_topological(function_space, edim, facets)
+            return locate_dofs_topological(fs, edim, facets)
         else:
-            function_subspace, _ = function_space.sub(subspace_index).collapse()
+            function_subspace, _ = fs.sub(subspace_index).collapse()
             dofs = locate_dofs_topological(
-                [function_space.sub(subspace_index), function_subspace],
+                [fs.sub(subspace_index), function_subspace],
                 edim,
                 facets,
             )
@@ -127,12 +127,17 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = fem_function(fs, u, use_cache=use_cache, try_identity=try_identity)
+        u = finite_element_function(fs, u, use_cache=use_cache, try_identity=try_identity)
         return u.x.array[:]
     elif l2_norm and is_vector(u):
-        scalars = fem_function_components(fs, u, use_cache=True)
-        scalar_dofs = np.stack([dofs(i, fs, use_cache=False, try_identity=False) for i in scalars], axis=1)
-        return np.linalg.norm(scalar_dofs, axis=1, ord=2)
+        component_dofs = np.stack(
+            [
+                dofs(i, fs, use_cache=False, try_identity=False) 
+                for i in finite_element_function_components(fs, u, use_cache=use_cache)
+            ], 
+            axis=1,
+        )
+        return np.linalg.norm(component_dofs, axis=1, ord=2)
     else:
         raise ScalarVectorError(u)
 
@@ -200,7 +205,7 @@ def as_dofs_setter(
             dofs = dofs_indices(f.function_space, m, i)
             if not isinstance(dofs, np.ndarray):
                 dofs = dofs[0]
-            set_fem_function(f, v, dofs)
+            set_finite_element_function(f, v, dofs)
 
     return _corrector
 

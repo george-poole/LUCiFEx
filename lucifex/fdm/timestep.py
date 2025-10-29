@@ -7,7 +7,7 @@ from ufl.core.expr import Expr
 from dolfinx.fem import Function
 from ufl.geometry import GeometricCellQuantity
 
-from ..fem import SpatialConstant
+from ..fem import Constant
 from ..utils import dofs, cell_size_quantity, MultipleDispatchTypeError, extract_mesh
 
 
@@ -43,7 +43,7 @@ def cfl_timestep(
 
 @overload
 def cfl_timestep(
-    u: float | SpatialConstant,
+    u: float | Constant,
     h: float,
     courant: float | None = 1.0,
     dt_max: float = np.inf,
@@ -58,7 +58,7 @@ def cfl_timestep(
 
 @overload
 def cfl_timestep(
-    u: SpatialConstant,
+    u: Constant,
     h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"],
     courant: float | None = 1.0,
     dt_max: float = np.inf,
@@ -93,8 +93,8 @@ def _(velocity, h, tol):
     return lambda: np.min(dofs(h / max_value(sqrt(inner(velocity, velocity)), tol), (mesh, 'DP', 0), use_cache=True))
 
 
-@_cfl_dt_evaluation.register(SpatialConstant)
-def _(velocity: SpatialConstant, h, tol):
+@_cfl_dt_evaluation.register(Constant)
+def _(velocity: Constant, h, tol):
     mesh = velocity.mesh
     if isinstance(h, str):
         h = cell_size_quantity(mesh, h)
@@ -116,7 +116,7 @@ def _(velocity, h, tol):
 
 @overload
 def reactive_timestep(
-    r: Function | Expr | SpatialConstant | float,
+    r: Function | Expr | Constant | float,
     courant: float | None = 1.0,
     dt_max: float = np.inf,
     dt_min: float = 0.0,
@@ -129,7 +129,7 @@ def reactive_timestep(
 
 @overload
 def reactive_timestep(
-    r: SpatialConstant | float,
+    r: Constant | float,
     courant: float | None = 1.0,
     dt_max: float = np.inf,
     dt_min: float = 0.0,
@@ -161,8 +161,8 @@ def _(reaction, tol):
     return lambda: np.min(dofs(1.0 / max_value(reaction, tol), (mesh, 'DP', 0), use_cache=True))
 
 
-@_reactive_dt_evaluation.register(SpatialConstant)
-def _(reaction: SpatialConstant, tol):
+@_reactive_dt_evaluation.register(Constant)
+def _(reaction: Constant, tol):
     if reaction.ufl_shape == ():
         return lambda: 1.0 / max(reaction.value, tol)
     else:
@@ -176,8 +176,8 @@ def _(reaction, tol):
 
 
 def cflr_timestep(
-    u: Function | Expr | SpatialConstant | float,
-    r: Function | Expr | SpatialConstant | float,
+    u: Function | Expr | Constant | float,
+    r: Function | Expr | Constant | float,
     h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
     cfl_courant: float | None = 1.0,
     k_courant: float | None = 1.0,
@@ -206,7 +206,7 @@ def cflr_timestep(
 
 
 def diffusive_timestep(
-    d: Function | Expr | SpatialConstant | float,
+    d: Function | Expr | Constant | float,
     h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"] | float,
     courant: float = 1.0,
     dt_max: float = np.inf,
@@ -237,8 +237,8 @@ def _(diffusion, h, tol):
     return lambda: np.min(dofs(h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True))
 
 
-@_diffusive_dt_evaluation.register(SpatialConstant)
-def _(diffusion: SpatialConstant, h, tol):
+@_diffusive_dt_evaluation.register(Constant)
+def _(diffusion: Constant, h, tol):
     mesh = diffusion.mesh
     if isinstance(h, str):
         h = cell_size_quantity(mesh, h)

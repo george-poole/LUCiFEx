@@ -6,7 +6,7 @@ from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
 
 from lucifex.fdm import FiniteDifference
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function as Function, SpatialConstant as Constant
 from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 

@@ -1,10 +1,8 @@
 from typing import Callable, TypeVar, Any
 
 import ufl
-from dolfinx.fem import Function, FunctionSpace
 
-from ..utils import MultipleDispatchTypeError
-from .series import Series, FunctionSeries, Unsolved, UnsolvedType, ExprSeries
+from .series import Series, ExprSeries, UnsolvedType, Unsolved
 
 
 T = TypeVar('T')

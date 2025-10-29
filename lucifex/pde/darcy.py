@@ -3,7 +3,7 @@ from ufl import (dx, Form, FacetNormal, inner, inv, div,
                  Dx, TrialFunction, TestFunction,
                  det, transpose, TrialFunctions, TestFunctions)
 
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 from lucifex.fdm import FunctionSeries
 
 from lucifex.fdm.ufl_operators import inner, grad

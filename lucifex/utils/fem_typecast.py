@@ -1,5 +1,5 @@
 from collections.abc import Callable, Iterable
-from functools import singledispatch, lru_cache
+from functools import singledispatch
 
 import numpy as np
 from ufl.core.expr import Expr
@@ -8,27 +8,41 @@ from dolfinx.fem import Function, FunctionSpace, Constant, Function, VectorFunct
 from dolfinx.fem import Expression
 from ufl import FiniteElement, MixedElement, VectorElement
 
-from .fem_utils import is_same_element, extract_mesh, is_vector, is_component_space, VectorError
+from .fem_utils import (
+    is_same_element, function_subspace,
+    extract_mesh, is_vector, is_component_space, VectorError
+)
 from .py_utils import MultipleDispatchTypeError, optional_lru_cache
-from .fem_mutate import set_fem_function
+from .fem_mutate import set_finite_element_function
 
 
-def fem_function_space(
+def function_space(
     fs: FunctionSpace
         | tuple[Mesh, str, int]
         | tuple[Mesh, str, int]
         | tuple[Mesh, str, int, int]
         | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
     subspace_index: int | None = None,
+    use_cache: bool = False,
 ) -> FunctionSpace:
     """
     Typecast to `dolfinx.fem.FunctionSpace` 
     """
+    if isinstance(fs, FunctionSpace):
+        return function_subspace(fs, subspace_index)
+    else:
+        return _function_space(use_cache=use_cache)(fs, subspace_index)
     
-    match fs:
-        case fs if isinstance(fs, FunctionSpace):
-            function_space = fs
 
+@optional_lru_cache
+def _function_space(
+    fs_hashable: tuple[Mesh, str, int]
+    | tuple[Mesh, str, int]
+    | tuple[Mesh, str, int, int]
+    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
+    subspace_index: int | None = None,
+) -> FunctionSpace:
+    match fs_hashable:
         case mesh, elements:
             mixed_elements = []
             for e in elements:
@@ -40,111 +54,116 @@ def fem_function_space(
                     mixed_elements.append(VectorElement(fam, mesh.ufl_cell(), deg, dim))
                 else:
                     raise ValueError(f'{e}')
-            function_space = FunctionSpace(mesh, MixedElement(*mixed_elements))
+            fs = FunctionSpace(mesh, MixedElement(*mixed_elements))
 
         case mesh, fam, deg:
-            function_space = FunctionSpace(mesh, (fam, deg))
+            fs = FunctionSpace(mesh, (fam, deg))
         
         case mesh, fam, deg, dim:
-            function_space = VectorFunctionSpace(mesh, (fam, deg), dim)
+            fs = VectorFunctionSpace(mesh, (fam, deg), dim)
         
         case _:
-            raise ValueError(f'{fs}')
-        
-    if subspace_index is not None:
-        function_space, _ = function_space.sub(subspace_index).collapse()
+            raise ValueError(f'{fs_hashable}')
 
-    return function_space
+    return function_subspace(fs, subspace_index)
 
 
-@optional_lru_cache
-def _create_fem_function(
-    fs: FunctionSpace | tuple[Mesh, str, int], 
-    subspace_index: int | None = None,
-    name: str | None = None,
-) -> Function:
-    fs = fem_function_space(fs, subspace_index)
-    return Function(fs, name=name)
-
-
-def fem_function(
+def finite_element_function(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
     value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     subspace_index: int | None = None,
     name: str | None = None,
-    use_cache: bool = False,
+    use_cache: bool | tuple[bool, bool] = False,
     try_identity: bool = False,
 ) -> Function:
     """
     Typecast to `dolfinx.fem.Function` 
     """
-            
-    if isinstance(fs, tuple):
-        fs = _mesh_fam_deg(fs, value)
-
-    if try_identity and isinstance(value, Function):
-        if isinstance(fs, FunctionSpace) and value.function_space == fs:
-            return value
-        if isinstance(fs, tuple):
-            mesh, *element = fs
-            if is_same_element(value, *element, mesh=mesh):
-                return value
-        
     if name is None:
         try:
             name = value.name
         except AttributeError:
             pass
 
-    f = _create_fem_function(use_cache=use_cache)(fs, subspace_index, name)
-    set_fem_function(f, value)
+    if isinstance(use_cache, bool):
+        use_cache = (use_cache, use_cache)
+            
+    if isinstance(fs, FunctionSpace):
+        if try_identity and isinstance(value, Function) and value.function_space == fs:
+            return value
+        fs = function_subspace(fs, subspace_index)
+        f = Function(fs, name=name)
+    else:
+        fs = _as_function_space_tuple(fs, value)
+        if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
+            return value
+        use_func_cache, use_fs_cache = use_cache
+        f = _finite_element_function(use_cache=use_func_cache)(fs, name, use_fs_cache)
+    set_finite_element_function(f, value)
     return f
 
 
 @optional_lru_cache
-def _create_fem_function_components(
-    fs: FunctionSpace | tuple[Mesh, str, int], 
-    names: tuple[str | None, ...],
+def _finite_element_function(
+    fs_hashable: tuple, 
+    name: str | None,
+    use_fs_cache: bool,
+) -> Function:
+    fs = _function_space(use_cache=use_fs_cache)(fs_hashable)
+    return Function(fs, name=name)
+
+
+@optional_lru_cache
+def finite_element_subfunctions(
+    u: Function,  
+    collapse: bool = True,
 ) -> tuple[Function, ...]:
-    f = [_create_fem_function(use_cache=False)(fs, name=n) for n in names]
-    return tuple(f)
+    if collapse:
+        return tuple(i.collapse() for i in u.split())
+    else:
+        return u.split()
 
 
-def fem_function_components(
+def finite_element_function_components(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
-    use_cache: bool = False,
+    use_cache: bool | tuple[bool, bool] = False,
 ) -> tuple[Function, ...]:
     
     if not is_vector(u):
         raise VectorError(u)
     
     if isinstance(fs, tuple):
-        fs = _mesh_fam_deg(fs, u)
+        fs = _as_function_space_tuple(fs, u)
 
     dim = u.ufl_shape[0]
     
     if names is None:
         try:
-            names = tuple(f'{u.name}_{i}' for i in range(dim))
+            u_name = u.name
         except AttributeError:
-            names = tuple([None] * dim)
+            u_name = f'u{id(u)}'
+        names = tuple(f'{u_name}_{i}' for i in range(dim))
 
     if isinstance(u, Function) and is_component_space(u.function_space):
         # e.g. vector-valued u ∈ P⨯P
-        f = _create_fem_function_components(use_cache=use_cache)(fs, names)
-        u = [ui.collapse() for ui in u.split()]
-        for fi, ui in zip(f, u, strict=True):
-            set_fem_function(fi, ui)
-        return f
+        # fs = function_space(fs, use_cache=use_fs_cache)
+        # f = _finite_element_function_components(use_cache=use_cache)(fs, names)
+        ##### f = [_finite_element_function(use_cache=False)(fs, n, use_fs_cache) for n in names]
+        # u = [ui.collapse() for ui in u.split()]
+        # u = finite_element_subfunctions(u)
+        return tuple(
+            finite_element_function(fs, i.collapse(), name=n, use_cache=use_cache) 
+            for i, n in zip(u.split(), names, strict=True)
+        )
     else:
         # e.g. vector-valued u ∈ BDM
-        u = fem_function((*fs, dim), u, use_cache=use_cache)
-        return fem_function_components(fs, u, names, use_cache)
+        u = finite_element_function((*fs, dim), u, use_cache=use_cache)
+        return finite_element_function_components(fs, u, names, use_cache)
 
 
-def fem_constant(
+def finite_element_constant(
     mesh: Mesh,
     value: float | Iterable[float] | Constant,
     try_identity: bool = False,
@@ -152,22 +171,22 @@ def fem_constant(
     """
     Typecast to `dolfinx.fem.Constant` 
     """
-    if try_identity and isinstance(value, Constant):
+    if try_identity and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
         return value
     else:
-        return _fem_constant(value, mesh)
+        return _finite_element_constant(value, mesh)
 
 @singledispatch
-def _fem_constant(value, _):
+def _finite_element_constant(value, _):
     raise MultipleDispatchTypeError(value)
 
-@_fem_constant.register(float)
-@_fem_constant.register(int)
+@_finite_element_constant.register(float)
+@_finite_element_constant.register(int)
 def _(value, mesh: Mesh,):
     return Constant(mesh, float(value))
 
 
-@_fem_constant.register(Iterable)
+@_finite_element_constant.register(Iterable)
 def _(value: Iterable[float], mesh: Mesh):
     if all(isinstance(i, (float, int)) for i in value):
         value = [float(i) for i in value]
@@ -176,11 +195,10 @@ def _(value: Iterable[float], mesh: Mesh):
         raise TypeError('Expected an iterable of numbers')
 
 
-def _mesh_fam_deg(
+def _as_function_space_tuple(
     elem: tuple[str, int] | tuple[Mesh, str, int], 
     u: Function | Expr,
 ) -> tuple[Mesh, str, int]:
-    
     match elem:
         case mesh, fam, deg:
             return elem
@@ -189,17 +207,3 @@ def _mesh_fam_deg(
             return mesh, fam, deg
         case _:
             raise TypeError
-
-
-
-    if isinstance(elem, tuple) and not isinstance(elem[0], Mesh):
-        if isinstance(u, Function):
-            mesh = u.function_space.mesh
-        elif isinstance(u, (Expression, Expr)):
-            mesh = extract_mesh(u)
-        else:
-            raise ValueError('Cannot deduce mesh from `u`. Provide function space as `tuple[Mesh, str, int]`')
-        fs = (mesh, *elem)
-    else:
-        fs = elem
-    return fs

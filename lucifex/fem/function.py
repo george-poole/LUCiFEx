@@ -4,17 +4,17 @@ from collections.abc import Callable
 import numpy as np
 from dolfinx.mesh import Mesh
 from dolfinx.fem import FunctionSpace, Expression
-from dolfinx.fem import Function
+from dolfinx.fem import Function as DOLFINxFunction
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import fem_function_space, SpatialPerturbation
+from ..utils import function_space, SpatialPerturbation
 from .unsolved import UnsolvedType
 
 
-class SpatialFunction(Function):
+class Function(DOLFINxFunction):
     """
-    Subclass of `dolfinx.fem.Function` with additional utilities.
+    Subclass with additional utilities, not to be confused with `dolfinx.fem.Function.`
     """
     def __init__(
         self,
@@ -22,7 +22,7 @@ class SpatialFunction(Function):
             | tuple[Mesh, str, int]
             | tuple[Mesh, str, int, int],
         x: VectorMetaClass
-            | Function
+            | Self
             | Expression
             | Callable[[np.ndarray], np.ndarray]
             | SpatialPerturbation
@@ -34,12 +34,12 @@ class SpatialFunction(Function):
         dtype: np.dtype = PETSc.ScalarType,
         index: int | None = None,
     ):
-        fs = fem_function_space(fs)
+        fs = function_space(fs)
 
         if name is None:
             name = f'f{id(self)}'
 
-        if isinstance(x, (Function, Expression, Callable, SpatialPerturbation, int, float, UnsolvedType)):
+        if isinstance(x, (DOLFINxFunction, Expression, Callable, SpatialPerturbation, int, float, UnsolvedType)):
             super().__init__(fs, None, name, dtype)
             if isinstance(x, SpatialPerturbation):
                 x = x.combine_base_noise(fs)
@@ -81,7 +81,7 @@ class SpatialFunction(Function):
     ) -> Self:
         if name is None:
             name = f'{self.name}_{subspace_index}'
-        f = SpatialFunction(
+        f = Function(
             self.function_space.sub(subspace_index), 
             self.x, 
             name, 
@@ -108,7 +108,7 @@ class SpatialFunction(Function):
     def collapse(self) -> Self:
         u = self._cpp_object.collapse()
         fs = FunctionSpace(None, self.ufl_element(), u.function_space)
-        return SpatialFunction(fs, u.x, self.name, index=self.index)
+        return Function(fs, u.x, self.name, index=self.index)
         
 
 def unicode_superscript(name: str, n: int) -> str:

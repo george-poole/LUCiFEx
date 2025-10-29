@@ -1,5 +1,3 @@
-import numpy as np
-from dolfinx.fem import Function, Constant
 from ufl import (dx, dS, Form, CellDiameter, FacetNormal,
                  TestFunction,
                  jump, avg, dot, conditional, gt)
@@ -7,6 +5,7 @@ from ufl.geometry import CellDiameter
 from ufl.core.expr import Expr
 
 from lucifex.solver import BoundaryConditions
+from lucifex.fem import Function, Constant
 from lucifex.fdm import (DT, AB1, FiniteDifference, FunctionSeries, Series, 
                         apply_finite_difference)
 from lucifex.fdm.ufl_operators import inner, grad

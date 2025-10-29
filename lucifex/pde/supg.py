@@ -1,9 +1,9 @@
 from dolfinx.mesh import Mesh
-from dolfinx.fem import Constant, Function
 from ufl import (as_vector, conditional, as_vector, sqrt, conditional, lt, tanh)
 from ufl.geometry import CellDiameter, MinCellEdgeLength, Circumradius
 from ufl.core.expr import Expr
 
+from lucifex.fem import Function, Constant
 from lucifex.fdm import DT, FiniteDifference, ImplicitDiscretizationError
 from lucifex.fdm.ufl_operators import inner, grad
 

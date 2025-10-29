@@ -6,16 +6,14 @@ from ufl import Measure, Form, TestFunction, inner
 from ufl.core.expr import Expr
 from dolfinx_mpc import MultiPointConstraint
 from dolfinx.fem import (
-    Function,
     FunctionSpace,
-    Constant,
     DirichletBCMetaClass,
     dirichletbc,
 )
 
 from ..utils.fem_utils import is_scalar, is_vector
 from ..utils.enum_types import BoundaryType
-from ..utils.fem_typecast import fem_function, fem_constant
+from ..utils.fem_typecast import finite_element_function, finite_element_constant
 from ..utils.measure_utils import create_tagged_measure
 from ..utils.dofs_utils import (
     as_spatial_marker,
@@ -25,6 +23,7 @@ from ..utils.dofs_utils import (
     SubspaceIndex,
     DofsMethodType,
 )
+from ..fem import Function, Constant
 
 Value: TypeAlias = (
     Function
@@ -84,7 +83,7 @@ class BoundaryConditions:
             
     def create_strong_bcs(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uD` on `∂Ω`
@@ -96,25 +95,25 @@ class BoundaryConditions:
             strict=True,
         ):
             if b in (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL):
-                dofs = dofs_indices(function_space, m, i, d)
+                dofs = dofs_indices(fs, m, i, d)
                 if isinstance(uD, Constant):
                     if i is None:
-                        dbc = dirichletbc(uD, dofs, function_space)
+                        dbc = dirichletbc(uD, dofs, fs)
                     else:
-                        dbc = dirichletbc(uD, dofs, function_space.sub(i))
+                        dbc = dirichletbc(uD, dofs, fs.sub(i))
                 else:
-                    uD = fem_function(function_space, uD, i, try_identity=True)
+                    uD = finite_element_function(fs, uD, i, try_identity=True)
                     if i is None:
                         dbc = dirichletbc(uD, dofs)
                     else:
-                        dbc = dirichletbc(uD, dofs, function_space.sub(i))
+                        dbc = dirichletbc(uD, dofs, fs.sub(i))
                 dirichlet.append(dbc)
                 
         return dirichlet
 
     def create_periodic_bcs(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         bcs: list[DirichletBCMetaClass] | None = None,
         finalize: bool = True,
     ) -> MultiPointConstraint | None:
@@ -125,7 +124,7 @@ class BoundaryConditions:
         if bcs is None:
             bcs = []
         
-        mpc = MultiPointConstraint(function_space)
+        mpc = MultiPointConstraint(fs)
         n_constraint = 0
 
         for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
@@ -134,7 +133,7 @@ class BoundaryConditions:
                     raise NotImplementedError
                 scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
                 mpc.create_periodic_constraint_geometrical(
-                    function_space, 
+                    fs, 
                     as_spatial_marker(m),
                     reln,
                     bcs=bcs,
@@ -152,19 +151,19 @@ class BoundaryConditions:
 
     def create_weak_bcs(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
     ) -> list[Form]:
         """
         Weakly enforced boundary condition by a term `+∫ v·uN ds` with 
         test function `v` and prescribed value `uN` in the variational form `F(v,u)=0`.
         """
         
-        v = TestFunction(function_space)
+        v = TestFunction(fs)
         boundary_types = (
             BoundaryType.NEUMANN, BoundaryType.ROBIN, 
             BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
         )
-        ds, *boundary_data = self.boundary_data(function_space, *boundary_types)
+        ds, *boundary_data = self.boundary_data(fs, *boundary_types)
 
         forms = []
         
@@ -182,7 +181,7 @@ class BoundaryConditions:
 
     def boundary_data(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         *boundary_types: BoundaryType,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
@@ -214,13 +213,13 @@ class BoundaryConditions:
                     pass 
                 elif isinstance(g, Iterable):
                     if all(isinstance(gi, (float, int)) for gi in g):
-                        g = fem_constant(function_space.mesh, g)
+                        g = finite_element_constant(fs.mesh, g)
                     else:
-                        g = fem_function(function_space, g, i)
+                        g = finite_element_function(fs, g, i)
                 elif isinstance(g, (float, int)):
-                    g = fem_constant(function_space.mesh, g)
+                    g = finite_element_constant(fs.mesh, g)
                 else:
-                    g = fem_function(function_space, g, i)
+                    g = finite_element_function(fs, g, i)
 
                 tags[b].append(tag)
                 markers[b].append(m)
@@ -229,7 +228,7 @@ class BoundaryConditions:
 
         nums_all = [t for _tags in tags.values() for t in _tags]
         markers_all = [m for _markers in markers.values() for m in _markers]
-        ds = create_tagged_measure('ds', function_space.mesh, markers_all, nums_all)
+        ds = create_tagged_measure('ds', fs.mesh, markers_all, nums_all)
         tags_exprs = [[(t, e) for t, e in zip(tags[b], exprs[b])] for b in boundary_types]
 
         return ds, *tags_exprs

@@ -2,21 +2,21 @@ from collections.abc import Iterable
 from typing_extensions import Self
 
 from dolfinx.mesh import Mesh
-from dolfinx.fem import Constant
+from dolfinx.fem import Constant as DOLFINxConstant
 import numpy as np
 
 from .unsolved import UnsolvedType
 from .function import unicode_superscript
 
 
-class SpatialConstant(Constant):
+class Constant(DOLFINxConstant):
     """
-    Subclass of `dolfinx.fem.Constant` with additional utilities.
+    Subclass with additional utilities, not to be confused with `dolfinx.fem.Constant`.
     """
     def __init__(
         self,
         mesh: Mesh,
-        value: float | Iterable[float] | UnsolvedType | Constant | None = None,
+        value: float | Iterable[float] | UnsolvedType | Self | None = None,
         name: str | None = None,
         shape: tuple[int, ...] = (),
         index: int | None = None,
@@ -36,7 +36,7 @@ class SpatialConstant(Constant):
             value = float(value)
         if not isinstance(value, Iterable):
             value = np.full(shape, value)
-        if isinstance(value, Constant):
+        if isinstance(value, DOLFINxConstant):
             value = value.value
         super().__init__(mesh, value)
         
@@ -56,7 +56,7 @@ class SpatialConstant(Constant):
         self._name = n
 
     def copy(self) -> Self:
-        c = SpatialConstant(self.mesh, self.value.copy())
+        c = Constant(self.mesh, self.value.copy())
         c.name = self.name
         return c
     

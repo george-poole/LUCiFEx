@@ -29,7 +29,7 @@ from .numpy_typecast import (
     spacetime_grid,
     UnstructuredQuadError,
 )
-from .fem_perturbation import (
+from .perturbation import (
     SpatialPerturbation, DofsPerturbation, Perturbation, 
     cubic_noise, sinusoid_noise, rescale,
 )
@@ -47,9 +47,9 @@ from .mesh_utils import(
     n_entities,
     is_cartesian,
 )
-from .fem_mutate import (set_fem_constant, set_fem_function, 
-                           interpolate_fem_function, set_value)
-from .fem_typecast import fem_constant, fem_function, fem_function_space, fem_function_components
+from .fem_mutate import (set_fem_constant, set_finite_element_function, 
+                           interpolate_finite_element_function, set_value)
+from .fem_typecast import finite_element_constant, finite_element_function, function_space, finite_element_function_components
 from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
 from .py_utils import (filter_kwargs, log_texec, replicate_callable, ToDoError,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)

@@ -12,8 +12,8 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpo
 from .enum_types import BoundaryType
 from .dofs_utils import as_dofs_setter, Marker
 from .mesh_utils import mesh_coordinates, mesh_vertices
-from .fem_typecast import fem_function, fem_function_space
-from .fem_mutate import set_fem_function
+from .fem_typecast import finite_element_function, function_space
+from .fem_mutate import set_finite_element_function
 
 
 @runtime_checkable
@@ -21,7 +21,7 @@ class Perturbation(Protocol):
 
     def base(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
     ) -> Function:
         """
         Returns the base function `b(𝐱)` only
@@ -30,7 +30,7 @@ class Perturbation(Protocol):
 
     def noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
     ) -> Function:
         """
         Returns the noise function `N(𝐱)` only
@@ -39,7 +39,7 @@ class Perturbation(Protocol):
 
     def combine_base_noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         base: Function | None = None,
         operator: Callable[[Any, Any], Any] = add,
     ) -> Function:
@@ -77,55 +77,55 @@ class DofsPerturbation:
 
     def base(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = fem_function(function_space, self._base)
+        f = finite_element_function(fs, self._base)
         if correct:
             self._dofs_corrector(f)
         return f
         
     def noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         freq: tuple[float, ...] | None = None,
         method: str | None = None,
     ) -> Function:
         if freq is None:
             freq = self._freq
-        function_space = fem_function_space(function_space)
+        fs = function_space(fs)
 
-        f = Function(function_space)
+        f = Function(fs)
         if freq is None:
             dofs = self._rng.uniform(*self._amplitude, len(f.x.array))
         else:
             method = 'linear' if method is None else method
-            vs = mesh_vertices(function_space.mesh)
-            xs = mesh_coordinates(function_space.mesh)
+            vs = mesh_vertices(fs.mesh)
+            xs = mesh_coordinates(fs.mesh)
             xlims = [(np.min(i), np.max(i)) for i in xs]
             x_coarse = [np.linspace(*lim, num=f) for lim, f in zip(xlims, freq, strict=True)]
             noise = self._rng.uniform(*self._amplitude, freq)
             dofs = RegularGridInterpolator(x_coarse, noise, method=method)(vs)
         
-        set_fem_function(f, dofs, dofs_indices=':')
+        set_finite_element_function(f, dofs, dofs_indices=':')
         return f
     
     def combine_base_noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         base: Function | None = None,
         operator: Callable[[np.ndarray, np.ndarray], np.ndarray] = add,
         correct: bool = True,
         name: str | None = None,
     ) -> Function:
-        function_space = fem_function_space(function_space)
+        fs = function_space(fs)
         if base is None:
-            base = self.base(function_space, False) 
-        perturbation = self.noise(function_space)
+            base = self.base(fs, False) 
+        perturbation = self.noise(fs)
 
-        f = Function(function_space, name=name)
+        f = Function(fs, name=name)
         dofs = operator(base.x.array, perturbation.x.array)
-        set_fem_function(f, dofs, dofs_indices=':')
+        set_finite_element_function(f, dofs, dofs_indices=':')
         if correct:
             self._dofs_corrector(f)
         return f
@@ -164,23 +164,23 @@ class SpatialPerturbation:
 
     def base(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = fem_function(function_space, self._base)
+        f = finite_element_function(fs, self._base)
         if correct:
             self._dofs_corrector(f)
         return f
 
     def noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
     ) -> Function:
-        return fem_function(function_space, self._noise)
+        return finite_element_function(fs, self._noise)
 
     def combine_base_noise(
         self,
-        function_space: FunctionSpace,
+        fs: FunctionSpace,
         base: Function | None = None,
         operator: Callable[[Any, Any], Any] = add,
         correct: bool = True,
@@ -190,10 +190,10 @@ class SpatialPerturbation:
             perturbed = lambda x: operator(self._base(x), self._noise(x))
         else:
             if base is None:
-                base = self.base(function_space, False) 
-            perturbation = self.noise(function_space)
+                base = self.base(fs, False) 
+            perturbation = self.noise(fs)
             perturbed = operator(base, perturbation)
-        f = fem_function(function_space, perturbed)
+        f = finite_element_function(fs, perturbed)
         if correct:
             self._dofs_corrector(f)
         if name is not None:

@@ -133,6 +133,12 @@ def load_constant_series(
     mesh: str | tuple[str, str] | Mesh,
     *shape_slc: tuple[int, ...] | StrSlice,
 ) -> ConstantSeries:
+    
+    if isinstance(mesh, str):
+        mesh = load_mesh(mesh, dir_path, file_name)
+    if isinstance(mesh, tuple):
+        mesh_name, mesh_file_name = mesh
+        mesh = load_mesh(mesh_name, dir_path, mesh_file_name)
 
     match shape_slc:
         case (shape, slc) if isinstance(shape, tuple):
@@ -148,12 +154,6 @@ def load_constant_series(
         case ():
             shape = ()
             slc = ':'
-
-    if isinstance(mesh, str):
-        mesh = load_mesh(mesh, dir_path, file_name)
-    if isinstance(mesh, tuple):
-        mesh, mesh_file_name = mesh
-        mesh = load_mesh(mesh, dir_path, mesh_file_name)
 
     c = ConstantSeries(mesh, name, shape=shape)
     read(c, dir_path, file_name, slc)

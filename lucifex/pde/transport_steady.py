@@ -6,7 +6,7 @@ from ufl import (
     avg, sqrt, tanh, jump,
 )
 
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 
 from .supg import peclet

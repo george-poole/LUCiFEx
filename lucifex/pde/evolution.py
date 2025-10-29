@@ -1,9 +1,9 @@
 from typing import Callable
 
-from dolfinx.fem import Function, Constant
 from ufl import dx, TestFunction, Form
 from ufl.core.expr import Expr
 
+from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, Series, 
     apply_finite_difference, ExplicitDiscretizationError

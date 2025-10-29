@@ -10,7 +10,7 @@ from ufl import Measure
 from ufl.core.expr import Expr
 
 from ..utils import set_value, replicate_callable, Marker, as_dofs_setter
-from ..fem import SpatialConstant, SpatialFunction
+from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries
 
 from .options import OptionsFFCX, OptionsJIT
@@ -29,18 +29,18 @@ class Evaluation(Generic[S, T]):
         future: bool = False,
         overwrite: bool = False,
     ) -> None:
-        if isinstance(solution, SpatialConstant):
+        if isinstance(solution, Constant):
             uh = solution
             uxt = ConstantSeries(uh.mesh, uh.name, shape=uh.ufl_shape)
         elif isinstance(solution, ConstantSeries):
             uxt = solution
-            uh = SpatialConstant(uxt.mesh, name=uxt.name, shape=uxt.shape)
-        elif isinstance(solution, SpatialFunction):
+            uh = Constant(uxt.mesh, name=uxt.name, shape=uxt.shape)
+        elif isinstance(solution, Function):
             uh = solution
             uxt = FunctionSeries(uh.function_space, uh.name)
         elif isinstance(solution, FunctionSeries):
             uxt = solution
-            uh = SpatialFunction(uxt.function_space, name=uxt.name)
+            uh = Function(uxt.function_space, name=uxt.name)
         else:
             raise TypeError(f"{type(solution)}")
 
@@ -90,7 +90,7 @@ class Evaluation(Generic[S, T]):
 
 
 P = ParamSpec("P")
-class Interpolation(Evaluation[FunctionSeries, SpatialFunction]):
+class Interpolation(Evaluation[FunctionSeries, Function]):
 
     jit_default = OptionsJIT.default()
     ffcx_default = OptionsFFCX.default()
@@ -110,10 +110,10 @@ class Interpolation(Evaluation[FunctionSeries, SpatialFunction]):
 
     def __init__(
         self,
-        solution: SpatialFunction | FunctionSeries,
-        expression: SpatialFunction | Expr,
-        dofs_corrector: Callable[[SpatialFunction], None] 
-        | Iterable[tuple[Marker, float | SpatialConstant] | tuple[Marker, float | SpatialConstant, SubspaceIndex]] 
+        solution: Function | FunctionSeries,
+        expression: Function | Expr,
+        dofs_corrector: Callable[[Function], None] 
+        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, SubspaceIndex]] 
         | None = None, 
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -135,9 +135,9 @@ class Interpolation(Evaluation[FunctionSeries, SpatialFunction]):
                 jit,
             )
 
-        _f = SpatialFunction(solution.function_space)
+        _f = Function(solution.function_space)
         dofs_corrector = as_dofs_setter(dofs_corrector)
-        def evaluation() -> SpatialFunction:
+        def evaluation() -> Function:
             _f.interpolate(expression)
             dofs_corrector(_f)
             return _f
@@ -148,9 +148,9 @@ class Interpolation(Evaluation[FunctionSeries, SpatialFunction]):
     def from_function(
         cls,
         solution: Function | FunctionSeries, 
-        expression_func: Callable[P, SpatialFunction | Expr],
-        dofs_corrector: Callable[[SpatialFunction], None] 
-        | Iterable[tuple[Marker, float | SpatialConstant] | tuple[Marker, float | SpatialConstant, SubspaceIndex]] 
+        expression_func: Callable[P, Function | Expr],
+        dofs_corrector: Callable[[Function], None] 
+        | Iterable[tuple[Marker, float | Constant] | tuple[Marker, float | Constant, SubspaceIndex]] 
         | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -175,7 +175,7 @@ class Interpolation(Evaluation[FunctionSeries, SpatialFunction]):
 
 
 P = ParamSpec("P")
-class Integration(Evaluation[ConstantSeries | FunctionSeries, SpatialConstant | SpatialFunction]):
+class Integration(Evaluation[ConstantSeries | FunctionSeries, Constant | Function]):
     
     @classmethod
     def from_function(
@@ -208,7 +208,7 @@ class Integration(Evaluation[ConstantSeries | FunctionSeries, SpatialConstant | 
         return _create
     
 
-@replicate_callable(Evaluation[ConstantSeries | FunctionSeries, SpatialConstant | SpatialFunction].from_function)
+@replicate_callable(Evaluation[ConstantSeries | FunctionSeries, Constant | Function].from_function)
 def evaluation():
     pass
 
@@ -228,7 +228,7 @@ def integration():
     # @classmethod
     # def from_function(
     #     cls, 
-    #     solution: ConstantSeries | SpatialConstant,
+    #     solution: ConstantSeries | Constant,
     #     integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form],
     #     marker: SpatialMarkerTypes | Measure | None = None,
     #     quadrature_degree: int | None = None, 
@@ -252,7 +252,7 @@ def integration():
 
 #     def __init__(
 #         self,
-#         solution: ConstantSeries | SpatialConstant,
+#         solution: ConstantSeries | Constant,
 #         integrand: Expr | tuple[Expr, ...] | Form,
 #         marker: SpatialMarkerTypes | Measure | None = None, 
 #         quadrature_degree: int | None = None, 
@@ -270,7 +270,7 @@ def integration():
 #     @classmethod
 #     def from_function(
 #         cls, 
-#         solution: ConstantSeries | SpatialConstant,
+#         solution: ConstantSeries | Constant,
 #         integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form], 
 #         marker: SpatialMarkerTypes | Measure | None = None,
 #         quadrature_degree: int | None = None, 
@@ -301,7 +301,7 @@ def integration():
 
 # def __init__(
 #     self,
-#     solution: ConstantSeries | SpatialConstant,
+#     solution: ConstantSeries | Constant,
 #     ###
 #     integrand: Expr | tuple[Expr, ...] | Form,
 #     marker: SpatialMarkerTypes | Measure | None = None,

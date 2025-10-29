@@ -2,8 +2,7 @@ from collections.abc import Callable
 from inspect import Signature, signature
 from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias
 
-from dolfinx.fem import Constant, Function
-
+from ..fem import Constant, Function
 from ..fdm import FunctionSeries, ConstantSeries
 from ..io import write
 from ..utils.deferred import Stopper, Writer, defer

@@ -1,4 +1,4 @@
-from .checkpoint import write_checkpoint, read_checkpoint
+from .checkpoint import write_checkpoint, read_checkpoint, reset_directory
 from .read import read
 from .load import (
     load_function_series, 

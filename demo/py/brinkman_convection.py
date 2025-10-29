@@ -1,7 +1,7 @@
 from ufl import as_vector, sqrt
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function as Function, SpatialConstant as Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,

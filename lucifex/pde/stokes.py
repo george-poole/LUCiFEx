@@ -7,7 +7,7 @@ from ufl import (Form, FacetNormal, CellDiameter, dx, dS,
 from ufl.core.expr import Expr
 
 from lucifex.solver import BoundaryConditions
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 
 
 def stokes_incompressible(

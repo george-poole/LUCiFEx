@@ -9,14 +9,14 @@ from mpi4py import MPI
 from ufl.core.expr import Expr
 from dolfinx.io import XDMFFile
 from dolfinx.mesh import Mesh, create_interval
-from dolfinx.fem import Function, Constant, FunctionSpace, VectorFunctionSpace
+from dolfinx.fem import FunctionSpace, VectorFunctionSpace
 from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ..utils import extract_mesh, MultipleDispatchTypeError, set_fem_function, StrSlice, as_slice
-from ..fem import SpatialConstant
+from ..utils import extract_mesh, MultipleDispatchTypeError, set_finite_element_function, StrSlice, as_slice
 from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
+from ..fem import Function, Constant
 
 from .utils import file_path_ext, io_array_dim
 
@@ -36,7 +36,7 @@ class WriteFunctionType(Protocol):
 
 @overload
 def write(
-    u: Function | SpatialConstant | Mesh,
+    u: Function | Constant | Mesh,
     file_name: str | None = None,
     dir_path: str | None = None,
     t: float | Constant | None = None,
@@ -248,9 +248,9 @@ def _(
         xdmf.write_function(u, t)
 
 
-@_write.register(SpatialConstant)
+@_write.register(Constant)
 def _(
-    c: SpatialConstant,
+    c: Constant,
     file_name: str,
     dir_path,
     t=None,
@@ -395,7 +395,7 @@ def _(
     fs = _cached_function_space(mesh, elem)
     func = Function(fs, name=name)
     func.name = name
-    set_fem_function(func, u)
+    set_finite_element_function(func, u)
     return write(func, file_name, dir_path, t, mode, comm)
 
 
@@ -525,9 +525,9 @@ def _(
 
 @lru_cache
 def _cached_dp0_function(
-    c: Function | SpatialConstant,
+    c: Function | Constant,
 ) -> Function:
-    if isinstance(c, SpatialConstant):
+    if isinstance(c, Constant):
         mesh = c.mesh
         dim = io_array_dim(c.ufl_shape)
     elif isinstance(c, Function):

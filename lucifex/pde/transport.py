@@ -4,7 +4,7 @@ from ufl.core.expr import Expr
 from ufl import dx, Form, inner, TestFunction, div, FacetNormal
 
 from lucifex.fdm import DT, FiniteDifference, apply_finite_difference
-from lucifex.fem import SpatialFunction as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries,
     FiniteDifference, AB1, Series, 

@@ -1,15 +1,14 @@
 from typing import TypeAlias, Iterable, Literal
 from types import EllipsisType
+from functools import wraps
 
-import functools
 import ufl
 import numpy as np
+from petsc4py import PETSc
 from dolfinx.fem import (
-    form as dolfinx_form,
+    form,
     DirichletBCMetaClass,
-    FormMetaClass as DolfinxFormMetaClass,
-    Function,
-    Constant,
+    FormMetaClass,
     FunctionSpace,
 )
 from dolfinx.fem.petsc import (
@@ -28,7 +27,9 @@ from dolfinx_mpc import (
     apply_lifting as mpc_apply_lifting,
     create_sparsity_pattern,
 )
-from petsc4py import PETSc
+
+from ..fem import Constant
+
 
 PETScMat: TypeAlias = PETSc.Mat
 """Alias to `PETSc.Mat`"""
@@ -36,17 +37,17 @@ PETScVec: TypeAlias = PETSc.Vec
 """Alias to `PETSc.Vec`"""
 
 
-class FormMetaClass(DolfinxFormMetaClass):
-    ufl_constants: list[Constant]
-    ufl_coefficients: list[Function]
+class MetaForm(FormMetaClass):
+    ufl_form: ufl.Form
 
 
-@functools.wraps(dolfinx_form)
-def form(*args, **kwargs) -> FormMetaClass:
-    f = dolfinx_form(*args, **kwargs)
-    ufl_form: ufl.Form = args[0]
-    f.ufl_constants = ufl_form.constants()
-    f.ufl_coefficients = ufl_form.coefficients()
+@wraps(form)
+def meta_form(*args, **kwargs) -> MetaForm:
+    f = form(*args, **kwargs)
+    ufl_form = kwargs.get('form')
+    if ufl_form is None:
+        ufl_form = args[0]
+    f.ufl_form = ufl_form
     return f
 
 
@@ -57,7 +58,7 @@ ATTR_ASSEMBLY_COUNT = "assembly_count"
 
 def assemble_matrix(
     m: PETScMat,
-    a: FormMetaClass,
+    a: MetaForm,
     bcs: list[DirichletBCMetaClass] | None = None,
     mpc: MultiPointConstraint | None = None,
     diag: float = 1.0,
@@ -66,21 +67,21 @@ def assemble_matrix(
     if bcs is None:
         bcs = []
 
-    consts_old = m.getAttr(ATTR_CONSTANTS)
-    coeffs_old = m.getAttr(ATTR_COEFFICIENTS)
-    consts_new = None
-    coeffs_new = None
+    _consts = m.getAttr(ATTR_CONSTANTS)
+    _coeffs = m.getAttr(ATTR_COEFFICIENTS)
+    consts = None
+    coeffs = None
     if cache is Ellipsis or cache is True:
-        consts_new = [i.value.copy() for i in a.ufl_constants]
-        coeffs_new = [i.x.array.copy() for i in a.ufl_coefficients]
+        consts = [i.value.copy() for i in a.ufl_form.constants()]
+        coeffs = [i.x.array.copy() for i in a.ufl_form.coefficients()]
 
     if (cache is False 
-        or (cache is True and (consts_old is None and coeffs_old is None))
-        or cache is Ellipsis and (np.isclose(consts_old, consts_new).all() and all(np.isclose(i, j).all() for i, j in zip(coeffs_old, coeffs_new, strict=True)))
+        or (cache is True and (_consts is None and _coeffs is None))
+        or cache is Ellipsis and (np.isclose(_consts, consts).all() and all(np.isclose(i, j).all() for i, j in zip(_coeffs, coeffs, strict=True)))
     ):
         _assemble_matrix(m, a, bcs, mpc, diag)
-        m.setAttr(ATTR_CONSTANTS, consts_new)
-        m.setAttr(ATTR_COEFFICIENTS, coeffs_new)
+        m.setAttr(ATTR_CONSTANTS, consts)
+        m.setAttr(ATTR_COEFFICIENTS, coeffs)
         return
     else:
         return
@@ -88,7 +89,7 @@ def assemble_matrix(
 
 def _assemble_matrix(
     m: PETScMat,
-    a: FormMetaClass,
+    a: MetaForm,
     bcs: list[DirichletBCMetaClass],
     mpc: MultiPointConstraint | None,
     diag: float,
@@ -110,8 +111,8 @@ def _assemble_matrix(
 
 def assemble_vector(
     v: PETScVec,
-    l: FormMetaClass,
-    bcs_a: tuple[list[DirichletBCMetaClass], FormMetaClass] = None,
+    l: MetaForm,
+    bcs_a: tuple[list[DirichletBCMetaClass], MetaForm] = None,
     mpc: MultiPointConstraint | None = None,
 ) -> None:
     with v.localForm() as local:
@@ -226,7 +227,7 @@ def array_vector(
     
 
 def create_matrix(
-   a: FormMetaClass, 
+   a: MetaForm, 
    mpc: MultiPointConstraint | None = None,  
 ) -> PETScMat:
     if mpc is None:
