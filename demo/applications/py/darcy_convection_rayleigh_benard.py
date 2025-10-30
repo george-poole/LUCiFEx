@@ -45,7 +45,7 @@ def darcy_convection_rayleigh_benard_rectangle(
     `∂c/∂t + 𝐮·∇c = 1/Ra ∇²c`
 
     `∇⋅𝐮 = 0` \\
-    `𝐮 = -(∇p + c𝐞ʸ)
+    `𝐮 = -(∇p + c𝐞ʸ)`
     """
     Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
