@@ -22,7 +22,6 @@ def navier_stokes_circle_obstacle(
     Lx: float,
     Ly: float,
     r: float,
-    c: tuple[float, float],
     dx: float,
     # physical
     rho: float,
@@ -38,15 +37,17 @@ def navier_stokes_circle_obstacle(
     D_visc: FiniteDifference,
 ):
     # space
-    Omega = ellipse_obstacle_mesh(dx, 'triangle')(Lx, Ly, r, c)
+    Omega = ellipse_obstacle_mesh(dx, 'triangle')(
+        (-Lx/2, Lx/2), (-Ly/2, Ly/2), r, (0.0, 0.0),
+    )
     dOmega = mesh_boundary(
         Omega,
         {
-            'obstacle': lambda x: (x[0] - c[0]) **2 + (x[1] - c[1]) **2 - r**2,
-            'upper': lambda x: x[1] - Ly,
-            'lower': lambda x: x[1],
-            'left': lambda x: x[0],
-            'right': lambda x: x[0] - Lx,
+            'obstacle': lambda x: x[0] **2 + x[1] **2 - r**2,
+            'upper': lambda x: x[1] - Ly/2,
+            'lower': lambda x: x[1] + Ly/2,
+            'left': lambda x: x[0] + Lx/2,
+            'right': lambda x: x[0] - Lx/2,
         }
     )
     dim = Omega.geometry.dim

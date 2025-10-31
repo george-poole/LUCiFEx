@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.special as sp
 
 from lucifex.mesh import rectangle_mesh, mesh_boundary
@@ -6,7 +7,7 @@ from lucifex.fdm.ufl_operators import exp
 from lucifex.fem import Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise
+from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise, BoundaryType
 from .darcy_convection_generic import darcy_convection_generic
 
 
@@ -22,6 +23,7 @@ def saffman_taylor_rectangle(
     cell: str = CellType.QUADRILATERAL,
     Pi: float = 5e2,
     Lmbda: float = 1e1,
+    bc_type: BoundaryType = BoundaryType.DIRICHLET,
     erf_eps: float = 1e-2,
     c_eps: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
@@ -59,14 +61,27 @@ def saffman_taylor_rectangle(
         [Lx, Ly],
         c_eps,
     ) 
-    c_bcs = BoundaryConditions(
-        ("dirichlet", dOmega['left'], 0.0),
-        ("dirichlet", dOmega['right'], 1.0),
-        ("neumann", dOmega['upper', 'lower'], 0.0),
-    )
-    psi_bcs = BoundaryConditions(
-        ("dirichlet", dOmega.union, 0.0),
-    )
+    if bc_type == BoundaryType.DIRICHLET:
+        psi_bcs = BoundaryConditions(
+            (BoundaryType.DIRICHLET, dOmega.union, 0.0),
+        )
+        c_bcs = BoundaryConditions(
+            ("dirichlet", dOmega['left'], 0.0),
+            ("dirichlet", dOmega['right'], 1.0),
+            ("neumann", dOmega['upper', 'lower'], 0.0),
+        )
+    elif bc_type == BoundaryType.PERIODIC:
+        right_to_left = lambda x: np.vstack((x[0] - Lx, x[1]))
+        psi_bcs = BoundaryConditions(
+            (BoundaryType.PERIODIC, dOmega['right'], right_to_left),
+            ("dirichlet", dOmega['upper', 'lower'], 0.0),
+        )
+        c_bcs = BoundaryConditions(
+            (BoundaryType.PERIODIC, dOmega['right'], right_to_left),
+            ("neumann", dOmega['upper', 'lower'], 0.0),
+        )
+    else:
+        raise ValueError
     
     # constitutive
     viscosity = lambda c: exp(-Lmbda * c)
