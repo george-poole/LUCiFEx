@@ -22,7 +22,7 @@ from ..utils import (
     Perturbation, replicate_callable, MultipleDispatchTypeError, 
     dofs_limits_corrector, function_space, SpatialMarkerAlias
 )
-from ..fdm import FiniteDifference, FiniteDifferenceTuple, FunctionSeries, finite_difference_order
+from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
 from ..fem import Function
 
@@ -568,7 +568,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             forms = forms_func(*args, **kwargs)
 
             def _init(arg):
-                if isinstance(arg, FiniteDifference, FiniteDifferenceTuple):
+                if isinstance(arg, (FiniteDifference, FiniteDifferenceArgwise)):
                     if arg.init is not None:
                         return arg.init
                     else:

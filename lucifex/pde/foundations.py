@@ -1,14 +1,15 @@
 from ufl.core.expr import Expr
 from ufl import (
     Form, inner, grad, dx, TestFunction, TrialFunction,
-    inner, grad, TestFunction, TrialFunction,
-    dS, div, jump, lt, conditional, FacetNormal
+    inner, grad, TestFunction, TrialFunction, cos,
+    dS, div, jump, lt, conditional, FacetNormal,
+    SpatialCoordinate,
 )
 
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    FunctionSeries, FiniteDifference, FiniteDifferenceTuple, 
+    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, 
     DT, AB1,
 )
 from lucifex.fem import Function, Constant
@@ -62,7 +63,7 @@ def diffusion_reaction(
     d: Function | Constant | Expr,
     D_diff: FiniteDifference,
     r: Function | Constant | None = None,
-    D_reac: FiniteDifference | FiniteDifferenceTuple = AB1,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
@@ -82,7 +83,7 @@ def advection(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
 ) -> tuple[Form, Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
@@ -97,9 +98,9 @@ def advection_reaction(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
     r: Function | Constant | None = None,
-    D_reac: FiniteDifference | FiniteDifferenceTuple = AB1,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = R`
@@ -152,7 +153,7 @@ def advection_reaction_dg(
     a: Function | Constant,
     D_fdm: FiniteDifference,
     r: Function | Constant | None = None,
-    D_reac: FiniteDifference | FiniteDifferenceTuple = AB1,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
@@ -185,11 +186,29 @@ def helmholtz(
         fs = u.function_space
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
-    F_lhs = -inner(grad(v), grad(u_trial)) * dx
-    F_rhs = v * u * dx
+    F_lapl = -inner(grad(v), grad(u_trial)) * dx
+    F_k2 = v * u * dx
     if k is None and f is None:
-        return F_lhs, F_rhs
+        return F_lapl, -F_k2
     else:
-        F_rhs = -k * F_rhs
+        F_k2 = k**2 * F_k2
         F_src =  -v * f * dx
-        return F_lhs, F_rhs, F_src
+        return F_lapl, F_k2, F_src
+    
+
+def mathieu(
+    u: Function | FunctionSpace,
+    q: Constant,
+    k: Constant,
+) -> tuple[Form, Form]:
+    if isinstance(u, FunctionSpace):
+        fs = u
+    else:
+        fs = u.function_space
+    v = TestFunction(fs)
+    u_trial = TrialFunction(fs)
+    x = SpatialCoordinate(fs.mesh)
+    lhs = inner(grad(v), grad(u_trial)) * dx
+    lhs += 2 * v * q * cos(inner(k, x)) * u_trial * dx
+    rhs = v * u_trial * dx
+    return lhs, rhs

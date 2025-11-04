@@ -183,6 +183,7 @@ class ExprSeries(
     def from_args(
         cls, 
         func: Callable[P, Self], 
+        /,
         *,
         name: str | None = None,
     ) -> Callable[P, Self]:

@@ -4,7 +4,7 @@ from ufl.geometry import CellDiameter, MinCellEdgeLength, Circumradius
 from ufl.core.expr import Expr
 
 from lucifex.fem import Function, Constant
-from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceTuple, ImplicitDiscretizationError
+from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceArgwise, ImplicitDiscretizationError
 from lucifex.fdm.ufl_operators import inner, grad
 
 
@@ -12,22 +12,22 @@ from lucifex.fdm.ufl_operators import inner, grad
 def supg_velocity(
     a: Function, 
     d: Function | Constant,
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
 ):
     """
-    `𝐮·∇c - ∇·(D∇c) = (𝐮 - ∇D)·∇c - D∇²c` \\
-    `⇒ 𝐮ᵉᶠᶠ = 𝐮 - ∇D`
+    `𝐚·∇u - ∇·(D∇u) = (𝐚 - ∇D)·∇u - D∇²u` \\
+    `⟹ 𝐚ᵉᶠᶠ = 𝐚 - ∇D` 
     """
-    match D_adv:
-        case D_adv_u, D_adv_c:
-            if D_adv_c.is_explicit:
-                raise ImplicitDiscretizationError(D_adv_c, 'Advection term must be implicit w.r.t. concentration')
-            u_future = D_adv_u(a) * D_adv_c.explicit_coeff
-        case D_adv:
-            if D_adv.is_explicit:
-                raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. concentration')
-            u_future = a[1] * D_adv.explicit_coeff
+    if isinstance(D_adv, FiniteDifference):
+        if D_adv.is_explicit:
+            raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. concentration')
+        u_future = a[1] * D_adv.explicit_coeff
+    else:
+        D_adv_a, D_adv_u = D_adv
+        if D_adv_u.is_explicit:
+            raise ImplicitDiscretizationError(D_adv_u, 'Advection term must be implicit w.r.t. concentration')
+        u_future = D_adv_a(a) * D_adv_u.explicit_coeff
 
     u_eff = u_future - grad(d) * D_diff.explicit_coeff
     return u_eff
@@ -44,7 +44,7 @@ def supg_diffusivity(
 def supg_reaction(
     dt: Constant,
     Da: Constant,
-    D_reac: FiniteDifference | FiniteDifferenceTuple,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise,
     r_factor: float = 0.1, # FIXME
 ):
     # NOTE assumes reaction such that `R(s,c) = R(s)R(c)` and `R(s,0) = R(s)`

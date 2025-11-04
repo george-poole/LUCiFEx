@@ -3,7 +3,7 @@ from typing import Callable
 from ufl.core.expr import Expr
 from ufl import dx, Form, inner, TestFunction, div, FacetNormal
 
-from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceTuple
+from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceArgwise
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries,
@@ -21,7 +21,7 @@ def advection_diffusion(
     dt: Constant | ConstantSeries,
     a: FunctionSeries,
     d: Series | Function | Expr,
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
     D_disp: FiniteDifference = AB1,
     D_phi: FiniteDifference = AB1,
@@ -72,9 +72,9 @@ def advection_diffusion_reaction(
     a: FunctionSeries,
     d: Series | Function | Expr,
     r: Function | Expr | Series | tuple[Callable, tuple],
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
-    D_reac: FiniteDifference,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise,
     D_disp: FiniteDifference = AB1,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
@@ -89,10 +89,12 @@ def advection_diffusion_reaction(
     if isinstance(phi, Series):
         phi = D_phi(phi)
         
-    forms = advection_diffusion(u, dt, a, d, D_adv, D_diff, D_disp, D_phi, phi, bcs, supg=None)
+    forms = advection_diffusion(
+        u, dt, a, d, D_adv, D_diff, D_disp, D_phi, phi, bcs, supg=None,
+    )
 
     v = TestFunction(u.function_space)
-    r = D_reac(r, u)
+    r = D_reac(r, trial=u)
     reac = -(1 / phi) * r
     F_reac = v * reac * dx
 
@@ -118,18 +120,18 @@ def advection_diffusion_residuals(
     dt: Constant,
     a: FunctionSeries,
     d: Function | Expr,
-    D_adv: FiniteDifference | FiniteDifferenceTuple,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
     phi: Series | Function | Expr | float = 1,
 ) -> tuple[Expr, Expr, Expr]:
     
     dudt = DT(u, dt)
 
-    match D_adv:
-        case D_adv_u, D_adv_c:
-            adv = (1 / phi) * inner(D_adv_u(a, False), grad(D_adv_c(u)))
-        case D_adv:
-            adv = (1 / phi) * D_adv(inner(a, grad(u)))
+    advection = lambda a, u: inner(a, grad(u))
+    if isinstance(D_adv, FiniteDifference):
+        adv = (1 / phi) *  D_adv(advection(a, u))
+    else:
+        adv = (1 / phi) * D_adv(a, u, advection, trial=u)
 
     diff = -(1/phi) * div(d * grad(D_diff(u)))
 

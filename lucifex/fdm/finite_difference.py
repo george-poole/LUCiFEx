@@ -85,14 +85,6 @@ class FiniteDifference:
     
     def __str__(self):
         return self.name
-    
-    @overload
-    def __call__(
-        self,
-        u: Expr | Function | Constant,
-        **kwargs,
-    ) -> Expr | Function | Constant:
-        ...
 
     @overload
     def __call__(
@@ -103,10 +95,18 @@ class FiniteDifference:
     ) -> Expr:
         ...
 
+    @overload
+    def __call__(
+        self,
+        u: Expr | Function | Constant,
+        **kwargs,
+    ) -> Expr | Function | Constant:
+        ...
+
     def __call__(
         self,
         u: Series | Expr | Function | Constant,
-        trial: bool | None = None,
+        trial: FunctionSeries | bool | None = None,
         strict: bool = False,
     ) -> Expr:
         """
@@ -118,6 +118,11 @@ class FiniteDifference:
                 raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
             else:
                 return u
+            
+        if self.order > u.order:
+            raise RuntimeError(
+                f"Order of finite difference operator '{self.name}' exceeds order of series '{u.name}'",
+            )
 
         if trial is None:
             trial = self.trial if isinstance(u, FunctionSeries) else trial
@@ -131,12 +136,12 @@ class FiniteDifference:
 
         return sum((c * _u(n) for n, c in self.coefficients.items()))
     
-    def __matmul__(self, other: Self) -> 'FiniteDifferenceTuple':
+    def __matmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
         if not isinstance(other, FiniteDifference):
             raise NotImplementedError
-        return FiniteDifferenceTuple(self, other)
+        return FiniteDifferenceArgwise(self, other)
         
-    # def __rmatmul__(self, other: Self) -> 'FiniteDifferenceTuple':
+    # def __rmatmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
     #     return other.__matmul__(self)
         
         
@@ -362,15 +367,15 @@ def THETA(theta: float) -> FiniteDifference:
     )
 
 
-class FiniteDifferenceTuple:
+class FiniteDifferenceArgwise:
     """
     Argument-wise application of finite difference operators to time-dependent
     arguments of an expression.
 
-    To combine individual `FiniteDifference` operators into a `FiniteDifferenceTuple`, 
+    To combine individual `FiniteDifference` operators into a `FiniteDifferenceArgwise`, 
     use either the class constructor or `@` operation.
 
-    e.g. `FiniteDifferenceTuple(AB2, CN)` or `AB2 @ CN`
+    e.g. `FiniteDifferenceArgwise(AB2, CN)` or `AB2 @ CN`
     """
     def __init__(
         self, 
@@ -383,34 +388,65 @@ class FiniteDifferenceTuple:
         if name is None:
             name = '◦'.join([fd.name for fd in self.finite_differences])
         self._name = name
-        
+
+    @overload
     def __call__(
         self, 
-        expr: ExprSeries | tuple[Callable, tuple[Any, ...]], 
+        u: ExprSeries, 
+        /,
         trial: FunctionSeries | None = None,
         strict: bool = False,
+    ) -> Expr:
+        ...
+
+    @overload
+    def __call__(
+        self, 
+        *args: Any | Callable[..., Expr], 
+        trial: FunctionSeries | None = None,
+        strict: bool = False,
+    ) -> Expr:
+        ...
+
+    @overload
+    def __call__(
+        self,
+        u: Expr | Function | Constant,
+        /,
+        **kwargs,
+    ) -> Expr | Function | Constant:
+        ...
+    
+    def __call__(
+        self, 
+        *args,
+        trial=None,
+        strict=False,
     ):
         """
         `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
         """
-        if not isinstance(expr, Series):
-            if strict:
-                raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(expr)}.")
-            else:
-                return expr
-            
-        if isinstance(expr, tuple):
-            expr_func, expr_args = expr
-            expr_kws = {}
-        else:
-            assert isinstance(expr, ExprSeries)
-            assert expr.expression
-            expr_func, expr_args, expr_kws = expr.expression
-
-        _args = [fd(arg, arg is trial) for fd, arg in zip(self._fd_args, expr_args, strict=False)]
-        _kws = {k: fd(expr_kws[k], expr_kws[k] is trial) for k, fd in self._fd_kws.items()}
+        if not args:
+            raise TypeError
         
-        return expr_func(*_args, **_kws)
+        if len(args) > 1:
+            *args, func = args
+            kws = {}
+        else:
+            u = args[0]
+            if not isinstance(u, ExprSeries):
+                if strict:
+                    raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(u)}.")
+                else:
+                    return u
+            if not u.expression:
+                raise ValueError(f"Expression and arguments must be deducable '{u.name}'.")
+            func, args, kws = u.expression
+
+        _args = [fd(arg, arg is trial) for fd, arg in zip(self._fd_args, args, strict=False)]
+        _kws = {k: fd(kws[k], kws[k] is trial) for k, fd in self._fd_kws.items()}
+        
+        return func(*_args, **_kws)
     
     @property
     def name(self) -> str:
@@ -430,7 +466,7 @@ class FiniteDifferenceTuple:
             return None
         fd_args_init = [fd.init if fd.init is not None else fd for fd in self._fd_args]
         fs_kws_init = {k: v.init if v.init is not None else v for k, v in self._fd_kws.items()}
-        return FiniteDifferenceTuple(*fd_args_init, **fs_kws_init)
+        return FiniteDifferenceArgwise(*fd_args_init, **fs_kws_init)
 
     def __iter__(self):
         return iter(self.finite_differences)
@@ -441,11 +477,11 @@ class FiniteDifferenceTuple:
     def __matmul__(
         self, 
         other: Self | FiniteDifference,
-    ) -> 'FiniteDifferenceTuple':
+    ) -> 'FiniteDifferenceArgwise':
         if isinstance(other, FiniteDifference):
-            return FiniteDifferenceTuple(*self._fd_args, other, **self._fd_kws)
-        if isinstance(other, FiniteDifferenceTuple):
-            return FiniteDifferenceTuple(
+            return FiniteDifferenceArgwise(*self._fd_args, other, **self._fd_kws)
+        if isinstance(other, FiniteDifferenceArgwise):
+            return FiniteDifferenceArgwise(
                 *self._fd_args,
                 *other._fd_args, 
                 **self._fd_kws,
@@ -456,19 +492,19 @@ class FiniteDifferenceTuple:
     def __rmatmul__(
         self, 
         other: Self | FiniteDifference,
-    ) -> 'FiniteDifferenceTuple':
+    ) -> 'FiniteDifferenceArgwise':
         if isinstance(other, FiniteDifference):
-            return FiniteDifferenceTuple(other, *self._fd_args, other, **self._fd_kws)
-        if isinstance(other, FiniteDifferenceTuple):
+            return FiniteDifferenceArgwise(other, *self._fd_args, other, **self._fd_kws)
+        if isinstance(other, FiniteDifferenceArgwise):
             return other.__matmul__(self)
         raise NotImplementedError
     
 
 def finite_difference_order(
-    *args: FiniteDifference | FiniteDifferenceTuple | Any,
+    *args: FiniteDifference | FiniteDifferenceArgwise | Any,
     minimum: int = 1,
 ) -> int | None:
-    orders = [a.order for a in args if isinstance(a, (FiniteDifference, FiniteDifferenceTuple))]
+    orders = [a.order for a in args if isinstance(a, (FiniteDifference, FiniteDifferenceArgwise))]
     if orders:
         return max(minimum, max(orders))
     else:

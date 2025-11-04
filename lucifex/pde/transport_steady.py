@@ -1,4 +1,3 @@
-from ufl.core.expr import Expr
 from ufl import (
     Form, inner, grad, dx, TestFunction, TrialFunction,
     CellDiameter, FacetNormal, dx, dS, 
@@ -12,7 +11,7 @@ from lucifex.solver import BoundaryConditions
 from .supg import peclet
 
 
-def reaction_diffusion(
+def diffusion_reaction_steady(
     u: Function,
     d: Constant,
     r: Function | Constant | None = None,

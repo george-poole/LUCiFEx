@@ -101,6 +101,7 @@ def io_array_dim(
 
 def get_ipynb_file_name(
     key: str = '__vsc_ipynb_file__',
+    ext: bool = False,
 ) -> str:
     try:
         from IPython import get_ipython
@@ -109,8 +110,13 @@ def get_ipynb_file_name(
             _globals = ip.user_global_ns 
     except Exception:
         _globals = globals()
-        
-    return os.path.basename(_globals[key])
+
+    basename = os.path.basename(_globals[key])
+
+    if ext:
+        return basename
+    else:
+        return os.path.splitext(basename)[0]
 
 
 def io_element(

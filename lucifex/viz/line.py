@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import Literal, Callable, Iterable, Any
+from typing import Literal, Iterable, Any
 from types import EllipsisType
 
 import numpy as np

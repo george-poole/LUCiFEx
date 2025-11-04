@@ -10,16 +10,16 @@ Development has primarily been motivated by the numerical study of fluid dynamic
 
 <table>
   <tr>
-    <td><img src="demo/figures/A01_darcy_lens_p.png" width="400"/></td>
-    <td><img src="demo/figures/A10_darcy_streamfunction_k_streamlines.png" width="400"/></td>
+    <td><img src="demo/applications/figures/A01_darcy_lens_p.png" width="400"/></td>
+    <td><img src="demo/applications/figures/A10_darcy_streamfunction_k_streamlines.png" width="400"/></td>
   </tr>
   <tr>
     <td align="left"> <a href="demo/A01.1_darcy_lens.ipynb"> flow of a Darcy fluid through a lens of low permeability </a> </td>
     <td align="left"> <a href="demo/A01.1_darcy_lens.ipynb"> flow of a Darcy fluid across an anticline of heterogeneous permeability </a> </td>
   </tr>
   <tr>
-    <td><img src="demo/figures/A15a_rayleigh_benard_rectangle_c(t=15.75).png" width="400"/></td>
-    <td><img src="demo/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A15a_rayleigh_benard_rectangle_c(t=15.75).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
   </tr>
   <tr> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle
     <td align="left"> <a href="demo/A04.1_darcy_convection_rayleigh_benard_rectangle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </a> </td>
@@ -27,8 +27,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td align="left"> <a href="demo/A04.2_darcy_convection_rayleigh_benard_semicircle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </a> </td>
   </tr>
     <tr>
-    <td><img src="demo/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
-    <td><img src="demo/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
   </tr>
   <tr>
     <td align="left"> <a href="demo/A04.3_darcy_convection_rayleigh_benard_annulus.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </a> </td>
@@ -36,8 +36,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
   </tr>
   </tr>
     <tr>
-    <td><img src="demo/figures/A17_double_diffusive_c(t=0.07).png" width="400"/></td>
-    <td><img src="demo/figures/A19_marangoni_convection_c(t=1.96e-02).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A17_double_diffusive_c(t=0.07).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A19_marangoni_convection_c(t=1.96e-02).png" width="400"/></td>
   </tr>
   <tr>
     <td align="left"> <a href="demo/A09.1_navier_stokes_double_diffusive.ipynb"> double-diffusive convection of a Navier-Stokes fluid in a rectangle </a> </td>
@@ -45,8 +45,8 @@ Development has primarily been motivated by the numerical study of fluid dynamic
   </tr>
   </tr>
     <tr>
-    <td><img src="demo/figures/A18_rayleigh_taylor_c(t=0.05).png" width="400"/></td>
-    <td><img src="demo/figures/A20_saffman_taylor_c(t=0.36).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A18_rayleigh_taylor_c(t=0.05).png" width="400"/></td>
+    <td><img src="demo/applications/figures/A20_saffman_taylor_c(t=0.36).png" width="400"/></td>
   </tr>
   <tr>
     <td align="left"> <a href="demo/A09.2_navier_stokes_rayleigh_taylor.ipynb"> Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle </a> </td>
@@ -56,7 +56,7 @@ Development has primarily been motivated by the numerical study of fluid dynamic
 
 ## Documentation
 
-See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to fluid dynamics), `F` (fundamentals of solving PDEs numerically), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the LUCiFEx package). Fluid dynamics examples include:
+See `demo` for notebooks and scripts, which are divided into three categories: `A` (applications to fluid dynamics), `F` (foundations of solving PDEs numerically), `N` (numerical methods for solving time-dependent PDEs) and `T` (technical details and testing of the LUCiFEx package). Fluid dynamics examples include:
 * Darcy's equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$)
 * Navier-Stokes equations (formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$) 
 * Stokes equations
@@ -106,11 +106,11 @@ Time-dependent constants and expressions are similarly implemented by `ConstantS
 
 ### Finite differences in time
 
-`FiniteDifference` operators act on time-dependent quantities to produce finite-difference discretizations. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
+A `FiniteDifference` operator acts on a time-dependent quantity to produce a finite-difference discretization. For example, the second-order Adams-Bashforth discretization of $u(\textbf{x}, t)$ 
 
 $$u(\textbf{x}, t^n)\approx \tfrac{3}{2}u^n - \tfrac{1}{2}u^{n-1}$$
 
-is produced by the  `AB2` operator acting on a `FunctionSeries`
+is written using the `AB2` operator applied to `u` as
 ```python
 AB2(u)
 ```
@@ -119,6 +119,19 @@ which is equivalent to manually writing out
 ```python
 1.5 * u[0] - 0.5 * u[-1]
 ```
+
+Finite differences can also be applied argument-wise to an expression of time-dependent quantities. A `FiniteDifferenceArgwise` operator can be composed from individual `FiniteDifference` operators using `@`. For example, the discretization of $f(a, b)$ with second-order Adams-Bashforth applied to $a(\textbf{x}, t)$ and Crank-Nicolson applied to $b(\textbf{x}, t)$ is written as
+
+```
+(AB2 @ CN)(f)
+```
+
+which is equivalent to manually writing out
+```python
+(1.5 * a[0] - 0.5 * a[-1]) * (0.5 * b[1] + 0.5 * b[0])
+```
+
+Finite differences from the Adams-Bashforth, Adams-Moulton, backward-differential formulae families are provided ready to use, and the `FiniteDifference` base class permits further custom finite difference operators to be defined.
 
 ### Unified problem-solving interface
 
@@ -202,7 +215,7 @@ These features remain to be implemented as part of ongoing development:
 + nested and blocked solvers
 + preconditioned solvers
 + nonlinear solvers
-+ more documentation and testing
++ more documentation and unit testing
 
 ## What does LUCiFEx *not* do?
 

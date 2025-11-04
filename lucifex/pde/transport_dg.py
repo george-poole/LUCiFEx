@@ -8,7 +8,7 @@ from lucifex.solver import BoundaryConditions
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, AB1, FiniteDifference, FunctionSeries, Series, 
-    FiniteDifferenceTuple)
+    FiniteDifferenceArgwise)
 from lucifex.fdm.ufl_operators import inner, grad
 
 
@@ -20,7 +20,7 @@ def advection_diffusion_dg(
     d: Function | Expr | Series, 
     alpha: Constant | float,
     gamma: Constant | float,
-    D_adv: FiniteDifferenceTuple,
+    D_adv: FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
@@ -91,9 +91,9 @@ def advection_diffusion_reaction_dg(
     r,
     alpha: float,
     gamma: float,
-    D_adv: FiniteDifferenceTuple,
+    D_adv: FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
-    D_reac: FiniteDifference | FiniteDifferenceTuple,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
@@ -107,7 +107,7 @@ def advection_diffusion_reaction_dg(
     if isinstance(phi, Series):
         phi = D_phi(phi)
 
-    r = D_reac(r, u)
+    r = D_reac(r, trial=u)
     v = TestFunction(u.function_space)
     F_reac = -v  * (r / phi) * dx
     forms.append(F_reac)

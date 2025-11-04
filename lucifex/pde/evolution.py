@@ -6,7 +6,7 @@ from ufl.core.expr import Expr
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, Series, 
-    FiniteDifferenceTuple, ExplicitDiscretizationError
+    FiniteDifferenceArgwise, ExplicitDiscretizationError
 )
 
 
@@ -14,7 +14,7 @@ def evolution_forms(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Function | Expr | Series | tuple[Callable, tuple],
-    D_rhs: FiniteDifference | FiniteDifferenceTuple,
+    D_rhs: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
 ) -> tuple[Form, Form]:
@@ -37,7 +37,7 @@ def evolution_expression(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Series | Expr | Function,
-    D_rhs: FiniteDifference | FiniteDifferenceTuple,
+    D_rhs: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
     tuple_index: int = 0,

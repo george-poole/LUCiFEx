@@ -15,43 +15,47 @@ from ..io import (
     load_constant_series,
 )
 from ..io.utils import file_path_ext, io_element
-
 from .simulation import Simulation
 
-import datetime
+
 ObjectName: TypeAlias = str
 DirPath: TypeAlias = str
 FileName: TypeAlias = str
 
 
 @overload
-def postprocess_grids(
+def np_postprocess(
     dir_path: str,
     mesh: Mesh | tuple[ObjectName, FileName],
-    load_grid_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+    load_function_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     load_numeric_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     cartesian: bool | None = None,
     delete_h5_xdmf: bool = False,
     mode: str = 'a',
-    numpy_file_name: str | tuple[str, str] | None = None,
+    file_name: str | tuple[str, str] | None = None,
 ) -> None:
     ...
 
 
 @overload
-def postprocess_grids(
+def np_postprocess(
     sim: Simulation,
     exclude: Iterable[str] = (),
     include: Iterable[str] = (),
     cartesian: bool | None = None,
     delete_h5_xdmf: bool = False,
     mode: str = 'a',
-    numpy_file_name: str | tuple[str, str] | None = None,
+    file_name: str | tuple[str, str] | None = None,
 ) -> None:
     ...
 
 
-def postprocess_grids(*args, **kwargs) -> None:
+def np_postprocess(*args, **kwargs) -> None:
+    """
+    Postprocess a simulation dataset exisiting as `.h5` and `.xdmf` 
+    files to `.npz` files in preparation for further I/O or 
+    postprocessing with `numpy`.
+    """
     return _postprocess_grids(*args, **kwargs)
     
 
@@ -68,7 +72,7 @@ def _(
     cartesian: bool | None = None,
     delete_h5_xdmf: bool = False,
     mode: str = 'a',
-    numpy_file_name: str | tuple[str, str] | None = None,
+    file_name: str | tuple[str, str] | None = None,
 ):
     grid_series = [i.series for i in sim.solvers if isinstance(i.series, FunctionSeries)]
     numeric_series = [i.series for i in sim.solvers if isinstance(i.series, ConstantSeries)]
@@ -97,7 +101,7 @@ def _(
         cartesian,
         delete_h5_xdmf, 
         mode,
-        numpy_file_name,
+        file_name,
     )
 
 
@@ -105,12 +109,12 @@ def _(
 def _(
     dir_path: str,
     mesh: Mesh | tuple[ObjectName, FileName],
-    load_grid_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+    load_function_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     load_numeric_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     cartesian: bool | None = None,
     delete_h5_xdmf: bool = False,
     mode: str = 'a',
-    numpy_file_name: str | tuple[str, str] | None = None,
+    file_name: str | tuple[str, str] | None = None,
 ):
     if not isinstance(mesh, Mesh):
         mesh_name, mesh_file_name = mesh
@@ -133,55 +137,39 @@ def _(
         case _:
             raise ValueError
     
-    if numpy_file_name is None:
-        numpy_file_name = (
+    if file_name is None:
+        file_name = (
             NpSeries.__name__,
             NumericSeries.__name__,
         )
-    if isinstance(numpy_file_name, str):
-        numpy_file_name = (numpy_file_name, numpy_file_name)
-    grid_file_name, numeric_file_name = numpy_file_name
+    if isinstance(file_name, str):
+        file_name = (file_name, file_name)
+    grid_file_name, numeric_file_name = file_name
 
-    for i in load_grid_args:
+    for i in load_function_args:
         name, file_name = i[:2]
         elem = i[2:]
-        print(f'loading {name} ...', datetime.datetime.now(), flush=True)
         u = load_function_series(name, dir_path, file_name, mesh, *elem)
-        print(f'loaded {name} successfully', datetime.datetime.now(), flush=True)
-        # _u2 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u3 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u4 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u5 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u6 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u7 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u8 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u9 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u10 = load_function_series(name, dir_path, file_name, mesh, *elem)
-        # _u11 = load_function_series(name, dir_path, file_name, mesh, *elem)
         write(
             NpSeries.from_series(u), 
             file_name=grid_file_name, 
             dir_path=dir_path,
             mode=mode,
         )
-        print(f'loaded {name} written', datetime.datetime.now(), flush=True)
         
     for i in load_numeric_args:
         name, file_name = i[:2]
         shape = i[2:]
-        print(f'loading {name} ...', datetime.datetime.now(), flush=True)
         c = load_constant_series(name, dir_path, file_name, mesh, *shape)
-        print(f'loaded {name} successfully', datetime.datetime.now(), flush=True)
         write(
             NumericSeries.from_series(c), 
             file_name=numeric_file_name, 
             dir_path=dir_path,
             mode=mode,
         )
-        print(f' {name} written', datetime.datetime.now(), flush=True)
 
     if delete_h5_xdmf:
-        file_names = set((fn for _, fn, *_ in (*load_grid_args, *load_numeric_args)))
+        file_names = set((fn for _, fn, *_ in (*load_function_args, *load_numeric_args)))
         file_paths = [
             *(file_path_ext(dir_path, fn, 'h5', mkdir=False) for fn in file_names),
             *(file_path_ext(dir_path, fn, 'xdmf', mkdir=False) for fn in file_names),

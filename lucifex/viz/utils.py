@@ -1,5 +1,8 @@
 from inspect import signature
-from typing import Callable, Iterable, ParamSpec, Concatenate, Literal
+from typing import (
+    Callable, Iterable, ParamSpec, Concatenate, 
+    Literal, Any, overload,
+)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -69,7 +72,29 @@ def _optional_fig_and_or_ax(
     return _inner
 
 
+@overload
 def create_cycler(
+    cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None,
+    num: int | None = None,
+) -> Cycler:
+    ...
+
+
+@overload
+def create_cycler(
+    **kwargs: Any,
+) -> Cycler:
+    ...
+
+
+def create_cycler(*args, **kwargs):
+    if not args:
+        return cycler(**kwargs)
+    else:
+        return _create_cycler(*args, **kwargs)
+
+
+def _create_cycler(
     cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None,
     num: int | None = None,
 ) -> Cycler:
