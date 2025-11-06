@@ -18,19 +18,20 @@ from ..io.utils import file_path_ext, io_element
 from .simulation import Simulation
 
 
+
+
 ObjectName: TypeAlias = str
 DirPath: TypeAlias = str
 FileName: TypeAlias = str
 
-
 @overload
-def np_postprocess(
+def xdmf_to_npz(
     dir_path: str,
     mesh: Mesh | tuple[ObjectName, FileName],
     load_function_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     load_numeric_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     cartesian: bool | None = None,
-    delete_h5_xdmf: bool = False,
+    delete_xdmf: bool = False,
     mode: str = 'a',
     file_name: str | tuple[str, str] | None = None,
 ) -> None:
@@ -38,39 +39,39 @@ def np_postprocess(
 
 
 @overload
-def np_postprocess(
+def xdmf_to_npz(
     sim: Simulation,
     exclude: Iterable[str] = (),
     include: Iterable[str] = (),
     cartesian: bool | None = None,
-    delete_h5_xdmf: bool = False,
+    delete_xdmf: bool = False,
     mode: str = 'a',
     file_name: str | tuple[str, str] | None = None,
 ) -> None:
     ...
 
 
-def np_postprocess(*args, **kwargs) -> None:
+def xdmf_to_npz(*args, **kwargs) -> None:
     """
     Postprocess a simulation dataset exisiting as `.h5` and `.xdmf` 
     files to `.npz` files in preparation for further I/O or 
     postprocessing with `numpy`.
     """
-    return _postprocess_grids(*args, **kwargs)
+    return _xdmf_to_npz(*args, **kwargs)
     
 
 @singledispatch
-def _postprocess_grids(arg, *_, **__):
-    raise MultipleDispatchTypeError(arg, _postprocess_grids)
+def _xdmf_to_npz(arg, *_, **__):
+    raise MultipleDispatchTypeError(arg, _xdmf_to_npz)
 
 
-@_postprocess_grids.register(Simulation)
+@_xdmf_to_npz.register(Simulation)
 def _(
     sim: Simulation,
     exclude: Iterable[str] = (),
     include: Iterable[str] = (),
     cartesian: bool | None = None,
-    delete_h5_xdmf: bool = False,
+    delete_xdmf: bool = False,
     mode: str = 'a',
     file_name: str | tuple[str, str] | None = None,
 ):
@@ -93,26 +94,26 @@ def _(
         for i in numeric_series if _include(i.name)
     ]
 
-    return _postprocess_grids(
+    return _xdmf_to_npz(
         dir_path, 
         mesh, 
         load_grid_args, 
         load_numeric_args, 
         cartesian,
-        delete_h5_xdmf, 
+        delete_xdmf, 
         mode,
         file_name,
     )
 
 
-@_postprocess_grids.register(str)
+@_xdmf_to_npz.register(str)
 def _(
     dir_path: str,
     mesh: Mesh | tuple[ObjectName, FileName],
     load_function_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     load_numeric_args: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     cartesian: bool | None = None,
-    delete_h5_xdmf: bool = False,
+    delete_xdmf: bool = False,
     mode: str = 'a',
     file_name: str | tuple[str, str] | None = None,
 ):
@@ -168,7 +169,7 @@ def _(
             mode=mode,
         )
 
-    if delete_h5_xdmf:
+    if delete_xdmf:
         file_names = set((fn for _, fn, *_ in (*load_function_args, *load_numeric_args)))
         file_paths = [
             *(file_path_ext(dir_path, fn, 'h5', mkdir=False) for fn in file_names),

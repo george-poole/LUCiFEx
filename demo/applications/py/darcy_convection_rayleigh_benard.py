@@ -3,7 +3,7 @@ from ufl import SpatialCoordinate, sqrt
 
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
 from lucifex.fem import Constant
-from lucifex.fdm import FiniteDifference, AB2, CN
+from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
@@ -31,7 +31,7 @@ def darcy_convection_rayleigh_benard_rectangle(
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
     # time discretization
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     # linear algebra
     psi_petsc: OptionsPETSc | None = None,
@@ -48,7 +48,7 @@ def darcy_convection_rayleigh_benard_rectangle(
     `𝐮 = -(∇p + c𝐞ʸ)`
     """
     Ly = 1.0
-    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
+    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {
@@ -106,7 +106,7 @@ def darcy_convection_rayleigh_benard_annulus(
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,
@@ -177,7 +177,7 @@ def darcy_convection_rayleigh_benard_semicircle(
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,

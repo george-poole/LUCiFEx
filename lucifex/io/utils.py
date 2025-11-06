@@ -18,6 +18,7 @@ def create_dir_path(
     dir_timestamp: bool | None,
     dir_seps: tuple[str, str] = ('|', '__'),
     mkdir: bool = False,
+    slc: slice = slice(2, -4),
 ) -> str:
     
     dir_name = ''
@@ -35,7 +36,7 @@ def create_dir_path(
         dir_name = f"{dir_name}{sep}{dir_suffix}"
 
     if dir_timestamp:
-        time = str(datetime.datetime.now())
+        time = str(datetime.datetime.now())[slc]
         whitespace_delims = " ", "_"
         year_month_day_delims = "-", "-"
         hour_min_sec_delims = ":", "-"
@@ -85,7 +86,7 @@ def file_path_ext(
     return file_path
 
 
-def io_array_dim(
+def dofs_array_dim(
     shape: tuple[int, ...]
 ) -> int:
     match shape:

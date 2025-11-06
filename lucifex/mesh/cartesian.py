@@ -32,8 +32,8 @@ def rectangle_mesh(
     Ly: float | tuple[float, float],
     Nx: int,
     Ny: int,
-    name: str | None = None,
     cell: CellType | DiagonalType = CellType.QUADRILATERAL,
+    name: str | None = None,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
     **kwargs,
 ) -> Mesh:
@@ -78,8 +78,8 @@ def box_mesh(
     Nx: int,
     Ny: int,
     Nz: int,
-    name: str | None = None,
     cell: CellType = CellType.HEXAHEDRON,
+    name: str | None = None,
     comm: MPI.Comm | str = MPI.COMM_WORLD,
     **kwargs,
 ) -> Mesh:

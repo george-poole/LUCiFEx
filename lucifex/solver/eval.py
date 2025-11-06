@@ -5,14 +5,13 @@ from typing import (
 from typing_extensions import Self
 import numpy as np
 
-from dolfinx.fem import Function, Constant, Expression
+from dolfinx.fem import Expression #Function, Constant,
 from ufl import Measure
 from ufl.core.expr import Expr
 
 from ..utils import set_value, replicate_callable, SpatialMarkerAlias, as_dofs_setter
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries
-
 from .options import OptionsFFCX, OptionsJIT
 from .bcs import SubspaceIndex
 
@@ -175,12 +174,12 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
 
 
 P = ParamSpec("P")
-class Integration(Evaluation[ConstantSeries | FunctionSeries, Constant | Function]):
+class Integration(Evaluation[ConstantSeries, Constant]):
     
     @classmethod
     def from_function(
         cls, 
-        solution: S | T, 
+        solution: ConstantSeries | Constant, 
         func: Callable[P, Expr | tuple[Expr, ...]],
         measure: Literal['dx', 'ds', 'dS'] | Measure | None = None, 
         *markers: SpatialMarkerAlias,
@@ -221,141 +220,3 @@ def integration():
     pass
 
 
-
-# class CellIntegrationProblem(IntegrationProblem):
-#     _measure_type = 'dx'
-
-    # @classmethod
-    # def from_function(
-    #     cls, 
-    #     solution: ConstantSeries | Constant,
-    #     integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form],
-    #     marker: SpatialMarkerTypes | Measure | None = None,
-    #     quadrature_degree: int | None = None, 
-    #     future: bool = False,
-    # ):
-    #     def _create(
-    #         *args: P.args, 
-    #         **kwargs: P.kwargs,
-    #     ) -> Self:
-    #         return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree, future)
-    #     return _create
-
-
-# class FacetIntegrationProblem(IntegrationProblem):
-#     _measure_type = 'ds'
-
-
-# P = ParamSpec("P")
-# class InteriorFacetIntegrationProblem(IntegrationProblem):
-#     _measure_type = 'dS'
-
-#     def __init__(
-#         self,
-#         solution: ConstantSeries | Constant,
-#         integrand: Expr | tuple[Expr, ...] | Form,
-#         marker: SpatialMarkerTypes | Measure | None = None, 
-#         quadrature_degree: int | None = None, 
-#         facet_side: Literal['+', '-'] = '+',
-#         future: bool = False,
-#     ):
-#         if isinstance(integrand, tuple):
-#             integrand = tuple(i(facet_side) if not isinstance(i, Restricted) else i for i in integrand)
-
-#         if isinstance(integrand, Expr) and not isinstance(integrand, Restricted):
-#             integrand = integrand(facet_side)
-
-#         super().__init__(solution, integrand, marker, quadrature_degree, future)
-
-#     @classmethod
-#     def from_function(
-#         cls, 
-#         solution: ConstantSeries | Constant,
-#         integrand_func: Callable[P, Expr | tuple[Expr, ...] | Form], 
-#         marker: SpatialMarkerTypes | Measure | None = None,
-#         quadrature_degree: int | None = None, 
-#         facet_side: Literal['+', '-'] = '+',
-#         future: bool = False,
-#     ):
-#         def _create(
-#             *args: P.args, 
-#             **kwargs: P.kwargs,
-#         ) -> Self:
-#             return cls(solution, integrand_func(*args, **kwargs), marker, quadrature_degree, facet_side, future)
-#         return _create
-
-
-
-
-
-# @replicate_callable(FacetIntegrationProblem.from_function)
-# def ds_solver():
-#     pass
-
-# @replicate_callable(InteriorFacetIntegrationProblem.from_function)
-# def dS_solver():
-#     pass
-
-
-# _measure_type: str 
-
-# def __init__(
-#     self,
-#     solution: ConstantSeries | Constant,
-#     ###
-#     integrand: Expr | tuple[Expr, ...] | Form,
-#     marker: SpatialMarkerTypes | Measure | None = None,
-#     quadrature_degree: int | None = None,  # TODO expand to quadrature metadata/scheme
-#     ###
-#     future: bool = False,
-# ):
-#     if isinstance(integrand, Form):
-#         if marker is not None:
-#             raise ValueError('Integration measure is already specified in the `Form` object supplied.')
-#         dx = None # TODO get Measure from Form somehow?
-#         evaluation = lambda: assemble_scalar(form(integrand))
-#     else:
-#         ...
-
-
-
-
-
-
-
-#         #####
-#         if marker is None:
-#             dx = create_tagged_measure(self._measure_type, solution.mesh)(degree=quadrature_degree)
-#             evaluation = lambda: assemble_scalar(form(integrand * dx))
-#         elif isinstance(marker, Measure):
-#             dx = marker(degree=quadrature_degree)
-#             evaluation = lambda: assemble_scalar(form(integrand * dx))
-#         elif isinstance(marker, (list, tuple)):
-#             tags = list(range(len(marker)))
-#             dx = lambda tag: create_tagged_measure(
-#                 self._measure_type, 
-#                 solution.mesh, 
-#                 marker,
-#                 tags,
-#             )(tag, degree=quadrature_degree)
-#             if isinstance(integrand, tuple):
-#                 assert solution.shape == (len(marker), len(integrand))
-#                 evaluation = lambda: np.array([[assemble_scalar(form(i * dx(tag))) for i in integrand] for tag in tags])
-#             else:   
-#                 assert solution.shape == (len(marker), )
-#                 evaluation = lambda: tuple(assemble_scalar(form(integrand * dx(t)) for t in tags))
-#         else:
-#             tag = 0
-#             dx = create_tagged_measure(self._measure_type, 
-#                                             solution.mesh, 
-#                                             [marker], [tag],
-#                                             )(tag, degree=quadrature_degree)
-#             if isinstance(integrand, tuple):
-#                 assert solution.shape == (len(integrand), )
-#                 evaluation = lambda: tuple(assemble_scalar(form(i * dx)) for i in integrand)
-#             else:   
-#                 evaluation = lambda: assemble_scalar(form(integrand * dx))
-#         ####
-
-#     self._measure = dx
-#     super().__init__(solution, evaluation, future)

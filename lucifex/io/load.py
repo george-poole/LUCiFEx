@@ -216,6 +216,8 @@ def load_txt_dict(
         for i, line in enumerate(f):
             if i in skip:
                 continue
+            if sep not in line:
+                continue
             name, val_str = line.split(sep)
             if name in skip:
                 continue

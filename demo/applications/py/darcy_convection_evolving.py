@@ -4,7 +4,7 @@ from typing import Callable
 from ufl import cos, sin
 
 from lucifex.mesh import mesh_boundary, rectangle_mesh
-from lucifex.fdm import FiniteDifference, AB2, CN
+from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.fem import Constant
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import Simulation, configure_simulation
@@ -43,7 +43,7 @@ def darcy_convection_evolving_rectangle(
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
     # time discretization
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     # linear algebra
     psi_petsc: OptionsPETSc | None = None,
@@ -53,7 +53,7 @@ def darcy_convection_evolving_rectangle(
 ) -> Simulation:
     Ly = Ra
     Lx = aspect * Ly
-    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
+    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {

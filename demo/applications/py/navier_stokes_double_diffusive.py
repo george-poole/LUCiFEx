@@ -5,7 +5,7 @@ from lucifex.fem import Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
-    ExprSeries, finite_difference_order, cfl_timestep,
+    FiniteDifferenceArgwise, ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
@@ -45,7 +45,8 @@ def navier_stokes_double_diffusive_rectangle(
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
-    D_adv_ad: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
+    D_adv_ad: FiniteDifference 
+    | FiniteDifferenceArgwise = (BE @ BE),
     D_diff_ad: FiniteDifference = CN,
 ):
     """
@@ -62,7 +63,7 @@ def navier_stokes_double_diffusive_rectangle(
     """
     # space
     Ly = 1.0
-    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
+    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {

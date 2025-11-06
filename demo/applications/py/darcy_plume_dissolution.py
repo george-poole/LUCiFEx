@@ -6,7 +6,7 @@ from lucifex.fem import Function as Function, SpatialConstant as Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1,
-    ExprSeries, finite_difference_order, cfl_timestep,
+    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, 
@@ -50,7 +50,7 @@ def darcy_plume_dissolution_rectangle(
     cfl_h: str | float = "hmin",
     cfl_courant: float | None = 0.75,
     # time discretization
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = AB1,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
     D_reac: FiniteDifference = AB1,
     D_evol: FiniteDifference = AB1,
@@ -60,7 +60,7 @@ def darcy_plume_dissolution_rectangle(
     b_petsc: OptionsPETSc | None = None,
 ):
     # space
-    Omega = rectangle_mesh((-Lx/2, Lx/2), Ly, Nx, Ny, cell=cell)
+    Omega = rectangle_mesh((-Lx/2, Lx/2), Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {

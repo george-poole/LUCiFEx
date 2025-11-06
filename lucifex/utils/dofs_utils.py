@@ -14,7 +14,7 @@ from dolfinx.fem import (
 from ufl.core.expr import Expr
 
 from .enum_types import DofsMethodType
-from .fem_typecast import finite_element_function, finite_element_function_components
+from .fem_typecast import create_function, get_component_functions
 from .fem_utils import is_scalar, is_vector, ScalarVectorError
 from .fem_mutate import set_finite_element_function
 
@@ -123,7 +123,7 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = finite_element_function(fs, u, try_identity=try_identity, use_cache=use_cache)
+        u = create_function(fs, u, try_identity=try_identity, use_cache=use_cache)
         return u.x.array[:]
     elif l2_norm and is_vector(u):
         if not isinstance(use_cache, tuple):
@@ -132,7 +132,7 @@ def dofs(
         component_dofs = np.stack(
             [
                 dofs(i, fs, use_cache=use_scalars_cache, try_identity=False) 
-                for i in finite_element_function_components(fs, u, use_cache=use_vector_cache)
+                for i in get_component_functions(fs, u, use_cache=use_vector_cache)
             ], 
             axis=1,
         )

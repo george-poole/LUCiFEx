@@ -6,15 +6,15 @@ from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
 
 from lucifex.fdm import FiniteDifference
-from lucifex.fem import Function as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant
 from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 
-    ExprSeries, finite_difference_order, cfl_timestep,
+    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
-    ds_solver, interpolation
+    integration, interpolation
 )
 from lucifex.utils import extremum
 from lucifex.sim import Simulation
@@ -51,7 +51,7 @@ def darcy_convection_generic(
     cfl_h: str | float = "hmin",
     cfl_courant: float | None = 0.75,
     # time discretization
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = AB1,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
     # TODO supg stabilization
     # c_stabilization: str | None = None,
@@ -69,7 +69,7 @@ def darcy_convection_generic(
     """
     2D streamfunction formulation with boundary conditions `ψ = 0` on `∂Ω`.
 
-    Default gravity unit vector is `e₉ = -eʸ`.
+    Default gravity unit vector is `𝐞₉ = -𝐞ʸ`.
     
     Default boundary conditions are no flux of solute everywhere on `∂Ω`. 
     
@@ -116,12 +116,16 @@ def darcy_convection_generic(
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
 
     if secondary:
+        uMinMax = ConstantSeries(Omega, "uMinMax", shape=(2,))
+        cMinMax = ConstantSeries(Omega, "cMinMax", shape=(2,))
+        dtCFL = ConstantSeries(Omega, "dtCFL")
+        fBoundary = ConstantSeries(Omega, "fBoundary", shape=(len(dOmega.union), 2))
         solvers.extend(
             [
-                evaluation(ConstantSeries(Omega, "uMinMax", shape=(2,)), extremum)(u[0]),
-                evaluation(ConstantSeries(Omega, "cMinMax", shape=(2,)), extremum)(c[0]),
-                evaluation(ConstantSeries(Omega, "dtCFL"), cfl_timestep)(u[0], cfl_h),
-                ds_solver(ConstantSeries(Omega, "fOmega", shape=(len(dOmega.union), 2)))(flux, dOmega.union)(c[0], u[0], d[0]),
+                evaluation(uMinMax, extremum)(u[0]),
+                evaluation(cMinMax, extremum)(c[0]),
+                evaluation(dtCFL, cfl_timestep)(u[0], cfl_h),
+                integration(fBoundary, flux, 'ds', *dOmega.union)(c[0], u[0], d[0]),
             ]
         )
 

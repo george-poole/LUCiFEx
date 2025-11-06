@@ -6,7 +6,7 @@ from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ..utils import is_vector, grid, finite_element_function, finite_element_function_components, is_cartesian
+from ..utils import is_vector, grid, create_function, get_component_functions, is_cartesian
 from .utils import set_axes, optional_ax
 
 
@@ -29,9 +29,9 @@ def plot_quiver(
             raise ValueError(
                 "Quiver plots must be of 2D vector-valued quantities."
             )
-        fx, fy = finite_element_function_components(('P', 1), f)
+        fx, fy = get_component_functions(('P', 1), f)
     else:
-        fx, fy = (finite_element_function(('P', 1), i) for i in f)
+        fx, fy = (create_function(('P', 1), i) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Quiver plots on unstructured meshes are not supported.")
@@ -85,9 +85,9 @@ def plot_streamlines(
             raise ValueError(
                 "Streamline plots must be of 2D vector-valued quantities."
             )
-        fx, fy = finite_element_function_components(('P', 1), f)
+        fx, fy = get_component_functions(('P', 1), f)
     else:
-        fx, fy = (finite_element_function(('P', 1), i, try_identity=True) for i in f)
+        fx, fy = (create_function(('P', 1), i, try_identity=True) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
         raise ValueError("Streamline plots on unstructured meshes are not supported.")

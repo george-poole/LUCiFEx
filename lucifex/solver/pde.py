@@ -12,7 +12,7 @@ import numpy as np
 from ufl import Form, lhs, rhs, Measure, TestFunction, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
-from dolfinx.fem import Constant, Function, FunctionSpace
+from dolfinx.fem import FunctionSpace #Constant, Function
 from dolfinx.fem.petsc import create_vector, DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
@@ -24,8 +24,7 @@ from ..utils import (
 )
 from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
-from ..fem import Function
-
+from ..fem import Function, Constant
 from .bcs import BoundaryConditions, Value, SubspaceIndex
 from .options import (
     OptionsPETSc, OptionsSLEPc,

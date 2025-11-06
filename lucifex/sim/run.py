@@ -14,7 +14,7 @@ from ..io import write, write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_texec
 
 from ..utils.deferred import Writer, Stopper
-from .controller import (
+from .deferred import (
     CreateStopper, CreateWriter, 
     as_stopper, as_writer, has_simulation_arg,
 )
@@ -88,8 +88,10 @@ def run(
 
     if isinstance(dt, ConstantSeries):
         _dt = dt[0]
+        dt_solver_index = [s.solution.name for s in simulation.solvers].index(dt.name)
     else:
         _dt = dt
+        dt_solver_index = -1
 
     _n = 0
     _time_stoppers: list[Stopper] = []
@@ -110,8 +112,9 @@ def run(
             _solvers = solvers_init
         else:
             _solvers = simulation.solvers
-        [s.solve() for s in _solvers]
+        [s.solve() for s in _solvers[:dt_solver_index + 1]]
         t.update(t[0].value + _dt.value, future=True)
+        [s.solve() for s in _solvers[dt_solver_index + 1:]]
         [w.write(t[0]) for w in _writers]
         if any(s.stop(t[0]) for s in _stoppers):
             break

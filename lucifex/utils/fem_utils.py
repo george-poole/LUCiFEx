@@ -206,16 +206,6 @@ def is_discontinuous_family(family: str) -> bool:
     )
 
 
-def subspace_functions(
-    f: Function,
-    collapse: bool = True,
-) -> tuple[Function, ...]:
-    if collapse:
-        return tuple(i.collapse() for i in f.split())
-    else:
-        return tuple(i for i in f.split())
-
-
 def extract_mesh(
     expr: Expr | Expression | Function,
 ) -> Mesh:
@@ -246,6 +236,7 @@ def extract_meshes(
             meshes.add(getattr(c, 'mesh'))
 
     return meshes
+
 
 def extract_integrands(
     form: Form,

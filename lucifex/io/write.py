@@ -9,16 +9,18 @@ from mpi4py import MPI
 from ufl.core.expr import Expr
 from dolfinx.io import XDMFFile
 from dolfinx.mesh import Mesh, create_interval
-from dolfinx.fem import FunctionSpace, VectorFunctionSpace
 from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ..utils import extract_mesh, MultipleDispatchTypeError, set_finite_element_function, StrSlice, as_slice
+from ..utils import (extract_mesh, create_function, function_space, 
+    MultipleDispatchTypeError, set_finite_element_function, 
+    StrSlice, as_slice,
+)
 from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
 from ..fem import Function, Constant
 
-from .utils import file_path_ext, io_array_dim
+from .utils import file_path_ext, dofs_array_dim
 
 
 class WriteFunctionType(Protocol):
@@ -27,7 +29,6 @@ class WriteFunctionType(Protocol):
         obj: Any,
         file_name: str,
         dir_path: str,
-        # t: Any | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -105,6 +106,7 @@ def write(
     file_name: str,
     dir_path: str,
     mode: str= 'a',
+    preamble: Iterable[str] = (),
     sep: str = ' = ',
 ) -> None:
     ...
@@ -116,6 +118,7 @@ def write(
     file_name: str,
     dir_path: str,
     mode: str= 'a',
+    preamble: Iterable[str] = (),
     **np_savez_kwargs,
 ) -> None:
     ...
@@ -212,6 +215,7 @@ def _(
 
 
 @_write.register(Function)
+@_write.register(Function.__base__)
 def _(
     u: Function,
     file_name: str,
@@ -232,8 +236,14 @@ def _(
         comm = u.function_space.mesh.comm
 
     if mode == "c":
-        dp0_function = _cached_dp0_function(u)
-        dp0_function.x.array[:] = u.x.array[:]
+        interval = _cell_per_dof_interval(u.function_space.mesh, len(u.x.array), u.name)
+        dp0_function = create_function(
+            (interval, 'DP', 0), 
+            u.x.array,
+            dofs_indices=':',
+            name=u.name,
+            use_cache=True,
+        )
         return _write(dp0_function, file_name, dir_path, t, "a", comm)
     
     if mode == 'w':
@@ -261,8 +271,15 @@ def _(
 ):
     if comm is None:
         comm = c.mesh.comm
-    dp0_function = _cached_dp0_function(c)
-    dp0_function.x.array[:] = c.value.flatten()
+
+    interval = _cell_per_dof_interval(c.mesh, dofs_array_dim(c.ufl_shape), c.name)
+    dp0_function = create_function(
+        (interval, 'DP', 0), 
+        c.value.flatten(),
+        dofs_indices=':',
+        name=c.name,
+        use_cache=True,
+    )
     return _write(dp0_function, file_name, dir_path, t, mode, comm, xdmf=xdmf)
 
 
@@ -392,7 +409,8 @@ def _(
             raise NotImplementedError
         dim = shape[0]
         elem = (*fam_deg, dim)
-    fs = _cached_function_space(mesh, elem)
+
+    fs = function_space((mesh, *elem), use_cache=True)
     func = Function(fs, name=name)
     func.name = name
     set_finite_element_function(func, u)
@@ -405,6 +423,7 @@ def _(
     file_name: str,
     dir_path,
     mode: str= 'a',
+    preamble: Iterable[str] = (),
     file_ext: str | None = None,
     **kwargs,
 ) -> None:
@@ -424,8 +443,10 @@ def _(
         _kwargs = {'sep': ' = '}
         _kwargs.update(kwargs)
         with open(file_path, mode) as f:
+            for line in preamble:
+                print(line, **_kwargs, file=f)
             for k, v in namespace.items():
-                print(k, repr(v), **_kwargs, file=f)
+                print(k, str(v), **_kwargs, file=f)
     elif file_ext == NPZ:
         array_dict = {}
         if mode == 'a' and os.path.isfile(file_path):
@@ -524,185 +545,24 @@ def _(
 
 
 @lru_cache
-def _cached_dp0_function(
-    c: Function | Constant,
-) -> Function:
-    if isinstance(c, Constant):
-        mesh = c.mesh
-        dim = io_array_dim(c.ufl_shape)
-    elif isinstance(c, Function):
-        mesh = c.function_space.mesh
-        dim = len(c.x.array)
-    else:
-        raise TypeError
-
-    mesh = _cached_interval(mesh, dim, c.name)
-    fs = _cached_function_space(mesh, ('DP', 0))
-    # mesh = create_interval(comm, dim, (0, dim))
-    # mesh.name = c.name
-    # fs = FunctionSpace(mesh, ("DP", 0))
-    f = Function(fs)
-    f.name = c.name
-    return f
-
-
-@lru_cache
-def _cached_interval(
+def _cell_per_dof_interval(
     mesh: Mesh,
-    dim: int,
+    n_dofs: int,
     name: str,
 ) -> Mesh:
-    interval = create_interval(mesh.comm, dim, (0, dim))
+    interval = create_interval(mesh.comm, n_dofs, (0, n_dofs))
     interval.name = name
     return interval
 
 
-@lru_cache
-def _cached_function_space(
-    mesh: Mesh,
-    elem: tuple,
-) -> FunctionSpace:
-    if len(elem) == 2:
-        fam, deg = elem
-        return FunctionSpace(mesh, (fam, deg))
-    elif len(elem) == 3:
-        fam, deg, dim = elem
-        return VectorFunctionSpace(mesh, (fam, deg), dim)
-    else:
-        raise ValueError
-    
-
 @lru_cache(maxsize=None)
 def _cached_write_mesh(mesh, file_name, dir_path) -> None:
-    """Ensuring that a time-independent mesh is written once only"""
+    """
+    Ensuring that a time-independent mesh is written once only
+    """
     _write(mesh, file_name, dir_path, mode='w', comm=mesh.comm)
 
 
 def clear_write_cache():
     _cached_write_mesh.cache_clear()
-    _cached_dp0_function.cache_clear()
-    _cached_function_space.cache_clear()
-
-
-# @_write.register(Image.Image)
-# def _(
-#     img: Image.Image,
-#     file_name,
-#     dir_path,
-#     close = False,
-#     file_ext = "jpg",
-#     **kwargs,
-# ):
-#     file_path = file_path_ext(dir_path, file_name, file_ext)
-#     img.save(file_path, **kwargs)
-#     if close:
-#         img.close()
-
-
-
-# @overload
-# def write(
-#     u: Iterable[float],
-#     t: float | Constant | None = None,
-#     file_name: str | None = None,
-#     dir_path: str | None = None,
-#     mode: Literal["a", "w", "c"] = "a",
-#     comm: MPI.Comm = MPI.COMM_WORLD,
-#     *,
-#     mesh: Mesh,
-#     name: str | None = None,
-# ):
-#     ...
-
-
-# @_write.register(np.ndarray)
-# @_write.register(tuple)
-# @_write.register(list)
-# @_write.register(Iterable)
-# def _(
-#     u: Iterable[float],
-#     t,
-#     file_path,
-#     mode,
-#     comm=None,
-#     *,
-#     mesh,
-#     name=None,
-# ):
-#     c = StaticConstant(mesh, np.array(u))
-#     if name is None:
-#         name = "constant"
-#     c.name = name
-#     return write(c, t, file_path, mode, comm)
-
-# def write_to(_write_to):
-#     @wraps(_write_to)
-#     def wrapper(t, series, condition, *args, **kwargs):
-#         if len({i.name for i in series}) != len(series):
-#             raise RuntimeError("Series' names must be unique")
-
-#         if isinstance(condition, int):
-#             _condition = lambda n: n % condition == 0
-#         else:
-#             _condition = condition
-
-#         return _write_to(t, series, _condition, *args, **kwargs)
-
-#     return wrapper
-
-
-# @write_to
-# def write_to_collective(
-#     t: ConstantSeries,
-#     series: list[FunctionSeries | ConstantSeries],
-#     condition: int | Callable[[int], bool],
-#     file_name: str = None,
-#     dir_path: str = None,
-#     comm: MPI.Comm = MPI.COMM_WORLD,
-#     checkpoint: bool = False,
-# ) -> Callable[[int], None]:
-#     if file_name is None:
-#         file_name = "_".join([i.name for i in series])
-
-#     def _io_routine(n):
-#         if condition(n) == 0:
-#             mode = "w" if n == 0 and not checkpoint else "a"
-#             write_mesh = True if n == 0 and not checkpoint else False
-#             for i in series:
-#                 write(
-#                     i[0], t[0], file_name, dir_path, mode, comm, write_mesh=write_mesh
-#                 )
-#                 mode = "a"
-
-#     return _io_routine
-
-
-# @write_to
-# def write_to_individual(
-#     t: ConstantSeries,
-#     series: list[FunctionSeries | ConstantSeries],
-#     condition: int | Callable[[int], bool],
-#     file_name: Optional[list[str]] = None,
-#     dir_path: str = None,
-#     comm: MPI.Comm = MPI.COMM_WORLD,
-#     checkpoint: bool = False,
-# ) -> Callable[[int], None]:
-#     def _io_routine(n):
-#         if condition(n):
-#             mode = "w" if n == 0 and not checkpoint else "a"
-#             [write(i, t[0], i.name, dir_path, mode, comm) for i in series]
-
-#     return _io_routine
-
-
-# def multi_mono_writers(self, t, function_series, function_series_2, comm) -> list[Callable[[int], bool]]:
-#     writers = []
-
-#     n_io_mono, n_io_multi = self.n_io
-
-#     if n_io_mono is not None:
-#         writers.append(write_to_collective(t, [function_series], lambda n: n % n_io_mono == 0, dir_path=self.io_dir, comm=comm, checkpoint=self.checkpoint))
-#     if n_io_multi is not None:
-#         writers.append(write_multi(t, [function_series_2], cond = lambda n: n % n_io_multi == 0, self.io_dir, comm, self.checkpoint))
-
-#     return writers
+    _cell_per_dof_interval.cache_clear()

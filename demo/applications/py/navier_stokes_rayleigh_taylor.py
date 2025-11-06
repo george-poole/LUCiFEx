@@ -5,7 +5,7 @@ from lucifex.fem import Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
-    ExprSeries, finite_difference_order, cfl_timestep,
+        FiniteDifferenceArgwise, ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
@@ -13,7 +13,8 @@ from lucifex.solver import (
 from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
-from lucifex.pde.navier_stokes import ipcs_solvers, newtonian_stress
+from lucifex.pde.navier_stokes import ipcs_solvers
+from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.transport import advection_diffusion
 
 
@@ -43,7 +44,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
-    D_adv_ad: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
+    D_adv_ad: FiniteDifference | FiniteDifferenceArgwise = (BE @ BE),
     D_diff_ad: FiniteDifference = CN,
 ):
     """
@@ -56,7 +57,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     # space
     Lx = 2.0
     Ly = 1.0
-    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
+    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {
@@ -100,7 +101,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
     # constitutive
-    stress = lambda u, p: Pr * newtonian_stress(u, p, 1)
+    deviatoric_stress = lambda u: Pr * newtonian_stress(u, 1)
     rho = ExprSeries(c, 'rho')
     f = Pr * Ra * rho * as_vector([0, -1]) 
 
@@ -109,7 +110,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, 
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_coeff=Pr,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_ad, D_diff_ad,

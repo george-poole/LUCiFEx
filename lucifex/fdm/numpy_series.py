@@ -8,7 +8,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..utils import grid, triangulation
 from ..utils.fem_utils import ScalarVectorError
-from ..utils.fem_typecast import finite_element_function_components
+from ..utils.fem_typecast import get_component_functions
 from .series import ConstantSeries, FunctionSeries, SubSeriesError
 
 
@@ -147,7 +147,7 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
                     np.array(
                         [
                             grid(use_cache=use_func_cache)(j, **grid_kwargs) 
-                            for j in finite_element_function_components(('P', 1), i, use_cache=Ellipsis)
+                            for j in get_component_functions(('P', 1), i, use_cache=Ellipsis)
                         ]
                     ) 
                     for i in u.series
@@ -207,7 +207,7 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
                     np.array(
                         [
                             triangulation(use_func_cache=use_func_cache)(j) 
-                            for j in finite_element_function_components(('P', 1), i, use_cache=(True, True))
+                            for j in get_component_functions(('P', 1), i, use_cache=(True, True))
                         ]
                     )
                     for i in u.series

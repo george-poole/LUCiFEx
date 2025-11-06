@@ -1,7 +1,7 @@
 import csv
 from inspect import signature
-from typing import Callable
 from collections.abc import Iterable
+from typing import Callable
 
 from ..io.utils import file_path_ext
 

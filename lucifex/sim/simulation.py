@@ -294,10 +294,11 @@ def configure_simulation(
                     
                     if simulation.writers:
                         write(
-                            {'simulation': simulation_func.__name__} | sim_parameters, 
+                            sim_parameters, 
                             simulation.parameter_file, 
                             dir_path,
                             mode='w',
+                            preamble=[f'{simulation_func.__module__}.{simulation_func.__name__}'],
                         )
 
                     return simulation

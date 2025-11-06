@@ -45,7 +45,7 @@ def brinkman_convection_rayleigh_benard_rectangle(
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
     D_darcy_ns: FiniteDifference = BE,
-    D_adv_ad: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
+    D_adv_ad: FiniteDifference | FiniteDifferenceArgwise = (BE, BE),
     D_diff_ad: FiniteDifference = CN,
 ):
     """
@@ -156,7 +156,7 @@ def brinkman_convection_rayleigh_taylor_rectangle(
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
     D_darcy_ns: FiniteDifference = BE,
-    D_adv_ad: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
+    D_adv_ad: FiniteDifference | FiniteDifferenceArgwise = (BE, BE),
     D_diff_ad: FiniteDifference = CN,
 ):
     raise NotImplementedError 

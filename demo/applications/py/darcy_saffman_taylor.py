@@ -2,7 +2,7 @@ import numpy as np
 import scipy.special as sp
 
 from lucifex.mesh import rectangle_mesh, mesh_boundary
-from lucifex.fdm import FiniteDifference, AB2, CN
+from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.fdm.ufl_operators import exp
 from lucifex.fem import Constant
 from lucifex.solver import BoundaryConditions
@@ -30,7 +30,7 @@ def saffman_taylor_rectangle(
     dt_max: float = 0.25,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.25,
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (AB2, CN),
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
 ):
     Omega = rectangle_mesh(

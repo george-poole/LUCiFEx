@@ -47,7 +47,7 @@ def navier_stokes_marangoni(
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
-    D_adv_c: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = (BE, BE),
+    D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE, BE),
     D_diff_c: FiniteDifference = CN,
 ):
     # space

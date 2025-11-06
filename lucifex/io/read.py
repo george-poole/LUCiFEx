@@ -13,7 +13,7 @@ from ..utils import (
     as_slice,
     StrSlice,
 )
-from .utils import file_path_ext, io_array_dim
+from .utils import file_path_ext, dofs_array_dim
 
 
 class ReadObject(Protocol):
@@ -84,10 +84,10 @@ def _(
     dofs: np.ndarray | None = None,
 ):
 
-    l = len(dofs)
-    dim = io_array_dim(u.shape)
-    if not l == dim:
-        ValueError(f'Cannot load data of length {l} into object of shape {u.shape}.')
+    dim = len(dofs)
+    dim_expected = dofs_array_dim(u.shape)
+    if not dim == dim_expected:
+        ValueError(f'Cannot load data of length {dim} into object of shape {u.shape}.')
 
     match u.shape:
         case ():
@@ -97,7 +97,7 @@ def _(
         case (_, _):
             u[:] = np.reshape(dofs, u.shape)
         case _:
-            raise NotImplementedError(f'I/O with shape {u.shape} is not supported.')
+            raise NotImplementedError
 
 
 @_read.register(Function)
@@ -109,7 +109,7 @@ def _(
     dofs=None,
 ):
     if dofs is None:
-        dim = io_array_dim(u.ufl_shape)
+        dim = dofs_array_dim(u.ufl_shape)
         with h5py.File(file_path, "r") as h5:
             dofs = _dofs_time_series(h5, u.name, dim)[0][0]
 
@@ -138,8 +138,7 @@ def _(
         container = Function(u.function_space, name=u.name)
     else:
         raise MultipleDispatchTypeError(u)
-    
-    dim = io_array_dim(container.ufl_shape)
+    dim = dofs_array_dim(container.ufl_shape)
 
     if is_unsolved(u[u.FUTURE_INDEX - 1]):
         future = False

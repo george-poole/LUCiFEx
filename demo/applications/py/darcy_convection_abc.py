@@ -2,7 +2,7 @@ import scipy.special as sp
 
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
-    FunctionSeries, FiniteDifference, AB1, ConstantSeries, 
+    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, AB1, ConstantSeries, 
     finite_difference_order, ExprSeries, cfl_timestep,
 )
 from lucifex.fem import Constant
@@ -47,7 +47,7 @@ def porous_abc_convection_rectangle(
     cfl_h: str | float = "hmin",
     cfl_courant: float | None = 0.75,
     # time discretization
-    D_adv: FiniteDifference | tuple[FiniteDifference, FiniteDifference] = AB1,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
     D_reac: FiniteDifference = AB1,
     # linear algebra

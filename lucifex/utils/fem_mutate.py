@@ -19,7 +19,8 @@ def set_finite_element_function(
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """
-    Mutates `f`, does not mutate `value`.
+    Mutates `f` by either setting its DoFs array or calling its interpolation
+    method. Does not mutate `value`.
     """
     if isinstance(dofs_indices, StrSlice):
         dofs_indices = as_slice(dofs_indices)
@@ -130,12 +131,12 @@ def _(u, f: Function):
     f.interpolate(lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType))
 
 
-def set_fem_constant(
+def set_finite_element_constant(
     c: Constant,
     value: Constant | float | np.ndarray | Iterable[float],
 ) -> None:
     """
-    Mutates `c`, does not mutate `value`.
+    Mutates `c` by setting its value array. Does not mutate `value`.
     """
     return _set_finite_element_constant(value, c)
 
@@ -176,7 +177,7 @@ def _set_value(obj, *_, **__):
 
 @_set_value.register(Constant)
 def _(obj, value):
-    return set_fem_constant(obj, value)
+    return set_finite_element_constant(obj, value)
 
 
 @_set_value.register(Function)

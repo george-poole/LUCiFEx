@@ -12,7 +12,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpo
 from .enum_types import BoundaryType
 from .dofs_utils import as_dofs_setter, SpatialMarkerAlias
 from .mesh_utils import mesh_coordinates, mesh_vertices
-from .fem_typecast import finite_element_function, function_space
+from .fem_typecast import create_function, function_space
 from .fem_mutate import set_finite_element_function
 
 
@@ -80,7 +80,7 @@ class DofsPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = finite_element_function(fs, self._base)
+        f = create_function(fs, self._base)
         if correct:
             self._dofs_corrector(f)
         return f
@@ -167,7 +167,7 @@ class SpatialPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = finite_element_function(fs, self._base)
+        f = create_function(fs, self._base)
         if correct:
             self._dofs_corrector(f)
         return f
@@ -176,7 +176,7 @@ class SpatialPerturbation:
         self,
         fs: FunctionSpace,
     ) -> Function:
-        return finite_element_function(fs, self._noise)
+        return create_function(fs, self._noise)
 
     def combine_base_noise(
         self,
@@ -193,7 +193,7 @@ class SpatialPerturbation:
                 base = self.base(fs, False) 
             perturbation = self.noise(fs)
             perturbed = operator(base, perturbation)
-        f = finite_element_function(fs, perturbed)
+        f = create_function(fs, perturbed)
         if correct:
             self._dofs_corrector(f)
         if name is not None:

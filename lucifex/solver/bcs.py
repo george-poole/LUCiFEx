@@ -14,7 +14,7 @@ from dolfinx.fem import (
 
 from ..utils.fem_utils import is_scalar, is_vector
 from ..utils.enum_types import BoundaryType
-from ..utils.fem_typecast import finite_element_function, finite_element_constant
+from ..utils.fem_typecast import create_function, create_constant
 from ..utils.measure_utils import create_tagged_measure
 from ..utils.dofs_utils import (
     as_spatial_marker,
@@ -105,7 +105,7 @@ class BoundaryConditions:
                     else:
                         dbc = dirichletbc(uD, dofs, fs.sub(i))
                 else:
-                    uD = finite_element_function(fs, uD, i, try_identity=True)
+                    uD = create_function(fs, uD, i, try_identity=True)
                     if i is None:
                         dbc = dirichletbc(uD, dofs)
                     else:
@@ -216,13 +216,13 @@ class BoundaryConditions:
                     pass 
                 elif isinstance(g, Iterable):
                     if all(isinstance(gi, (float, int)) for gi in g):
-                        g = finite_element_constant(fs.mesh, g)
+                        g = create_constant(fs.mesh, g)
                     else:
-                        g = finite_element_function(fs, g, i)
+                        g = create_function(fs, g, i)
                 elif isinstance(g, (float, int)):
-                    g = finite_element_constant(fs.mesh, g)
+                    g = create_constant(fs.mesh, g)
                 else:
-                    g = finite_element_function(fs, g, i)
+                    g = create_function(fs, g, i)
 
                 tags[b].append(tag)
                 markers[b].append(m)

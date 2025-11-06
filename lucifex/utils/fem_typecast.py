@@ -14,7 +14,7 @@ from .fem_utils import (
     is_same_element, function_subspace,
     extract_mesh, is_vector, is_component_space, VectorError
 )
-from .py_utils import MultipleDispatchTypeError, optional_lru_cache
+from .py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache
 from .fem_mutate import set_finite_element_function
 
 
@@ -86,10 +86,11 @@ def _function_space(
     return function_subspace(fs, subspace_index)
 
 
-def finite_element_function(
+def create_function(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
     value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     subspace_index: int | None = None,
+    dofs_indices: Iterable[int] | StrSlice | None = None,
     name: str | None = None,
     try_identity: bool = False,
     use_cache: bool | EllipsisType = False,
@@ -118,17 +119,17 @@ def finite_element_function(
         if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
             return value
         if use_cache is True:
-            f = _cached_finite_element_function(fs, subspace_index, name)
+            f = _create_function(fs, subspace_index, name)
         else:
             fs = function_space(fs, subspace_index, bool(use_cache))
             f = Function(fs, name=name)
 
-    set_finite_element_function(f, value)
+    set_finite_element_function(f, value, dofs_indices)
     return f
 
 
 @lru_cache
-def _cached_finite_element_function(
+def _create_function(
     fs_hashable: tuple, 
     subspace_index: int | None,
     name: str | None,
@@ -138,7 +139,7 @@ def _cached_finite_element_function(
 
 
 @optional_lru_cache
-def finite_element_subfunctions(
+def get_subfunctions(
     u: Function,  
     collapse: bool = True,
 ) -> tuple[Function, ...]:
@@ -148,7 +149,7 @@ def finite_element_subfunctions(
         return u.split()
 
 
-def finite_element_function_components(
+def get_component_functions(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
@@ -171,22 +172,18 @@ def finite_element_function_components(
         names = tuple(f'{u_name}_{i}' for i in range(dim))
 
     if isinstance(u, Function) and is_component_space(u.function_space):
-        # e.g. vector-valued u ∈ P⨯P
-        ## fs = function_space(fs, use_cache=use_fs_cache)
-        ## f = _finite_element_function_components(use_cache=use_cache)(fs, names)
-        ## u = [ui.collapse() for ui in u.split()]
-        ## u = finite_element_subfunctions(u)
+        # e.g. `u(𝐱) ∈ P₁⨯P₁`
         return tuple(
-            finite_element_function(fs, i.collapse(), name=n, use_cache=use_cache) 
+            create_function(fs, i.collapse(), name=n, use_cache=use_cache) 
             for i, n in zip(u.split(), names, strict=True)
         )
     else:
-        # e.g. vector-valued u ∈ BDM
-        u = finite_element_function((*fs, dim), u, use_cache=Ellipsis)
-        return finite_element_function_components(fs, u, names, use_cache)
+        # e.g. `u(𝐱) ∈ BDM`
+        u = create_function((*fs, dim), u, use_cache=Ellipsis)
+        return get_component_functions(fs, u, names, use_cache)
 
 
-def finite_element_constant(
+def create_constant(
     mesh: Mesh,
     value: float | Iterable[float] | Constant,
     try_identity: bool = False,
@@ -197,19 +194,19 @@ def finite_element_constant(
     if try_identity and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
         return value
     else:
-        return _finite_element_constant(value, mesh)
+        return _create_constant(value, mesh)
 
 @singledispatch
-def _finite_element_constant(value, _):
+def _create_constant(value, _):
     raise MultipleDispatchTypeError(value)
 
-@_finite_element_constant.register(float)
-@_finite_element_constant.register(int)
+@_create_constant.register(float)
+@_create_constant.register(int)
 def _(value, mesh: Mesh,):
     return Constant(mesh, float(value))
 
 
-@_finite_element_constant.register(Iterable)
+@_create_constant.register(Iterable)
 def _(value: Iterable[float], mesh: Mesh):
     if all(isinstance(i, (float, int)) for i in value):
         value = [float(i) for i in value]
@@ -219,12 +216,20 @@ def _(value: Iterable[float], mesh: Mesh):
 
 
 def _as_function_space_tuple(
-    elem: tuple[str, int] | tuple[Mesh, str, int], 
+    elem: tuple[str, int] 
+    | tuple[str, int, int] 
+    | tuple[Mesh, str, int] 
+    | tuple[Mesh, str, int, int], 
     u: Function | Expr,
-) -> tuple[Mesh, str, int]:
+) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
     match elem:
-        case mesh, fam, deg:
-            return elem
+        case mesh, fam, deg, dim:
+            return mesh, fam, deg, dim
+        case mesh, fam, deg if isinstance(mesh, Mesh):
+            return mesh, fam, deg
+        case fam, deg, dim:
+            mesh = extract_mesh(u)
+            return mesh, fam, deg, dim
         case fam, deg:
             mesh = extract_mesh(u)
             return mesh, fam, deg

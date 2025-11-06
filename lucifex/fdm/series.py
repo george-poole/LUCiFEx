@@ -8,7 +8,7 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_finite_element_function, extract_mesh, function_space
+from ..utils import set_finite_element_constant, set_finite_element_function, extract_mesh, function_space
 from ..utils.deferred import Writer
 from ..utils.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
@@ -506,9 +506,9 @@ class ConstantSeries(
     @staticmethod
     def _set_container(container: Constant, value):
         if value is Unsolved:
-            return set_fem_constant(container, value.value)
+            return set_finite_element_constant(container, value.value)
         else:
-            return set_fem_constant(container, value)
+            return set_finite_element_constant(container, value)
 
     @property
     def mesh(self) -> Mesh:

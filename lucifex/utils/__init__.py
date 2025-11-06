@@ -44,11 +44,11 @@ from .mesh_utils import(
     n_entities,
     is_cartesian,
 )
-from .fem_mutate import (set_fem_constant, set_finite_element_function, 
+from .fem_mutate import (set_finite_element_constant, set_finite_element_function, 
                            interpolate_finite_element_function, set_value)
-from .fem_typecast import finite_element_constant, finite_element_function, function_space, finite_element_function_components
+from .fem_typecast import create_constant, create_function, function_space, get_component_functions
 from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
-from .py_utils import (filter_kwargs, log_texec, replicate_callable, ToDoError,
+from .py_utils import (filter_kwargs, log_texec, replicate_callable, ToDoError, nested_dict,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
 from .str_utils import str_indexed
 from .norm import L_norm, l_norm, div_norm

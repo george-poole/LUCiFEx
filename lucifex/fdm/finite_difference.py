@@ -53,7 +53,7 @@ class FiniteDifference:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
 
-        self.trial = self.trial_default
+        self._trial = self.trial_default
     
     @property
     def coefficients(self) -> dict[int, float]:
@@ -106,7 +106,7 @@ class FiniteDifference:
     def __call__(
         self,
         u: Series | Expr | Function | Constant,
-        trial: FunctionSeries | bool | None = None,
+        trial: bool | FunctionSeries | None = None,
         strict: bool = False,
     ) -> Expr:
         """
@@ -124,9 +124,13 @@ class FiniteDifference:
                 f"Order of finite difference operator '{self.name}' exceeds order of series '{u.name}'",
             )
 
-        if trial is None:
-            trial = self.trial if isinstance(u, FunctionSeries) else trial
+        if isinstance(trial, FunctionSeries):
+            trial = u is trial
 
+        if trial is None:
+            trial = self._trial if isinstance(u, FunctionSeries) else False
+
+        assert isinstance(trial, bool)
         if trial:
             if not isinstance(u, FunctionSeries):
                 raise TypeError(f'Expected `FunctionSeries` type, not `{type(u)}`.')
@@ -372,8 +376,8 @@ class FiniteDifferenceArgwise:
     Argument-wise application of finite difference operators to time-dependent
     arguments of an expression.
 
-    To combine individual `FiniteDifference` operators into a `FiniteDifferenceArgwise`, 
-    use either the class constructor or `@` operation.
+    To combine individual `FiniteDifference` operators into a `FiniteDifferenceArgwise` operator, 
+    use either the class constructor or the `@` infix.
 
     e.g. `FiniteDifferenceArgwise(AB2, CN)` or `AB2 @ CN`
     """

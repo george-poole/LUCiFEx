@@ -19,7 +19,8 @@ from lucifex.solver import BoundaryConditions
 def poisson(
     u: Function | FunctionSpace,
     f: Function | Constant | Expr,
-) -> tuple[Form, Form]:
+    bcs: BoundaryConditions | None = None,
+) -> list[Form]:
     """
     `∇²u = f`
     """
@@ -31,7 +32,12 @@ def poisson(
     u_trial = TrialFunction(fs)
     F_lhs = -inner(grad(v), grad(u_trial)) * dx
     F_rhs = -inner(v, f) * dx
-    return F_lhs, F_rhs
+    forms = [F_lhs, F_rhs]
+    if bcs is not None:
+        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
+        F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
+        forms.append(F_neumann)
+    return forms
 
 
 def diffusion(

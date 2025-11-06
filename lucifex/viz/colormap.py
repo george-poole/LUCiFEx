@@ -12,7 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 
 from ..mesh.cartesian import CellType
-from ..utils import (is_scalar, grid, triangulation, finite_element_function, is_cartesian, 
+from ..utils import (is_scalar, grid, triangulation, create_function, is_cartesian, 
                      filter_kwargs, MultipleDispatchTypeError, UnstructuredQuadError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax
@@ -25,7 +25,7 @@ def _plot_colormap(
     f: Function,
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
-    use_cache: bool = False,
+    use_cache: bool | tuple[bool, bool] = (True, False),
     **kwargs,
 ) -> None:
     """Plots colormap of a scalar-valued function"""
@@ -39,7 +39,7 @@ def _plot_colormap(
     expr: Expr,
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
-    use_cache: bool = False,
+    use_cache: bool | tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
@@ -82,7 +82,7 @@ def _(
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = (True, False),
     **kwargs,
 ):
     if not is_scalar(f):
@@ -91,6 +91,8 @@ def _(
     mesh = f.function_space.mesh
     cell_type = mesh.topology.cell_name()
 
+    if isinstance(use_cache, bool):
+        use_cache = (use_cache, use_cache)
     use_mesh_cache, use_func_cache = use_cache
 
     if cartesian is None:
@@ -122,13 +124,13 @@ def _(
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
-    use_cache: bool = False,
+    use_cache: bool | tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
 ):
     if mesh is None:
         mesh = extract_mesh(expr)
-    f = finite_element_function((mesh, 'P', 1), expr)
+    f = create_function((mesh, 'P', 1), expr)
     return _plot_colormap(
         f,
         fig, 
@@ -192,7 +194,7 @@ def plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     levels: Iterable[float] | int | None = None,
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = (True, False),
     **kwargs,
 ) -> None:
     """Plots contours of a scalar-valued function"""
@@ -203,7 +205,7 @@ def _plot_contours(
     ax: Axes,
     f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     levels: Iterable[float] | int | None,
-    use_cache: tuple[bool, bool],
+    use_cache: bool | tuple[bool, bool],
     **kwargs,
 ) -> None:
     if isinstance(f, tuple):
@@ -229,12 +231,14 @@ def _plot_contours(
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
 
     else:
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
         use_mesh_cache, use_func_cache = use_cache
         cartesian = is_cartesian(use_cache=use_mesh_cache)(f.function_space.mesh)
         if not cartesian:
             trigl = triangulation(use_cache=use_mesh_cache)(f.function_space.mesh)
             f_trigl = triangulation(use_cache=use_func_cache)(f)
-            return _plot_contours(ax, (trigl, f_trigl), levels, **kwargs)
+            return _plot_contours(ax, (trigl, f_trigl), levels, use_cache, **kwargs)
         else:
             x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
             f_grid = grid(use_cache=use_func_cache)(f)
