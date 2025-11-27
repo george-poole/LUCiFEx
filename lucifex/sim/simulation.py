@@ -40,7 +40,7 @@ class Simulation:
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
         parameter_file: str | None = None,
         checkpoint_file: str | None = None,
-        texec_file: str | None = None,
+        timing_file: str | None = None,
     ):
         self.solvers = list(solvers)
         self.t = t 
@@ -50,7 +50,7 @@ class Simulation:
         self.dir_path = dir_path
         self.parameter_file = parameter_file
         self.checkpoint_file = checkpoint_file
-        self.texec_file = texec_file
+        self.timing_file = timing_file
         self.store_delta = store_delta
         self.write_delta = write_delta
         self.write_file = write_file
@@ -201,7 +201,7 @@ def configure_simulation(
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
     parameter_file: str = 'PARAMETERS',
     checkpoint_file: str = 'CHECKPOINT',
-    texec_file: str = 'TEXEC',
+    timing_file: str = 'TIMING',
     dir_base: str = './',
     dir_params: Iterable[str] | str = '',
     dir_prefix: str | None = None,
@@ -257,7 +257,7 @@ def configure_simulation(
             write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = ...,
             parameter_file: str = ...,
             checkpoint_file: str = ...,
-            texec_file: str = ...,
+            timing_file: str = ...,
             dir_base: str = ...,
             dir_params: Iterable[str] | str = ...,
             dir_prefix: str | None = ...,   
@@ -324,7 +324,7 @@ def configure_simulation(
                     write_file=write_file, 
                     parameter_file=parameter_file, 
                     checkpoint_file=checkpoint_file, 
-                    texec_file=texec_file,
+                    timing_file=timing_file,
                 )(*args, **kwargs)
         
         return _

@@ -48,7 +48,7 @@ from .fem_mutate import (set_finite_element_constant, set_finite_element_functio
                            interpolate_finite_element_function, set_value)
 from .fem_typecast import create_constant, create_function, function_space, get_component_functions
 from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
-from .py_utils import (filter_kwargs, log_texec, replicate_callable, ToDoError, nested_dict,
+from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
 from .str_utils import str_indexed
 from .norm import L_norm, l_norm, div_norm

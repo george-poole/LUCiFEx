@@ -1,7 +1,8 @@
 import argparse 
 from collections.abc import Iterable
 from types import GenericAlias, UnionType
-from typing import Callable, Any
+from typing import Callable, Any, Hashable
+import time
 from inspect import signature, Parameter, Signature
 
 from typing import Callable
@@ -11,7 +12,7 @@ from ..fem import Constant
 from ..fdm import ConstantSeries
 from ..solver import Solver, Evaluation, IBVP, IVP
 from ..io import write, write_checkpoint, read_checkpoint, reset_directory
-from ..utils import log_texec
+from ..utils import log_timing
 
 from ..utils.deferred import Writer, Stopper
 from .deferred import (
@@ -19,7 +20,7 @@ from .deferred import (
     as_stopper, as_writer, has_simulation_arg,
 )
 from .simulation import configure_simulation, Simulation
-from .utils import write_texec, arg_name_collisions, ArgNameCollisionError
+from .utils import write_timing, arg_name_collisions, ArgNameCollisionError
 
 
 def run(
@@ -30,7 +31,7 @@ def run(
     n_init: int | None = None,
     resume: bool = False, 
     overwrite: bool | None = None,
-    texec: bool | dict = False,
+    timing: bool | dict[Hashable, list[float]] = False,
     stoppers: Iterable[Stopper | Callable[[], bool] | CreateStopper] = (),
     writers: Iterable[Writer | Callable[[], None] | CreateWriter] = (),
 ) -> None:    
@@ -100,18 +101,21 @@ def run(
     if t_stop is not None:
         _time_stoppers.append(Stopper(lambda: not t[0].value < t_stop))
 
-    _texec = {} if texec is True else texec if isinstance(texec, dict) else None
-    if isinstance(_texec, dict):
+    _timing = {} if timing is True else timing if isinstance(timing, dict) else None
+    if isinstance(_timing, dict):
         for s in set((*simulation.solvers, *solvers_init)):
-            s.solve = log_texec(s.solve, _texec, f'{s.series.name}_{s.solve.__name__}')
+            s.solve = log_timing(s.solve, _timing, f'{s.series.name}_{s.solve.__name__}')
         for w in _writers:
-            w.write = log_texec(w.write, _texec, f'{w.name}_{w.write.__name__}')
+            w.write = log_timing(w.write, _timing, f'{w.name}_{w.write.__name__}')
+        _timing[run.__name__] = []
 
     while all(not s.stop(t[0]) for s in _time_stoppers):
         if _n < n_init:
             _solvers = solvers_init
         else:
             _solvers = simulation.solvers
+        if _timing:
+            t_run_start = time.perf_counter()
         [s.solve() for s in _solvers[:dt_solver_index + 1]]
         t.update(t[0].value + _dt.value, future=True)
         [s.solve() for s in _solvers[dt_solver_index + 1:]]
@@ -121,11 +125,14 @@ def run(
         [s.forward(t[0]) for s in simulation.series]
         t.forward(t[0])
         _n += 1
+        if _timing:
+            t_run_stop = time.perf_counter()
+            _timing[run.__name__].append(t_run_stop - t_run_start)
 
     if _writers:
         write_checkpoint(series_ics, t, simulation.checkpoint_file, simulation.dir_path)
-        if _texec:
-            write_texec(_texec, simulation.dir_path, simulation.texec_file)
+        if _timing:
+            write_timing(_timing, simulation.dir_path, simulation.timing_file)
 
 
 def run_from_cli(

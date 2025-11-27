@@ -1,7 +1,7 @@
 import csv
 from inspect import signature
 from collections.abc import Iterable
-from typing import Callable
+from typing import Callable, Hashable
 
 from ..io.utils import file_path_ext
 
@@ -32,20 +32,20 @@ class ArgNameCollisionError(RuntimeError):
         super().__init__(msg)
 
 
-def write_texec(
-    texec_log: dict[str, list[float]],  
+def write_timing(
+    logged: dict[Hashable, list[float]],  
     dir_path: str,
     file_name: str,
     
 ):
     file_path = file_path_ext(dir_path, file_name, 'csv')
-    n_rows = max(len(i) for i in texec_log.values())
+    n_rows = max(len(i) for i in logged.values())
     with open(file_path, 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(texec_log.keys())
+        writer.writerow(logged.keys())
         for i in range(n_rows):
             row = []
-            for v in texec_log.values():
+            for v in logged.values():
                 try:
                     row.append(v[i])
                 except IndexError:
@@ -53,7 +53,7 @@ def write_texec(
             writer.writerow(row)
 
 
-def load_texec(
+def load_timing(
     dir_path: str,
     file_name: str,
 ) -> dict[str, list[float]]:
@@ -63,9 +63,9 @@ def load_texec(
         for i, row in enumerate(reader):
             if i == 0:
                 keys = row
-                texec_log = {k: list() for k in keys}
+                logged = {k: list() for k in keys}
             else:
-                [texec_log[k].append(float(i)) for k, i in zip(keys, row, strict=True) if i != '']
+                [logged[k].append(float(i)) for k, i in zip(keys, row, strict=True) if i != '']
 
-    return texec_log
+    return logged
 

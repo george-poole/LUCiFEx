@@ -60,7 +60,7 @@ def replicate_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P,
 
 P = ParamSpec('P')
 R = TypeVar('R')
-def log_texec(
+def log_timing(
     func: Callable[P, R], 
     logged: dict[Hashable, list[float]],
     key: Hashable | None = None,
