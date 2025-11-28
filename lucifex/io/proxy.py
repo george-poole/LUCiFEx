@@ -7,6 +7,7 @@ from .load import load
 
 
 ObjectName: TypeAlias = str
+ObjectType: TypeAlias = type
 FileName: TypeAlias = str
 
 class Proxy:
@@ -20,7 +21,7 @@ class Proxy:
     def __init__(
         self, 
         func: Callable[[Unpack[tuple]], Any],
-        objs: list[tuple[ObjectName, type, FileName, Unpack[tuple]]], 
+        objs: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
         use_cache: bool = True,
         clear_cache: bool = False
     ):
@@ -48,7 +49,7 @@ class Proxy:
 
 @overload
 def proxy(
-    obj: tuple[ObjectName, type, FileName, Unpack[tuple]], 
+    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -62,7 +63,7 @@ def proxy(
 @overload
 def proxy(
     func: Callable[[Any], Any], 
-    obj: tuple[ObjectName, type, FileName, Unpack[tuple]], 
+    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -75,13 +76,13 @@ def proxy(
 
 @overload
 def proxy(
-    obj: list[tuple[ObjectName, type, FileName, Unpack[tuple]]], 
+    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
 ) -> Proxy:
     """
-    `proxy(['x', 'y', ...]) -> ('x', 'y', ...)`
+    `proxy(['x', 'y', ...]) -> (x, y, ...)`
     """
     ...
 
@@ -89,13 +90,13 @@ def proxy(
 @overload
 def proxy(
     func: Callable[..., Any], 
-    obj: list[tuple[ObjectName, type, FileName, Unpack[tuple]]],
+    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]],
     *, 
     use_cache: bool = True,
     clear_cache: bool = False
 ) -> Proxy:
     """
-    `proxy(f, ['x', 'y', ...]) -> f('x', 'y', ...)`
+    `proxy(f, ['x', 'y', ...]) -> f(x, y, ...)`
     """
     ...
 
@@ -127,7 +128,7 @@ class CoProxy(Proxy):
     def __init__(
         self, 
         func: Callable[[Unpack[tuple]], Any],
-        objs: list[tuple[ObjectName, type, FileName, Unpack[tuple]]], 
+        objs: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
         use_cache: bool = True,
         clear_cache: bool = False,
         vectorize: bool = True,
@@ -157,7 +158,7 @@ class CoProxy(Proxy):
 
 @overload
 def co_proxy(
-    obj: tuple[ObjectName, type, FileName, Unpack[tuple]], 
+    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -171,7 +172,7 @@ def co_proxy(
 @overload
 def co_proxy(
     func: Callable[[Any], Any], 
-    obj: tuple[ObjectName, type, FileName, Unpack[tuple]], 
+    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False,
@@ -188,7 +189,7 @@ def co_proxy(
 
 @overload
 def co_proxy(
-    obj: list[tuple[ObjectName, type, FileName, Unpack[tuple]]], 
+    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False,
@@ -204,7 +205,7 @@ def co_proxy(
     func: Callable[..., Any], 
     obj: list[
         tuple[ObjectName, FileName, Unpack[tuple]]
-        | tuple[ObjectName, type, FileName, Unpack[tuple]]
+        | tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]
     ],
     *, 
     use_cache: bool = True,

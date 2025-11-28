@@ -66,10 +66,10 @@ class Constant(DOLFINxConstant):
 
     def __str__(self) -> str:
         s = self.name
-        if self.time_index is None:
+        if self._index is None:
             return s
         else:
-            return str_indexed(s, self.time_index, 'superscript', True)
+            return str_indexed(s, self._index, 'superscript', True)
         
     def __bool__(self) -> bool:
         return not bool(np.all(self.value == 0))

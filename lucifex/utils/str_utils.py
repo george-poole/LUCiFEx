@@ -29,6 +29,7 @@ SUBSCRIPTS = {
     '9': '₉',
 }
 
+
 def str_indexed(
     name: str, 
     n: int,

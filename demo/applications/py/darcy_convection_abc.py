@@ -51,8 +51,8 @@ def porous_abc_convection_rectangle(
     D_diff: FiniteDifference = AB1,
     D_reac: FiniteDifference = AB1,
     # linear algebra
-    psi_petsc: OptionsPETSc | None = None,
-    abc_petsc: OptionsPETSc | None = None,   
+    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
+    abc_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
 ):
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)

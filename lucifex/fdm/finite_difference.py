@@ -23,6 +23,7 @@ class FiniteDifference:
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
         name: str | None = None,
+        index: str | None = None,
     ) -> None:
 
         if not isinstance(indices_coeffs, dict):
@@ -48,10 +49,11 @@ class FiniteDifference:
             self._init = init
         else:
             raise TypeError
-        
+                
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
+        self._index = index
 
         self._trial = self.trial_default
     
@@ -66,10 +68,6 @@ class FiniteDifference:
     @property
     def order(self) -> int:
         return Series.FUTURE_INDEX - min(self.coefficients)
-    
-    @property
-    def name(self) -> str:
-        return self._name
 
     @property
     def init(self) -> Self | None:
@@ -83,8 +81,21 @@ class FiniteDifference:
     def is_explicit(self) -> bool:
         return not self.is_implicit
     
-    def __str__(self):
+    @property
+    def name(self) -> str:
+        if self._index is not None:
+            return f'{self._name}{self._index}'
+        else:
+            return self._name
+        
+    def __repr__(self):
         return self.name
+    
+    def __str__(self):
+        if self._index is not None:
+            return str_indexed(self._name, self._index, 'subscript')
+        else:
+            return self._name
 
     @overload
     def __call__(
@@ -149,7 +160,6 @@ class FiniteDifference:
     #     return other.__matmul__(self)
         
         
-
 class FiniteDifferenceDerivative(FiniteDifference):
 
     def __init__(
@@ -160,8 +170,9 @@ class FiniteDifferenceDerivative(FiniteDifference):
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
         name: str | None = None,
+        index: str | None = None,
     ) -> None:
-        super().__init__(indices_coeffs, init, name)
+        super().__init__(indices_coeffs, init, name, index)
         self._denominator = denominator
 
     def __call__(
@@ -262,12 +273,13 @@ def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
     if init is None:
         init = FE
 
-    return FiniteDifference(d, init, str_indexed('AB', n, 'subscript'))
+    return FiniteDifference(d, init, 'AB', n)
 
 
 AB1 = AB(1)
 AB2 = AB(2)
 AB3 = AB(3)
+
 
 def AM(
     n: int, 
@@ -301,7 +313,7 @@ def AM(
     if init is None:
         init = BE
 
-    return FiniteDifference(d, init, str_indexed('AM', n, 'subscript'))
+    return FiniteDifference(d, init, 'AM', n)
 
 
 AM1 = AM(1)
@@ -346,7 +358,7 @@ def BDF(
     if init is None:
         init = DT
 
-    return FiniteDifferenceDerivative(lambda dt: dt, d, init, str_indexed('BDF', n, 'subscript'))
+    return FiniteDifferenceDerivative(lambda dt: dt, d, init, 'BDF', n)
 
 
 BDF1 = BDF(1)
@@ -389,8 +401,6 @@ class FiniteDifferenceArgwise:
     ):
         self._fd_args = tuple(args)
         self._fd_kws = kws.copy()
-        if name is None:
-            name = '◦'.join([fd.name for fd in self.finite_differences])
         self._name = name
 
     @overload
@@ -452,9 +462,6 @@ class FiniteDifferenceArgwise:
         
         return func(*_args, **_kws)
     
-    @property
-    def name(self) -> str:
-        return self._name
     
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:
@@ -475,8 +482,21 @@ class FiniteDifferenceArgwise:
     def __iter__(self):
         return iter(self.finite_differences)
     
-    def __str__(self):
+    @property
+    def name(self) -> str:
+        if self._name is None:
+            return ' @ '.join([fd.name for fd in self.finite_differences])
+        else:
+            return self._name
+    
+    def __repr__(self):
         return self.name
+    
+    def __str__(self):
+        if self._name is None:
+            return '◦'.join([str(fd) for fd in self.finite_differences])
+        else:
+            return self._name
     
     def __matmul__(
         self, 

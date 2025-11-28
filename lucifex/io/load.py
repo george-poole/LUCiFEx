@@ -1,6 +1,6 @@
 from typing import Protocol, Any, TypeVar, Generic, Iterable, get_args
 from typing_extensions import Self
-from types import EllipsisType, UnionType
+from types import UnionType
 import pickle as pkl
 
 import numpy as np
@@ -207,7 +207,7 @@ def load_txt_dict(
     eval_locals: Iterable[type] = (),
     sep: str = ' = ',
     skip: Iterable[int | str] = (),
-) -> dict[str, Any | EllipsisType]:
+) -> dict[str, Any]:
 
     file_path = file_path_ext(dir_path, file_name, 'txt', mkdir=False)
     params = {}
@@ -223,10 +223,12 @@ def load_txt_dict(
                 continue
             val_str = val_str.strip() 
             try:
+                for i in eval_locals:
+                    val_str = val_str.replace(str(i), repr(i))
                 val = eval(val_str, globals(), {i.__name__: i for i in eval_locals})
                 params[name] = val
             except Exception as ex:
-                params[name] = type(ex).__name__
+                params[name] = repr(ex)
 
     return params
 
@@ -340,15 +342,3 @@ def load(
         return load_obj(use_cache=use_cache, clear_cache=clear_cache)
     except TypeError:
         return load_obj   
-
-
-
-# def load_parameter(
-#     name: str,
-#     dir_path: str,
-#     file_name: str,
-#     eval_locals: Iterable[type] = (),
-#     sep: str = ' = ',
-#     skip: Iterable[int | str] = (),
-# ) -> Any | EllipsisType:
-#     return load_txt_dict(dir_path, file_name, eval_locals, sep, skip)[name]

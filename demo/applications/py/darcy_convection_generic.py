@@ -57,8 +57,8 @@ def darcy_convection_generic(
     # c_stabilization: str | None = None,
     # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
-    psi_petsc: OptionsPETSc | None = None,
-    c_petsc: OptionsPETSc | None = None,
+    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
+    c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
     # optional solvers
     secondary: bool = False,    
     # solvers
