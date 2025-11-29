@@ -1,134 +1,231 @@
-from dolfinx.mesh import Mesh
-from ufl import (as_vector, conditional, as_vector, sqrt, conditional, lt, tanh)
-from ufl.geometry import CellDiameter, MinCellEdgeLength, Circumradius
+from typing import Callable
+from functools import wraps
+
+from ufl import conditional, sqrt, conditional, lt, tanh, tr
 from ufl.core.expr import Expr
+from ufl.geometry import GeometricCellQuantity
 
 from lucifex.fem import Function, Constant
-from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceArgwise, ImplicitDiscretizationError
+from lucifex.fdm import (
+    BE, FiniteDifference, FiniteDifferenceArgwise, Series, 
+    ConstantSeries, ImplicitDiscretizationError,
+)
 from lucifex.fdm.ufl_operators import inner, grad
+from lucifex.utils import is_tensor, is_vector, extract_mesh, cell_size_quantity
+from lucifex.utils.py_utils import StrEnum
 
+
+class TauType(StrEnum):
+    CODINA = 'codina'
+    SHAKIB = 'shakib'
+    COTH = 'coth'
+    COTH_APPROX = 'coth_approx'
+    UPWIND = 'upwind'
+    TRANSIENT = 'transient'
+
+
+def supg_stabilization(
+    supg: str | Callable,
+    h: str | GeometricCellQuantity,
+    a: Function | Constant | Series,
+    d: Function | Constant | Series, 
+    r: Function | Constant | Series = None,
+    dt: Constant | ConstantSeries | None = None,
+    D_adv: FiniteDifference | None = None,
+    D_diff: FiniteDifference | None = None,
+    D_reac: FiniteDifference | None = None,
+    D_dt: FiniteDifference | None = None,
+    phi = 1,
+) -> tuple[Expr, Expr]:
+    """
+    Returns `(𝜏, 𝐚ᵉᶠᶠ)`
+    """
+    if isinstance(dt, ConstantSeries):
+        dt = dt[0]
+
+    if callable(supg):
+        tau = supg(*[arg for arg in (h, a, d, r, dt) if arg is not None])
+    else:
+        if r is None:
+            r = 0
+        if D_adv is not None:
+            a = (1 / phi) * effective_velocity(a, d, D_adv, D_diff)
+        if D_diff is not None:
+            d = (1 / phi) *  effective_diffusivity(d, D_diff)
+        if D_reac is not None:
+            r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
+        else:
+            r_eff = r
+
+        match supg:
+            case TauType.CODINA:
+                tau = tau_codina(h, a, d, r_eff)
+            case TauType.SHAKIB:
+                tau = tau_shakib(h, a, d, r_eff)
+            case TauType.COTH:
+                tau = tau_coth(h, a, d)
+            case TauType.TRANSIENT:
+                r_eff = effective_reaction(r, D_reac)
+                tau = tau_transient(h, a, d, r, dt)
+            case TauType.UPWIND:
+                tau = tau_upwind(h, a)
+            case _:
+                raise ValueError(f'{supg} SUPG method not implemented.')
+            
+    return tau, a
+
+
+def tau_function(func):
+    @wraps(func)
+    def _(h, a, d, *args, **kwargs):
+        if isinstance(h, str):
+            mesh = extract_mesh(a)
+            h = cell_size_quantity(mesh, h)
+        if is_vector(a):
+            a = sqrt(inner(a, a))
+        if is_tensor(d):
+            mesh = extract_mesh(d)
+            d = tr(d) / mesh.geometry.dim
+        return func(h, a, d, *args, **kwargs)
+    return _
+
+
+@tau_function
+def tau_codina(h, a, d, r) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = (2|𝐚| / h  +  4D / h²  +  R)⁻¹`
+    """
+    return ((2 * a / h) + (4 * d / h**2) + r) ** (-1) 
+
+
+@tau_function
+def tau_shakib(h, a, d, r) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = ( (2|𝐚| / h)²  +  9(4D / h²)²  +  R²)⁻¹ᐟ²`
+    """
+    return ((2 * a / h)**2 + 9 * (4 * d / h**2)**2 + r**2) ** (-0.5) 
+
+
+@tau_function
+def tau_transient(h, a, d, r, dt) -> Expr:
+    """
+    `∂u/∂t + 𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = ( (2 / Δt)² + (2|𝐚| / h)²  +  (4D / h²)²  +  R²)⁻¹ᐟ²`
+    """
+    return ((2 / dt)**2 + (2 * a / h)**2 + (2 * d / h**2)**2 + r**2) ** (-0.5) 
+
+
+@tau_function
+def tau_coth(h, a, d) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = h / 2|𝐚| ξ(Pe)`
+
+    where `Pe = |𝐚|h / 2D` and `ξ(Pe) = coth(Pe) - 1/Pe`.
+    """
+    return (0.5 * h / a) * xi(peclet(h, a, d))
+
+
+@tau_function
+def tau_coth_approx(h, a, d) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = h / 2|𝐚| ξ(Pe)`
+
+    where `Pe = |𝐚|h / 2D` and `ξ(Pe)` is approximated.
+    """
+    return (0.5 * h / a) * xi_approx(peclet(h, a, d))
+
+
+@tau_function
+def tau_upwind(h, a) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = h / 2|𝐚|`
+    """
+    return (0.5 * h / a) 
+
+
+def peclet(h, a, d) -> Expr | float:
+    """
+    `Pe = |𝐚|h / 2D`
+    """
+    return 0.5 * a * h / d
+
+
+def xi(Pe):
+    """
+    `ξ(Pe) = coth(Pe) - 1/Pe`
+    """
+    return 1/tanh(Pe) - 1/Pe
+
+
+def xi_approx(Pe):
+    """
+    `ξ(Pe) = coth(Pe) - 1/Pe` \\
+    `≈ Pe / 3` if `Pe < 3` \\
+    `≈ 1` otherwise
+    """
+    return conditional(lt(Pe, 3), Pe / 3, 1)
+    
 
 # FIXME tensor d
-def supg_velocity(
-    a: Function, 
-    d: Function | Constant,
+def effective_velocity(
+    a: Series, 
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
-    D_diff: FiniteDifference,
-):
+    d: Function | Constant | None = None,
+    D_diff: FiniteDifference | None = None,
+) -> Expr:
     """
-    `𝐚·∇u - ∇·(D∇u) = (𝐚 - ∇D)·∇u - D∇²u` \\
-    `⟹ 𝐚ᵉᶠᶠ = 𝐚 - ∇D` 
+    `𝒟(𝐚·∇u) - ∇·(D𝒟(∇u)) = 𝐚ᵉᶠᶠ·∇uⁿ⁺¹ + ...` \\
     """
     if isinstance(D_adv, FiniteDifference):
         if D_adv.is_explicit:
             raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. concentration')
-        u_future = a[1] * D_adv.explicit_coeff
+        a_eff = BE(a) * D_adv.explicit_coeff
     else:
         D_adv_a, D_adv_u = D_adv
         if D_adv_u.is_explicit:
             raise ImplicitDiscretizationError(D_adv_u, 'Advection term must be implicit w.r.t. concentration')
-        u_future = D_adv_a(a) * D_adv_u.explicit_coeff
+        a_eff = D_adv_a(a) * D_adv_u.explicit_coeff
 
-    u_eff = u_future - grad(d) * D_diff.explicit_coeff
-    return u_eff
+    if d is not None:
+        assert D_diff is not None
+        a_eff -= grad(d) * D_diff.explicit_coeff
+
+    return a_eff
 
 
-def supg_diffusivity(
-    d: Constant,
+def effective_diffusivity(
+    d: Function | Constant,
     D_diff: FiniteDifference,
-):
-    return d * D_diff.explicit_coeff
-
-
-# FIXME
-def supg_reaction(
-    dt: Constant,
-    Da: Constant,
-    D_reac: FiniteDifference | FiniteDifferenceArgwise,
-    r_factor: float = 0.1, # FIXME
-):
-    # NOTE assumes reaction such that `R(s,c) = R(s)R(c)` and `R(s,0) = R(s)`
-    # r_func, r_args = r
-    # s = r_args[0]
-    # match D_reac:
-    #     case D_reac_s, D_reac_c:
-    #         r_coeff = r(D_reac_s(s, False), 0) * D_reac_c.explicit_coeff 
-    #     case D_reac:
-    #         r_coeff = r_func(s[1], 0) * D_reac.explicit_coeff 
-
-    if isinstance(D_reac, tuple):
-        c_trial_coeff = r_factor * D_reac[1].explicit_coeff 
-    else:
-        c_trial_coeff = r_factor * D_reac.explicit_coeff 
-
-    r_eff = (1/dt) * DT.explicit_coeff + Da * c_trial_coeff
-    return r_eff
-
-
-def supg_tau(
-    method: str,
-    mesh: Mesh,
-    u_eff: Expr,
-    d_eff: Expr,
-    r_eff: Expr | float = 0,
-    cell_size: type[MinCellEdgeLength] | type[Circumradius] = CellDiameter,
 ) -> Expr:
-    
-    h = cell_size(mesh)
+    """
+    `∇·(D𝒟(∇u)) = Dᵉᶠᶠ ∇²uⁿ⁺¹ + ...`
+    """
+    d_eff = d * D_diff.explicit_coeff
+    return d_eff
 
-    if method == 'codina':
-        return tau_codina(u_eff, d_eff, r_eff, h)
-    elif method == 'shakib':
-        return tau_shakib(u_eff, d_eff, r_eff, h)
-    elif method == 'upwind':
-        return tau_upwind(u_eff, d_eff, h)
-    elif method == 'upwind_xy':
-        # TODO how to get hx, hy in ufl?
-        return tau_upwind_xy(u_eff, d_eff, h, h)
+
+def effective_reaction(
+    r: Series | Function | Constant,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise,
+    dt: Constant | None = None,
+    D_dt: FiniteDifference | None = None,
+):
+    """
+    `∂u/∂t + 𝒟(Ru) = Rᵉᶠᶠ uⁿ⁺¹ + ...`
+    """
+    if isinstance(D_reac, FiniteDifference):
+        r_eff = BE(r) * D_reac.explicit_coeff
     else:
-        raise RuntimeError(f'Invalid SUPG choice {method}.')
+        D_reac_r, D_reac_u = D_reac
+        r_eff = D_reac_r(r) * D_reac_u.explicit_coeff
 
+    if dt is not None:
+        assert D_dt is not None
+        r_eff += (1 / dt) * D_dt.explicit_coeff
 
-def tau_codina(U_eff, D_eff, R_eff, h) -> Expr:
-    u = sqrt(inner(U_eff, U_eff))
-    return ((2 * u / h) + (4 * D_eff / h**2) + R_eff) ** (-1) 
-
-
-def tau_shakib(U_eff, D_eff, R_eff, h) -> Expr:
-    u = sqrt(inner(U_eff, U_eff))
-    return ((2 * u / h)**2 + 9 * (4 * D_eff / h**2)**2 + R_eff**2) ** (-0.5) 
-
-
-def tau_upwind(U_eff, D_eff, h) -> Expr:
-    u = sqrt(inner(U_eff, U_eff))
-    return (0.5 * h / u) * xi(peclet(u, h, D_eff))
-
-
-def tau_upwind_xy(U_eff, D_eff, hx, hy) -> Expr:
-    ex = as_vector((1, 0))
-    ey = as_vector((0, 1))
-    Ux = inner(ex, U_eff)
-    Uy = inner(ey, U_eff)
-    ux = sqrt(inner(Ux, Ux))
-    uy = sqrt(inner(Uy, Uy))
-    xi_x = xi(peclet(ux, hx, D_eff))
-    xi_y = xi(peclet(uy, hy, D_eff))
-    return 0.5 * (xi_x * ux * hx + xi_y * uy * hy) / inner(U_eff, U_eff)
-
-
-def peclet(a, h, D):
-    return 0.5 * a * h / D
-
-
-def peclet(h, a, eps) -> Expr | float:
-    if all(isinstance(i, (float, int)) for i in (h, a, eps)):
-        return 0.5 * a * h / eps
-    return 0.5 * sqrt(inner(a, a)) * h / eps
-
-
-def xi(Pe):
-    return 1/tanh(Pe) - Pe
-
-
-def xi_approx(Pe):
-    return conditional(lt(Pe, 3), Pe / 3, 1)
+    return r_eff

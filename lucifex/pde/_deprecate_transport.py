@@ -13,7 +13,7 @@ from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
 from lucifex.utils import integral
 
-from .supg import supg_diffusivity, supg_velocity, supg_tau, supg_reaction
+from .supg import effective_diffusivity, effective_velocity, supg_tau, effective_reaction
 
 
 def advection_diffusion(
@@ -56,8 +56,8 @@ def advection_diffusion(
         forms.append(F_neumann)
 
     if supg is not None:
-        u_eff = (1 / phi) * supg_velocity(a, d, D_adv, D_diff)
-        d_eff = (1 / phi) *  supg_diffusivity(d, D_diff)
+        u_eff = (1 / phi) * effective_velocity(a, d, D_adv, D_diff)
+        d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
         tau = supg_tau(supg, u.function_space.mesh, u_eff, d_eff)        
         res = dudt + adv + diff
         F_res = tau * inner(grad(v), u_eff) * res * dx
@@ -101,8 +101,8 @@ def advection_diffusion_reaction(
     forms.append(F_reac)
 
     if supg is not None:
-        u_eff = (1 / phi) * supg_velocity(a, d, D_adv, D_diff)
-        d_eff = (1 / phi) * supg_diffusivity(d, D_diff)
+        u_eff = (1 / phi) * effective_velocity(a, d, D_adv, D_diff)
+        d_eff = (1 / phi) * effective_diffusivity(d, D_diff)
         r_eff = 0 # FIXME (1 / phi) * supg_reaction(dt, Da, D_reac)
         tau = supg_tau(supg, u.function_space.mesh, u_eff, d_eff, r_eff)   
         dcdt, adv, diff = advection_diffusion_residuals(

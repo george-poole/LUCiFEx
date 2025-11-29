@@ -20,7 +20,7 @@ from lucifex.utils import extremum
 from lucifex.sim import Simulation
 
 from lucifex.pde.streamfunction import streamfunction_velocity
-from lucifex.pde.transport import advection_diffusion, flux
+from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
 
 

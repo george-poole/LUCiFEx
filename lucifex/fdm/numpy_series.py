@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import TypeVar, Iterable, Generic
+from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
+import operator
 
 import numpy as np
 from matplotlib.tri.triangulation import Triangulation
@@ -116,6 +117,28 @@ class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
         if name is None:
             name = self._create_subname(index)
         return NumericSeries([i[index] for i in self.series], self.time_series, name)
+    
+    def transform(
+        self, 
+        transf: str | Callable[[float | Iterable[float]], float] | Callable[[float, float], float],
+        other: Self | float | None = None,
+        name: str | None = None,
+    ) -> Self:
+        if isinstance(transf, str):
+            transf = getattr(operator, transf)
+
+        if other is None:
+            return NumericSeries([transf(i) for i in self.series], self.time_series, name)
+        elif isinstance(other, float):
+            return NumericSeries([transf(i, other) for i in self.series], self.time_series, name)
+        else:
+            size = min(len(self.time_series), len(other.time_series))
+            assert np.allclose(self.time_series[:size], other.time_series[:size])
+            return NumericSeries(
+                [transf(i, j) for i, j in zip(self.series[:size], other.series[:size])],
+                self.time_series[:size],
+                name,
+            )
     
 
 class GridSeries(NumpySeriesABC[np.ndarray]):

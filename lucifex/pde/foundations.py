@@ -85,6 +85,32 @@ def diffusion_reaction(
     return forms
 
 
+def diffusion_reaction_steady(
+    u: Function,
+    d: Constant,
+    r: Function | Constant | None = None,
+    j: Function | Constant | None = None,
+    zero: bool = True,
+) -> tuple[Form, Form]:
+    """"
+    `∇·(D·∇u) = Ru + J`
+    """
+    u_trial = TrialFunction(u.function_space)
+    v = TestFunction(u.function_space)
+    Fd =  -inner(grad(v), d * grad(u_trial)) * dx
+    forms = [Fd]
+    if r is not None:
+        Fr = -v * r * u_trial * dx
+        forms.append(Fr)
+    if j is not None:
+        Fs = -v * j * dx
+        forms.append(Fs)
+    if zero:
+        Fzero = v * Constant(u.function_space.mesh, 0.0) * dx
+        forms.append(Fzero)
+    return forms
+
+
 def advection(
     u: FunctionSeries,
     dt: Constant,
@@ -150,7 +176,6 @@ def advection_dg(
         forms.extend([F_inflow, F_outflow])
 
     return forms
-
 
 
 def advection_reaction_dg(

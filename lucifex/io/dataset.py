@@ -1,6 +1,6 @@
 import os
 import glob
-from typing import Any
+from typing import Any, overload
 from typing_extensions import Unpack
 from collections.abc import Iterable
 
@@ -8,19 +8,19 @@ from natsort import natsorted
 
 from ..fdm import FunctionSeries, GridSeries, ConstantSeries, NumericSeries
 from .load import load_txt_dict
-from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
+from .proxy import proxy, Proxy, ObjectName, FileName
 
 
 class DataSet:
     def __init__(
         self,
         dir_path: str,
+        parameter_file: str | None = None,
         *,
         functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        parameter_file: str | None = None,
         ):
         self._dir_path = dir_path
         self._loaded: dict[
@@ -28,8 +28,22 @@ class DataSet:
             FunctionSeries | ConstantSeries | GridSeries | NumericSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
-        self.parameter_file = parameter_file
+        self._parameter_file = parameter_file
+        self.include(
+            functions=functions,
+            constants=constants,
+            grids=grids,
+            numerics=numerics,
+        )
 
+    def include(
+        self,
+        *,
+        functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+    ) -> None:
         for metadata in (*functions, *constants, *grids, *numerics):
             if metadata in functions:
                 _type = FunctionSeries
@@ -44,25 +58,49 @@ class DataSet:
             name, file_name, *args = metadata
             self._proxies[name] = proxy((name, _type, file_name, *args))
 
+    @overload
     def __getitem__(
         self, 
-        *names: str | tuple[ObjectName, ObjectType, FileName, Unpack[tuple]],
+        key: str,
     ) -> FunctionSeries | ConstantSeries | GridSeries | NumericSeries:
-        for name in names:
-            if not isinstance(name, str):
-                self._proxies[name[0]] = proxy(*name)
-            try:
-                return self._loaded[name]
-            except KeyError:
-                obj = self._proxies[name].load_arg(self._dir_path)
-                self._loaded[name] = obj
-                return self[name]    
-            
-    def __setitem__(self, name: str, value):
-        if name in self._proxies:
-            raise ValueError
+        ...
+
+    @overload
+    def __getitem__(
+        self, 
+        key: tuple[str, ...],
+    ) -> list[FunctionSeries | ConstantSeries | GridSeries | NumericSeries]:
+        ...
+
+    def __getitem__(
+        self, 
+        key: str | tuple[str, ...],
+    ) -> FunctionSeries | ConstantSeries | GridSeries | NumericSeries:
+        if isinstance(key, tuple) and all(isinstance(i, (str, tuple)) for i in key):
+            return [self[i] for i in key]
         else:
-            self._loaded[name] = value
+            if not isinstance(key, str):
+                self._proxies[key[0]] = proxy(*key)
+            try:
+                return self._loaded[key]
+            except KeyError:
+                obj = self._proxies[key].load_arg(self._dir_path)
+                self._loaded[key] = obj
+                return self[key]    
+            
+    def __setitem__(
+        self, 
+        name: str | tuple[str, ...], 
+        value: Any | tuple[Any, ...],
+    ):
+        if isinstance(name, str):
+            if name in self._proxies:
+                raise ValueError(f"'{name}' already exists.")
+            else:
+                self._loaded[name] = value
+        else:
+            for n, v in zip(name, value):
+                self[n] = v
             
     def __iter__(self):
         return iter(self.keys())
@@ -76,20 +114,27 @@ class DataSet:
     def values(self):
         return self._loaded.values()
     
+    def __repr__(self):
+        return f'{self.__class__.__name__}(dir_path={self.dir_path})'
+    
     @property
     def dir_path(self):
         return self._dir_path
-
+    
+    @property
+    def parameter_file(self):
+        return self._parameter_file
+    
 
 def find_datasets(
     root_dir_path: str,
     include: str | Iterable[str] = '*',
     exclude: str | Iterable[str] = (),
+    parameter_file: str | None = None,
     functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    parameter_file: str | None = None,
 ) -> list[DataSet]:
 
     dir_paths = set()
@@ -109,11 +154,11 @@ def find_datasets(
         datasets.append(
             DataSet(
                 dir_path,
+                parameter_file,
                 functions=functions,
                 constants=constants,
                 grids=grids,
                 numerics=numerics,
-                parameter_file=parameter_file, 
             )
         )
 

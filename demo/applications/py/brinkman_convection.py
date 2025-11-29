@@ -14,7 +14,7 @@ from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.navier_stokes import ipcs_solvers, newtonian_stress
-from lucifex.pde.transport import advection_diffusion
+from lucifex.pde.advection_diffusion import advection_diffusion
 
 
 @configure_simulation(

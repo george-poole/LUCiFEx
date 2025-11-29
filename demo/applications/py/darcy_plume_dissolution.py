@@ -15,7 +15,7 @@ from lucifex.solver import (
 from lucifex.utils import CellType
 from lucifex.sim import configure_simulation
 
-from lucifex.pde.transport import advection_diffusion, advection_diffusion_reaction
+from lucifex.pde.advection_diffusion import advection_diffusion, advection_diffusion_reaction
 from lucifex.pde.darcy import darcy_incompressible
 from lucifex.pde.evolution import evolution_expression
 

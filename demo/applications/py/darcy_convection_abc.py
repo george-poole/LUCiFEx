@@ -13,7 +13,7 @@ from lucifex.solver import(
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
 
-from lucifex.pde.transport import advection_diffusion_reaction
+from lucifex.pde.advection_diffusion import advection_diffusion_reaction
 from lucifex.pde.darcy import darcy_streamfunction, streamfunction_velocity
 
 

@@ -27,7 +27,7 @@ def evolution_forms(
         phi = D_phi(phi)
     v = TestFunction(u.function_space)
     F_dsdt = v * DT(u, dt) * dx
-    r = D_rhs(r, u)
+    r = D_rhs(r, trial=u)
     F_reac = -v * (1/phi) * r * dx
     return F_dsdt, F_reac
 
@@ -65,4 +65,4 @@ def evolution_expression(
         if D_rhs.finite_differences[tuple_index].is_implicit:
             raise ExplicitDiscretizationError(D_rhs[tuple_index], f'Reaction must be explicit w.r.t. {u.name}')
     
-    return u[0] + (1 / phi) * dt * D_rhs(r, u)
+    return u[0] + (1 / phi) * dt * D_rhs(r, trial=u)

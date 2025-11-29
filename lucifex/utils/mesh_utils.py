@@ -152,15 +152,14 @@ def cell_aspect_ratios(mesh) -> np.ndarray:
 
 
 def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
-    sizes = {
+    d = {
         'hmin': MinCellEdgeLength,
         'hmax': MaxCellEdgeLength,
         'hdiam': CellDiameter,
         'hrad': Circumradius,
     }
-
     try:
-        return sizes[h](mesh)
+        return d[h](mesh)
     except KeyError:
         raise ValueError(f'Invalid cell size quantity {h}.')
     
