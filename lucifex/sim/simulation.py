@@ -6,8 +6,10 @@ from typing import (
     TypeVar,
     ParamSpec,
     TypeAlias,
+    Any,
     overload,
 )
+from typing_extensions import Self
 from types import EllipsisType
 
 from ufl.core.expr import Expr
@@ -21,6 +23,7 @@ from ..solver import (
     Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc
 )
 from ..io import create_dir_path, write
+from ..solver import IBVP, IVP, Evaluation
 from .utils import arg_name_collisions, ArgNameCollisionError
 
 
@@ -87,19 +90,6 @@ class Simulation:
         for i in (self.solvers, self.t, self.dt, self.namespace_extras):
             yield i
 
-    def index(self, name: str) -> int | tuple[int, ...]:
-        indices = []
-        for i, s in enumerate(self.solvers):
-            if s.series.name == name:
-                indices.append(i)
-    
-        if len(indices) == 0:   
-            raise ValueError(f"{name} not found in simulation's solvers.")
-        elif len(indices) == 1:
-            return indices[0]
-        else:
-            return tuple(indices)
-
     def _map_to_solver_series(
         self,
         obj: dict[str | Iterable[str], T] | tuple[T, T] | T,
@@ -133,7 +123,10 @@ class Simulation:
         `len(series) ≤ len(solvers)` because a series may be solved for by more 
         than one solvers (e.g. in splitting or linearization schemes)
         """
-        return list({s.series for s in self.solvers})
+        return list(
+            {*[s.series for s in self.solvers], 
+             *[s.correction_series for s in self.solvers if s.correction_series is not None]},
+            )
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
@@ -188,6 +181,71 @@ class Simulation:
             _writers.append(writer)
 
         return _writers
+    
+    def solver_index(
+        self, 
+        name: str,
+        default: int | None = None,
+    ) -> int | tuple[int, ...]:
+        indices = []
+        for i, s in enumerate(self.solvers):
+            if s.series.name == name:
+                indices.append(i)
+
+        if len(indices) == 0:
+            if default is None:
+                raise ValueError(f"{name} not found in simulation's solvers.")
+            else:
+                return default
+        elif len(indices) == 1:
+            return indices[0]
+        else:
+            return tuple(indices)
+    
+    @property
+    def pre_solvers(self) -> list[Solver]:
+        """
+        Solvers prior to and including the solver for `dt`, if there is one.
+        """
+        return self.solvers[:self.solver_index(self.dt.name, -1) + 1]
+    
+
+    @property
+    def dt_solver(self) -> Evaluation | None:
+        try:
+            i = self.solver_index(self.dt.name)
+            return self.solvers[i]
+        except ValueError:
+            return None
+
+    @property
+    def post_solvers(self) -> list[Solver]:
+        """
+        Solvers after and not including the solver for `dt`, if there is one.
+        """
+        return self.solvers[self.solver_index(self.dt.name, -1) + 1:]
+    
+    def initial(self, dt_init: float | None) -> Self:
+
+        _init = lambda solvers: [
+            s.initial if isinstance(s, (IBVP, IVP)) and s.initial is not None 
+            else s for s in solvers
+        ]
+
+        if dt_init is not None:
+            dt_solver_init = Evaluation(self.dt, lambda: dt_init)
+            if self.dt_solver is None:
+                solvers_init = [*_init(self.pre_solvers), dt_solver_init, *_init(self.post_solvers)]
+            else:
+                solvers_init = [*_init(self.pre_solvers)[:-1], dt_solver_init, *_init(self.post_solvers)]
+        else:
+            solvers_init = _init(self.solvers)
+
+        return Simulation(
+            solvers_init,
+            self.t,
+            self.dt,
+        )
     
 
 FunctionSeriesDelta: TypeAlias = int | float | None

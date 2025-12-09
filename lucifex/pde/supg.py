@@ -1,6 +1,7 @@
 from typing import Callable
 from functools import wraps
 
+import numpy as np
 from ufl import conditional, sqrt, conditional, lt, tanh, tr
 from ufl.core.expr import Expr
 from ufl.geometry import GeometricCellQuantity
@@ -49,7 +50,7 @@ def supg_stabilization(
         if r is None:
             r = 0
         if D_adv is not None:
-            a = (1 / phi) * effective_velocity(a, d, D_adv, D_diff)
+            a = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
         if D_diff is not None:
             d = (1 / phi) *  effective_diffusivity(d, D_diff)
         if D_reac is not None:
@@ -70,7 +71,7 @@ def supg_stabilization(
             case TauType.UPWIND:
                 tau = tau_upwind(h, a)
             case _:
-                raise ValueError(f'{supg} SUPG method not implemented.')
+                raise ValueError(f"'{supg}' SUPG method not implemented.")
             
     return tau, a
 
@@ -78,13 +79,12 @@ def supg_stabilization(
 def tau_function(func):
     @wraps(func)
     def _(h, a, d, *args, **kwargs):
+        mesh = extract_mesh(a)
         if isinstance(h, str):
-            mesh = extract_mesh(a)
             h = cell_size_quantity(mesh, h)
         if is_vector(a):
             a = sqrt(inner(a, a))
         if is_tensor(d):
-            mesh = extract_mesh(d)
             d = tr(d) / mesh.geometry.dim
         return func(h, a, d, *args, **kwargs)
     return _
@@ -183,17 +183,19 @@ def effective_velocity(
     """
     if isinstance(D_adv, FiniteDifference):
         if D_adv.is_explicit:
-            raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. concentration')
+            raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. transported quantity')
         a_eff = BE(a) * D_adv.explicit_coeff
     else:
         D_adv_a, D_adv_u = D_adv
         if D_adv_u.is_explicit:
-            raise ImplicitDiscretizationError(D_adv_u, 'Advection term must be implicit w.r.t. concentration')
+            raise ImplicitDiscretizationError(D_adv_u, 'Advection term must be implicit w.r.t. transported quantity')
         a_eff = D_adv_a(a) * D_adv_u.explicit_coeff
 
     if d is not None:
-        assert D_diff is not None
-        a_eff -= grad(d) * D_diff.explicit_coeff
+        if D_diff is None:
+            a_eff -= grad(d)
+        else:
+            a_eff -= grad(d) * D_diff.explicit_coeff
 
     return a_eff
 
@@ -225,7 +227,40 @@ def effective_reaction(
         r_eff = D_reac_r(r) * D_reac_u.explicit_coeff
 
     if dt is not None:
-        assert D_dt is not None
-        r_eff += (1 / dt) * D_dt.explicit_coeff
+        if D_dt is None:
+            r_eff += 1 / dt
+        else:
+            r_eff += (1 / dt) * D_dt.explicit_coeff
 
     return r_eff
+
+
+def limits_corrector(
+    lower: float | None = None,
+    upper: float | None = None,
+    conservation: Callable[[np.ndarray], np.ndarray] | None = None,
+) -> Callable[[np.ndarray], None]:
+    """
+    Enforces `u ∈ [umin, umax]`
+
+    `u_corrected = u + u_corrections`
+
+    NOTE intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
+    """
+    def _(u):
+        if conservation:
+            mass_pre = conservation(np.copy(u))
+
+        if lower is not None:
+            u[u < lower] = lower
+        if upper is not None:
+            u[u > upper] = upper
+
+        # TODO Lenardic1993 steps
+        
+        if conservation:
+            mass_post = conservation(np.copy(u))
+            mass_len = len([i for i in u if i not in (lower, upper)])
+            u[:] += (mass_post - mass_pre) / mass_len
+    
+    return _

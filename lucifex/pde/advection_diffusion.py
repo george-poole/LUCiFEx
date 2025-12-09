@@ -90,6 +90,8 @@ def advection_diffusion_reaction(
 
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u) + (1/ϕ)R + (1/ϕ)J`
     """
+    if isinstance(d, Series):
+        d = D_disp(d)
     if isinstance(phi, Series):
         phi = D_phi(phi)
         

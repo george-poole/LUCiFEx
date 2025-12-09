@@ -19,8 +19,8 @@ from petsc4py import PETSc
 from slepc4py import SLEPc
 
 from ..utils import (
-    Perturbation, replicate_callable, MultipleDispatchTypeError, 
-    dofs_limits_corrector, function_space, SpatialMarkerAlias
+    Perturbation, replicate_callable, 
+    function_space, SpatialMarkerAlias
 )
 from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
@@ -42,10 +42,11 @@ from .petsc import (
     PETScMat,
     PETScVec,
 )
+from .eval import GenericSolver
 
 
 P = ParamSpec("P")
-class BoundaryValueProblem:
+class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
 
     petsc_default = OptionsPETSc.default()
     jit_default = OptionsJIT.default()
@@ -79,23 +80,19 @@ class BoundaryValueProblem:
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = False,
         overwrite: bool = False,
     ) -> None:
         
+        super().__init__(solution, corrector, future, overwrite)
+        
         if isinstance(forms, Form):
             forms = (forms, )
-
-        if isinstance(solution, Function):
-            series = FunctionSeries(solution.function_space, solution.name)
-        elif isinstance(solution, FunctionSeries):
-            series = solution
-            solution = Function(solution.function_space, name=series.name)
-        else:
-            raise MultipleDispatchTypeError(solution)
 
         if petsc is None:
             petsc = self.petsc_default
@@ -106,11 +103,6 @@ class BoundaryValueProblem:
         petsc = dict(petsc)
         jit = dict(jit)
         ffcx = dict(ffcx)
-
-        if isinstance(dofs_corrector, tuple):
-            self._dofs_corrector = lambda u: dofs_limits_corrector(u, dofs_corrector)
-        else:
-            self._dofs_corrector = dofs_corrector
 
         if bcs is None:
             bcs = []
@@ -127,13 +119,6 @@ class BoundaryValueProblem:
 
         if self._mpc is not None and not self._mpc.finalized:
             self._mpc.finalize()
-
-        self._solution = solution
-        self._series = series
-        self._assemble_termwise = assemble_termwise
-        self._cache_matrix = cache_matrix
-        self._future = future
-        self._overwrite = overwrite
         
         # variational forms
         self._scalings = [i[0] if isinstance(i, tuple) else 1.0 for i in forms]
@@ -191,6 +176,9 @@ class BoundaryValueProblem:
         self._matrix = None
         self._vector = None
         self._solver = None
+        # defaults
+        self._assemble_termwise = assemble_termwise
+        self._cache_matrix = cache_matrix
 
     def _create_matrix_termwise(self) -> None:
         if self._init_matrix_termwise:
@@ -256,7 +244,9 @@ class BoundaryValueProblem:
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = False,
@@ -284,7 +274,7 @@ class BoundaryValueProblem:
                 petsc, 
                 jit, 
                 ffcx, 
-                dofs_corrector,
+                corrector,
                 cache_matrix, 
                 assemble_termwise,
                 future,
@@ -300,10 +290,6 @@ class BoundaryValueProblem:
         assemble_termwise: tuple[bool, bool] | None = None,
     ) -> None:
         """Mutates the data structures `self.solution` and `self.series` containing the solution"""
-        if future is None:
-            future = self._future
-        if overwrite is None:
-            overwrite = self._overwrite
         if cache_matrix is None:
             cache_matrix = self._cache_matrix
         if assemble_termwise is None:
@@ -367,13 +353,7 @@ class BoundaryValueProblem:
         if self._mpc:
             self._mpc.backsubstitution(self._solution.vector)
 
-        if self._dofs_corrector is not None:
-            self._dofs_corrector(self._solution)
-
-        self._series.update(self._solution, future, overwrite)
-
-    def forward(self, t: float | Constant | np.ndarray) -> None:
-        self._series.forward(t)
+        super().solve(future, overwrite)
 
     def get_matrix(
         self,
@@ -464,14 +444,6 @@ class BoundaryValueProblem:
         assert isinstance(value, tuple)
         assert len(value) == 2
         self._assemble_termwise = value
-
-    @property
-    def series(self) -> FunctionSeries:
-        return self._series
-
-    @property
-    def solution(self) -> Function:
-        return self._solution
     
 
 P = ParamSpec("P")
@@ -492,7 +464,9 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
@@ -508,7 +482,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             petsc, 
             jit, 
             ffcx, 
-            dofs_corrector, 
+            corrector, 
             cache_matrix, 
             assemble_termwise, 
             future,
@@ -516,21 +490,21 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         )
 
         if forms_init is not None:
-            self._init = InitialBoundaryValueProblem(
+            self._initial = InitialBoundaryValueProblem(
                 solution, 
                 forms_init, 
                 bcs=bcs, 
                 petsc=petsc, 
                 jit=jit, 
                 ffcx=ffcx, 
-                dofs_corrector=dofs_corrector,
+                corrector=corrector,
                 cache_matrix=cache_matrix, 
                 assemble_termwise=assemble_termwise,
             )
             assert n_init is not None and n_init > 0
             self._n_init = n_init
         else:
-            self._init = None
+            self._initial = None
             assert n_init is None or n_init == 0
             self._n_init = 0
 
@@ -543,7 +517,9 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
@@ -568,8 +544,8 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
 
             def _init(arg):
                 if isinstance(arg, (FiniteDifference, FiniteDifferenceArgwise)):
-                    if arg.init is not None:
-                        return arg.init
+                    if arg.initial is not None:
+                        return arg.initial
                     else:
                         return arg
                 else:
@@ -597,7 +573,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                 petsc, 
                 jit, 
                 ffcx, 
-                dofs_corrector, 
+                corrector, 
                 cache_matrix, 
                 assemble_termwise, 
                 future, 
@@ -607,8 +583,8 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         return _create
 
     @property
-    def init(self) -> Self | None:
-        return self._init
+    def initial(self) -> Self | None:
+        return self._initial
 
     @property
     def n_init(self) -> int:
@@ -631,7 +607,9 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
@@ -647,7 +625,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             petsc, 
             jit, 
             ffcx, 
-            dofs_corrector, 
+            corrector, 
             cache_matrix, 
             assemble_termwise, 
             future,
@@ -662,7 +640,9 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | tuple[float, float] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
@@ -677,7 +657,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             petsc,
             jit,
             ffcx,
-            dofs_corrector,
+            corrector,
             cache_matrix,
             assemble_termwise,
             future,
@@ -939,7 +919,9 @@ class Projection(BoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         future: bool = False,
         overwrite: bool = False,
     ):
@@ -961,7 +943,7 @@ class Projection(BoundaryValueProblem):
             petsc, 
             jit, 
             ffcx, 
-            dofs_corrector, 
+            corrector, 
             cache_matrix=True, 
             assemble_termwise=(False, False), 
             future=future, 
@@ -977,7 +959,9 @@ class Projection(BoundaryValueProblem):
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
-        dofs_corrector: Callable[[Function], None] | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         future: bool = False,
         overwrite: bool = False,
     ):
@@ -993,7 +977,7 @@ class Projection(BoundaryValueProblem):
                 petsc, 
                 jit, 
                 ffcx, 
-                dofs_corrector,
+                corrector,
                 future,
                 overwrite,
             )

@@ -19,7 +19,7 @@ class FiniteDifference:
     def __init__(
         self,
         indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
-        init: 
+        initial: 
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
         name: str | None = None,
@@ -32,23 +32,22 @@ class FiniteDifference:
         self._coefficients = indices_coeffs
 
         if self.order > 1:
-            if init is None:
+            if initial is None:
                 raise ValueError(
                     "Must also provide first order method for initialization"
                 )
 
-        if isinstance(init, FiniteDifference):
-            assert init.order in (0, 1)
-            self._init = init
-        elif isinstance(init, dict):
-            self._init = self(init)
-        elif isinstance(init, tuple):
-            self._init = FiniteDifference(*init, init=None)
-        elif init is None:
+        if isinstance(initial, FiniteDifference):
+            self._initial = initial
+        elif isinstance(initial, (dict, tuple)):
+            self._initial = FiniteDifference(initial)
+        elif initial is None:
             assert self.order in (0, 1)
-            self._init = init
+            self._initial = initial
         else:
             raise TypeError
+        assert self._initial.order in (0, 1)
+
                 
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
@@ -70,8 +69,8 @@ class FiniteDifference:
         return Series.FUTURE_INDEX - min(self.coefficients)
 
     @property
-    def init(self) -> Self | None:
-        return self._init
+    def initial(self) -> Self | None:
+        return self._initial
 
     @property
     def is_implicit(self) -> bool:
@@ -166,13 +165,13 @@ class FiniteDifferenceDerivative(FiniteDifference):
         self,
         denominator: Callable[[Constant], Constant | Expr] | Callable[[float], float],
         indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
-        init: 
+        initial: 
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
         name: str | None = None,
         index: str | None = None,
     ) -> None:
-        super().__init__(indices_coeffs, init, name, index)
+        super().__init__(indices_coeffs, initial, name, index)
         self._denominator = denominator
 
     def __call__(
@@ -244,7 +243,7 @@ DT2 = FiniteDifferenceDerivative(
 """Centred second time derivative"""
 
 
-def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
+def AB(n: int, initial: FiniteDifference | None = None) -> FiniteDifference:
     """Adams-Bashforth family of explicit methods"""
     match n:
         case 1:
@@ -270,10 +269,10 @@ def AB(n: int, init: FiniteDifference | None = None) -> FiniteDifference:
         case _:
             raise NotImplementedError(f'Only implemented up to AB4.')
 
-    if init is None:
-        init = FE
+    if initial is None:
+        initial = FE
 
-    return FiniteDifference(d, init, 'AB', n)
+    return FiniteDifference(d, initial, 'AB', n)
 
 
 AB1 = AB(1)
@@ -283,7 +282,7 @@ AB3 = AB(3)
 
 def AM(
     n: int, 
-    init: FiniteDifference | None = None,
+    initial: FiniteDifference | None = None,
 ) -> FiniteDifference:
     """Adams-Moulton family of implicit methods"""
     match n:
@@ -310,10 +309,10 @@ def AM(
         case _:
             raise NotImplementedError(f'Only implemented up to AM4.')
 
-    if init is None:
-        init = BE
+    if initial is None:
+        initial = BE
 
-    return FiniteDifference(d, init, 'AM', n)
+    return FiniteDifference(d, initial, 'AM', n)
 
 
 AM1 = AM(1)
@@ -323,7 +322,7 @@ AM3 = AM(3)
 
 def BDF(
     n: int,
-    init: FiniteDifference | None = None,
+    initial: FiniteDifference | None = None,
 ) -> FiniteDifferenceDerivative:
     """Backward-differentiation-formulae family for discretizations of `∂u/∂t`"""
     match n:
@@ -355,10 +354,10 @@ def BDF(
         case _:
             raise NotImplementedError(f'Only implemented up to BDF4.')
 
-    if init is None:
-        init = DT
+    if initial is None:
+        initial = DT
 
-    return FiniteDifferenceDerivative(lambda dt: dt, d, init, 'BDF', n)
+    return FiniteDifferenceDerivative(lambda dt: dt, d, initial, 'BDF', n)
 
 
 BDF1 = BDF(1)
@@ -475,8 +474,8 @@ class FiniteDifferenceArgwise:
     def init(self) -> Self | None:
         if self.order <= 1:
             return None
-        fd_args_init = [fd.init if fd.init is not None else fd for fd in self._fd_args]
-        fs_kws_init = {k: v.init if v.init is not None else v for k, v in self._fd_kws.items()}
+        fd_args_init = [fd.initial if fd.initial is not None else fd for fd in self._fd_args]
+        fs_kws_init = {k: v.initial if v.initial is not None else v for k, v in self._fd_kws.items()}
         return FiniteDifferenceArgwise(*fd_args_init, **fs_kws_init)
 
     def __iter__(self):

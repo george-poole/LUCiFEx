@@ -18,7 +18,7 @@ from lucifex.solver import (
 )
 
 from .foundations import poisson
-from .transport import advection_diffusion_reaction
+from .advection_diffusion import advection_diffusion_reaction
 from .constitutive import strain
 
 

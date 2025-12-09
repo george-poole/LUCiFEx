@@ -271,7 +271,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
           
     @staticmethod
     @abstractmethod
-    def _set_container(container: T, value: T | U | UnsolvedType) -> None:
+    def set_container(container: T, value: T | U | UnsolvedType) -> None:
         ...
     
     @Series.name.setter
@@ -331,7 +331,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         if not overwrite:
             if not is_unsolved(container):
                 raise RuntimeError('Cannot overwrite the solution if `overwrite=False`.')
-        self._set_container(container, value)
+        self.set_container(container, value)
 
     def forward(
         self, 
@@ -346,15 +346,15 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
         for i in range(-self.order + 1, 0):
             if i == -1:
-                self._set_container(self._previous[i], self._present)
+                self.set_container(self._previous[i], self._present)
             else:
-                self._set_container(self._previous[i], self._previous[i + 1])
+                self.set_container(self._previous[i], self._previous[i + 1])
 
         if not is_unsolved(self._future):
-            self._set_container(self._present, self._future)
-            self._set_container(self._future, Unsolved)
+            self.set_container(self._present, self._future)
+            self.set_container(self._future, Unsolved)
         else:
-            self._set_container(self._present, Unsolved)
+            self.set_container(self._present, Unsolved)
 
 
 class FunctionSeries(
@@ -382,7 +382,7 @@ class FunctionSeries(
             assert len(self._subnames) == self._function_space.num_sub_spaces
 
     @staticmethod
-    def _set_container(container: Function, value):
+    def set_container(container: Function, value):
         if value is Unsolved:
             return set_finite_element_function(container, value.value, dofs_indices=':')
         elif isinstance(value, Function) and value.function_space == container.function_space:
@@ -504,7 +504,7 @@ class ConstantSeries(
             assert len(self._subnames) == self.shape[0]
 
     @staticmethod
-    def _set_container(container: Constant, value):
+    def set_container(container: Constant, value):
         if value is Unsolved:
             return set_finite_element_constant(container, value.value)
         else:

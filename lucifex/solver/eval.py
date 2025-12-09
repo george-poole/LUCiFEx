@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from typing import (
-    Callable, ParamSpec, Iterable, Generic, 
+    Callable, ParamSpec, Generic,
     TypeVar, Any, Literal,
 )
 from typing_extensions import Self
@@ -9,50 +10,130 @@ from dolfinx.fem import Expression #Function, Constant,
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils import set_value, replicate_callable, SpatialMarkerAlias, as_dofs_setter
+from ..utils import replicate_callable, SpatialMarkerAlias, MultipleDispatchTypeError
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries
 from .options import OptionsFFCX, OptionsJIT
-from .bcs import SubspaceIndex
 
 
-S = TypeVar('S')
-T = TypeVar('T')
+T = TypeVar('T', Function, Constant)
+TS = TypeVar('TS', FunctionSeries, ConstantSeries)
+class GenericSolver(ABC, Generic[T, TS]):
+
+    def __init__(
+        self,
+        solution: T | TS | Any, #FIXME typing
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
+        future: bool = False,
+        overwrite: bool = False,
+        ):
+        if isinstance(solution, (Function, Constant)):
+            series = None
+        elif isinstance(solution, FunctionSeries):
+            series = solution
+            solution = Function(series.function_space, name=series.name)
+        elif isinstance(solution, ConstantSeries):
+            series = solution
+            solution = Constant(series.mesh, name=series.name, shape=series.shape)
+        else:
+            raise MultipleDispatchTypeError(solution)
+
+        self._solution = solution
+        self._series = series
+        self._future = future
+        self._overwrite = overwrite
+
+        self._corrector_func = None
+        self._correction = None
+        self._correction_series = None
+        if callable(corrector):
+            self._corrector_func = corrector
+        if isinstance(corrector, tuple):
+            corr_name, self._corrector_func = corrector
+            if corr_name == self._solution.name:
+                raise ValueError('Solution and correction names must be distinct.')
+            if isinstance(self._solution, Function):
+                self._correction = Function(self._solution.function_space, name=corr_name)
+                if self._series is not None:
+                    self._correction_series = FunctionSeries(
+                        self._solution.function_space, corr_name, series.order, series.store,
+                    )
+            elif isinstance(self._solution, Constant):
+                self._correction = Constant(
+                    self._solution.mesh, name=corr_name, shape=self._solution.ufl_shape,
+                )
+                if self._series is not None:
+                    self._correction_series = ConstantSeries(
+                        self._solution.mesh, corr_name, self._series.order, self._series.shape, self._series.store,
+                    )
+            else:
+                raise TypeError
+            
+    @property
+    def solution(self) -> T:
+        return self._solution
+
+    @property
+    def series(self) -> TS | None:
+        return self._series
+    
+    @property
+    def correction(self) -> T | None:
+        return self._correction
+    
+    @property
+    def correction_series(self) -> TS | None:
+        return self._correction_series
+    
+    @abstractmethod
+    def solve(
+        self, 
+        future: bool | None,
+        overwrite: bool | None,
+    ) -> None:
+        """
+        In-place mutation of `self._solution`
+        """
+        if future is None:
+            future = self._future
+        if overwrite is None:
+            overwrite = self._overwrite
+
+        if self._corrector_func is not None:
+            if self._correction is not None:
+                self._correction.x.array[:] = self._solution.x.array[:]
+            self._corrector_func(self._solution.x.array)
+            if self._correction is not None:
+                self._correction.x.array[:] = self._solution.x.array[:] - self._correction.x.array[:]
+            if self._correction_series is not None:
+                self._correction_series.update(self._correction, future, overwrite)
+
+        if self._series is not None:
+            self._series.update(self._solution, future, overwrite)
+
+
 P = ParamSpec("P")
-class Evaluation(Generic[S, T]):
+class Evaluation(GenericSolver[T, TS]):
     
     def __init__(
         self,
-        solution: S | T ,
+        solution: T | TS ,
         evaluation: Callable[[], Any],
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         future: bool = False,
         overwrite: bool = False,
     ) -> None:
-        if isinstance(solution, Constant):
-            uh = solution
-            uxt = ConstantSeries(uh.mesh, uh.name, shape=uh.ufl_shape)
-        elif isinstance(solution, ConstantSeries):
-            uxt = solution
-            uh = Constant(uxt.mesh, name=uxt.name, shape=uxt.shape)
-        elif isinstance(solution, Function):
-            uh = solution
-            uxt = FunctionSeries(uh.function_space, uh.name)
-        elif isinstance(solution, FunctionSeries):
-            uxt = solution
-            uh = Function(uxt.function_space, name=uxt.name)
-        else:
-            raise TypeError(f"{type(solution)}")
-
-        self._series = uxt
-        self._solution = uh
+        super().__init__(solution, corrector, future, overwrite)
         self._evaluation = evaluation
-        self._future = future
-        self._overwrite = overwrite
 
     @classmethod
     def from_function(
         cls, 
-        solution: S | T, 
+        solution: T | TS, 
         func: Callable[P, Any],
         future: bool = False,
         overwrite: bool = False,
@@ -64,32 +145,17 @@ class Evaluation(Generic[S, T]):
             return cls(solution, lambda: func(*args, **kwargs), future, overwrite)
         return _create
 
-    @property
-    def series(self) -> S:
-        return self._series
-
-    @property
-    def solution(self) -> T:
-        return self._solution
-
     def solve(
         self, 
         future: bool | None = None, 
         overwrite: bool | None = None,
     ) -> None:
-        if future is None:
-            future = self._future
-        if overwrite is None:
-            overwrite = self._overwrite
-        set_value(self._solution, self._evaluation())
-        self._series.update(self._solution, future, overwrite)
-
-    def forward(self, t: float | np.ndarray | Constant):
-        self._series.forward(t)
+        self._series.set_container(self._solution, self._evaluation())
+        super().solve(future, overwrite)
 
 
 P = ParamSpec("P")
-class Interpolation(Evaluation[FunctionSeries, Function]):
+class Interpolation(Evaluation[Function, FunctionSeries]):
 
     jit_default = OptionsJIT.default()
     ffcx_default = OptionsFFCX.default()
@@ -111,9 +177,9 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
         self,
         solution: Function | FunctionSeries,
         expr: Expr | Function,
-        dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, SubspaceIndex]] 
-        | None = None, 
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         future: bool = False,
@@ -134,22 +200,20 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
                 jit,
             )
 
-        _f = Function(solution.function_space)
-        dofs_corrector = as_dofs_setter(dofs_corrector)
-        def evaluation() -> Function:
-            _f.interpolate(expr)
-            dofs_corrector(_f)
-            return _f
+        _solution = Function(solution.function_space)
+        def _evaluation() -> Function:
+            _solution.interpolate(expr)
+            return _solution
 
-        super().__init__(solution, evaluation, future, overwrite)
+        super().__init__(solution, _evaluation, corrector, future, overwrite)
 
     @classmethod
     def from_function(
         cls,
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, Function | Expr],
-        dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, SubspaceIndex]] 
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -164,50 +228,53 @@ class Interpolation(Evaluation[FunctionSeries, Function]):
             return cls(
                 solution, 
                 expression_func(*args, **kwargs), 
-                dofs_corrector, 
+                corrector, 
                 jit, 
                 ffcx, 
                 future,
                 overwrite,
             )
         return _create
-
+    
 
 P = ParamSpec("P")
-class Integration(Evaluation[ConstantSeries, Constant]):
+class Integration(Evaluation[Constant, ConstantSeries]):
     
     @classmethod
     def from_function(
         cls, 
-        solution: ConstantSeries | Constant, 
-        func: Callable[P, Expr | tuple[Expr, ...]],
+        solution: Constant | ConstantSeries, 
+        integrand_func: Callable[P, Expr | tuple[Expr, ...]],
         measure: Literal['dx', 'ds', 'dS'] | Measure | None = None, 
         *markers: SpatialMarkerAlias,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         future: bool = False,
         overwrite: bool = False,
         facet_side: Literal['+', '-'] | None = None,
-        **metadata,
+        **measure_kwargs,
     ):
         if measure is None:
-            _func = func
+            _func = integrand_func
         else:
-            _func = func(
+            _func = integrand_func(
             measure,
             *markers,
             facet_side=facet_side,
-            **metadata,
+            **measure_kwargs,
             )
 
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: _func(*args, **kwargs), future, overwrite)
+            return cls(solution, lambda: _func(*args, **kwargs), corrector, future, overwrite)
         
         return _create
     
 
-@replicate_callable(Evaluation[ConstantSeries | FunctionSeries, Constant | Function].from_function)
+@replicate_callable(Evaluation[Constant | Function, ConstantSeries | FunctionSeries].from_function)
 def evaluation():
     pass
 
@@ -218,5 +285,3 @@ def interpolation():
 @replicate_callable(Integration.from_function)
 def integration():
     pass
-
-

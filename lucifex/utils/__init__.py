@@ -12,8 +12,6 @@ from .dofs_utils import (
     maximum,
     minimum,
     as_spatial_marker,
-    as_dofs_setter,
-    dofs_limits_corrector,
 )
 from .enum_types import CellType, BoundaryType, DiagonalType
 from .numpy_typecast import (
@@ -45,7 +43,7 @@ from .mesh_utils import(
     is_cartesian,
 )
 from .fem_mutate import (set_finite_element_constant, set_finite_element_function, 
-                           interpolate_finite_element_function, set_value)
+                           interpolate_finite_element_function)
 from .fem_typecast import create_constant, create_function, function_space, get_component_functions
 from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
 from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict,

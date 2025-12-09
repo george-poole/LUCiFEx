@@ -1,7 +1,7 @@
 import argparse 
 from collections.abc import Iterable
 from types import GenericAlias, UnionType
-from typing import Callable, Any, Hashable
+from typing import Callable, Any, Hashable, TypeAlias
 import time
 from inspect import signature, Parameter, Signature
 
@@ -10,7 +10,7 @@ from collections.abc import Iterable
 
 from ..fem import Constant
 from ..fdm import ConstantSeries
-from ..solver import Solver, Evaluation, IBVP, IVP
+from ..solver import Solver, IBVP, IVP
 from ..io import write, write_checkpoint, read_checkpoint, reset_directory
 from ..utils import log_timing
 
@@ -23,8 +23,10 @@ from .simulation import configure_simulation, Simulation
 from .utils import write_timing, arg_name_collisions, ArgNameCollisionError
 
 
+T: TypeAlias = ConstantSeries
+DT: TypeAlias = ConstantSeries | Constant
 def run(
-    simulation: Simulation | tuple[Iterable[Solver], ConstantSeries, ConstantSeries | Constant],
+    simulation: Simulation | tuple[Iterable[Solver], T, DT],
     n_stop: int | None = None,
     t_stop: float | None = None,
     dt_init: float | None = None,
@@ -37,9 +39,6 @@ def run(
 ) -> None:    
     if isinstance(simulation, tuple):
         simulation = Simulation(*simulation)
-
-    t = simulation.t
-    dt = simulation.dt
     
     if (n_stop, t_stop).count(None) == 2:
         raise ValueError('Must provide at least one of `n_stop` and `t_stop`')
@@ -56,24 +55,14 @@ def run(
     else:
         n_init = n_init_min
 
-    if dt_init is not None:
-        dt_solver_init = Evaluation(dt, lambda: dt_init)
-    else:
-        if isinstance(dt, Constant):
-            dt_solver_init = Evaluation(dt, lambda: dt.value)
-        else:
-            dt_solver_init = simulation.solvers[simulation.index(dt.name)]
+    t = simulation.t
+    _dt = simulation.dt if isinstance(simulation.dt, Constant) else simulation.dt[0]
+    simulation_init = simulation.initial(dt_init)
 
-    solvers_init = [
-        s.init if isinstance(s, (IBVP, IVP)) and s.init is not None 
-        else dt_solver_init if s.series is dt 
-        else s for s in simulation.solvers
-    ]
-
-    series_ics = [t, *[s.series for s in simulation.solvers if s.series.ics is not None]]
+    series_checkpointed = [t, *[s.series for s in simulation.solvers if s.series.ics is not None]]
     if resume:
         n_init = 0
-        read_checkpoint(series_ics, simulation.dir_path, simulation.checkpoint_file)
+        read_checkpoint(series_checkpointed, simulation.dir_path, simulation.checkpoint_file)
     if overwrite and _writers:
         reset_directory(simulation.dir_path, ('*.h5', '*.xdmf'))
     if _writers and simulation.dir_path:
@@ -87,13 +76,6 @@ def run(
         parameters.update(write_delta={k: v for k, v in simulation.write_delta.items() if v is not None})
         write(parameters, simulation.parameter_file, simulation.dir_path, mode='a')
 
-    if isinstance(dt, ConstantSeries):
-        _dt = dt[0]
-        dt_solver_index = [s.solution.name for s in simulation.solvers].index(dt.name)
-    else:
-        _dt = dt
-        dt_solver_index = -1
-
     _n = 0
     _time_stoppers: list[Stopper] = []
     if n_stop is not None:
@@ -103,7 +85,7 @@ def run(
 
     _timing = {} if timing is True else timing if isinstance(timing, dict) else None
     if isinstance(_timing, dict):
-        for s in set((*simulation.solvers, *solvers_init)):
+        for s in set((*simulation.solvers, *simulation_init.solvers)):
             s.solve = log_timing(s.solve, _timing, f'{s.series.name}_{s.solve.__name__}')
         for w in _writers:
             w.write = log_timing(w.write, _timing, f'{w.name}_{w.write.__name__}')
@@ -111,14 +93,14 @@ def run(
 
     while all(not s.stop(t[0]) for s in _time_stoppers):
         if _n < n_init:
-            _solvers = solvers_init
+            _simulation = simulation_init
         else:
-            _solvers = simulation.solvers
+            _simulation = simulation
         if _timing:
             t_run_start = time.perf_counter()
-        [s.solve() for s in _solvers[:dt_solver_index + 1]]
+        [s.solve() for s in _simulation.pre_solvers]
         t.update(t[0].value + _dt.value, future=True)
-        [s.solve() for s in _solvers[dt_solver_index + 1:]]
+        [s.solve() for s in _simulation.post_solvers]
         [w.write(t[0]) for w in _writers]
         if any(s.stop(t[0]) for s in _stoppers):
             break
@@ -130,7 +112,7 @@ def run(
             _timing[run.__name__].append(t_run_stop - t_run_start)
 
     if _writers:
-        write_checkpoint(series_ics, t, simulation.checkpoint_file, simulation.dir_path)
+        write_checkpoint(series_checkpointed, t, simulation.checkpoint_file, simulation.dir_path)
         if _timing:
             write_timing(_timing, simulation.dir_path, simulation.timing_file)
 

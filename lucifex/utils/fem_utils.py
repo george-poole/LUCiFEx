@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 import numpy as np
 from basix.ufl_wrapper import BasixElement
@@ -207,7 +208,7 @@ def is_discontinuous_family(family: str) -> bool:
 
 
 def extract_mesh(
-    expr: Expr | Expression | Function,
+    expr: Expr | Expression | Any,
 ) -> Mesh:
     meshes = extract_meshes(expr)
     if len(meshes) == 0:
@@ -222,7 +223,7 @@ def extract_mesh(
 
 
 def extract_meshes(
-    expr: Expr | Expression,
+    expr: Expr | Expression | Any,
 ) -> list[Mesh]:
     if isinstance(expr, Expression):
         return extract_meshes(expr.ufl_expression)

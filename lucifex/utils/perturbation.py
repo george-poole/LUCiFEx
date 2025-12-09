@@ -10,7 +10,6 @@ from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpolator
 
 from .enum_types import BoundaryType
-from .dofs_utils import as_dofs_setter, SpatialMarkerAlias
 from .mesh_utils import mesh_coordinates, mesh_vertices
 from .fem_typecast import create_function, function_space
 from .fem_mutate import set_finite_element_function
@@ -63,9 +62,7 @@ class DofsPerturbation:
         seed: int,
         amplitude: float | tuple[float, float],
         freq: tuple[int, ...] | None = None,
-        dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, int]] 
-        | None = None,
+        corrector: Callable[[np.ndarray], None] | None = None,
     ):
         self._base = base
         if isinstance(amplitude, float):
@@ -73,7 +70,7 @@ class DofsPerturbation:
         self._amplitude = amplitude
         self._freq = freq
         self._rng = np.random.default_rng(seed)
-        self._dofs_corrector = as_dofs_setter(dofs_corrector)
+        self._corrector = corrector
 
     def base(
         self,
@@ -81,8 +78,8 @@ class DofsPerturbation:
         correct: bool = True,
     ) -> Function:
         f = create_function(fs, self._base)
-        if correct:
-            self._dofs_corrector(f)
+        if correct and self._corrector:
+            self._corrector(f.x.array)
         return f
         
     def noise(
@@ -127,7 +124,7 @@ class DofsPerturbation:
         dofs = operator(base.x.array, perturbation.x.array)
         set_finite_element_function(f, dofs, dofs_indices=':')
         if correct:
-            self._dofs_corrector(f)
+            self._corrector(f)
         return f
 
 
@@ -153,14 +150,12 @@ class SpatialPerturbation:
         noise_shape: Callable[[np.ndarray], np.ndarray],
         domain_lims: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
-        dofs_corrector: Callable[[Function], None] 
-        | Iterable[tuple[SpatialMarkerAlias, float | Constant] | tuple[SpatialMarkerAlias, float | Constant, int]] 
-        | None = None, #FIXME subspace case,
+        corrector: Callable[[np.ndarray], None] | None = None, #FIXME subspace case,
         **rescale_kwargs,
     ) -> None:
         self._base = base
         self._noise = rescale(noise_shape, domain_lims, amplitude, **rescale_kwargs)
-        self._dofs_corrector = as_dofs_setter(dofs_corrector)
+        self._corrector = corrector
 
     def base(
         self,
@@ -168,8 +163,8 @@ class SpatialPerturbation:
         correct: bool = True,
     ) -> Function:
         f = create_function(fs, self._base)
-        if correct:
-            self._dofs_corrector(f)
+        if correct and self._corrector:
+            self._corrector(f)
         return f
 
     def noise(
@@ -195,7 +190,7 @@ class SpatialPerturbation:
             perturbed = operator(base, perturbation)
         f = create_function(fs, perturbed)
         if correct:
-            self._dofs_corrector(f)
+            self._corrector(f)
         if name is not None:
             f.name = name
         return f

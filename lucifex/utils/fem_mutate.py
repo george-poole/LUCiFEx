@@ -166,20 +166,21 @@ def _(value: np.ndarray, const: Constant):
 def _(value, const: Constant):
     return _set_finite_element_constant(np.array(value), const)
 
-def set_value(obj: Function | Constant, value: Any) -> None:
-    return _set_value(obj, value)
+# TODO deprecate
+# def set_value(obj: Function | Constant, value: Any) -> None:
+#     return _set_value(obj, value)
 
 
-@singledispatch
-def _set_value(obj, *_, **__):
-    raise MultipleDispatchTypeError(obj)
+# @singledispatch
+# def _set_value(obj, *_, **__):
+#     raise MultipleDispatchTypeError(obj)
 
 
-@_set_value.register(Constant)
-def _(obj, value):
-    return set_finite_element_constant(obj, value)
+# @_set_value.register(Constant)
+# def _(obj, value):
+#     return set_finite_element_constant(obj, value)
 
 
-@_set_value.register(Function)
-def _(obj, value):
-    return set_finite_element_function(obj, value)
+# @_set_value.register(Function)
+# def _(obj, value):
+#     return set_finite_element_function(obj, value)

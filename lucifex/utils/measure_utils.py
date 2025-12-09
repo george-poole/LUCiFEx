@@ -21,7 +21,7 @@ def create_tagged_measure(
     markers: Iterable[SpatialMarkerAlias] = (),
     tags: Iterable[int] | None = None,
     tag_unmarked: int | None = None,
-    **metadata,
+    **measure_kwargs,
 ) -> Measure:
     """
     If `tags` and `tag_unmarked` are unspecified, creates 
@@ -32,7 +32,7 @@ def create_tagged_measure(
     all specified subdomains.
     """
     if not markers:
-        return Measure(measure, domain=mesh, metadata=metadata)
+        return Measure(measure, domain=mesh, metadata=measure_kwargs)
     
     if tags is None:
         tags = list(range(len(markers)))
@@ -53,7 +53,7 @@ def create_tagged_measure(
         facet_tags[facet_indices] = t
 
     mesh_tags = meshtags(mesh, fdim, np.arange(num_facets), facet_tags)
-    return Measure(measure, domain=mesh, subdomain_data=mesh_tags, metadata=metadata)    
+    return Measure(measure, domain=mesh, subdomain_data=mesh_tags, metadata=measure_kwargs)    
 
     
 P = ParamSpec('P')
@@ -77,7 +77,7 @@ def integral(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
         *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
-        **metadata,
+        **measure_kwargs,
     ) -> Callable[P, float | np.ndarray]:
         ...
 
@@ -86,7 +86,7 @@ def integral(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
         *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
-        **metadata,
+        **measure_kwargs,
     ):
         """
         If more than one marker provided, returned array will have shape
@@ -114,7 +114,7 @@ def integral(
                     mesh = extract_mesh(integrand)
                 else:
                     mesh = extract_mesh(integrand[0])
-                dx_tagged = create_tagged_measure(measure, mesh, markers, **metadata)
+                dx_tagged = create_tagged_measure(measure, mesh, markers, **measure_kwargs)
 
             n_subdomains = len(markers)
 

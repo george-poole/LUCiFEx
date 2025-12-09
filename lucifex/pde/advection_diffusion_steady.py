@@ -55,13 +55,12 @@ def advection_diffusion_steady(
         if j is not None:
             res -= j
 
+        tau, a = supg_stabilization(supg, h, a, d, r)
         Pv = inner(grad(v), a)
         if gls:
             Pv -= div(d * grad(v))
             if r is not None:
                 Pv -= v * r
-
-        tau = supg_stabilization(supg, h, a, d, r)
         F_supg = tau * Pv * res * dx
         forms.append(F_supg)
 
