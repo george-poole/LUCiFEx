@@ -2,7 +2,7 @@ from typing import Callable
 from functools import wraps
 
 import numpy as np
-from ufl import conditional, sqrt, conditional, lt, tanh, tr
+from ufl import dx, Form, conditional, sqrt, conditional, lt, tanh, tr
 from ufl.core.expr import Expr
 from ufl.geometry import GeometricCellQuantity
 
@@ -27,6 +27,8 @@ class TauType(StrEnum):
 
 def supg_stabilization(
     supg: str | Callable,
+    v: Expr,
+    res: Expr,
     h: str | GeometricCellQuantity,
     a: Function | Constant | Series,
     d: Function | Constant | Series, 
@@ -37,9 +39,9 @@ def supg_stabilization(
     D_reac: FiniteDifference | None = None,
     D_dt: FiniteDifference | None = None,
     phi = 1,
-) -> tuple[Expr, Expr]:
+) -> Form:
     """
-    Returns `(𝜏, 𝐚ᵉᶠᶠ)`
+    `𝜏 (∇v·𝐚ᵉᶠᶠ)ℛ`
     """
     if isinstance(dt, ConstantSeries):
         dt = dt[0]
@@ -50,9 +52,9 @@ def supg_stabilization(
         if r is None:
             r = 0
         if D_adv is not None:
-            a = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
+            a_eff = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
         if D_diff is not None:
-            d = (1 / phi) *  effective_diffusivity(d, D_diff)
+            d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
         if D_reac is not None:
             r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
         else:
@@ -60,20 +62,20 @@ def supg_stabilization(
 
         match supg:
             case TauType.CODINA:
-                tau = tau_codina(h, a, d, r_eff)
+                tau = tau_codina(h, a_eff, d_eff, r_eff)
             case TauType.SHAKIB:
-                tau = tau_shakib(h, a, d, r_eff)
+                tau = tau_shakib(h, a_eff, d_eff, r_eff)
             case TauType.COTH:
-                tau = tau_coth(h, a, d)
+                tau = tau_coth(h, a_eff, d_eff)
             case TauType.TRANSIENT:
-                r_eff = effective_reaction(r, D_reac)
-                tau = tau_transient(h, a, d, r, dt)
+                r_eff = (1 / phi) * effective_reaction(r, D_reac)
+                tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
             case TauType.UPWIND:
-                tau = tau_upwind(h, a)
+                tau = tau_upwind(h, a_eff)
             case _:
                 raise ValueError(f"'{supg}' SUPG method not implemented.")
             
-    return tau, a
+    return tau * inner(grad(v), a_eff) * res * dx
 
 
 def tau_function(func):
@@ -94,9 +96,9 @@ def tau_function(func):
 def tau_codina(h, a, d, r) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
-    `⟹ 𝜏 = (2|𝐚| / h  +  4D / h²  +  R)⁻¹`
+    `⟹ 𝜏 = (2|𝐚| / h  +  4D / h²  -  R)⁻¹`
     """
-    return ((2 * a / h) + (4 * d / h**2) + r) ** (-1) 
+    return ((2 * a / h) + (4 * d / h**2) - r) ** (-1) 
 
 
 @tau_function
@@ -171,7 +173,6 @@ def xi_approx(Pe):
     return conditional(lt(Pe, 3), Pe / 3, 1)
     
 
-# FIXME tensor d
 def effective_velocity(
     a: Series, 
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
@@ -218,13 +219,13 @@ def effective_reaction(
     D_dt: FiniteDifference | None = None,
 ):
     """
-    `∂u/∂t + 𝒟(Ru) = Rᵉᶠᶠ uⁿ⁺¹ + ...`
+    `∂u/∂t - 𝒟(Ru) = Rᵉᶠᶠ uⁿ⁺¹ + ...`
     """
     if isinstance(D_reac, FiniteDifference):
-        r_eff = BE(r) * D_reac.explicit_coeff
+        r_eff = -BE(r) * D_reac.explicit_coeff
     else:
         D_reac_r, D_reac_u = D_reac
-        r_eff = D_reac_r(r) * D_reac_u.explicit_coeff
+        r_eff = -D_reac_r(r) * D_reac_u.explicit_coeff
 
     if dt is not None:
         if D_dt is None:
@@ -235,6 +236,7 @@ def effective_reaction(
     return r_eff
 
 
+# TODO Lenardic1993 steps?
 def limits_corrector(
     lower: float | None = None,
     upper: float | None = None,
@@ -243,11 +245,9 @@ def limits_corrector(
     """
     Enforces `u ∈ [umin, umax]`
 
-    `u_corrected = u + u_corrections`
-
     NOTE intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
     """
-    def _(u):
+    def _(u: np.ndarray) -> None:
         if conservation:
             mass_pre = conservation(np.copy(u))
 
@@ -255,8 +255,6 @@ def limits_corrector(
             u[u < lower] = lower
         if upper is not None:
             u[u > upper] = upper
-
-        # TODO Lenardic1993 steps
         
         if conservation:
             mass_post = conservation(np.copy(u))

@@ -1,20 +1,20 @@
 from .deferred import defer
-from .fem_utils import (is_scalar, is_vector, is_tensor, extract_mesh, extract_meshes,
-                        is_shape, is_continuous_lagrange, is_discontinuous_lagrange, 
-                        is_mixed_space, is_same_element, is_family_alias, extract_integrands,
-                        extract_integrand)
+from .ufl_utils import (
+    is_scalar, 
+    is_vector, is_tensor, extract_mesh, extract_meshes,
+    is_shape, 
+    is_continuous_lagrange, is_discontinuous_lagrange, 
+    is_same_element, is_family_alias, extract_integrands,
+    extract_integrand,
+)
 from .dofs_utils import (
     SpatialMarkerAlias,
     SpatialMarker, 
     dofs_indices,
     dofs,
-    extremum,
-    maximum,
-    minimum,
     as_spatial_marker,
 )
-from .enum_types import CellType, BoundaryType, DiagonalType
-from .numpy_typecast import (
+from .numpy_utils import (
     grid,
     triangulation,
     quadrangulation,
@@ -24,12 +24,12 @@ from .numpy_typecast import (
     spacetime_grid,
     UnstructuredQuadError,
 )
-from .perturbation import (
-    SpatialPerturbation, DofsPerturbation, Perturbation, 
-    cubic_noise, sinusoid_noise, rescale,
-)
-from .measure_utils import create_tagged_measure, integral
 from .mesh_utils import(
+    CellType,
+    DiagonalType,
+    BoundaryType,
+    create_tagged_measure, 
+    mesh_integral,
     mesh_axes,
     mesh_vertices_tensor,
     mesh_vertices,
@@ -38,15 +38,24 @@ from .mesh_utils import(
     cell_sizes,
     cell_size_quantity,
     cell_aspect_ratios,
-    n_cells,
-    n_entities,
+    number_of_cells,
+    number_of_entities,
     is_cartesian,
+    is_uniform_cartesian,
 )
-from .fem_mutate import (set_finite_element_constant, set_finite_element_function, 
-                           interpolate_finite_element_function)
-from .fem_typecast import create_constant, create_function, function_space, get_component_functions
-from .numpy_typecast import triangulation, quadrangulation, grid, as_index, as_indices
+from .fem_utils import (
+    create_fem_constant, 
+    create_fem_function, 
+    create_fem_space, 
+    get_component_fem_functions,
+    set_fem_constant, 
+    set_fem_function, 
+    interpolate_fem_function,
+    is_mixed_space,
+    get_fem_subspace,
+    get_fem_subspaces,
+)
+from .numpy_utils import triangulation, quadrangulation, grid, as_index, as_indices
 from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
 from .str_utils import str_indexed
-from .norm import L_norm, l_norm, div_norm

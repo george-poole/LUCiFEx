@@ -13,8 +13,8 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ..utils import (extract_mesh, create_function, function_space, 
-    MultipleDispatchTypeError, set_finite_element_function, 
+from ..utils import (extract_mesh, create_fem_function, create_fem_space, 
+    MultipleDispatchTypeError, set_fem_function, 
     StrSlice, as_slice,
 )
 from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
@@ -237,7 +237,7 @@ def _(
 
     if mode == "c":
         interval = _cell_per_dof_interval(u.function_space.mesh, len(u.x.array), u.name)
-        dp0_function = create_function(
+        dp0_function = create_fem_function(
             (interval, 'DP', 0), 
             u.x.array,
             dofs_indices=':',
@@ -273,7 +273,7 @@ def _(
         comm = c.mesh.comm
 
     interval = _cell_per_dof_interval(c.mesh, dofs_array_dim(c.ufl_shape), c.name)
-    dp0_function = create_function(
+    dp0_function = create_fem_function(
         (interval, 'DP', 0), 
         c.value.flatten(),
         dofs_indices=':',
@@ -410,10 +410,10 @@ def _(
         dim = shape[0]
         elem = (*fam_deg, dim)
 
-    fs = function_space((mesh, *elem), use_cache=True)
+    fs = create_fem_space((mesh, *elem), use_cache=True)
     func = Function(fs, name=name)
     func.name = name
-    set_finite_element_function(func, u)
+    set_fem_function(func, u)
     return write(func, file_name, dir_path, t, mode, comm)
 
 

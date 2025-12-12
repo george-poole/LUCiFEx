@@ -1,10 +1,8 @@
-from typing import Literal
-
 from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.mesh import create_rectangle, create_interval, create_box
 
-from ..utils.enum_types import CellType, DiagonalType 
+from ..utils.mesh_utils import CellType, DiagonalType 
 
 
 def interval_mesh(

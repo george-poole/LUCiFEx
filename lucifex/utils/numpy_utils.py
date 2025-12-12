@@ -2,7 +2,6 @@
 objects to `numpy.ndarray` objects for postprocessing """
 
 from functools import singledispatch
-import operator
 from typing import overload, Literal, Callable, Iterable
 
 from dolfinx.fem import Function
@@ -12,11 +11,11 @@ from matplotlib.tri.triangulation import Triangulation
 import numba
 import numpy as np
 
-from .enum_types import CellType
+
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
-from .mesh_utils import mesh_vertices, mesh_coordinates, mesh_axes
-from .fem_utils import is_scalar, ScalarError
+from .mesh_utils import CellType, mesh_vertices, mesh_coordinates, mesh_axes
+from .ufl_utils import is_scalar, ScalarError
 
 
 @overload
@@ -378,35 +377,26 @@ def where_on_grid(
 def as_index(
     arr: np.ndarray | Iterable[float],
     target: int | float,
-    tol: float | None = None,
-    less_than: bool | None = None,
+    ineq: Callable[[float, float], bool] | str | None = None,
+    ineq_msg: str = 'Target inequality cannot be satisfied.',
 ) -> int:
     if isinstance(target, int):
         return target
     
-    if less_than is None:
-        func = None
-    else:
-        arr = np.sort(arr)
-        if less_than:
-            func = operator.lt
-            index_shift = -1
-        else:
-            func = operator.ge
-            index_shift = 1
+    arr = np.sort(arr)
+    
+    if isinstance(ineq, str):
+        ineq = getattr(ineq, str)
 
-    arr_diff = np.abs([i - target for i in arr])
-    if tol is not None and np.min(arr_diff) > tol:
-        raise ValueError(
-            f'No values found within tolerance {tol} of target value {target}.'
-        ) 
-           
+    arr_diff = np.abs([i - target for i in arr])           
     target_index = np.argmin(arr_diff)
 
-    if func is not None:
-        if not func(arr[target_index], target):
-            target_index += index_shift
-        assert func(arr[target_index], target)
+    if ineq is not None:
+        if not ineq(arr[target_index], target):
+            for i in (-1, 1, -2, 2):
+                if ineq(arr[target_index], target):
+                    return target_index + i
+            raise ValueError(ineq_msg)
 
     return target_index
 

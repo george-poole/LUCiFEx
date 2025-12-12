@@ -13,7 +13,7 @@ from lucifex.fdm import (
     Series, FiniteDifferenceArgwise)
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
-from lucifex.utils import integral
+from lucifex.utils import mesh_integral
 
 from .supg import supg_stabilization
 
@@ -32,9 +32,7 @@ def advection_diffusion(
     supg: str | Callable | None = None,
     h: str = 'hdiam',
 ) -> list[Form]:
-    """
-    `∂u/∂t + 𝐚·∇u = ∇·(D·∇u)`
-    
+    """    
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u)`
     """
     if isinstance(d, Series):
@@ -59,10 +57,9 @@ def advection_diffusion(
         forms.append(F_neumann)
 
     if supg is not None:
-        tau, a_eff = supg_stabilization(supg, h, a, d, dt=dt, D_adv=D_adv, D_diff=D_diff, phi=phi)
         res = dudt + adv + diff
-        F_res = tau * inner(grad(v), a_eff) * res * dx
-        forms.append(F_res)
+        F_supg = supg_stabilization(supg, v, res, h, a, d, dt=dt, D_adv=D_adv, D_diff=D_diff, phi=phi)
+        forms.append(F_supg)
 
     return forms
 
@@ -86,8 +83,6 @@ def advection_diffusion_reaction(
     h: str = 'hdiam',
 ) -> list[Form]:
     """
-    `∂u/∂t + 𝐚·∇u = ∇·(D·∇u) + Ru + J`
-
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u) + (1/ϕ)R + (1/ϕ)J`
     """
     if isinstance(d, Series):
@@ -118,12 +113,11 @@ def advection_diffusion_reaction(
         forms.append(F_src)
 
     if supg is not None:
-        tau, a_eff = supg_stabilization(supg, h, a, d, r, dt, D_adv, D_diff, D_reac, DT, phi=phi) 
         dcdt, adv, diff = advection_diffusion_residuals(
             u, dt, a, d, DT, D_adv, D_diff, phi
         )
         res = dcdt + adv + diff + reac + src
-        F_supg = tau * inner(grad(v), a_eff) * res * dx
+        F_supg = supg_stabilization(supg, v, res, h, a, d, r, dt, D_adv, D_diff, D_reac, DT, phi=phi) 
         forms.append(F_supg)
 
     return forms
@@ -258,7 +252,7 @@ def advection_diffusion_reaction_dg(
     return forms
 
 
-@integral
+@mesh_integral
 def advective_flux(
     u: Function,
     a: Function | Constant,
@@ -270,7 +264,7 @@ def advective_flux(
     return inner(n, a * u)
 
 
-@integral
+@mesh_integral
 def diffusive_flux(
     u: Function,
     d: Function | Constant,
@@ -282,7 +276,7 @@ def diffusive_flux(
     return inner(n, d * grad(u))
 
 
-@integral
+@mesh_integral
 def flux(
     u: Function,
     a: Function | Constant, 

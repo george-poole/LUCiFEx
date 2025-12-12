@@ -19,8 +19,6 @@ def evolution_forms(
     phi: Series | Function | Expr | float = 1,
 ) -> tuple[Form, Form]:
     """
-    `∂u/∂t = R`
-
     `𝜑∂u/∂t = R`
     """
     if isinstance(phi, Series):
@@ -40,15 +38,13 @@ def evolution_expression(
     D_rhs: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
-    tuple_index: int = 0,
+    explicit: int | None = None,
 ) -> Expr:
     """
-    `∂u/∂t = R` \\
     `𝜑∂u/∂t = R`
 
     rearranged after finite difference discretization into the algebraic expression
 
-    `uⁿ⁺¹ = uⁿ + Δtⁿ 𝒟(R)` \\
     `uⁿ⁺¹ = uⁿ + (1/𝜑)Δtⁿ 𝒟(R)`
 
     under the assumption that 𝒟(R) with respect to `u`.
@@ -60,9 +56,11 @@ def evolution_expression(
 
     if isinstance(D_rhs, FiniteDifference):
         if D_rhs.is_implicit:
-            raise ExplicitDiscretizationError(D_rhs, f'Reaction must be explicit w.r.t. {u.name}')
+            raise ExplicitDiscretizationError(D_rhs, f"Reaction must be explicit in '{u.name}'.")
     else:
-        if D_rhs.finite_differences[tuple_index].is_implicit:
-            raise ExplicitDiscretizationError(D_rhs[tuple_index], f'Reaction must be explicit w.r.t. {u.name}')
+        if explicit is None:
+            raise ValueError(f"Need to provide argument index of '{u.name}'")
+        if D_rhs.finite_differences[explicit].is_implicit:
+            raise ExplicitDiscretizationError(D_rhs.finite_differences[explicit], f"Reaction must be explicit in '{u.name}'.")
     
     return u[0] + (1 / phi) * dt * D_rhs(r, trial=u)

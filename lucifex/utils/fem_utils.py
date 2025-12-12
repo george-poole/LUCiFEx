@@ -1,77 +1,24 @@
-from enum import Enum
-from typing import Any
+from collections.abc import Callable, Iterable
+from typing import overload
+from types import EllipsisType
+from functools import singledispatch, lru_cache
 
 import numpy as np
-from basix.ufl_wrapper import BasixElement
-from dolfinx.mesh import Mesh
-from dolfinx.fem import Function, Constant, FunctionSpace, Expression
-from ufl import Form
 from ufl.core.expr import Expr
-from ufl.finiteelement import FiniteElement
-from ufl.algorithms.analysis import extract_coefficients, extract_constants
+from dolfinx.mesh import Mesh
+from petsc4py import PETSc
+from dolfinx.fem import Function, FunctionSpace, Constant, Function, VectorFunctionSpace
+from dolfinx.fem import Expression
+from ufl import FiniteElement, MixedElement, VectorElement
 
-
-def is_scalar(
-    f: Function | Constant | FunctionSpace | Expr,
-) -> bool:
-    """Returns `True` if the function or function space is scalar-valued."""
-    return is_shape(f, ())
-
-
-def is_vector(
-    f: Function | Constant | FunctionSpace | Expr,
-    dim: int | None = None,
-) -> bool:
-    """Returns `True` if the function or function space is vector-valued."""
-    return is_shape(f, (dim,))
-
-
-def is_tensor(f: Function | Constant | FunctionSpace | Expr):
-    return not is_scalar(f) and not is_vector(f)
-
-
-def is_shape(
-    f: Function | Constant | FunctionSpace | Expr,
-    shape: tuple[int | None, ...],
-):
-    if isinstance(f, (tuple, list, float, int, np.ndarray)):
-        _shape = np.array(f).shape
-    elif isinstance(f, FunctionSpace):
-        _shape = f.ufl_element().value_shape()
-    else:
-        _shape = f.ufl_shape
-
-    if len(shape) != len(_shape):
-        return False
-    else:
-        shape = tuple(
-            i if i is not None else j for i, j in zip(shape, _shape, strict=True)
-        )
-        return shape == _shape
-    
-
-class ShapeError(ValueError):
-    def __init__(
-        self,
-        u: Function | Constant | Expr, 
-        shape: str | tuple,
-    ):
-        super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
-
-
-class ScalarError(ShapeError):
-    def __init__(self, u):
-        super().__init__(u, "'scalar'")
-
-
-class VectorError(ShapeError):
-    def __init__(self, u):
-        super().__init__(u, "'vector'")
-
-
-class ScalarVectorError(ShapeError):
-    def __init__(self, u):
-        super().__init__(u, "'scalar or vector'")
+from .ufl_utils import (
+    is_same_element,
+    extract_mesh,     is_scalar,
+    is_vector, 
+    VectorError,
+    ShapeError
+)
+from .py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache, as_slice
 
 
 def is_mixed_space(fs: FunctionSpace) -> bool:
@@ -93,14 +40,14 @@ def is_component_space(fs: FunctionSpace) -> bool:
     if not is_mixed_space(fs):
         return False
     else:
-        subspaces = function_subspaces(fs)
+        subspaces = get_fem_subspaces(fs)
         sub0 = subspaces[0]
         if not is_scalar(sub0):
             return False
         return all([sub.ufl_element() == sub0.ufl_element() for sub in subspaces])
     
 
-def function_subspace(
+def get_fem_subspace(
     fs: FunctionSpace,
     subspace_index: int | None = None,
     collapse: bool = True,
@@ -114,140 +61,407 @@ def function_subspace(
         return fs_sub
 
 
-def function_subspaces(
+def get_fem_subspaces(
     fs: FunctionSpace,
     collapse: bool = True,
 ) -> tuple[FunctionSpace, ...]:
     subspaces = []
     n_sub = fs.num_sub_spaces
     for n in range(n_sub):
-        subspaces.append(function_subspace(fs, n, collapse))
+        subspaces.append(get_fem_subspace(fs, n, collapse))
     return tuple(subspaces)
 
 
-class ElementFamilyType(set, Enum):
-    CONTINUOUS_LAGRANGE = {"P", "Q", "CG", "Lagrange"}
-    DISCONTINOUS_LAGRANGE = {"DP", "DQ", "DG", "Discontinuous Lagrange"}
-    LAGRANGE = CONTINUOUS_LAGRANGE.union(DISCONTINOUS_LAGRANGE)
-    BREZZI_DOUGLAS_MARINI = {"BDM", "Brezzi-Douglas-Marini"}
-    RAVIART_THOMAS = {"RT", "Raviart-Thomas"}
+
+@overload
+def create_fem_space(
+    fs: FunctionSpace,
+    subspace_index: int | None = None,
+) -> FunctionSpace:
+    ...
 
 
-def is_same_element(
-    f: Function | FunctionSpace,
-    family: str,
-    degree: int | None = None,
-    dim: int | None = None,
-    mesh: Mesh | None = None,
-) -> bool:
-    if isinstance(f, Function):
-        f = f.function_space
+@overload
+def create_fem_space(
+    fs: tuple[Mesh, str, int]
+    | tuple[Mesh, str, int]
+    | tuple[Mesh, str, int, int]
+    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
+    subspace_index: int | None = None,
+    use_cache: bool = False,
+) -> FunctionSpace:
+    ...
 
-    f_element: BasixElement | FiniteElement = f.ufl_element()
-    f_fam = f_element.family()
-    f_deg = f_element.degree()
-    f_shape = f_element.value_shape()
-    f_mesh = f.mesh
-    if isinstance(f_element, BasixElement):
-        f_dc = f_element.discontinuous
+
+def create_fem_space(
+    fs,
+    subspace_index=None,
+    use_cache=False,
+) -> FunctionSpace:
+    """
+    Typecast to `dolfinx.fem.FunctionSpace`.
+    """
+    if isinstance(fs, FunctionSpace):
+        return get_fem_subspace(fs, subspace_index)
     else:
-        f_dc = is_discontinuous_family(f_fam)
-
-    if degree is None:
-        degree = f_deg
-    if dim is None:
-        shape = f_shape
-    else:
-        shape = (dim, )
-    if mesh is None:
-        mesh = f_mesh
-
-    if (is_family_alias(f_fam, family) is True 
-        and f_deg == degree 
-        and f_mesh == mesh
-        and f_shape == shape
-        and f_dc == is_discontinuous_family(family)):
-        return True
-    else:
-        return False
+        return _function_space(use_cache=use_cache)(fs, subspace_index)
     
 
-def is_family_alias(
-    name: str,
-    other: str,
-) -> bool | None:
-    if name == other:
-        return True
+@optional_lru_cache
+def _function_space(
+    fs_hashable: tuple[Mesh, str, int]
+    | tuple[Mesh, str, int]
+    | tuple[Mesh, str, int, int]
+    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
+    subspace_index: int | None = None,
+) -> FunctionSpace:
+    match fs_hashable:
+        case mesh, elements:
+            mixed_elements = []
+            for e in elements:
+                if len(e) == 2:
+                    fam, deg = e
+                    mixed_elements.append(FiniteElement(fam, mesh.ufl_cell(), deg))
+                elif len(e) == 3:
+                    fam, deg, dim = e
+                    mixed_elements.append(VectorElement(fam, mesh.ufl_cell(), deg, dim))
+                else:
+                    raise ValueError(f'{e}')
+            fs = FunctionSpace(mesh, MixedElement(*mixed_elements))
+
+        case mesh, fam, deg:
+            fs = FunctionSpace(mesh, (fam, deg))
+        
+        case mesh, fam, deg, dim:
+            fs = VectorFunctionSpace(mesh, (fam, deg), dim)
+        
+        case _:
+            raise ValueError(f'{fs_hashable}')
+
+    return get_fem_subspace(fs, subspace_index)
+
+
+def create_fem_function(
+    fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
+    value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    subspace_index: int | None = None,
+    dofs_indices: Iterable[int] | StrSlice | None = None,
+    name: str | None = None,
+    try_identity: bool = False,
+    use_cache: bool | EllipsisType = False,
+) -> Function:
+    """
+    Typecast to `dolfinx.fem.Function`. 
+
+    `use_cache = True` will try to fetch a `Function` from the cache, based on the tuple-valued `fs`, 
+    `subspace_index` and `name` and then mutate that `Function`. \\
+    `use_cache = Ellipsis` will try to fetch a `FunctionSpace` from the cache, but create a new `Function`. \\
+    `use_cache = False` will create a new `FunctionSpace` and a new `Function`.
+    """
+    if name is None:
+        try:
+            name = value.name
+        except AttributeError:
+            pass
+            
+    if isinstance(fs, FunctionSpace):
+        if try_identity and isinstance(value, Function) and value.function_space == fs:
+            return value
+        fs = get_fem_subspace(fs, subspace_index)
+        f = Function(fs, name=name)
     else:
-        for family in ElementFamilyType:
-            if (name in family) and (other in family):
-                return True
-            if (name in family) and (other not in family):
-                return False
-        return None
+        fs = _as_function_space_tuple(fs, value)
+        if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
+            return value
+        if use_cache is True:
+            f = _create_function(fs, subspace_index, name)
+        else:
+            fs = create_fem_space(fs, subspace_index, bool(use_cache))
+            f = Function(fs, name=name)
+
+    set_fem_function(f, value, dofs_indices)
+    return f
+
+
+@lru_cache
+def _create_function(
+    fs_hashable: tuple, 
+    subspace_index: int | None,
+    name: str | None,
+) -> Function:
+    fs = _function_space(use_cache=True)(fs_hashable, subspace_index)
+    return Function(fs, name=name)
+
+
+@optional_lru_cache
+def get_subfunctions(
+    u: Function,  
+    collapse: bool = True,
+) -> tuple[Function, ...]:
+    if collapse:
+        return tuple(i.collapse() for i in u.split())
+    else:
+        return u.split()
+
+
+def get_component_fem_functions(
+    fs: tuple[Mesh, str, int] | tuple[str, int],
+    u: Function | Expr,
+    names: Iterable[str | None] | None = None,
+    use_cache: bool | EllipsisType = False,
+) -> tuple[Function, ...]:
     
+    if not is_vector(u):
+        raise VectorError(u)
+    
+    if isinstance(fs, tuple):
+        fs = _as_function_space_tuple(fs, u)
 
-def is_continuous_lagrange(
-    f: Function | FunctionSpace,
-    degree: int | None = None,
-) -> bool:
-    return is_same_element(f, "P", degree)
+    dim = u.ufl_shape[0]
+    
+    if names is None:
+        try:
+            u_name = u.name
+        except AttributeError:
+            u_name = f'{u.__class__.__name__}{id(u)}'
+        names = tuple(f'{u_name}_{i}' for i in range(dim))
 
-
-def is_discontinuous_lagrange(
-    f: Function | FunctionSpace,
-    degree: int | None = None,
-) -> bool:
-    return is_same_element(f, "DP", degree)
-
-
-def is_discontinuous_family(family: str) -> bool:
-    return family in ElementFamilyType.DISCONTINOUS_LAGRANGE or family.startswith(
-        "Discontinuous"
-    )
-
-
-def extract_mesh(
-    expr: Expr | Expression | Any,
-) -> Mesh:
-    meshes = extract_meshes(expr)
-    if len(meshes) == 0:
-        raise ValueError(
-            "No mesh deduced from expression's operands."
+    if isinstance(u, Function) and is_component_space(u.function_space):
+        # e.g. `u(𝐱) ∈ P₁⨯P₁`
+        return tuple(
+            create_fem_function(fs, i.collapse(), name=n, use_cache=use_cache) 
+            for i, n in zip(u.split(), names, strict=True)
         )
-    if len(meshes) > 1:
-        raise ValueError(
-            "Multiple meshes deduced from expression's operands."
-        )
-    return list(meshes)[0]
+    else:
+        # e.g. `u(𝐱) ∈ BDM`
+        u = create_fem_function((*fs, dim), u, use_cache=Ellipsis)
+        return get_component_fem_functions(fs, u, names, use_cache)
 
 
-def extract_meshes(
-    expr: Expr | Expression | Any,
-) -> list[Mesh]:
-    if isinstance(expr, Expression):
-        return extract_meshes(expr.ufl_expression)
+def create_fem_constant(
+    mesh: Mesh,
+    value: float | Iterable[float] | Constant,
+    try_identity: bool = False,
+) -> Constant:
+    """
+    Typecast to `dolfinx.fem.Constant` 
+    """
+    if try_identity and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
+        return value
+    else:
+        return _create_constant(value, mesh)
 
-    meshes = set()
-    coeffs_consts = (*extract_coefficients(expr), *extract_constants(expr))
-    for c in coeffs_consts:
-        if isinstance(c, Function):
-            meshes.add(c.function_space.mesh)
-        if hasattr(c, 'mesh'):
-            meshes.add(getattr(c, 'mesh'))
+@singledispatch
+def _create_constant(value, _):
+    raise MultipleDispatchTypeError(value)
 
-    return meshes
-
-
-def extract_integrands(
-    form: Form,
-) -> list[Expr]:
-    return [i.integrand for i in form.integrals()]
+@_create_constant.register(float)
+@_create_constant.register(int)
+def _(value, mesh: Mesh,):
+    return Constant(mesh, float(value))
 
 
-def extract_integrand(
-    form: Form,
-) -> Expr:
-    return sum(extract_integrands(form))
+@_create_constant.register(Iterable)
+def _(value: Iterable[float], mesh: Mesh):
+    if all(isinstance(i, (float, int)) for i in value):
+        value = [float(i) for i in value]
+        return Constant(mesh, value)
+    else:
+        raise TypeError('Expected an iterable of numbers')
+
+
+def _as_function_space_tuple(
+    elem: tuple[str, int] 
+    | tuple[str, int, int] 
+    | tuple[Mesh, str, int] 
+    | tuple[Mesh, str, int, int], 
+    u: Function | Expr,
+) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
+    match elem:
+        case mesh, fam, deg, dim:
+            return mesh, fam, deg, dim
+        case mesh, fam, deg if isinstance(mesh, Mesh):
+            return mesh, fam, deg
+        case fam, deg, dim:
+            mesh = extract_mesh(u)
+            return mesh, fam, deg, dim
+        case fam, deg:
+            mesh = extract_mesh(u)
+            return mesh, fam, deg
+        case _:
+            raise TypeError
+        
+
+
+# TODO @overload
+def set_fem_function(
+    f: Function,
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+    dofs_indices: Iterable[int] | StrSlice | None = None,
+) -> None:
+    """
+    Mutates `f` by either setting its DoFs array or calling its interpolation
+    method. Does not mutate `value`.
+    """
+    if isinstance(dofs_indices, StrSlice):
+        dofs_indices = as_slice(dofs_indices)
+    elif isinstance(dofs_indices, Iterable):
+        dofs_indices = np.array(dofs_indices)
+    return _set_fem_function(value, f, dofs_indices)
+
+
+@singledispatch
+def _set_fem_function(value, *_, **__):
+    raise MultipleDispatchTypeError(value)
+
+
+@_set_fem_function.register(Expression)
+@_set_fem_function.register(Expr)
+@_set_fem_function.register(Callable)
+def _(value, f: Function, indices):
+    assert indices is None
+    interpolate_fem_function(f, value)
+
+
+@_set_fem_function.register(Function)
+def _(value: Function, f: Function, indices: np.ndarray | None):
+    if indices is None:
+        f.interpolate(value)
+    else:
+        assert f.function_space == value.function_space
+        f.x.array[indices] = value.x.array[indices]
+
+
+@_set_fem_function.register(Constant)
+def _(value: Constant, f: Function, indices: np.ndarray | None):
+    if value.value.shape == ():
+        _set_fem_function(value.value.item(), f, indices)
+    else:
+        assert indices is None
+        if not f.ufl_shape == value.value.shape:
+            raise ShapeError(f, value.value.shape)
+        interpolate_fem_function(f, value)
+
+
+@_set_fem_function.register(float)
+@_set_fem_function.register(int)
+def _(value, u: Function, indices: np.ndarray | None):
+    if indices is None:
+        interpolate_fem_function(u, value)
+    else:
+        u.x.array[indices] = value
+
+@_set_fem_function.register(Iterable)
+def _(value, u: Function, indices: np.ndarray | None):
+    if indices is None:
+        interpolate_fem_function(u, value)
+    else:
+        u.x.array[indices] = value[indices]
+
+
+def interpolate_fem_function(
+    f: Function,
+    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+) -> None:
+    """
+    Mutates `f` by calling its `interpolate` method, does not mutate `value`.
+    """
+    return _interpolate_finite_element_function(value, f)
+
+
+@singledispatch
+def _interpolate_finite_element_function(u, *_, **__):
+    raise MultipleDispatchTypeError(u)
+
+
+@_interpolate_finite_element_function.register(Expr)
+def _(u: Expr, f: Function):
+    f.interpolate(Expression(u, f.function_space.element.interpolation_points()))
+
+@_interpolate_finite_element_function.register(Function)
+@_interpolate_finite_element_function.register(Expression)
+@_interpolate_finite_element_function.register(Callable)
+def _(u, f: Function):
+    f.interpolate(u)
+
+@_interpolate_finite_element_function.register(Constant)
+def _(u: Constant, f: Function):
+    if is_scalar(u):
+        return _interpolate_finite_element_function(u.value.item(), f)
+    else:
+        return _interpolate_finite_element_function(u.value, f)
     
-    
+
+@_interpolate_finite_element_function.register(Iterable)
+def _(u: Iterable[float | Constant | Callable], f: Function):
+    def _lambda_x(u) -> Callable[[np.ndarray], np.ndarray]:
+        if isinstance(u, (int ,float)):
+            return lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType)
+        if isinstance(u, Constant):
+            assert is_scalar(u)
+            return _lambda_x(u.value.item())
+        if isinstance(u, Callable):
+            return u
+        raise MultipleDispatchTypeError(u)
+    f.interpolate(lambda x: np.vstack([_lambda_x(ui)(x) for ui in u]))
+
+
+@_interpolate_finite_element_function.register(float)
+@_interpolate_finite_element_function.register(int)
+def _(u, f: Function):
+    f.interpolate(lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType))
+
+
+def set_fem_constant(
+    c: Constant,
+    value: Constant | float | np.ndarray | Iterable[float],
+) -> None:
+    """
+    Mutates `c` by setting its value array. Does not mutate `value`.
+    """
+    return _set_finite_element_constant(value, c)
+
+
+@singledispatch
+def _set_finite_element_constant(value, *_, **__):
+    raise MultipleDispatchTypeError(value)
+
+
+@_set_finite_element_constant.register(Constant)
+def _(value: Constant, const: Constant):
+    const.value = value.value.copy()
+
+
+@_set_finite_element_constant.register(float)
+@_set_finite_element_constant.register(int)
+def _(value, const: Constant):
+    const.value = value
+
+@_set_finite_element_constant.register(np.ndarray)
+def _(value: np.ndarray, const: Constant):
+    if not const.value.shape == value.shape:
+        raise ShapeError(const, value.shape)
+    const.value = value
+
+@_set_finite_element_constant.register(Iterable)
+def _(value, const: Constant):
+    return _set_finite_element_constant(np.array(value), const)
+
+# TODO deprecate
+# def set_value(obj: Function | Constant, value: Any) -> None:
+#     return _set_value(obj, value)
+
+
+# @singledispatch
+# def _set_value(obj, *_, **__):
+#     raise MultipleDispatchTypeError(obj)
+
+
+# @_set_value.register(Constant)
+# def _(obj, value):
+#     return set_finite_element_constant(obj, value)
+
+
+# @_set_value.register(Function)
+# def _(obj, value):
+#     return set_fem_function(obj, value)

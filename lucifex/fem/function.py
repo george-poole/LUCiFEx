@@ -8,8 +8,10 @@ from dolfinx.fem import Function as DOLFINxFunction
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import function_space, SpatialPerturbation, str_indexed
+from ..utils import create_fem_space, str_indexed
+from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
+
 
 
 class Function(DOLFINxFunction):
@@ -34,7 +36,7 @@ class Function(DOLFINxFunction):
         dtype: np.dtype = PETSc.ScalarType,
         index: int | None = None,
     ):
-        fs = function_space(fs)
+        fs = create_fem_space(fs)
 
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'

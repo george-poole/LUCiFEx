@@ -19,12 +19,12 @@ from petsc4py import PETSc
 from slepc4py import SLEPc
 
 from ..utils import (
-    Perturbation, replicate_callable, 
-    function_space, SpatialMarkerAlias
+    replicate_callable, 
+    create_fem_space, SpatialMarkerAlias
 )
 from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
-from ..fem import Function, Constant
+from ..fem import Function, Constant, Perturbation
 from .bcs import BoundaryConditions, Value, SubspaceIndex
 from .options import (
     OptionsPETSc, OptionsSLEPc,
@@ -731,7 +731,7 @@ class EigenvalueProblem:
                 raise TypeError
         else:
             nev = slepc.get(EPS_NEV_ATTR, self.slepc_default.eps_nev)
-            fs = function_space(solutions)
+            fs = create_fem_space(solutions)
             eigenfunctions = [Function(fs) for _ in range(nev)]
             eigenseries = [FunctionSeries(fs) for _ in range(nev)]
         

@@ -20,6 +20,15 @@ from .eval import (
     interpolation,
     integration,
 )
+from .norm import (
+    l_norm,
+    L_norm,
+    div_norm,
+    extremum,
+    maximum,
+    minimum,
+
+)
 
 
 BVP = BoundaryValueProblem

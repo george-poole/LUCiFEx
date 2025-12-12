@@ -6,7 +6,6 @@ from typing import (
     TypeVar,
     ParamSpec,
     TypeAlias,
-    Any,
     overload,
 )
 from typing_extensions import Self
@@ -20,7 +19,7 @@ from ..fem import Function, Constant
 from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
     Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-    Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc
+    EigenvalueProblem, Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc
 )
 from ..io import create_dir_path, write
 from ..solver import IBVP, IVP, Evaluation
@@ -333,8 +332,12 @@ def configure_simulation(
 
                 def _inner(*sim_func_args, **sim_func_kwargs):
                     classes = (
-                        BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-                        Projection, Interpolation,
+                        BoundaryValueProblem, 
+                        InitialBoundaryValueProblem, 
+                        InitialValueProblem, 
+                        EigenvalueProblem,
+                        Projection, 
+                        Interpolation,
                     )
                     [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
                     simulation_func_return = simulation_func(*sim_func_args, **sim_func_kwargs)

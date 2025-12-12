@@ -1,7 +1,7 @@
 import gmsh
 
 from ..utils.py_utils import replicate_callable
-from .utils import create_gmsh_mesh_factory
+from .gmsh_utils import create_gmsh_mesh_factory
 
 
 def ellipse_obstacle_model(

@@ -1,6 +1,6 @@
-# LUCiFEx
+# LUCiFEx 😈
 
-Welcome to the ***Linearized Convection in FEniCSx*** package! 
+Welcome to the *&nbsp;**L**inearized **C**onvection **i**n **FE**niCS**x**&nbsp;* package! 
 
 LUCiFEx is a flexible and user-friendly package for the applied mathematician to solve time-dependent PDEs numerically by the finite element method using [FEniCSx](https://github.com/FEniCS/dolfinx).
 

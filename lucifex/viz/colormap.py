@@ -12,7 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 
 from ..mesh.cartesian import CellType
-from ..utils import (is_scalar, grid, triangulation, create_function, is_cartesian, 
+from ..utils import (is_scalar, grid, triangulation, create_fem_function, is_cartesian, 
                      filter_kwargs, MultipleDispatchTypeError, UnstructuredQuadError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax
@@ -130,7 +130,7 @@ def _(
 ):
     if mesh is None:
         mesh = extract_mesh(expr)
-    f = create_function((mesh, 'P', 1), expr)
+    f = create_fem_function((mesh, 'P', 1), expr)
     return _plot_colormap(
         f,
         fig, 

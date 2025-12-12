@@ -180,27 +180,27 @@ def cflr_timestep(
     r: Function | Expr | Constant | float,
     h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
     cfl_courant: float | None = 1.0,
-    k_courant: float | None = 1.0,
+    r_courant: float | None = 1.0,
     dt_max: float = np.inf,
     dt_min: float = 0.0,
     tol: float = 1e-10,
 ):
     """
-    Advection-diffusion-reaction timestep combining CFL and kinetic conditions.
+    Calculates a timestep combining CFL and reactive constraints.
 
     `∆tCFLK = min{cK minₓ(1 / r(x)), cCFL minₓ(h(x) / |u(x)|)}` 
     """
-    if cfl_courant is None and k_courant is not None:
-        return reactive_timestep(r, k_courant, dt_max, dt_min, tol)
-    if k_courant is None and cfl_courant is not None:
+    if cfl_courant is None and r_courant is not None:
+        return reactive_timestep(r, r_courant, dt_max, dt_min, tol)
+    if r_courant is None and cfl_courant is not None:
         return cfl_timestep(u, h, cfl_courant, dt_max, dt_min, tol)
-    if cfl_courant is None and k_courant is None:
+    if cfl_courant is None and r_courant is None:
         return dt_max
 
     _lambda_cfl = _cfl_dt_evaluation(u, h, tol)
     _lambda_r = _reactive_dt_evaluation(r, tol)
     _lambda_cflk = lambda: min(
-        k_courant * _lambda_r(), cfl_courant * _lambda_cfl()
+        r_courant * _lambda_r(), cfl_courant * _lambda_cfl()
     )
     return _bounded_timestep(_lambda_cflk, dt_max, dt_min, 1.0)
 

@@ -6,7 +6,7 @@ from collections.abc import Iterable
 
 from natsort import natsorted
 
-from ..fdm import FunctionSeries, GridSeries, ConstantSeries, NumericSeries
+from ..fdm import FunctionSeries, GridSeries, ConstantSeries, NumericSeries, TriangulationSeries
 from .load import load_txt_dict
 from .proxy import proxy, Proxy, ObjectName, FileName
 
@@ -18,21 +18,23 @@ class DataSet:
         parameter_file: str | None = None,
         *,
         functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         ):
         self._dir_path = dir_path
         self._loaded: dict[
             str, 
-            FunctionSeries | ConstantSeries | GridSeries | NumericSeries
+            FunctionSeries | ConstantSeries | GridSeries | NumericSeries | TriangulationSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file
         self.include(
             functions=functions,
-            constants=constants,
             grids=grids,
+            triangulations=triangulations,
+            constants=constants,
             numerics=numerics,
         )
 
@@ -40,17 +42,20 @@ class DataSet:
         self,
         *,
         functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
         numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     ) -> None:
-        for metadata in (*functions, *constants, *grids, *numerics):
+        for metadata in (*functions, *grids, *triangulations, *constants, *numerics):
             if metadata in functions:
                 _type = FunctionSeries
-            elif metadata in constants:
-                _type = ConstantSeries
             elif metadata in grids:
                 _type = GridSeries
+            elif metadata in triangulations:
+                _type = TriangulationSeries
+            elif metadata in constants:
+                _type = ConstantSeries
             elif metadata in numerics:
                 _type = NumericSeries
             else:
@@ -62,20 +67,20 @@ class DataSet:
     def __getitem__(
         self, 
         key: str,
-    ) -> FunctionSeries | ConstantSeries | GridSeries | NumericSeries:
+    ) -> FunctionSeries |  GridSeries | TriangulationSeries | ConstantSeries | NumericSeries:
         ...
 
     @overload
     def __getitem__(
         self, 
         key: tuple[str, ...],
-    ) -> list[FunctionSeries | ConstantSeries | GridSeries | NumericSeries]:
+    ) -> list[FunctionSeries | GridSeries | TriangulationSeries | ConstantSeries | NumericSeries]:
         ...
 
     def __getitem__(
         self, 
         key: str | tuple[str, ...],
-    ) -> FunctionSeries | ConstantSeries | GridSeries | NumericSeries:
+    ) -> FunctionSeries | GridSeries| TriangulationSeries | ConstantSeries | NumericSeries:
         if isinstance(key, tuple) and all(isinstance(i, (str, tuple)) for i in key):
             return [self[i] for i in key]
         else:
@@ -132,8 +137,9 @@ def find_datasets(
     exclude: str | Iterable[str] = (),
     parameter_file: str | None = None,
     functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+    triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+    constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
     numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
 ) -> list[DataSet]:
 
@@ -156,8 +162,9 @@ def find_datasets(
                 dir_path,
                 parameter_file,
                 functions=functions,
-                constants=constants,
                 grids=grids,
+                triangulations=triangulations,
+                constants=constants,
                 numerics=numerics,
             )
         )

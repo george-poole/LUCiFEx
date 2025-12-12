@@ -9,10 +9,8 @@ import numpy as np
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpolator
 
-from .enum_types import BoundaryType
-from .mesh_utils import mesh_coordinates, mesh_vertices
-from .fem_typecast import create_function, function_space
-from .fem_mutate import set_finite_element_function
+from ..utils.mesh_utils import BoundaryType, mesh_coordinates, mesh_vertices
+from ..utils.fem_utils import create_fem_function, create_fem_space, set_fem_function
 
 
 @runtime_checkable
@@ -77,7 +75,7 @@ class DofsPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = create_function(fs, self._base)
+        f = create_fem_function(fs, self._base)
         if correct and self._corrector:
             self._corrector(f.x.array)
         return f
@@ -90,7 +88,7 @@ class DofsPerturbation:
     ) -> Function:
         if freq is None:
             freq = self._freq
-        fs = function_space(fs)
+        fs = create_fem_space(fs)
 
         f = Function(fs)
         if freq is None:
@@ -104,7 +102,7 @@ class DofsPerturbation:
             noise = self._rng.uniform(*self._amplitude, freq)
             dofs = RegularGridInterpolator(x_coarse, noise, method=method)(vs)
         
-        set_finite_element_function(f, dofs, dofs_indices=':')
+        set_fem_function(f, dofs, dofs_indices=':')
         return f
     
     def combine_base_noise(
@@ -115,16 +113,16 @@ class DofsPerturbation:
         correct: bool = True,
         name: str | None = None,
     ) -> Function:
-        fs = function_space(fs)
+        fs = create_fem_space(fs)
         if base is None:
             base = self.base(fs, False) 
         perturbation = self.noise(fs)
 
         f = Function(fs, name=name)
         dofs = operator(base.x.array, perturbation.x.array)
-        set_finite_element_function(f, dofs, dofs_indices=':')
+        set_fem_function(f, dofs, dofs_indices=':')
         if correct:
-            self._corrector(f)
+            self._corrector(f.x.array)
         return f
 
 
@@ -162,16 +160,16 @@ class SpatialPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = create_function(fs, self._base)
+        f = create_fem_function(fs, self._base)
         if correct and self._corrector:
-            self._corrector(f)
+            self._corrector(f.x.array)
         return f
 
     def noise(
         self,
         fs: FunctionSpace,
     ) -> Function:
-        return create_function(fs, self._noise)
+        return create_fem_function(fs, self._noise)
 
     def combine_base_noise(
         self,
@@ -188,9 +186,9 @@ class SpatialPerturbation:
                 base = self.base(fs, False) 
             perturbation = self.noise(fs)
             perturbed = operator(base, perturbation)
-        f = create_function(fs, perturbed)
-        if correct:
-            self._corrector(f)
+        f = create_fem_function(fs, perturbed)
+        if correct and self._corrector:
+            self._corrector(f.x.array)
         if name is not None:
             f.name = name
         return f
@@ -453,34 +451,7 @@ def is_univariate(
         return False
     
 
-BoundaryTypeError = lambda b: ValueError(f'Boundary type {b} not valid.')
-       
-
-# def _multiply_noise(
-#     noise: Callable,
-#     limit: float | tuple[float, float],
-#     *args: list | Iterable,
-# ):
-#     if isinstance(limit, float):
-#         limit = (0, limit)
-#     offset, amplitude = limit
-#     dim = len(args[0])
-#     noises = [noise(amplitude ** (1/dim), *a) for a in zip(*args, strict=True)]
-#     return lambda x: offset + reduce(mul, [n(x[i]) for i, n in enumerate(noises)])
-
-
-# def _typecast_noise_args(
-#     limit: float | tuple[float, float],
-#     boundary: str | tuple[str, str],
-#     Lx: float | tuple[float, float],
-# ) -> tuple[tuple[float, float], 
-#            tuple[str, str], 
-#            tuple[float, float],
-#            ]:
-#     if isinstance(limit, float):
-#         limit = (0.0, limit)
-#     if isinstance(boundary, str):
-#         boundary = (boundary, boundary)
-#     if isinstance(Lx, float):
-#         Lx = (0.0, Lx)
-#     return limit, boundary, Lx
+class BoundaryTypeError(ValueError):
+    def __init__(self, arg: Any):
+        msg = f'Boundary type {arg} not valid.'
+        super().__init__(msg)

@@ -8,9 +8,9 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_finite_element_constant, set_finite_element_function, extract_mesh, function_space
+from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space
 from ..utils.deferred import Writer
-from ..utils.perturbation import Perturbation
+from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 
 
@@ -374,7 +374,7 @@ class FunctionSeries(
         store: int | float | Callable[[], bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
     ):
-        fs = function_space(fs)
+        fs = create_fem_space(fs)
         self._function_space = fs
         self._ics_perturbation = None
         super().__init__(lambda i: Function(fs, Unsolved, index=i), name, order, store, ics)
@@ -384,11 +384,11 @@ class FunctionSeries(
     @staticmethod
     def set_container(container: Function, value):
         if value is Unsolved:
-            return set_finite_element_function(container, value.value, dofs_indices=':')
+            return set_fem_function(container, value.value, dofs_indices=':')
         elif isinstance(value, Function) and value.function_space == container.function_space:
-            return set_finite_element_function(container, value, dofs_indices=':')
+            return set_fem_function(container, value, dofs_indices=':')
         else:
-            return set_finite_element_function(container, value)
+            return set_fem_function(container, value)
 
     @property
     def function_space(
@@ -506,9 +506,9 @@ class ConstantSeries(
     @staticmethod
     def set_container(container: Constant, value):
         if value is Unsolved:
-            return set_finite_element_constant(container, value.value)
+            return set_fem_constant(container, value.value)
         else:
-            return set_finite_element_constant(container, value)
+            return set_fem_constant(container, value)
 
     @property
     def mesh(self) -> Mesh:

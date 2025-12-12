@@ -5,6 +5,7 @@ from ufl.core.expr import Expr
 from ufl import TrialFunction
 from dolfinx.fem import Function, Constant
 
+from ..utils import MultipleDispatchTypeError
 from ..utils.str_utils import str_indexed 
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
@@ -31,22 +32,21 @@ class FiniteDifference:
 
         self._coefficients = indices_coeffs
 
-        if self.order > 1:
-            if initial is None:
+        if initial is None:
+            if self.order > 1:
                 raise ValueError(
-                    "Must also provide first order method for initialization"
+                    "Must also provide first-order method for initialization"
                 )
-
-        if isinstance(initial, FiniteDifference):
+            self._initial = None
+        elif isinstance(initial, FiniteDifference):
             self._initial = initial
         elif isinstance(initial, (dict, tuple)):
             self._initial = FiniteDifference(initial)
-        elif initial is None:
-            assert self.order in (0, 1)
-            self._initial = initial
         else:
-            raise TypeError
-        assert self._initial.order in (0, 1)
+            raise MultipleDispatchTypeError(initial)
+        
+        if self._initial is not None:
+            assert self._initial.order in (0, 1)
 
                 
         if name is None:
@@ -471,7 +471,7 @@ class FiniteDifferenceArgwise:
         return max(i.order for i in self.finite_differences)
     
     @property
-    def init(self) -> Self | None:
+    def initial(self) -> Self | None:
         if self.order <= 1:
             return None
         fd_args_init = [fd.initial if fd.initial is not None else fd for fd in self._fd_args]
@@ -541,7 +541,7 @@ class DiscretizationError(RuntimeError):
         fd: FiniteDifference,
         msg: str = '',
     ):
-        super().__init__(f"{required} discretization required, not {fd}'. {msg}")
+        super().__init__(f"{required} discretization required, not {fd}. {msg}")
 
 
 class ImplicitDiscretizationError(DiscretizationError):

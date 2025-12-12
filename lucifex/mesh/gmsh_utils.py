@@ -10,7 +10,7 @@ from dolfinx.mesh import Mesh, MeshTagsMetaClass
 from dolfinx.cpp.mesh import MeshTags_int32
 from dolfinx.io.gmshio import model_to_mesh
 
-from ..utils import CellType
+from ..utils.mesh_utils import CellType
 
 
 Markers: TypeAlias = Iterable[tuple[str, int]]

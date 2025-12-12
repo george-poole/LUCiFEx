@@ -104,7 +104,7 @@ def run(
         [w.write(t[0]) for w in _writers]
         if any(s.stop(t[0]) for s in _stoppers):
             break
-        [s.forward(t[0]) for s in simulation.series]
+        [s.forward(t[0]) for s in _simulation.series]
         t.forward(t[0])
         _n += 1
         if _timing:

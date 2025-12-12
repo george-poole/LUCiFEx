@@ -2,7 +2,7 @@ import gmsh
 import numpy as np
 
 from ..utils.py_utils import replicate_callable
-from .utils import create_gmsh_mesh_factory
+from .gmsh_utils import create_gmsh_mesh_factory
 
 
 def annulus_model(

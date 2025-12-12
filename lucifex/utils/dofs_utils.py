@@ -13,11 +13,9 @@ from dolfinx.fem import (
 )
 from ufl.core.expr import Expr
 
-from .enum_types import DofsMethodType
-from .fem_typecast import create_function, get_component_functions
-from .fem_utils import is_scalar, is_vector, ScalarVectorError
-from .fem_mutate import set_finite_element_function
-from .py_utils import replicate_callable
+from .fem_utils import create_fem_function, get_component_fem_functions, set_fem_function
+from .ufl_utils import is_scalar, is_vector, ScalarVectorError
+from .py_utils import replicate_callable, StrEnum
 
 
 SpatialExpression = Callable[[np.ndarray], np.ndarray]
@@ -40,6 +38,11 @@ SpatialMarkerAlias: TypeAlias = SpatialExpression | Iterable[SpatialExpression |
 Alias types to `SpatialMarker`.
 """
 SubspaceIndex: TypeAlias = int | None 
+
+
+class DofsMethodType(StrEnum):
+    GEOMETRICAL = 'geometrical'
+    TOPOLOGICAL = 'topological'
 
 
 def dofs_indices(
@@ -103,7 +106,7 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = create_function(fs, u, try_identity=try_identity, use_cache=use_cache)
+        u = create_fem_function(fs, u, try_identity=try_identity, use_cache=use_cache)
         return u.x.array[:]
     elif l2_norm and is_vector(u):
         if not isinstance(use_cache, tuple):
@@ -112,7 +115,7 @@ def dofs(
         component_dofs = np.stack(
             [
                 dofs(i, fs, use_cache=use_scalars_cache, try_identity=False) 
-                for i in get_component_functions(fs, u, use_cache=use_vector_cache)
+                for i in get_component_fem_functions(fs, u, use_cache=use_vector_cache)
             ], 
             axis=1,
         )
@@ -141,27 +144,3 @@ def as_spatial_marker(
         return _as_marker(m)
     else:
         return lambda x: np.any([_as_marker(mi)(x) for mi in m], axis=0)
-    
-
-def extremum(
-    u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
-) -> tuple[float, float]:
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True) 
-    return np.min(_dofs), np.max(_dofs)
-
-
-def minimum(
-    u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
-) -> float:
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
-    return np.min(_dofs)
-
-
-def maximum(
-    u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
-) -> float:
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
-    return np.max(_dofs)
