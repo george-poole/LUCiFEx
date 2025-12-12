@@ -8,7 +8,7 @@ from natsort import natsorted
 
 from ..fdm import FunctionSeries, GridSeries, ConstantSeries, NumericSeries, TriangulationSeries
 from .load import load_txt_dict
-from .proxy import proxy, Proxy, ObjectName, FileName
+from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 
 
 class DataSet:
@@ -16,12 +16,7 @@ class DataSet:
         self,
         dir_path: str,
         parameter_file: str | None = None,
-        *,
-        functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        *metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]],
         ):
         self._dir_path = dir_path
         self._loaded: dict[
@@ -30,38 +25,30 @@ class DataSet:
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file
-        self.include(
-            functions=functions,
-            grids=grids,
-            triangulations=triangulations,
-            constants=constants,
-            numerics=numerics,
+        self.add_metadata(
+            *metadata,
         )
 
-    def include(
+    def add_metadata(
         self,
-        *,
-        functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-        numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
+        *metadata,
     ) -> None:
-        for metadata in (*functions, *grids, *triangulations, *constants, *numerics):
-            if metadata in functions:
-                _type = FunctionSeries
-            elif metadata in grids:
-                _type = GridSeries
-            elif metadata in triangulations:
-                _type = TriangulationSeries
-            elif metadata in constants:
-                _type = ConstantSeries
-            elif metadata in numerics:
-                _type = NumericSeries
-            else:
-                raise ValueError
-            name, file_name, *args = metadata
+        for md in metadata:
+            name, _type, file_name, *args = md
             self._proxies[name] = proxy((name, _type, file_name, *args))
+
+    def load(
+        self, 
+        name: str, 
+        reload: bool = False,
+    ) -> None:
+        if not reload and name in self._loaded:
+            return
+        try:
+            obj = self._proxies[name].load_arg(self._dir_path)
+        except KeyError:
+            raise KeyError(f"No metadata has been included for '{name}'")
+        self._loaded[name] = obj
 
     @overload
     def __getitem__(
@@ -80,7 +67,7 @@ class DataSet:
     def __getitem__(
         self, 
         key: str | tuple[str, ...],
-    ) -> FunctionSeries | GridSeries| TriangulationSeries | ConstantSeries | NumericSeries:
+    ):
         if isinstance(key, tuple) and all(isinstance(i, (str, tuple)) for i in key):
             return [self[i] for i in key]
         else:
@@ -89,8 +76,7 @@ class DataSet:
             try:
                 return self._loaded[key]
             except KeyError:
-                obj = self._proxies[key].load_arg(self._dir_path)
-                self._loaded[key] = obj
+                self.load(key)
                 return self[key]    
             
     def __setitem__(
@@ -133,14 +119,10 @@ class DataSet:
 
 def find_datasets(
     root_dir_path: str,
+    *metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]],
     include: str | Iterable[str] = '*',
     exclude: str | Iterable[str] = (),
     parameter_file: str | None = None,
-    functions: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    grids: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    triangulations: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    constants: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
-    numerics: Iterable[tuple[ObjectName, FileName, Unpack[tuple]]] = (),
 ) -> list[DataSet]:
 
     dir_paths = set()
@@ -161,11 +143,7 @@ def find_datasets(
             DataSet(
                 dir_path,
                 parameter_file,
-                functions=functions,
-                grids=grids,
-                triangulations=triangulations,
-                constants=constants,
-                numerics=numerics,
+                *metadata,
             )
         )
 

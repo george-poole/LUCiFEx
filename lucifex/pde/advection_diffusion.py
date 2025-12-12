@@ -1,5 +1,6 @@
 from typing import Callable
 
+import numpy as np
 from ufl.core.expr import Expr
 from ufl.geometry import CellDiameter
 from ufl import (dx, dS, Form, inner, TestFunction, div, 
@@ -21,7 +22,7 @@ from .supg import supg_stabilization
 def advection_diffusion(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
-    a: FunctionSeries,
+    a: Series | Function | Expr,
     d: Series | Function | Expr,
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
@@ -67,7 +68,7 @@ def advection_diffusion(
 def advection_diffusion_reaction(
     u: FunctionSeries,
     dt: Constant,
-    a: FunctionSeries,
+    a: Series | Function | Expr,
     d: Series | Function | Expr,
     r: Function | Expr | Series | tuple[Callable, tuple],
     D_adv: FiniteDifference | FiniteDifferenceArgwise,

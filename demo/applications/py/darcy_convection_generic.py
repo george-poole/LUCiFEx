@@ -16,7 +16,7 @@ from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
     integration, interpolation
 )
-from lucifex.utils import extremum
+from lucifex.utils import extrema
 from lucifex.sim import Simulation
 
 from lucifex.pde.streamfunction import streamfunction_velocity
@@ -122,8 +122,8 @@ def darcy_convection_generic(
         fBoundary = ConstantSeries(Omega, "fBoundary", shape=(len(dOmega.union), 2))
         solvers.extend(
             [
-                evaluation(uMinMax, extremum)(u[0]),
-                evaluation(cMinMax, extremum)(c[0]),
+                evaluation(uMinMax, extrema)(u[0]),
+                evaluation(cMinMax, extrema)(c[0]),
                 evaluation(dtCFL, cfl_timestep)(u[0], cfl_h),
                 integration(fBoundary, flux, 'ds', *dOmega.union)(c[0], u[0], d[0]),
             ]

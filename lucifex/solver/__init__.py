@@ -24,7 +24,7 @@ from .norm import (
     l_norm,
     L_norm,
     div_norm,
-    extremum,
+    extrema,
     maximum,
     minimum,
 

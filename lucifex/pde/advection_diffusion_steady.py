@@ -27,7 +27,6 @@ def advection_diffusion_steady(
     """
     `𝐚·∇u = ∇·(D·∇u) + Ru + J`
     """
-    supg = str(supg).lower()
     v = TestFunction(u.function_space)
     u_trial = TrialFunction(u.function_space)
     h = CellDiameter(u.function_space.mesh)
@@ -55,14 +54,14 @@ def advection_diffusion_steady(
         if j is not None:
             res -= j
 
-        tau, a = supg_stabilization(supg, h, a, d, r)
-        Pv = inner(grad(v), a)
         if gls:
-            Pv -= div(d * grad(v))
-            if r is not None:
-                Pv -= v * r
-        F_supg = tau * Pv * res * dx
-        forms.append(F_supg)
+            petrov_func = lambda v, a, d, r: (
+                inner(grad(v), a) - div(d * grad(v)) - v * (r if r is not None else 0)
+            )
+        else:
+            petrov_func = None
+        F_stbl = supg_stabilization(supg, v, res, h, a, d, r, petrov_func=petrov_func)
+        forms.append(F_stbl)
 
     return forms
 

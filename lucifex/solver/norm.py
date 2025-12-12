@@ -72,7 +72,7 @@ def grad_norm(
     return L_norm(inner(grad(u), grad(u)), p, mod)
 
 
-def extremum(
+def extrema(
     u: Function | Expr,
     elem: tuple[str, int] = ('P', 1),
 ) -> tuple[float, float]:

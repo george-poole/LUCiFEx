@@ -39,6 +39,7 @@ def supg_stabilization(
     D_reac: FiniteDifference | None = None,
     D_dt: FiniteDifference | None = None,
     phi = 1,
+    petrov_func: Callable | None = None,
 ) -> Form:
     """
     `𝜏 (∇v·𝐚ᵉᶠᶠ)ℛ`
@@ -51,14 +52,18 @@ def supg_stabilization(
     else:
         if r is None:
             r = 0
-        if D_adv is not None:
-            a_eff = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
-        if D_diff is not None:
-            d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
-        if D_reac is not None:
-            r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
+        if D_adv is None:
+            a_eff = (1 / phi) * a
         else:
-            r_eff = r
+            a_eff = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
+        if D_diff is None:
+            d_eff = (1/phi) * d
+        else:
+             d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
+        if D_reac is None:
+            r_eff = (1 / phi) * r
+        else:
+            r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
 
         match supg:
             case TauType.CODINA:
@@ -75,20 +80,28 @@ def supg_stabilization(
             case _:
                 raise ValueError(f"'{supg}' SUPG method not implemented.")
             
-    return tau * inner(grad(v), a_eff) * res * dx
+    if petrov_func is None:
+        Pv = inner(grad(v), a_eff)
+    else:
+        Pv = petrov_func(v, a_eff, d_eff, r_eff)
+
+    return tau * Pv * res * dx
 
 
 def tau_function(func):
     @wraps(func)
-    def _(h, a, d, *args, **kwargs):
+    def _(h, a, *args, **kwargs):
         mesh = extract_mesh(a)
         if isinstance(h, str):
             h = cell_size_quantity(mesh, h)
         if is_vector(a):
             a = sqrt(inner(a, a))
-        if is_tensor(d):
-            d = tr(d) / mesh.geometry.dim
-        return func(h, a, d, *args, **kwargs)
+        if args:
+            d = args[0]
+            if is_tensor(d):
+                d = tr(d) / mesh.geometry.dim
+            args = (d, *args[1:])
+        return func(h, a, *args, **kwargs)
     return _
 
 
@@ -234,31 +247,3 @@ def effective_reaction(
             r_eff += (1 / dt) * D_dt.explicit_coeff
 
     return r_eff
-
-
-# TODO Lenardic1993 steps?
-def limits_corrector(
-    lower: float | None = None,
-    upper: float | None = None,
-    conservation: Callable[[np.ndarray], np.ndarray] | None = None,
-) -> Callable[[np.ndarray], None]:
-    """
-    Enforces `u ∈ [umin, umax]`
-
-    NOTE intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
-    """
-    def _(u: np.ndarray) -> None:
-        if conservation:
-            mass_pre = conservation(np.copy(u))
-
-        if lower is not None:
-            u[u < lower] = lower
-        if upper is not None:
-            u[u > upper] = upper
-        
-        if conservation:
-            mass_post = conservation(np.copy(u))
-            mass_len = len([i for i in u if i not in (lower, upper)])
-            u[:] += (mass_post - mass_pre) / mass_len
-    
-    return _

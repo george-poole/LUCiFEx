@@ -50,7 +50,7 @@ from .fem_utils import (
     get_component_fem_functions,
     set_fem_constant, 
     set_fem_function, 
-    interpolate_fem_function,
+    set_fem_function_interpolate,
     is_mixed_space,
     get_fem_subspace,
     get_fem_subspaces,

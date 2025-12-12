@@ -13,7 +13,8 @@ from ufl import FiniteElement, MixedElement, VectorElement
 
 from .ufl_utils import (
     is_same_element,
-    extract_mesh,     is_scalar,
+    extract_mesh,     
+    is_scalar,
     is_vector, 
     VectorError,
     ShapeError
@@ -70,7 +71,6 @@ def get_fem_subspaces(
     for n in range(n_sub):
         subspaces.append(get_fem_subspace(fs, n, collapse))
     return tuple(subspaces)
-
 
 
 @overload
@@ -251,9 +251,11 @@ def create_fem_constant(
     else:
         return _create_constant(value, mesh)
 
+
 @singledispatch
 def _create_constant(value, _):
     raise MultipleDispatchTypeError(value)
+
 
 @_create_constant.register(float)
 @_create_constant.register(int)
@@ -290,126 +292,133 @@ def _as_function_space_tuple(
             return mesh, fam, deg
         case _:
             raise TypeError
-        
 
 
-# TODO @overload
 def set_fem_function(
     f: Function,
-    value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+    value: Function 
+    | Callable[[np.ndarray], np.ndarray] 
+    | Expression 
+    | Expr 
+    | Constant 
+    | float 
+    | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """
     Mutates `f` by either setting its DoFs array or calling its interpolation
     method. Does not mutate `value`.
     """
+    if dofs_indices is None:
+        set_fem_function_interpolate(f, value)
+    else:
+        set_fem_function_dofs(f, value, dofs_indices)
+
+
+def set_fem_function_dofs(
+    f: Function | np.ndarray,
+    value: Function 
+    | Callable[[np.ndarray], np.ndarray] 
+    | Expression 
+    | Expr 
+    | Constant 
+    | float 
+    | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+    dofs_indices: Iterable[int] | StrSlice | None = None,
+) -> None:
+    """
+    Mutates `f` by calling its setting its DoFs array. Does not mutate `value`.
+    """
     if isinstance(dofs_indices, StrSlice):
         dofs_indices = as_slice(dofs_indices)
     elif isinstance(dofs_indices, Iterable):
         dofs_indices = np.array(dofs_indices)
-    return _set_fem_function(value, f, dofs_indices)
+
+    if isinstance(f, Function):
+        f = f.x.array
+
+    return _set_fem_function_dofs(value, f, dofs_indices)
 
 
 @singledispatch
-def _set_fem_function(value, *_, **__):
+def _set_fem_function_dofs(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
-@_set_fem_function.register(Expression)
-@_set_fem_function.register(Expr)
-@_set_fem_function.register(Callable)
-def _(value, f: Function, indices):
-    assert indices is None
-    interpolate_fem_function(f, value)
+@_set_fem_function_dofs.register(Function)
+def _(value: Function, arr: np.ndarray, indices: np.ndarray | None):
+    # assert f.function_space == value.function_space
+    arr[indices] = value.x.array[indices]
 
 
-@_set_fem_function.register(Function)
-def _(value: Function, f: Function, indices: np.ndarray | None):
-    if indices is None:
-        f.interpolate(value)
-    else:
-        assert f.function_space == value.function_space
-        f.x.array[indices] = value.x.array[indices]
+@_set_fem_function_dofs.register(Constant)
+def _(value: Constant, arr: np.ndarray, indices: np.ndarray | None):
+    _set_fem_function_dofs(value.value.item(), arr, indices)
 
 
-@_set_fem_function.register(Constant)
-def _(value: Constant, f: Function, indices: np.ndarray | None):
-    if value.value.shape == ():
-        _set_fem_function(value.value.item(), f, indices)
-    else:
-        assert indices is None
-        if not f.ufl_shape == value.value.shape:
-            raise ShapeError(f, value.value.shape)
-        interpolate_fem_function(f, value)
+@_set_fem_function_dofs.register(float)
+@_set_fem_function_dofs.register(int)
+def _(value, arr: np.ndarray, indices: np.ndarray | None):
+    arr[indices] = value
+
+@_set_fem_function_dofs.register(Iterable)
+def _(value, arr: np.ndarray, indices: np.ndarray | None):
+    arr[indices] = value[indices]
 
 
-@_set_fem_function.register(float)
-@_set_fem_function.register(int)
-def _(value, u: Function, indices: np.ndarray | None):
-    if indices is None:
-        interpolate_fem_function(u, value)
-    else:
-        u.x.array[indices] = value
-
-@_set_fem_function.register(Iterable)
-def _(value, u: Function, indices: np.ndarray | None):
-    if indices is None:
-        interpolate_fem_function(u, value)
-    else:
-        u.x.array[indices] = value[indices]
-
-
-def interpolate_fem_function(
+def set_fem_function_interpolate(
     f: Function,
     value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
 ) -> None:
     """
-    Mutates `f` by calling its `interpolate` method, does not mutate `value`.
+    Mutates `f` by calling its `interpolate` method. Does not mutate `value`.
     """
-    return _interpolate_finite_element_function(value, f)
+    return _set_fem_function_interpolate(value, f)
 
 
 @singledispatch
-def _interpolate_finite_element_function(u, *_, **__):
+def _set_fem_function_interpolate(u, *_, **__):
     raise MultipleDispatchTypeError(u)
 
 
-@_interpolate_finite_element_function.register(Expr)
+@_set_fem_function_interpolate.register(Expr)
 def _(u: Expr, f: Function):
     f.interpolate(Expression(u, f.function_space.element.interpolation_points()))
 
-@_interpolate_finite_element_function.register(Function)
-@_interpolate_finite_element_function.register(Expression)
-@_interpolate_finite_element_function.register(Callable)
-def _(u, f: Function):
-    f.interpolate(u)
+@_set_fem_function_interpolate.register(Function)
+@_set_fem_function_interpolate.register(Expression)
+@_set_fem_function_interpolate.register(Callable)
+def _(value, f: Function):
+    f.interpolate(value)
 
-@_interpolate_finite_element_function.register(Constant)
-def _(u: Constant, f: Function):
-    if is_scalar(u):
-        return _interpolate_finite_element_function(u.value.item(), f)
+@_set_fem_function_interpolate.register(Constant)
+def _(value: Constant, f: Function):
+    if is_scalar(value):
+        return _set_fem_function_interpolate(value.value.item(), f)
     else:
-        return _interpolate_finite_element_function(u.value, f)
+        if not f.ufl_shape == value.value.shape:
+            raise ShapeError(f, value.value.shape)
+        return _set_fem_function_interpolate(value.value, f)
     
 
-@_interpolate_finite_element_function.register(Iterable)
-def _(u: Iterable[float | Constant | Callable], f: Function):
-    def _lambda_x(u) -> Callable[[np.ndarray], np.ndarray]:
+@_set_fem_function_interpolate.register(Iterable)
+def _(value: Iterable[float | Constant | Callable], f: Function):
+    def _inner(u) -> Callable[[np.ndarray], np.ndarray]:
         if isinstance(u, (int ,float)):
             return lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType)
         if isinstance(u, Constant):
             assert is_scalar(u)
-            return _lambda_x(u.value.item())
+            return _(u.value.item())
         if isinstance(u, Callable):
             return u
         raise MultipleDispatchTypeError(u)
-    f.interpolate(lambda x: np.vstack([_lambda_x(ui)(x) for ui in u]))
+    f.interpolate(lambda x: np.vstack([_inner(i)(x) for i in value]))
 
 
-@_interpolate_finite_element_function.register(float)
-@_interpolate_finite_element_function.register(int)
-def _(u, f: Function):
-    f.interpolate(lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType))
+@_set_fem_function_interpolate.register(float)
+@_set_fem_function_interpolate.register(int)
+def _(value, f: Function):
+    f.interpolate(lambda x: np.full_like(x[0], value, dtype=PETSc.ScalarType))
 
 
 def set_fem_constant(
@@ -446,22 +455,3 @@ def _(value: np.ndarray, const: Constant):
 @_set_finite_element_constant.register(Iterable)
 def _(value, const: Constant):
     return _set_finite_element_constant(np.array(value), const)
-
-# TODO deprecate
-# def set_value(obj: Function | Constant, value: Any) -> None:
-#     return _set_value(obj, value)
-
-
-# @singledispatch
-# def _set_value(obj, *_, **__):
-#     raise MultipleDispatchTypeError(obj)
-
-
-# @_set_value.register(Constant)
-# def _(obj, value):
-#     return set_finite_element_constant(obj, value)
-
-
-# @_set_value.register(Function)
-# def _(obj, value):
-#     return set_fem_function(obj, value)

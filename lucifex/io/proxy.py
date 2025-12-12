@@ -9,6 +9,8 @@ from .load import load
 ObjectName: TypeAlias = str
 ObjectType: TypeAlias = type
 FileName: TypeAlias = str
+ObjectMetaData: TypeAlias = tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]
+
 
 class Proxy:
     id_func = staticmethod(lambda *a: a[0] if len(a) == 1 else a)
@@ -21,12 +23,12 @@ class Proxy:
     def __init__(
         self, 
         func: Callable[[Unpack[tuple]], Any],
-        objs: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
+        metadata: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
         use_cache: bool = True,
         clear_cache: bool = False
     ):
         self._func = func
-        self._objs = objs
+        self._metadata = metadata
         self._use_cache = use_cache
         self._clear_cache = clear_cache
 
@@ -37,7 +39,7 @@ class Proxy:
     ) -> Any:
         
         objs_loaded = []
-        for (name, tp, file_name, *args) in self._objs:
+        for (name, tp, file_name, *args) in self._metadata:
             obj_loaded = load(tp, self._use_cache, self._clear_cache)(name, directory, file_name, *args)
             objs_loaded.append(obj_loaded)
 
@@ -49,7 +51,7 @@ class Proxy:
 
 @overload
 def proxy(
-    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
+    metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -63,7 +65,7 @@ def proxy(
 @overload
 def proxy(
     func: Callable[[Any], Any], 
-    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
+    metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -76,7 +78,7 @@ def proxy(
 
 @overload
 def proxy(
-    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
+    metadata: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -90,7 +92,7 @@ def proxy(
 @overload
 def proxy(
     func: Callable[..., Any], 
-    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]],
+    metadata: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]],
     *, 
     use_cache: bool = True,
     clear_cache: bool = False
@@ -104,36 +106,36 @@ def proxy(
 @singledispatch
 def proxy(
     func, 
-    objs, 
+    metadata, 
     use_cache: bool = True,
     clear_cache: bool = False,
 ):
     assert callable(func)
-    if not isinstance(objs, list):
-        objs = [objs]
-    return Proxy(func, objs, use_cache, clear_cache)
+    if not isinstance(metadata, list):
+        metadata = [metadata]
+    return Proxy(func, metadata, use_cache, clear_cache)
 
 
 @proxy.register(tuple)
-def _(obj, **kwargs):
-    return proxy(Proxy.id_func, obj, **kwargs)
+def _(metadata, **kwargs):
+    return proxy(Proxy.id_func, metadata, **kwargs)
 
 
 @proxy.register(list)
-def _(obj, **kwargs):
-    return proxy(Proxy.id_func, obj, **kwargs)
+def _(metadata, **kwargs):
+    return proxy(Proxy.id_func, metadata, **kwargs)
 
 
 class CoProxy(Proxy):
     def __init__(
         self, 
         func: Callable[[Unpack[tuple]], Any],
-        objs: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
+        metadata: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
         use_cache: bool = True,
         clear_cache: bool = False,
         vectorize: bool = True,
     ):
-        super().__init__(func, objs, use_cache, clear_cache)
+        super().__init__(func, metadata, use_cache, clear_cache)
         self._vectorize = vectorize
     
     def load_arg(
@@ -158,7 +160,7 @@ class CoProxy(Proxy):
 
 @overload
 def co_proxy(
-    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
+    metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False
@@ -172,7 +174,7 @@ def co_proxy(
 @overload
 def co_proxy(
     func: Callable[[Any], Any], 
-    obj: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
+    metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False,
@@ -189,7 +191,7 @@ def co_proxy(
 
 @overload
 def co_proxy(
-    obj: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
+    metadata: list[tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]], 
     *,
     use_cache: bool = True,
     clear_cache: bool = False,
@@ -203,7 +205,7 @@ def co_proxy(
 @overload
 def co_proxy(
     func: Callable[..., Any], 
-    obj: list[
+    metadata: list[
         tuple[ObjectName, FileName, Unpack[tuple]]
         | tuple[ObjectName, ObjectType, FileName, Unpack[tuple]]
     ],
@@ -223,24 +225,24 @@ def co_proxy(
 @singledispatch
 def co_proxy(
     func, 
-    objs, 
+    metadata, 
     use_cache = True,
     clear_cache = False,
     vectorize = True,
 ):
     assert callable(func)
-    if not isinstance(objs, list):
-        objs = [objs]
-    return CoProxy(func, objs, use_cache, clear_cache, vectorize)
+    if not isinstance(metadata, list):
+        metadata = [metadata]
+    return CoProxy(func, metadata, use_cache, clear_cache, vectorize)
 
 
 @co_proxy.register(list)
-def _(obj, **kwargs):
-    return co_proxy(CoProxy.id_func, obj, **kwargs)
+def _(metadata, **kwargs):
+    return co_proxy(CoProxy.id_func, metadata, **kwargs)
 
 
 @co_proxy.register(tuple)
-def _(obj, **kwargs):
-    return co_proxy(CoProxy.id_func, obj, **kwargs)
+def _(metadata, **kwargs):
+    return co_proxy(CoProxy.id_func, metadata, **kwargs)
 
 

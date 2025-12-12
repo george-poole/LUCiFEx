@@ -1,4 +1,4 @@
-from typing import TypeAlias, ParamSpec, Concatenate
+from typing import TypeAlias
 from types import EllipsisType
 from collections.abc import Callable, Iterable
 
@@ -13,9 +13,13 @@ from dolfinx.fem import (
 )
 from ufl.core.expr import Expr
 
-from .fem_utils import create_fem_function, get_component_fem_functions, set_fem_function
+from .fem_utils import (
+    create_fem_function, 
+    get_component_fem_functions, 
+    set_fem_function_dofs,
+)
 from .ufl_utils import is_scalar, is_vector, ScalarVectorError
-from .py_utils import replicate_callable, StrEnum
+from .py_utils import StrEnum
 
 
 SpatialExpression = Callable[[np.ndarray], np.ndarray]
@@ -47,7 +51,7 @@ class DofsMethodType(StrEnum):
 
 def dofs_indices(
     fs: FunctionSpace,
-    dofs_marker: SpatialMarkerAlias,
+    dofs_marker: SpatialMarker | SpatialMarkerAlias,
     subspace_index: int | None = None,
     method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
 ) -> np.ndarray | list[np.ndarray]:
@@ -144,3 +148,68 @@ def as_spatial_marker(
         return _as_marker(m)
     else:
         return lambda x: np.any([_as_marker(mi)(x) for mi in m], axis=0)
+    
+
+def limits_corrector(
+    lower: float | Constant | None = None,
+    upper: float | Constant | None = None,
+    conservation: Callable[[np.ndarray], np.ndarray] | None = None,
+) -> Callable[[np.ndarray], None]:
+    """
+    NOTE intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
+    """
+    def _(u: np.ndarray) -> None:
+        if conservation:
+            mass_pre = conservation(np.copy(u))
+
+        if lower is not None:
+            if isinstance(lower, Constant):
+                _lower = lower.value
+            else:
+                _lower = lower
+            u[u < _lower] = _lower
+        if upper is not None:
+            if isinstance(upper, Constant):
+                _upper = upper.value
+            else:
+                _upper = upper
+            u[u > _upper] = _upper
+        
+        if conservation:
+            mass_post = conservation(np.copy(u))
+            mass_len = len([i for i in u if i not in (lower, upper)])
+            u[:] += (mass_post - mass_pre) / mass_len
+    
+    return _
+
+
+def dirichlet_corrector(
+    fs: FunctionSpace,
+    *markers_values: tuple[SpatialMarkerAlias, float | Constant | Function | Expr] 
+    | tuple[SpatialMarkerAlias, float | Constant | Function | Expr, int]
+) -> Callable[[np.ndarray], None]:
+
+    markers, values, subspace_indices = [], [], []
+    for m_v_si in markers_values:
+        if len(m_v_si) == 2:
+            m, v, si = *m_v_si, None
+        elif len(m_v_si) == 3:
+            m, v, si = m_v_si
+        else:
+            raise ValueError
+        markers.append(m)
+        values.append(v)
+        subspace_indices.append(si)
+
+    dofs: list[np.ndarray] = []
+    for m, v, i in zip(markers, values, subspace_indices, strict=True):
+        d = dofs_indices(fs, m, i)
+        if not isinstance(d, np.ndarray):
+            d = d[0]
+        dofs.append[d]
+
+    def _(u: np.ndarray) -> None:
+        for d, v in zip(d, values):
+            set_fem_function_dofs(u, v, d)
+
+    return _

@@ -11,7 +11,10 @@ from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, classproperty, optional_lru_cache
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
+from ..fdm import (
+    FunctionSeries, ConstantSeries, GridSeries, NumericSeries, 
+    TriangulationSeries,
+)
 from .read import read
 from .utils import file_path_ext
 
