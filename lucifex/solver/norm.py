@@ -32,7 +32,7 @@ def L_norm(
     """
     `‖u‖ℒₚᵖ = ∫ |u(𝐱)|ᵖ dx`
 
-     Note that raising the evaluated integral to the power of `1/p` 
+    Note that raising the evaluated integral to the power of `1/p` 
     is required to recover the usual definition of the divergence norm.
     """
     if mod:

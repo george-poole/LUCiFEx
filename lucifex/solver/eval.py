@@ -131,10 +131,10 @@ class Evaluation(GenericSolver[T, TS]):
         self._evaluation = evaluation
 
     @classmethod
-    def from_function(
+    def from_expr_func(
         cls, 
         solution: T | TS, 
-        func: Callable[P, Any],
+        expr_func: Callable[P, Any],
         future: bool = False,
         overwrite: bool = False,
     ):
@@ -142,7 +142,7 @@ class Evaluation(GenericSolver[T, TS]):
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: func(*args, **kwargs), future, overwrite)
+            return cls(solution, lambda: expr_func(*args, **kwargs), future, overwrite)
         return _create
 
     def solve(
@@ -208,7 +208,7 @@ class Interpolation(Evaluation[Function, FunctionSeries]):
         super().__init__(solution, _evaluation, corrector, future, overwrite)
 
     @classmethod
-    def from_function(
+    def from_expr_func(
         cls,
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, Function | Expr],
@@ -241,7 +241,7 @@ P = ParamSpec("P")
 class Integration(Evaluation[Constant, ConstantSeries]):
     
     @classmethod
-    def from_function(
+    def from_expr_func(
         cls, 
         solution: Constant | ConstantSeries, 
         integrand_func: Callable[P, Expr | tuple[Expr, ...]],
@@ -281,14 +281,14 @@ class Integration(Evaluation[Constant, ConstantSeries]):
         return _create
     
 
-@replicate_callable(Evaluation[Constant | Function, ConstantSeries | FunctionSeries].from_function)
+@replicate_callable(Evaluation[Constant | Function, ConstantSeries | FunctionSeries].from_expr_func)
 def evaluation():
     pass
 
-@replicate_callable(Interpolation.from_function)
+@replicate_callable(Interpolation.from_expr_func)
 def interpolation():
     pass
 
-@replicate_callable(Integration.from_function)
+@replicate_callable(Integration.from_expr_func)
 def integration():
     pass

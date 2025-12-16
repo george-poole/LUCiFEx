@@ -85,7 +85,7 @@ def diffusion_reaction(
     return forms
 
 
-def diffusion_reaction_steady(
+def steady_diffusion_reaction(
     u: Function,
     d: Constant,
     r: Function | Constant | None = None,
@@ -152,6 +152,8 @@ def advection_dg(
     a: Function | Constant,
     D_adv: FiniteDifference,
     bcs: BoundaryConditions | None = None,
+    adv_dx: int = 0,
+    adv_dS: int= 0,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
@@ -161,11 +163,17 @@ def advection_dg(
 
     F_dt = v * DT(u, dt) * dx
 
-    aOut = 0.5 * (inner(a, n) + abs(inner(a, n)))
-    Fa_dx = - D_adv(u) * div(v * a) * dx
-    Fa_dS = jump(v) * jump(aOut * D_adv(u)) * dS
+    match adv_dx:
+        case 0:
+            F_adv_dx = -inner(grad(v), a) * D_adv(u) * dx
+        case 1: 
+            F_adv_dx = -div(v * a) * D_adv(u) * dx
 
-    forms = [F_dt, Fa_dx, Fa_dS]
+    match adv_dS:
+        case 0:
+            F_adv_dS = jump(v) * jump(0.5 * (inner(a, n) + abs(inner(a, n))) * D_adv(u)) * dS
+
+    forms = [F_dt, F_adv_dx, F_adv_dS]
 
     if bcs is not None:
         ds, u_inflow = bcs.boundary_data(u.function_space, 'dirichlet')
@@ -182,7 +190,7 @@ def advection_reaction_dg(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
-    D_fdm: FiniteDifference,
+    D_adv: FiniteDifference,
     r: Function | Constant | None = None,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
     bcs: BoundaryConditions | None = None,
@@ -190,7 +198,7 @@ def advection_reaction_dg(
     """
     `∂u/∂t + 𝐚·∇u = R`
     """
-    forms = advection_dg(u, dt, a, D_fdm, bcs)
+    forms = advection_dg(u, dt, a, D_adv, bcs)
     if r is not None:
         v = TestFunction(u.function_space)
         F_reac = -v * D_reac(r) * dx

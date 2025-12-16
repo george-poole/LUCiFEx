@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec, overload
-from typing_extensions import Self
+from typing_extensions import Self, TypeVarTuple, Unpack
 
 import numpy as np
 from ufl import split
@@ -180,7 +180,7 @@ class ExprSeries(
 
     @overload
     @classmethod
-    def from_args(
+    def _from_expr(
         cls, 
         func: Callable[P, Self], 
         /,
@@ -191,7 +191,7 @@ class ExprSeries(
 
     @overload
     @classmethod
-    def from_args(
+    def _from_expr(
         cls, 
         *args: Any | Callable[..., Self],
         name: str | None = None,
@@ -199,7 +199,7 @@ class ExprSeries(
         ...
 
     @classmethod
-    def from_args(
+    def _from_expr(
         cls, 
         *args,
         name: str | None = None,
@@ -219,6 +219,24 @@ class ExprSeries(
         else:
             func = args[0]
             return lambda *a, **k: _(func, *a, **k)
+        
+    @classmethod
+    def from_expr_func(
+        cls, 
+        func: Callable[P, Self], 
+        /,
+        *,
+        name: str | None = None,
+    ) -> Callable[P, Self]:
+        return cls._from_expr(func, name=name)
+    
+    @classmethod
+    def from_expr_args(
+        cls, 
+        *args: Any | Callable[..., Self],
+        name: str | None = None,
+    ) -> Self:
+        return cls._from_expr(*args, name=name)
     
     @property
     def expression(self) -> tuple[Callable, tuple[Any, ...], dict[str, Any]] | None:

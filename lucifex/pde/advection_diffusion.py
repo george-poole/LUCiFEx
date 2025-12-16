@@ -36,10 +36,8 @@ def advection_diffusion(
     """    
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u)`
     """
-    if isinstance(d, Series):
-        d = D_disp(d)
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
+    d = D_disp(d)
+    phi = D_phi(phi)
 
     v = TestFunction(u.function_space)
     dudt, adv, diff = advection_diffusion_residuals(
@@ -53,8 +51,8 @@ def advection_diffusion(
     forms = [F_dt, F_adv, F_diff]
 
     if bcs is not None:
-        ds, c_neumann = bcs.boundary_data(u.function_space, 'neumann')
-        F_neumann = sum([-v * (1/phi) * cN * ds(i) for i, cN in c_neumann])
+        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
+        F_neumann = sum([-v * (1/phi) * uN * ds(i) for i, uN in u_neumann])
         forms.append(F_neumann)
 
     if supg is not None:
@@ -85,16 +83,13 @@ def advection_diffusion_reaction(
 ) -> list[Form]:
     """
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u) + (1/ϕ)R + (1/ϕ)J`
-    """
-    if isinstance(d, Series):
-        d = D_disp(d)
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
-        
+    """    
     forms = advection_diffusion(
         u, dt, a, d, D_adv, D_diff, D_disp, D_phi, phi, bcs, supg=None,
     )
     v = TestFunction(u.function_space)
+    d = D_disp(d)
+    phi = D_phi(phi)
 
     reac = 0
     if r is not None:
@@ -161,64 +156,58 @@ def advection_diffusion_dg(
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
+    adv_dx: int = 0,
+    adv_dS: int= 0,
 ) -> list[Form]:
     if bcs is None:
         bcs = BoundaryConditions()
-    ds, c_dirichlet, c_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
-
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
-    if isinstance(d, Series):
-        d = D_phi(d)
+    ds, u_dirichlet, u_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
 
     v = TestFunction(u.function_space)
     h = CellDiameter(u.function_space.mesh)
     n = FacetNormal(u.function_space.mesh)
     if isinstance(alpha, float):
         alpha = Constant(u.function_space.mesh, alpha)
-    if isinstance(beta, float):
-        beta = Constant(u.function_space.mesh, beta)
+    if isinstance(gamma, float):
+        gamma = Constant(u.function_space.mesh, gamma)
 
-    F_dcdt = v * DT(u, dt) * dx
+    F_dudt = v * DT(u, dt) * dx
 
-    Pe = ... # FIXME
+    D_adv_a, D_adv_u = D_adv
+    a = D_adv_a(a)
+    phi = D_phi(phi)
+    d = D_phi(d)
+    outflow = conditional(gt(dot(a, n), 0), 1, 0)
 
-    D_adv_u, D_adv_c = D_adv
-    uEff = (1/phi) * (D_adv_u(a) - (1/Pe) * grad(phi))
-    cAdv = D_adv_c(u)
-    outflow = conditional(gt(dot(uEff, n), 0), 1, 0)
+    match adv_dx:
+        case 0:
+            F_adv_dx = -inner(grad(v / phi), a)  * D_adv_u(u) * dx
+        case 1:
+            F_adv_dx = -div(v * D_adv_a(a) / phi) * D_adv_u(u) * dx
 
-    F_adv_dx = -inner(grad(v), uEff * cAdv) * dx
-    F_adv_dS = 2 * inner(jump(v, n), avg(outflow * uEff * cAdv)) * dS
-    F_adv_ds = inner(v, outflow * inner(uEff, n) * cAdv) * ds 
-    F_adv_ds += sum([inner(v, (1 - outflow) * inner(uEff, n) * cD) * ds(i) for cD, i in c_dirichlet])
-    #### alternatice c.f. wells, burkardt
-    # un = 0.5 * (inner(u, n) + abs(inner(u, n)))
-    # un = outflow * inner(u, n)
-    # F_adv_dS = inner(jump(v), un('+') * c('+') - un('-') * c('-')) * dS
-    # F_adv_dS = inner(jump(v), jump(un * c)) * dS
-    # F_adv_ds = v * (un * c + ud * cD) * ds(i)   # NOTE this applies DiricletBC on inflow only?
-    ####
+    match adv_dS:
+        case 0:
+            F_adv_dS = jump(v) * jump(0.5 * (inner(a, n) + abs(inner(a, n))) * D_adv_u(u)) * dS
+        case 1:
+            F_adv_dS = 2 * jump(v / phi), avg(outflow * inner(a, n) * D_adv_u(u)) * dS
+
+    F_adv_ds = inner(v / phi, outflow * inner(a * D_adv_u(u), n)) * ds 
+    F_adv_ds += sum([inner(v / phi, (1 - outflow) * inner(a * uD, n)) * ds(i) for i, uD in u_dirichlet])
     F_adv = F_adv_dx + F_adv_dS + F_adv_ds
 
-    cDiff = D_diff(u)
-    # + ∫ ∇v⋅∇c dx
-    F_diff_dx = inner(grad(v), grad(cDiff)) * dx
-    # - ∫ [vn]⋅{∇c} dS
-    F_diff_dS = -inner(jump(v, n), avg(grad(cDiff))) * dS
-    # - ∫ [vn]⋅{∇c} dS
-    F_diff_dS += -inner(avg(grad(v)), jump(cDiff, n)) * dS
-    # + ∫ (α / h)[vn]⋅[cn] dS
-    F_diff_dS += (alpha / avg(h)) * inner(jump(v, n), jump(cDiff, n)) * dS # TODO h('+') or avg(h) ?
-    # ...
-    F_diff_ds = sum([-(inner(grad(v), (cDiff - cD) * n) + inner(v * n, grad(cDiff))) * ds(i) for cD, i in c_dirichlet])
-    F_diff_ds += sum([(gamma / h) * v * (cDiff - cD) * ds(i) for cD, i in c_dirichlet])
-    F_diff_ds += sum([-v * cN * ds(i) for cN, i in c_neumann])
-    F_diff = (1/Pe) * (F_diff_dx + F_diff_dS + F_diff_ds)
+    F_diff_dx = inner(grad(v / phi), d * grad(D_diff(u))) * dx
+    F_diff_dS = -inner(jump(v / phi, n), avg(d * grad(D_diff(u)))) * dS
+    F_diff_dS += -inner(avg(d * grad(v / phi)), jump(D_diff(u), n)) * dS
+    F_diff_dS += (alpha / avg(h)) * inner(jump(v / phi, n), jump(D_diff(u), n)) * dS
+    F_diff_ds = sum([-inner(d * grad(v / phi), (D_diff(u) - uD) * n) * ds(i) for i, uD in u_dirichlet])
+    F_diff_ds += sum([-inner(v * n / phi, d * grad(D_diff(u))) * ds(i) for i, uD in u_dirichlet])
+    F_diff_ds += sum([(gamma / h) * v * (D_diff(u) - uD) * ds(i) for i, uD in u_dirichlet])
+    F_diff_ds += sum([-(v / phi) * uN * ds(i) for i, uN in u_neumann])
+    F_diff = F_diff_dx + F_diff_dS + F_diff_ds
 
-    return [F_dcdt, F_adv, F_diff]
+    return [F_dudt, F_adv, F_diff]
 
-# TODO debug, debug, debug
+
 def advection_diffusion_reaction_dg(
     u: FunctionSeries,
     dt: Constant,
@@ -237,18 +226,26 @@ def advection_diffusion_reaction_dg(
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     
-    forms = advection_diffusion_dg(u, dt, phi, a, d, D_adv, D_diff, D_phi, alpha, gamma, bcs)
+    forms = advection_diffusion_dg(u, dt, a, d, alpha, gamma, D_adv, D_diff, D_phi, phi, bcs)
 
-    # if np.isclose(float(Da), 0):
-    #     return forms
-    
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
-
-    r = D_reac(r, trial=u)
     v = TestFunction(u.function_space)
+    phi = D_phi(phi)
+    r = D_reac(r, trial=u)
     F_reac = -v  * (r / phi) * dx
     forms.append(F_reac)
+
+    if r is not None:
+        reaction = lambda r, u: r * u
+        if isinstance(D_reac, FiniteDifference):
+            F_reac = -v * (1 / phi) *  D_reac(reaction(r, u)) * dx
+        else:
+            F_reac = -v * (1 / phi) * D_reac(r, u, reaction, trial=u) * dx
+        forms.append(F_reac)
+
+    if j is not None:
+        j = D_src(j, trial=u)
+        F_src = -v * (1 / phi) * j * dx
+        forms.append(F_src)
 
     return forms
 

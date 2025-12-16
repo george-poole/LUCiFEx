@@ -281,6 +281,16 @@ def nested_dict(
     assert order > 2
     return nested_dict(nested_dict(order - 1))
 
+
+def arity(
+    func: Callable,
+    explicit: bool = True,
+) -> int:
+    params = signature(func).parameters
+    if explicit:
+        params = {k: v for k, v in params.items() if v.kind is not (v.VAR_KEYWORD, v.VAR_POSITIONAL)}
+    return len(params)
+
     
 class ToDoError(NotImplementedError):
     def __init__(self):

@@ -951,7 +951,7 @@ class Projection(BoundaryValueProblem):
         )
 
     @classmethod
-    def from_function(
+    def from_expr_func(
         cls,
         solution: Function | FunctionSeries, 
         expr_func: Callable[P, Function | Expr],
@@ -1000,6 +1000,6 @@ def ivp():
 def evp():
     pass
 
-@replicate_callable(Projection.from_function)
+@replicate_callable(Projection.from_expr_func)
 def projection():
     pass

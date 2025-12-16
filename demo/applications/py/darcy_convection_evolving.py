@@ -5,10 +5,10 @@ from ufl import cos, sin
 
 from lucifex.mesh import mesh_boundary, rectangle_mesh
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import Simulation, configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
+from lucifex.utils import CellType
 
 from lucifex.pde.constitutive import permeability_cross_bedded
 from .darcy_convection_generic import darcy_convection_generic

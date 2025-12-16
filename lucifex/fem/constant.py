@@ -10,9 +10,6 @@ from .function import str_indexed
 
 
 class Constant(DOLFINxConstant):
-    """
-    Subclass with additional utilities, not to be confused with `dolfinx.fem.Constant`.
-    """
     def __init__(
         self,
         mesh: Mesh,
@@ -22,6 +19,7 @@ class Constant(DOLFINxConstant):
         index: int | None = None,
     ):
         """
+        Subclass with additional utilities, not to be confused with `dolfinx.fem.Constant`.
         A constant with respect to a mesh, but not necessarily with respect to time.
         """
         self._mesh = mesh

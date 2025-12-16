@@ -33,7 +33,7 @@ class Simulation:
         solvers: Iterable[Solver],
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr]] = (),
+        namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr | ExprSeries]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,

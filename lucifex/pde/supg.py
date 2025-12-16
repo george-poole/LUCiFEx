@@ -232,18 +232,18 @@ def effective_reaction(
     D_dt: FiniteDifference | None = None,
 ):
     """
-    `∂u/∂t - 𝒟(Ru) = Rᵉᶠᶠ uⁿ⁺¹ + ...`
+    `𝒟(Ru) - ∂u/∂t = Rᵉᶠᶠ uⁿ⁺¹ + ...`
     """
     if isinstance(D_reac, FiniteDifference):
-        r_eff = -BE(r) * D_reac.explicit_coeff
+        r_eff = BE(r) * D_reac.explicit_coeff
     else:
         D_reac_r, D_reac_u = D_reac
-        r_eff = -D_reac_r(r) * D_reac_u.explicit_coeff
+        r_eff = D_reac_r(r) * D_reac_u.explicit_coeff
 
     if dt is not None:
         if D_dt is None:
-            r_eff += 1 / dt
+            r_eff -= 1 / dt
         else:
-            r_eff += (1 / dt) * D_dt.explicit_coeff
+            r_eff -= (1 / dt) * D_dt.explicit_coeff
 
     return r_eff

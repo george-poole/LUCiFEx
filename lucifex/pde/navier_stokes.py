@@ -54,8 +54,7 @@ def ipcs_1(
     forms = [F_dudt, F_adv, F_stress, F_ds]
 
     if f is not None:
-        if isinstance(f, Series):
-            f = D_force(f)
+        f = D_force(f)
         F_f = -inner(v, f) * dx
         forms.append(F_f)
 

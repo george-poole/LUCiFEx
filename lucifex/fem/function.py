@@ -13,11 +13,12 @@ from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
 
 
-
 class Function(DOLFINxFunction):
-    """
-    Subclass with additional utilities, not to be confused with `dolfinx.fem.Function.`
-    """
+
+    def __new__(cls, *args, **kwargs) -> Self:
+        return super().__new__(cls, *args, **kwargs)
+
+
     def __init__(
         self,
         fs: FunctionSpace
@@ -36,12 +37,26 @@ class Function(DOLFINxFunction):
         dtype: np.dtype = PETSc.ScalarType,
         index: int | None = None,
     ):
+        """
+        Subclass with additional utilities, not to be confused with `dolfinx.fem.Function.`
+        """
         fs = create_fem_space(fs)
 
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
 
-        if isinstance(x, (DOLFINxFunction, Expression, Callable, SpatialPerturbation, int, float, UnsolvedType)):
+        if isinstance(
+            x, 
+            (
+                DOLFINxFunction, 
+                Expression, 
+                Callable, 
+                SpatialPerturbation, 
+                int, 
+                float, 
+                UnsolvedType,
+            ),
+        ):
             super().__init__(fs, None, name, dtype)
             if isinstance(x, SpatialPerturbation):
                 x = x.combine_base_noise(fs)

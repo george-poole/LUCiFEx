@@ -21,8 +21,7 @@ def evolution_forms(
     """
     `𝜑∂u/∂t = R`
     """
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
+    phi = D_phi(phi)
     v = TestFunction(u.function_space)
     F_dsdt = v * DT(u, dt) * dx
     r = D_rhs(r, trial=u)
@@ -51,8 +50,7 @@ def evolution_expression(
     """
     if isinstance(dt, ConstantSeries):
         dt = dt[0]
-    if isinstance(phi, Series):
-        phi = D_phi(phi)
+    phi = D_phi(phi)
 
     if isinstance(D_rhs, FiniteDifference):
         if D_rhs.is_implicit:

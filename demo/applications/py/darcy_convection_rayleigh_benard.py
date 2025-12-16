@@ -2,11 +2,11 @@ import numpy as np
 from ufl import SpatialCoordinate, sqrt
 
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
+from lucifex.utils import CellType
 
 from .darcy_convection_generic import darcy_convection_generic
 
