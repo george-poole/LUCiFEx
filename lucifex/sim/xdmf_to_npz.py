@@ -71,7 +71,7 @@ def _(
     npz_name: str | tuple[str, str] | None = None,
 ):
     function_series = [i.series for i in sim.solvers if isinstance(i.series, FunctionSeries)]
-    function_series.extend([i.correction_series for i in sim.solvers if i is not None])
+    function_series.extend([i.correction_series for i in sim.solvers if i.correction_series is not None])
     constant_series = [i.series for i in sim.solvers if isinstance(i.series, ConstantSeries)]
     
     if include:

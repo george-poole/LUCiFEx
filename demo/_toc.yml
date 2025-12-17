@@ -1,0 +1,6 @@
+format: jb-book
+root: home
+chapters:
+- file: code
+- file: talks
+- file: teaching

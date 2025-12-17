@@ -145,8 +145,8 @@ def run_from_cli(
             lucifex.fdm.AB2,
             lucifex.fdm.AB,
             lucifex.fdm.AM,
-            lucifex.utils.SpatialPerturbation,
-            lucifex.utils.DofsPerturbation,
+            lucifex.fem.SpatialPerturbation,
+            lucifex.fem.DofsPerturbation,
             )
         )
 

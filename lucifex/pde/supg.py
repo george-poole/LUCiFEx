@@ -90,15 +90,32 @@ def supg_stabilization(
 
 def tau_function(func):
     @wraps(func)
-    def _(h, a, *args, **kwargs):
-        mesh = extract_mesh(a)
+    def _(
+        h: GeometricCellQuantity | str, 
+        a: Expr | Function | Constant, 
+        *args, 
+        **kwargs,
+    ):
+        mesh = None
+        for i in (h, a, *args, kwargs.values()):
+            try:
+                if isinstance(i, Expr):
+                    mesh = extract_mesh(i)
+                    break
+            except:
+                pass
+
         if isinstance(h, str):
+            if mesh is None :
+                raise ValueError('Could not deduce mesh from arguments')
             h = cell_size_quantity(mesh, h)
         if is_vector(a):
             a = sqrt(inner(a, a))
         if args:
             d = args[0]
             if is_tensor(d):
+                if mesh is None :
+                    raise ValueError('Could not deduce mesh from arguments')    
                 d = tr(d) / mesh.geometry.dim
             args = (d, *args[1:])
         return func(h, a, *args, **kwargs)

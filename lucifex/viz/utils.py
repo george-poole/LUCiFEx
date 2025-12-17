@@ -172,7 +172,7 @@ def set_legend(
     )
 
 
-def create_mosaic_figure(
+def create_multifigure(
     n_rows: int,
     n_cols: int,
     suptitle: str | None = None,

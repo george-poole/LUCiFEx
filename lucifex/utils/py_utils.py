@@ -269,17 +269,64 @@ def is_slice(s: str | slice | Any) -> bool:
         return False
     
 
+@overload
 def nested_dict(
-    order: int | None = None,
+    *,
+    depth: int | None = None,
 ) -> defaultdict | dict:
-    if order is None:
+    ...
+
+K = TypeVar('K')
+V = TypeVar('V')
+@overload
+def nested_dict(
+    _: tuple[type[K], type[V]],
+    /,
+    *,
+    depth: int | None = None,
+) -> dict[K, V]:
+    ...
+
+K1 = TypeVar('K1')
+K2 = TypeVar('K2')
+V = TypeVar('V')
+@overload
+def nested_dict(
+    _: tuple[type[K1], type[K2], type[V]],
+    /,
+    *,
+    depth: int | None = None,
+) -> dict[K1, dict[K2, V]]:
+    ...
+
+K1 = TypeVar('K1')
+K2 = TypeVar('K2')
+K3 = TypeVar('K3')
+V = TypeVar('V')
+@overload
+def nested_dict(
+    _: tuple[type[K1], type[K2], type[K3], type[V]],
+    /,
+    *,
+    depth: int | None = None,
+) -> dict[K1, dict[K2, dict[K3, V]]]:
+    ...
+
+
+def nested_dict(
+    _,
+    /,
+    *,
+    depth: int | None = None,
+):
+    if depth is None:
         return defaultdict(nested_dict)
-    if order == 1:
+    if depth == 1:
         return dict
-    if order == 2:
+    if depth == 2:
         return defaultdict(dict)
-    assert order > 2
-    return nested_dict(nested_dict(order - 1))
+    assert depth > 2
+    return nested_dict(nested_dict(depth=depth - 1))
 
 
 def arity(

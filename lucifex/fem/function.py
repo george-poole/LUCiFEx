@@ -18,7 +18,6 @@ class Function(DOLFINxFunction):
     def __new__(cls, *args, **kwargs) -> Self:
         return super().__new__(cls, *args, **kwargs)
 
-
     def __init__(
         self,
         fs: FunctionSpace
