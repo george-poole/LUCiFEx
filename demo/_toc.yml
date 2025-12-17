@@ -1,6 +1,28 @@
 format: jb-book
 root: home
-chapters:
-- file: code
-- file: talks
-- file: teaching
+
+parts:
+  - caption: Foundations
+    chapters:
+      - file: notebooks/foundations/F01.1_poisson_rectangle
+      - file: notebooks/foundations/F01.2_poisson_annulus
+      - file: notebooks/foundations/F02.1_diffusion_interval
+      - file: notebooks/foundations/F02.2_diffusion_rectangle
+
+  - caption: Applications
+    chapters:
+      - file: notebooks/applications/A01.0_darcy_equations
+      - file: notebooks/applications/A01.1_darcy_lens
+      - file: notebooks/applications/A01.2_darcy_anticline
+
+  - caption: Numerical
+    chapters:
+      - file: notebooks/numerical/N01.1_dg_advection_interval
+      - file: notebooks/numerical/N01.2_dg_advection_rectangle
+      - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
+      - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle
+
+  - caption: technical
+    chapters:
+      - file: notebooks/technical/T01_series
+      - file: notebooks/technical/T02_finite_differences

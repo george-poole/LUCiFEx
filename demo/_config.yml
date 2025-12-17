@@ -1,8 +1,4 @@
-logo: ./media/photo.jpeg
-
+title: LUCiFEx Demo
+only_build_toc_files: true
 execute:
   execute_notebooks: off
-
-latex:
-  latex_documents:
-    targetname: george_poole.tex
