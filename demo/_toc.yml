@@ -5,24 +5,61 @@ parts:
   - caption: Foundations
     chapters:
       - file: notebooks/foundations/F01.1_poisson_rectangle
-      - file: notebooks/foundations/F01.2_poisson_annulus
+        sections: 
+          - file: notebooks/foundations/F01.2_poisson_annulus
+          - file: notebooks/foundations/F01.3_poisson_vector
       - file: notebooks/foundations/F02.1_diffusion_interval
-      - file: notebooks/foundations/F02.2_diffusion_rectangle
+        sections: 
+          - file: notebooks/foundations/F02.2_diffusion_rectangle
+      - file: notebooks/foundations/F03_advection
+      - file: notebooks/foundations/F04_advection_diffusion
+      - file: notebooks/foundations/F05.1_helmholtz_evp
+        sections: 
+         - file: notebooks/foundations/F05.2_helmholtz_bvp
 
   - caption: Applications
     chapters:
       - file: notebooks/applications/A01.0_darcy_equations
-      - file: notebooks/applications/A01.1_darcy_lens
-      - file: notebooks/applications/A01.2_darcy_anticline
+        sections: 
+          - file: notebooks/applications/A01.1_darcy_lens
+          - file: notebooks/applications/A01.2_darcy_anticline
+      - file: notebooks/applications/A02.0_stokes_equations
+        sections: 
+          - file: notebooks/applications/A02.1_stokes_poiseuille
+          - file: notebooks/applications/A02.2_stokes_cavity
+      - file: notebooks/applications/A03.0_navier_stokes_equations
+        sections: 
+          - file: notebooks/applications/A03.1_navier_stokes_obstacle
+          - file: notebooks/applications/A03.2_navier_stokes_forced
+      - file: notebooks/applications/A04.0_darcy_convection_equations
+        sections: 
+          - file: notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle
+          - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_annulus
+      - file: notebooks/applications/A09.0_navier_stokes_convection_equations
+        sections: 
+          - file: notebooks/applications/A09.1_navier_stokes_double_diffusive
+          - file: notebooks/applications/A09.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/applications/A09.3_navier_stokes_marangoni
 
   - caption: Numerical
     chapters:
       - file: notebooks/numerical/N01.1_dg_advection_interval
-      - file: notebooks/numerical/N01.2_dg_advection_rectangle
+        sections: 
+          - file: notebooks/numerical/N01.2_dg_advection_rectangle
       - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
-      - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle
+        sections: 
+          - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle
+      - file: notebooks/numerical/N03.1_dg_steady_advection_diffusion_interval
+        sections: 
+          - file: notebooks/numerical/N03.2_dg_steady_advection_diffusion_rectangle
+      - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
+        sections: 
+          - file: notebooks/numerical/N04.2_supg_advection_diffusion_rectangle
+      - file: notebooks/numerical/N05.1_dg_advection_interval
+        sections: 
+          - file: notebooks/numerical/N05.2_dg_advection_rectangle
 
-  - caption: technical
+  - caption: Technical
     chapters:
       - file: notebooks/technical/T01_series
       - file: notebooks/technical/T02_finite_differences
