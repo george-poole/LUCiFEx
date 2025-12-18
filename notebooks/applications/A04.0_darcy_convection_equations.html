@@ -433,8 +433,8 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-mixed-formulation">Weak forms sequence in the mixed formulation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-streamfunction-formulation">Weak forms sequence in the streamfunction formulation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation-weak-forms-sequence">Mixed formulation weak forms sequence</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation-weak-forms-sequence">Streamfunction formulation weak forms sequence</a></li>
 </ul>
 </li>
 </ul>
@@ -497,8 +497,8 @@ c_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},c} &amp; \text{concentrat
 \theta_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},\theta} &amp; \text{temperature Dirichlet boundary condition} \\
 c_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N},c} &amp; \text{concentration Neumann boundary condition} \\
 \theta_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}, \theta} &amp; \text{concentration Neumann boundary condition} \\
-u_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{essential velocity boundary condition} \\
-p_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{natural pressure boundary condition} \\
+u_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{normal velocity essential boundary condition} \\
+p_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{pressure natural boundary condition} \\
 \phi(\textbf{x}) &amp; \text{porosity}\\
 \mathsf{K}(\phi) &amp; \text{permeability}\\
 \mathsf{D}(\phi, \textbf{u}) &amp; \text{solutal dispersion}\\
@@ -676,8 +676,8 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
 \end{align*}
 \end{split}\]</div>
 </section>
-<section id="weak-forms-sequence-in-the-mixed-formulation">
-<h3>Weak forms sequence in the mixed formulation<a class="headerlink" href="#weak-forms-sequence-in-the-mixed-formulation" title="Link to this heading">#</a></h3>
+<section id="mixed-formulation-weak-forms-sequence">
+<h3>Mixed formulation weak forms sequence<a class="headerlink" href="#mixed-formulation-weak-forms-sequence" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -687,7 +687,7 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
 &amp;c^{n+1}\in V_c \\
 &amp;\theta^{n+1}\in V_\theta \\
 &amp;\text{such that} \\
-&amp;\mathbb{F} = 
+&amp;\mathbb{F} 
 \begin{cases}
 F_\psi(\psi^n, v) = 0\quad\forall v\in V_\psi \\
 F_{\textbf{u}}(\textbf{u}^n, v) = 0\quad\forall v\in V_{\textbf{u}} \\ 
@@ -697,8 +697,8 @@ F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\
 \end{align*}
 \end{split}\]</div>
 </section>
-<section id="weak-forms-sequence-in-the-streamfunction-formulation">
-<h3>Weak forms sequence in the streamfunction formulation<a class="headerlink" href="#weak-forms-sequence-in-the-streamfunction-formulation" title="Link to this heading">#</a></h3>
+<section id="streamfunction-formulation-weak-forms-sequence">
+<h3>Streamfunction formulation weak forms sequence<a class="headerlink" href="#streamfunction-formulation-weak-forms-sequence" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -707,7 +707,7 @@ F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\
 &amp;c^{n+1}\in V_c \\
 &amp;\theta^{n+1}\in V_\theta \\
 &amp;\text{such that} \\
-&amp;\mathbb{F} = 
+&amp;\mathbb{F} 
 \begin{cases}
 F_{\textbf{u},p}(\textbf{u}^n, p^n;\textbf{v}, q)=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p\\
 F_c(c^{n+1}, v) = 0\quad\forall v\in V_c \\ 
@@ -801,8 +801,8 @@ F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-mixed-formulation">Weak forms sequence in the mixed formulation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-streamfunction-formulation">Weak forms sequence in the streamfunction formulation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation-weak-forms-sequence">Mixed formulation weak forms sequence</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation-weak-forms-sequence">Streamfunction formulation weak forms sequence</a></li>
 </ul>
 </li>
 </ul>

@@ -417,15 +417,21 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearization-schemes">Linearization schemes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incremental-pressure-correction-scheme-ipcs">Incremental pressure correction scheme (IPCS)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearized-weak-forms-sequences">Linearized weak forms sequences</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incremental-pressure-correction-scheme">Incremental pressure correction scheme</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chorin-s-scheme">Chorin’s scheme</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-vorticity-formulation">Streamfunction-vorticity formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definitions">General definitions</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-vorticity-in-2d">Cartesian streamfunction-vorticity in 2D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definitions">2D Cartesian definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Strong form</a></li>
 </ul>
 </li>
 </ul>
@@ -443,36 +449,56 @@ document.write(`
 <h1>Navier-Stokes equations<a class="headerlink" href="#navier-stokes-equations" title="Link to this heading">#</a></h1>
 <section id="nonlinear-equations">
 <h2>Nonlinear equations<a class="headerlink" href="#nonlinear-equations" title="Link to this heading">#</a></h2>
-<p>strong form</p>
+<section id="strong-form">
+<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d~\text{and}~p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
 \nabla\cdot\textbf{u} = 0 &amp; \\
-\rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau(\textbf{u}) + \textbf{f}(\textbf{x}, t) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-\textbf{u}(\textbf{x},t=0)=\textbf{u}_0 &amp; \forall\textbf{x}\in\Omega \\
-p(\textbf{x},t=0)=p_0 &amp; \forall\textbf{x}\in\Omega \\
+\rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \textbf{f}(\textbf{x}, t) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+\textbf{u}=\textbf{u}_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
+p=p_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 \textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \times[0, \infty) \\
 (-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
-<p>weak form</p>
+</section>
+<section id="weak-form">
+<h3>Weak form<a class="headerlink" href="#weak-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \\
-&amp;F(\textbf{u}, p;\textbf{v}, q)=\dots \\
+&amp;\begin{align*}
+F(\textbf{u}, p;\textbf{v}, q)&amp;=\dots \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
+\end{align*}
 \end{align*}
 \end{split}\]</div>
 </section>
-<section id="linearization-schemes">
-<h2>Linearization schemes<a class="headerlink" href="#linearization-schemes" title="Link to this heading">#</a></h2>
-<section id="incremental-pressure-correction-scheme-ipcs">
-<h3>Incremental pressure correction scheme (IPCS)<a class="headerlink" href="#incremental-pressure-correction-scheme-ipcs" title="Link to this heading">#</a></h3>
-<p>sequence of weak forms</p>
+<section id="specification">
+<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\mathbb{S}
+\begin{cases}
+\Omega &amp; \text{domain}\\
+\textbf{u}_0(\textbf{x}) &amp; \text{initial velocity}\\
+p_0(\textbf{x}) &amp; \text{initial pressure}\\ 
+\textbf{u}_{\text{E}}~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
+\boldsymbol{\tau}_{\text{N}}~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
+\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} 
+\end{cases}
+\end{split}\]</div>
+</section>
+</section>
+<section id="linearized-weak-forms-sequences">
+<h2>Linearized weak forms sequences<a class="headerlink" href="#linearized-weak-forms-sequences" title="Link to this heading">#</a></h2>
+<section id="incremental-pressure-correction-scheme">
+<h3>Incremental pressure correction scheme<a class="headerlink" href="#incremental-pressure-correction-scheme" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -494,7 +520,6 @@ F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;=
 </section>
 <section id="chorin-s-scheme">
 <h3>Chorin’s scheme<a class="headerlink" href="#chorin-s-scheme" title="Link to this heading">#</a></h3>
-<p>sequence of weak forms</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -515,24 +540,29 @@ F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;=
 <section id="general-definitions">
 <h3>General definitions<a class="headerlink" href="#general-definitions" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0\]</div>
-<div class="math notranslate nohighlight">
-\[\boldsymbol{\omega}=\nabla\times\textbf{u}=\nabla\times(\nabla\times\boldsymbol{\psi})\]</div>
-<p>Newtonian stress and constant <span class="math notranslate nohighlight">\(\rho\)</span>, <span class="math notranslate nohighlight">\(\mu\)</span>
-$<span class="math notranslate nohighlight">\(\tau(\textbf{u}) = \frac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right)\)</span>$</p>
-<div class="math notranslate nohighlight">
-\[\implies\rho\left(\frac{\partial\boldsymbol{\omega}}{\partial t}+(\nabla\times\boldsymbol{\psi})\cdot\nabla\boldsymbol{\omega} - \boldsymbol{\omega}\cdot\nabla(\nabla\times\boldsymbol{\psi})\right)=\mu\nabla^2\boldsymbol{\omega} + \nabla\times\textbf{f}\]</div>
+\[\begin{split}
+\begin{align*}
+&amp;\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0~, \\
+&amp;\tau(\textbf{u}) = \frac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right)~, \\
+&amp;\boldsymbol{\omega}=\nabla\times\textbf{u}=\nabla\times(\nabla\times\boldsymbol{\psi})~, \\
+&amp;\text{and}~\nabla\rho=\nabla\mu=\textbf{0} \\
+&amp;\implies\rho\left(\frac{\partial\boldsymbol{\omega}}{\partial t}+(\nabla\times\boldsymbol{\psi})\cdot\nabla\boldsymbol{\omega} - \boldsymbol{\omega}\cdot\nabla(\nabla\times\boldsymbol{\psi})\right)=\mu\nabla^2\boldsymbol{\omega} + \nabla\times\textbf{f}
+\end{align*}
+\end{split}\]</div>
 </section>
-<section id="cartesian-streamfunction-vorticity-in-2d">
-<h3>Cartesian streamfunction-vorticity in 2D<a class="headerlink" href="#cartesian-streamfunction-vorticity-in-2d" title="Link to this heading">#</a></h3>
+<section id="d-cartesian-definitions">
+<h3>2D Cartesian definitions<a class="headerlink" href="#d-cartesian-definitions" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y\]</div>
 <div class="math notranslate nohighlight">
 \[\boldsymbol{\omega}=\omega\textbf{e}_z=\left(\frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}\right)\textbf{e}_z\]</div>
 <div class="math notranslate nohighlight">
 \[\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y\]</div>
-<p>strong form
-$<span class="math notranslate nohighlight">\(
+</section>
+<section id="id1">
+<h3>Strong form<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\psi(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{and}~\omega(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
@@ -546,7 +576,7 @@ $<span class="math notranslate nohighlight">\(
 \textbf{n}\cdot\nabla\omega = \omega_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N},\omega}\times[0,\infty]~,~\partial\Omega_{\text{N},\omega}=\partial\Omega/\partial\Omega_{\text{D},\omega} 
 \end{cases}~.
 \end{align*}
-\)</span>$</p>
+\end{split}\]</div>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -617,15 +647,21 @@ $<span class="math notranslate nohighlight">\(
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearization-schemes">Linearization schemes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incremental-pressure-correction-scheme-ipcs">Incremental pressure correction scheme (IPCS)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearized-weak-forms-sequences">Linearized weak forms sequences</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#incremental-pressure-correction-scheme">Incremental pressure correction scheme</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chorin-s-scheme">Chorin’s scheme</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-vorticity-formulation">Streamfunction-vorticity formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definitions">General definitions</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-vorticity-in-2d">Cartesian streamfunction-vorticity in 2D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definitions">2D Cartesian definitions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Strong form</a></li>
 </ul>
 </li>
 </ul>
