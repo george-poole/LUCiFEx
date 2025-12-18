@@ -6,7 +6,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | -------- | ------- |
 | $\Omega$ | domain |
 | $\partial\Omega$ | domain boundary |
-| $\partial\Omega_i\sub\partial\Omega$ | subset of the domain boundary |
+| $\partial\Omega_i\subset\partial\Omega$ | subset of the domain boundary |
 | $\text{d}\Omega$ | integration measure over the cells | 
 | $\text{d}\Gamma$ | integration measure over the cell facets | 
 | $\textbf{e}_x, \textbf{e}_y, \textbf{e}_z$ | unit vectors | 
@@ -23,12 +23,13 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathsf{U}, \mathsf{V}, \dots$ | tensor quantity | 
 | $\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) $ | tensor quantity components | 
 | $V_u$ | function space to which $u$ belongs
-| $\mathcal{D}$ | finite difference operator |
+| $\mathcal{D}(\cdot)$ | finite difference operator |
 | $\mathbb{BVP}$ | boundary value problem |
 | $\mathbb{IBVP}$ | initial boundary value problem |
 | $\mathbb{IVP}$ | initial value problem |
 | $\mathbb{EVP}$ | eigenvalue problem |
 | $\mathbb{S}$ | problem specification |
+| $\mathbb{F}$ | sequence of time-discretized weak forms |
 | $u_0$ | initial condition on $u$ |
 | $u_\text{D}$ | Dirichlet boundary condition on $u$ |
 | $u_\text{N}$ | Neumann or natural boundary condition on $u$ |
