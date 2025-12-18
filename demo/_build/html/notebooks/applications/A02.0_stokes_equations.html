@@ -178,20 +178,21 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Example: Poisson equation on an annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../foundations/F02.2_diffusion_rectangle.html">Example: diffusion of a Gaussian on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../foundations/F03_advection.html">Advection equation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../foundations/F04_advection_diffusion.html">Advection-diffusion equation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Example: Helmholtz boundary value problem on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F06_mathieu.html">Mathieu equation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current nav bd-sidenav">
@@ -212,7 +213,17 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A05.4_darcy_convection_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -225,22 +236,27 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle.html">Example: the rotating cone problem on a rectangle</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle.html">Rotating cone problem on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Example: convection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">Example: steady advection-diffusion-reaction on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Example: a rotating pulse on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
 <ul class="nav bd-sidenav">
@@ -396,6 +412,7 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
 </ul>
 </li>
@@ -414,37 +431,42 @@ document.write(`
 <h1>Stokes equations<a class="headerlink" href="#stokes-equations" title="Link to this heading">#</a></h1>
 <section id="mixed-formulation">
 <h2>Mixed formulation<a class="headerlink" href="#mixed-formulation" title="Link to this heading">#</a></h2>
-<p>strong form of the boundary value problem
-$<span class="math notranslate nohighlight">\(
+<p>strong form of the boundary value problem</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
-&amp;\text{Find \)</span>\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d<span class="math notranslate nohighlight">\( and \)</span>p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \
+&amp;\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{and}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
-\nabla\cdot\textbf{u} = 0 &amp; \
-\textbf{0}=-\nabla p + \nabla\cdot\tau(\textbf{u}) + \textbf{f} &amp; \forall\textbf{x}\in\Omega \
-\textbf{u} = \textbf{u}<em>{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega</em>{\text{E}} \
-(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}<em>{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega</em>{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+\nabla\cdot\textbf{u} = 0 &amp; \\
+\textbf{0}=-\nabla p + \nabla\cdot\tau(\textbf{u}) + \textbf{f} &amp; \forall\textbf{x}\in\Omega \\
+\textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
+(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases}~.
 \end{align*}
-$$</p>
-<p>weak form
-$<span class="math notranslate nohighlight">\(
+\end{split}\]</div>
+<p>weak form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
-&amp;\text{Find \)</span>(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \
-&amp;F(\textbf{u}, p;\textbf{v}, q)=\int_\Omega\text{d}\Omega~q(\nabla\cdot\textbf{u}) - p(\nabla\cdot\textbf{v}) + \nabla\textbf{v}:\tau - \textbf{v}\cdot\textbf{f} \
-&amp;- \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~,\textbf{v}\cdot\boldsymbol{\tau}<em>{\text{N}} \
-&amp;=0 \quad\forall(\textbf{v}, q)\in V</em>{\textbf{u}} \times V_p~.
+&amp;\text{Find}~(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \\
+&amp;F(\textbf{u}, p;\textbf{v}, q)=\int_\Omega\text{d}\Omega~q(\nabla\cdot\textbf{u}) - p(\nabla\cdot\textbf{v}) + \nabla\textbf{v}:\tau - \textbf{v}\cdot\textbf{f} \\
+&amp;- \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~\,\textbf{v}\cdot\boldsymbol{\tau}_{\text{N}} \\
+&amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="streamfunction-formulation">
 <h2>Streamfunction formulation<a class="headerlink" href="#streamfunction-formulation" title="Link to this heading">#</a></h2>
-<p>general definition
-$<span class="math notranslate nohighlight">\(\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0\)</span>$</p>
+<section id="general-definition">
+<h3>General definition<a class="headerlink" href="#general-definition" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0\]</div>
 <p>Newtonian stress with unit viscosity</p>
 <div class="math notranslate nohighlight">
 \[\tau(\textbf{u}) = \tfrac{1}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right)\]</div>
 <div class="math notranslate nohighlight">
 \[\implies\textbf{0}=\nabla^2(\nabla\times\boldsymbol{\psi}) + \nabla\times\textbf{f}\]</div>
+</section>
 <section id="cartesian-streamfunction-in-2d">
 <h3>Cartesian streamfunction in 2D<a class="headerlink" href="#cartesian-streamfunction-in-2d" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
@@ -454,23 +476,27 @@ $<span class="math notranslate nohighlight">\(\textbf{u}=\nabla\times\boldsymbol
 <p>strong form of the boundary value problem
 $<span class="math notranslate nohighlight">\(
 \begin{align*}
-&amp;\text{Find \)</span>\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \
+&amp;\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
-\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} &amp; \forall\textbf{x}\in\Omega \
-\psi=\psi_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega \
+\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} &amp; \forall\textbf{x}\in\Omega \\
+\psi=\psi_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega \\
 \nabla^2\psi=\psi_{\text{L}} &amp; \forall \textbf{x}\in\partial\Omega
 \end{cases}~.
 \end{align*}
-$$</p>
-<p>weak form with penalty parameter <span class="math notranslate nohighlight">\(\alpha\)</span> and local mesh cell size <span class="math notranslate nohighlight">\(\ell(\textbf{x})\)</span>
-$<span class="math notranslate nohighlight">\(
+\)</span>$</p>
+<p>weak form with penalty parameter <span class="math notranslate nohighlight">\(\alpha\)</span> and local mesh cell size <span class="math notranslate nohighlight">\(h(\textbf{x})\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
-&amp;\text{Find \)</span>\psi\in V~\text{such that} \
-&amp;F(\psi, v) = \int_\Omega\text{d}\Omega~\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \
-&amp;+ \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{\ell(\textbf{x})}\llbracket\nabla v\rrbracket\llbracket\nabla u\rrbracket - \llbracket\nabla v\rrbracket\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\llbracket\nabla u\rrbracket \
+&amp;\text{Find}~\psi\in V~\text{such that} \\
+&amp;\begin{align*}
+F(\psi, v) &amp;= 
+\int_\Omega\text{d}\Omega~\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
+&amp;\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
 &amp;=0\quad\forall v\in V~.
 \end{align*}
-$$</p>
+\end{align*}
+\end{split}\]</div>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -543,6 +569,7 @@ $$</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
 </ul>
 </li>

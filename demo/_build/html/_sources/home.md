@@ -1,3 +1,3 @@
 # LUCiFEx 😈
 
-Welcome to the *&nbsp;**L**inearized **C**onvection **i**n **FE**niCS**x**&nbsp;* package! 
+Welcome to the *&nbsp;**L**inearized **U**nderground **C**onvection **i**n **FE**niCS**x**&nbsp;* package! 

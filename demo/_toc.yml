@@ -16,6 +16,7 @@ parts:
       - file: notebooks/foundations/F05.1_helmholtz_evp
         sections: 
          - file: notebooks/foundations/F05.2_helmholtz_bvp
+      - file: notebooks/foundations/F06_mathieu
 
   - caption: Applications
     chapters:
@@ -35,6 +36,15 @@ parts:
         sections: 
           - file: notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle
           - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_annulus
+          - file: notebooks/applications/A05.1_darcy_convection_evolving_isotropic
+          - file: notebooks/applications/A05.2_darcy_convection_evolving_crossbedded
+          - file: notebooks/applications/A05.3_darcy_convection_evolving_layered
+          - file: notebooks/applications/A05.4_darcy_convection_evolving_inclined
+          - file: notebooks/applications/A06_darcy_convection_elder
+      - file: notebooks/applications/A07.0_abc_convection_equations
+        sections:
+          - file: notebooks/applications/A07.1_abc_convection_density
+          - file: notebooks/applications/A07.2_abc_convection_viscosity
       - file: notebooks/applications/A09.0_navier_stokes_convection_equations
         sections: 
           - file: notebooks/applications/A09.1_navier_stokes_double_diffusive
@@ -55,9 +65,11 @@ parts:
       - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
         sections: 
           - file: notebooks/numerical/N04.2_supg_advection_diffusion_rectangle
-      - file: notebooks/numerical/N05.1_dg_advection_interval
+      - file: notebooks/numerical/N05.1_dg_advection_diffusion_interval
         sections: 
-          - file: notebooks/numerical/N05.2_dg_advection_rectangle
+          - file: notebooks/numerical/N05.2_dg_advection_diffusion_rectangle
+      - file: notebooks/numerical/N07_bcs_time_dependent
+      - file: notebooks/numerical/N08_bcs_periodic
 
   - caption: Technical
     chapters:

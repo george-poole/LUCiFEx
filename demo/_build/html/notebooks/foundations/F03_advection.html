@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Advection-diffusion equation" href="F04_advection_diffusion.html" />
-    <link rel="prev" title="Example: diffusion of a Gaussian on a rectangle" href="F02.2_diffusion_rectangle.html" />
+    <link rel="prev" title="Diffusion of a Gaussian profile on a rectangle" href="F02.2_diffusion_rectangle.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -178,20 +178,21 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Example: Poisson equation on an annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Example: diffusion of a Gaussian on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Advection equation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="F04_advection_diffusion.html">Advection-diffusion equation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Example: Helmholtz boundary value problem on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="F06_mathieu.html">Mathieu equation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="nav bd-sidenav">
@@ -212,7 +213,17 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.4_darcy_convection_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -225,22 +236,27 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle.html">Example: the rotating cone problem on a rectangle</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle.html">Rotating cone problem on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Example: convection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">Example: steady advection-diffusion-reaction on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Example: a rotating pulse on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
 <ul class="nav bd-sidenav">
@@ -394,7 +410,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-advection-of-a-gaussian-on-an-interval">Example: advection of a Gaussian on an interval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advection-of-a-gaussian-profile-on-an-interval">Advection of a Gaussian profile on an interval</a></li>
 </ul>
             </nav>
         </div>
@@ -431,8 +447,8 @@ u=u_{\text{I}} &amp; \forall(\textbf{x}, t)\in\Omega_{\text{I}}\times[0,\infty)~
 <p>problem specification</p>
 <div class="math notranslate nohighlight">
 \[\mathbb{S}=\{\Omega, u_0, u_{\text{I}}, \textbf{a}, \Delta t, \mathcal{D}_{\textbf{a}}\}\]</div>
-<section id="example-advection-of-a-gaussian-on-an-interval">
-<h2>Example: advection of a Gaussian on an interval<a class="headerlink" href="#example-advection-of-a-gaussian-on-an-interval" title="Link to this heading">#</a></h2>
+<section id="advection-of-a-gaussian-profile-on-an-interval">
+<h2>Advection of a Gaussian profile on an interval<a class="headerlink" href="#advection-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}=
@@ -615,7 +631,7 @@ u_{\text{I}} = 1 \\
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Example: diffusion of a Gaussian on a rectangle</p>
+        <p class="prev-next-title">Diffusion of a Gaussian profile on a rectangle</p>
       </div>
     </a>
     <a class="right-next"
@@ -643,7 +659,7 @@ u_{\text{I}} = 1 \\
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-advection-of-a-gaussian-on-an-interval">Example: advection of a Gaussian on an interval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advection-of-a-gaussian-profile-on-an-interval">Advection of a Gaussian profile on an interval</a></li>
 </ul>
   </nav></div>
 
