@@ -579,7 +579,37 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 Xl&amp;=\frac{\mathcal{L}_\Omega}{\mathcal{L}} \\
 \end{align*}
 \end{split}\]</div>
-<p>A particular choice of non-dimensionalization with <span class="math notranslate nohighlight">\(\mathcal{L}\)</span>, <span class="math notranslate nohighlight">\(\mathcal{U}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{T}\)</span> chosen according to the details of the problem (e.g. boundary conditions, dominant transport processes) will map <span class="math notranslate nohighlight">\(\{Ad, Pe, Ki, Bu, Xl\}\)</span> onto combinations of the physical dimensionless numbers introduced below.</p>
+</section>
+<section id="physical-dimensionless-numbers">
+<h4>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h4>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Definition</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Physical interpretation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>$<span class="math notranslate nohighlight">\(Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}\)</span>$</p></td>
+<td><p>Rayleigh</p></td>
+<td><p>Ratio of convective to diffusive speeds, defined with respect to the transport of <span class="math notranslate nohighlight">\(c\)</span> and domain length scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p>$<span class="math notranslate nohighlight">\(Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta R}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta R}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}\)</span>$</p></td>
+<td><p>Damköhler</p></td>
+<td><p>Ratio of reaction to convection rates, defined with respect to the transport of <span class="math notranslate nohighlight">\(c\)</span> and domain length scale.</p></td>
+</tr>
+<tr class="row-even"><td><p>$<span class="math notranslate nohighlight">\(Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}\)</span>$</p></td>
+<td><p>Lewis</p></td>
+<td><p>Ratio of thermal to solutal diffusivities.</p></td>
+</tr>
+<tr class="row-odd"><td><p>$<span class="math notranslate nohighlight">\(Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta R} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta R}{\Delta c}}_{\text{solutal reaction rate}}\)</span>$</p></td>
+<td><p>Lrwis</p></td>
+<td><p>Ratio of thermal to solutal reaction rates.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A particular choice of non-dimensionalization with <span class="math notranslate nohighlight">\(\mathcal{L}\)</span>, <span class="math notranslate nohighlight">\(\mathcal{U}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{T}\)</span> chosen according to the details of the problem (e.g. boundary conditions, dominant transport processes) will map <span class="math notranslate nohighlight">\(\{Ad, Pe, Ki, Bu, Xl\}\)</span> onto combinations of the physical dimensionless numbers.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></th>
@@ -618,19 +648,6 @@ Xl&amp;=\frac{\mathcal{L}_\Omega}{\mathcal{L}} \\
 </table>
 </div>
 </section>
-<section id="physical-dimensionless-numbers">
-<h4>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h4>
-<p>Rayleigh number (defined with respect to the transport of <span class="math notranslate nohighlight">\(c\)</span> and domain length scale)
-$<span class="math notranslate nohighlight">\(Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}\)</span>$</p>
-<p>Damköhler number (defined with respect to the transport of <span class="math notranslate nohighlight">\(c\)</span> and domain length scale)</p>
-<div class="math notranslate nohighlight">
-\[Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta R}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta R}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}\]</div>
-<p>Lewis number for ratio of diffusivities
-$<span class="math notranslate nohighlight">\(Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}\)</span>$</p>
-<p>Lewis number for ratio of reaction rates</p>
-<div class="math notranslate nohighlight">
-\[Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta R} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta R}{\Delta c}}_{\text{solutal reaction rate}}\]</div>
-</section>
 </section>
 </section>
 <section id="non-dimensional-equations">
@@ -638,9 +655,10 @@ $<span class="math notranslate nohighlight">\(Le=\frac{G_{\text{ref}}}{D_{\text{
 <section id="time-discretized-strong-form">
 <h3>Time-discretized strong form<a class="headerlink" href="#time-discretized-strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\begin{split}
+\[\begin{split}
 \begin{align*}
-&amp;\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\\end{split}\\\begin{split}&amp;\begin{cases}
+&amp;\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\
+&amp;\begin{cases}
 \phi\frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=\frac{1}{Pe}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) + Ki\,\mathcal{D}_R(R) \\
 \phi\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=\frac{1}{LePe}\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) + LrKi\,\mathcal{D}_H(H) \\
 \nabla\cdot\textbf{u}^n=0 \\
@@ -657,7 +675,7 @@ c^n=c^n_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \
 p^n = p^n_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty]~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases}
 \end{align*}
-\end{split}\end{aligned}\end{align} \]</div>
+\end{split}\]</div>
 </section>
 <section id="weak-forms-sequence-in-the-mixed-formulation">
 <h3>Weak forms sequence in the mixed formulation<a class="headerlink" href="#weak-forms-sequence-in-the-mixed-formulation" title="Link to this heading">#</a></h3>
