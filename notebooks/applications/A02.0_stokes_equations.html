@@ -437,7 +437,7 @@ document.write(`
 <h1>Stokes equations<a class="headerlink" href="#stokes-equations" title="Link to this heading">#</a></h1>
 <section id="mixed-formulation">
 <h2>Mixed formulation<a class="headerlink" href="#mixed-formulation" title="Link to this heading">#</a></h2>
-<p>strong form of the boundary value problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -479,8 +479,9 @@ document.write(`
 \[\textbf{u}=\nabla\times\psi\textbf{e}_z=-\frac{\partial\psi}{\partial y}\textbf{e}_x + \frac{\partial\psi}{\partial x}\textbf{e}_y\]</div>
 <div class="math notranslate nohighlight">
 \[\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y\]</div>
-<p>strong form of the boundary value problem
-$<span class="math notranslate nohighlight">\(
+<p>strong form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
@@ -489,7 +490,7 @@ $<span class="math notranslate nohighlight">\(
 \nabla^2\psi=\psi_{\text{L}} &amp; \forall \textbf{x}\in\partial\Omega
 \end{cases}~.
 \end{align*}
-\)</span>$</p>
+\end{split}\]</div>
 <p>weak form with penalty parameter <span class="math notranslate nohighlight">\(\alpha\)</span> and local mesh cell size <span class="math notranslate nohighlight">\(h(\textbf{x})\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}

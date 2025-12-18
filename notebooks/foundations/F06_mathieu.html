@@ -416,7 +416,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathieu-equation-on-an-interval">Mathieu equation on an interval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathieu-eigenvalue-problem-on-an-interval">Mathieu eigenvalue problem on an interval</a></li>
 </ul>
             </nav>
         </div>
@@ -430,30 +430,31 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="mathieu-equation">
 <h1>Mathieu equation<a class="headerlink" href="#mathieu-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the problem
+<p>strong form
 $<span class="math notranslate nohighlight">\(
 \begin{align*}
-&amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~	ext{such that} \\
-&amp;\begin{cases}
+&amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
+&amp;\mathbb{EVP} | \mathbb{BVP}\begin{cases}
 -\nabla^2u + 2q\cos(\textbf{k}\cdot\textbf{x}) u = \lambda u &amp; \forall\textbf{x}\in\Omega \\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot\nabla{u} = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
 \end{cases}~.
 \end{align*}
 \)</span>$</p>
-<p>weak form of the eigenvalue problem (if <span class="math notranslate nohighlight">\(\partial\Omega_{\text{N}}=\varnothing\)</span>)</p>
+<p>weak form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-&amp;\text{Find}~u\in V~\text{and}~\lambda\in\mathbb{C}~\text{such that}\\
+&amp; \partial\Omega_{\text{N}}=\varnothing \\
+\implies &amp;\text{Find}~u\in V~\text{and}~\lambda\in\mathbb{C}~\text{such that}\\
 &amp;L(u, v)=\lambda R(u,v) \quad\forall v\in V \\
 &amp;\text{where }\\
 &amp;L(u, v) = \int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u + 2q\cos(\textbf{k}\cdot\textbf{x}) vu\\
 &amp;R(u,v) = \int_\Omega\text{d}\Omega~vu \\
 \end{align*}
 \end{split}\]</div>
-<section id="mathieu-equation-on-an-interval">
-<h2>Mathieu equation on an interval<a class="headerlink" href="#mathieu-equation-on-an-interval" title="Link to this heading">#</a></h2>
+<section id="mathieu-eigenvalue-problem-on-an-interval">
+<h2>Mathieu eigenvalue problem on an interval<a class="headerlink" href="#mathieu-eigenvalue-problem-on-an-interval" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}=
@@ -461,7 +462,7 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \Omega = [0, L_x] \\
 \textbf{k}=2\,\textbf{e}_x \\
 u_{\text{D}}\vert_{\partial\Omega}=0 \\
-q=0\implies u_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda_{\text{e}, n}=\frac{n^2\pi^2}{L_x^2}
+u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\text{e}, n}=\frac{n^2\pi^2}{L_x^2}
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
@@ -618,7 +619,7 @@ q=0\implies u_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda_{\t
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathieu-equation-on-an-interval">Mathieu equation on an interval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathieu-eigenvalue-problem-on-an-interval">Mathieu eigenvalue problem on an interval</a></li>
 </ul>
   </nav></div>
 

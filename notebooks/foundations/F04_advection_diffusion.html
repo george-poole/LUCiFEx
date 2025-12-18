@@ -430,12 +430,12 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="advection-diffusion-equation">
 <h1>Advection-diffusion equation<a class="headerlink" href="#advection-diffusion-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the initial boundary value problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~u(\textbf{x}, t): \Omega\times[0,\infty) \to \mathbb{R}~\text{such that } \\
-&amp;\begin{cases}
+&amp;\mathbb{IBVP}\begin{cases}
 \frac{\partial u}{\partial t} + \textbf{a}\cdot\nabla u= \nabla\cdot(\mathsf{D}\cdot\nabla u) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 u(\textbf{x}, t=0)=u_0 &amp; \forall\textbf{x}\in\Omega\\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\

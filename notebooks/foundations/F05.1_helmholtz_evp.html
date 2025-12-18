@@ -430,23 +430,24 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="helmholtz-equation">
 <h1>Helmholtz equation<a class="headerlink" href="#helmholtz-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
+&amp;\mathbb{EVP} | \mathbb{BVP}\begin{cases}
 \nabla^2 u + k^2 u = f &amp; \forall\textbf{x}\in\Omega \\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot\nabla{u} = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
-<p>weak form of the eigenvalue problem (if <span class="math notranslate nohighlight">\(f=0\)</span> and <span class="math notranslate nohighlight">\(\partial\Omega_{\text{N}}=\varnothing\)</span>)</p>
+<p>weak form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-&amp;\text{Find}~u\in V~\text{and}~\lambda\in\mathbb{C}~\text{such that}\\
+&amp; f=0~\text{and}~\partial\Omega_{\text{N}}=\varnothing \\
+\implies &amp;\text{Find}~u\in V~\text{and}~\lambda\in\mathbb{C}~\text{such that}\\
 &amp;L(u, v)=\lambda R(u,v) \quad\forall v\in V \\
 &amp;\text{where }\\
 &amp;L(u, v) = \int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u \\
@@ -454,11 +455,11 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 &amp;\lambda = k^2
 \end{align*}
 \end{split}\]</div>
-<p>weak form of the boundary value problem (if <span class="math notranslate nohighlight">\(f\neq0\)</span> or <span class="math notranslate nohighlight">\(\partial\Omega_{\text{N}}\neq\varnothing\)</span>)</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-&amp;\text{Find}~u\in V~\text{such that} \\
+&amp; f\neq0~\text{or}~\partial\Omega_{\text{N}}\neq\varnothing \\
+\implies&amp; \text{Find}~u\in V~\text{such that} \\
 &amp;F(u, v)=-\int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u + k^2vu - vf + \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0\quad\forall v\in V~.
 \end{align*}
 \end{split}\]</div>

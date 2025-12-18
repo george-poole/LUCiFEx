@@ -416,7 +416,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
@@ -426,7 +430,12 @@ document.write(`
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-mixed-formulation">Weak forms sequence in the mixed formulation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-streamfunction-formulation">Weak forms sequence in the streamfunction formulation</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -440,24 +449,28 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="darcy-convection-equations">
 <h1>Darcy convection equations<a class="headerlink" href="#darcy-convection-equations" title="Link to this heading">#</a></h1>
+<p>Governing equations for thermosolutal convection with reaction/source terms coupled to Darcy flow.</p>
 <section id="dimensional-equations">
 <h2>Dimensional equations<a class="headerlink" href="#dimensional-equations" title="Link to this heading">#</a></h2>
-<p>strong form of the initial boundary value problem</p>
+<section id="strong-form">
+<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find} \\
 &amp;\text{$c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, } \\
 &amp;\text{$\theta(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, } \\
-&amp;\text{$\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d$ and $p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$} \\
+&amp;\text{$\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d$, } \\
+&amp;\text{$p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$} \\
 &amp;\text{such that} \\
-&amp;\begin{cases}
-\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}(\phi, \textbf{u})\cdot\nabla c) + R(c, \theta, \phi) &amp; \\
-\phi\frac{\partial\theta}{\partial t} + \textbf{u}\cdot\nabla\theta = \nabla\cdot(\mathsf{G}(\phi, \textbf{u})\cdot\nabla\theta) + Q(c, \theta, \phi) &amp; \\
+&amp;\mathbb{IBVP}
+\begin{cases}
+\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}\cdot\nabla c) + R &amp; \\
+\phi\frac{\partial\theta}{\partial t} + \textbf{u}\cdot\nabla\theta = \nabla\cdot(\mathsf{G}\cdot\nabla\theta) + H&amp; \\
 \nabla\cdot\textbf{u} = 0 &amp; \\
-\textbf{u}=-\frac{\mathsf{K}(\phi)}{\mu(c, \theta)}\cdot(\nabla p + \rho(c, \theta) g\,\textbf{e}_g) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-c(\textbf{x},t=0)=c_0 &amp; \forall\textbf{x}\in\Omega \\
-\theta(\textbf{x},t=0)=\theta_0 &amp; \forall\textbf{x}\in\Omega \\
+\textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot(\nabla p + \rho g\,\textbf{e}_g) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+c=c_0 &amp; \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+\theta=\theta_0 &amp; \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
 c=c_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty] \\
 \textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
 \times [0,\infty]~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\
@@ -469,23 +482,33 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
-<p>sequence of linear weak forms</p>
+</section>
+<section id="specification">
+<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\begin{align*}
-&amp;\text{Find}~(\textbf{u}^n, p^n)\in V_\textbf{u}\times V_p~\text{such that} \\
-&amp;F_{\textbf{u}}(\textbf{u}^n, p^n;\textbf{v}, q) = \dots \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p \\
-&amp;\text{or find $\psi^n\in V_\psi$ such that} \\
-&amp;F_\psi(\psi^n, v) = \dots \quad\forall v\in V_\psi \\
-\\
-&amp;\text{Find}~c^{n+1}\in V_c~\text{such that} \\
-&amp;F_c(c^{n+1}, v) = \dots \quad\forall v\in V_c \\
-\\
-&amp;\text{Find}~\theta^{n+1}\in V_\theta~\text{such that} \\
-&amp;F_\theta(\theta^{n+1}, v) = \dots \quad\forall v\in V_\theta \\
-\\
-\end{align*}
+\mathbb{S}=
+\begin{cases}
+\Omega &amp; \text{domain}\\
+c_0(\textbf{x}) &amp; \text{initial concentration}\\
+\theta_0(\textbf{x}) &amp; \text{initial temperature}\\ 
+c_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},c} &amp; \text{concentration Dirichlet boundary condition} \\
+\theta_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},\theta} &amp; \text{temperature Dirichlet boundary condition} \\
+c_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N},c} &amp; \text{concentration Neumann boundary condition} \\
+\theta_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}, \theta} &amp; \text{concentration Neumann boundary condition} \\
+u_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{essential velocity boundary condition} \\
+p_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{natural pressure boundary condition} \\
+\phi(\textbf{x}) &amp; \text{porosity}\\
+\mathsf{K}(\phi) &amp; \text{permeability}\\
+\mathsf{D}(\phi, \textbf{u}) &amp; \text{solutal dispersion}\\
+\mathsf{G}(\phi, \textbf{u}) &amp; \text{thermal dispersion}\\
+\rho(c, \theta) &amp; \text{density}\\
+\mu(c, \theta) &amp; \text{viscosity}\\
+R(c,\theta, \phi) &amp; \text{solutal reaction}\\
+H(c,\theta, \phi) &amp; \text{thermal reaction}\\
+\end{cases}
 \end{split}\]</div>
+</section>
 </section>
 <section id="non-dimensionalization">
 <h2>Non-dimensionalization<a class="headerlink" href="#non-dimensionalization" title="Link to this heading">#</a></h2>
@@ -526,7 +549,7 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 <th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}\vert\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{G}\vert\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(R\)</span></p></th>
-<th class="head"><p><span class="math notranslate nohighlight">\(Q\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(H\)</span></p></th>
 </tr>
 </thead>
 <tbody>
@@ -536,7 +559,7 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 <td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(G_{\text{ref}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\Delta R\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\Delta Q\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta H\)</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -606,70 +629,77 @@ $<span class="math notranslate nohighlight">\(Ra=\frac{\mathcal{L}_\Omega K_{\te
 $<span class="math notranslate nohighlight">\(Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}\)</span>$</p>
 <p>Lewis number for ratio of reaction rates</p>
 <div class="math notranslate nohighlight">
-\[Lr=\frac{\Delta Q\Delta c}{\Delta\theta \Delta R} = \underbrace{\frac{\Delta Q}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta R}{\Delta c}}_{\text{solutal reaction rate}}\]</div>
+\[Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta R} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta R}{\Delta c}}_{\text{solutal reaction rate}}\]</div>
 </section>
 </section>
 </section>
 <section id="non-dimensional-equations">
 <h2>Non-dimensional equations<a class="headerlink" href="#non-dimensional-equations" title="Link to this heading">#</a></h2>
-<p>strong form</p>
+<section id="time-discretized-strong-form">
+<h3>Time-discretized strong form<a class="headerlink" href="#time-discretized-strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{cases}
-\phi\frac{\partial c}{\partial t}+Ad\,\textbf{u}\cdot\nabla c=\frac{1}{Pe}\nabla\cdot(\mathsf{D}\cdot\nabla c) + Ki R \\
-\phi\frac{\partial\theta}{\partial t}+Ad\,\textbf{u}\cdot\nabla\theta=\frac{1}{LePe}\nabla\cdot(\mathsf{G}\cdot\nabla\theta) + LrKi Q \\
-\nabla\cdot\textbf{u}=0 \\
-\textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p - Bu \rho\,\textbf{e}_g\right)
-\end{cases}
-\end{split}\]</div>
-<p>time discretization</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{cases}
-\phi\frac{c^{n+1}}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=\frac{1}{Pe}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) + Ki\mathcal{D}_R(R) \\
-\phi\frac{\partial\theta}{\partial t}+Ad\,\textbf{u}\cdot\nabla\theta=\frac{1}{LePe}\nabla\cdot(\mathsf{G}\cdot\nabla\theta) + LrKi Q \\
+\[ \begin{align}\begin{aligned}\begin{split}
+\begin{align*}
+&amp;\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\\end{split}\\\begin{split}&amp;\begin{cases}
+\phi\frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=\frac{1}{Pe}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) + Ki\,\mathcal{D}_R(R) \\
+\phi\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=\frac{1}{LePe}\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) + LrKi\,\mathcal{D}_H(H) \\
 \nabla\cdot\textbf{u}^n=0 \\
-\textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n - Bu \rho^n\,\textbf{e}_g\right)
+\textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n - Bu\,\rho^n\,\textbf{e}_g\right) \\
+c^0=c_0 \\
+\theta^0=\theta_0  \\
+c^n=c^n_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{D}^n\cdot\nabla c^n) = c_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\
+\theta^n=\theta^n_{\text{D}} &amp; \forall (\textbf{x}, t)\in\partial\Omega_{\text{D}, \theta} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{G}^n\cdot\nabla\theta^n) = \theta_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, \theta}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, \theta}=\partial\Omega/\partial\Omega_{\text{D}, \theta} \\
+\textbf{n}\cdot\textbf{u}^n = u^n_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
+p^n = p^n_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty]~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases}
-\end{split}\]</div>
-<p>sequence of weak forms</p>
+\end{align*}
+\end{split}\end{aligned}\end{align} \]</div>
+</section>
+<section id="weak-forms-sequence-in-the-mixed-formulation">
+<h3>Weak forms sequence in the mixed formulation<a class="headerlink" href="#weak-forms-sequence-in-the-mixed-formulation" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-F_\psi(\psi^n, v) &amp;= 0\quad\forall v\in V_\psi \\ 
-F_c(c^{n+1}, v) &amp;= 0\quad\forall v\in V_c \\ 
-F_\theta(\theta^{n+1}, v) &amp;= 0\quad\forall v\in V_\theta \\ 
+&amp;\text{Find} \\
+&amp; \psi^n\in V_\psi \\
+&amp;\textbf{u}^n\in V_\textbf{u} \\
+&amp;c^{n+1}\in V_c \\
+&amp;\theta^{n+1}\in V_\theta \\
+&amp;\text{such that} \\
+&amp;\mathbb{F} = 
+\begin{cases}
+F_\psi(\psi^n, v) = 0\quad\forall v\in V_\psi \\
+F_{\textbf{u}}(\textbf{u}^n, v) = 0\quad\forall v\in V_{\textbf{u}} \\ 
+F_c(c^{n+1}, v) = 0\quad\forall v\in V_c \\ 
+F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\ 
+\end{cases}
 \end{align*}
 \end{split}\]</div>
-<p>problem specification
-$<span class="math notranslate nohighlight">\(
-\mathbb{S}=\{\Omega, c_0, \theta_0, \phi(\textbf{x}), \mathsf{K}(\phi), \mathsf{D}(\phi, \textbf{u}), \mathsf{G}(\phi, \textbf{u}), \rho(c, \theta), \mu(c, \theta)\}
-\)</span>$</p>
-<!-- ## Discretization
-
-### $d=2$ Cartesian streamfunction formulation
-
-$$\textbf{u} =-\frac{\partial\psi}{\partial y}\textbf{e}_x + \frac{\partial\psi}{\partial x}\textbf{e}_y$$
-
-$$\textbf{e}_g = e_{g}^{x}\,\textbf{e}_x + e_{g}^{y}\,\textbf{e}_y$$
-
-$$\nabla\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right)=-\frac{\partial(e_{g}^{y}\rho g)}{\partial x} + \frac{\partial(e_{g}^{x}\rho g)}{\partial y}$$
-
-### Discretization in time
-
-$$\Delta t^n = \min(\Delta t_{\text{max}}, \Delta t_{\text{CFL}}(\textbf{u}^n))$$
-
-$$\phi^n\frac{c^{n+1}-c^n}{\Delta t^n} + \mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \nabla\cdot(\mathsf{D}^n\cdot\nabla\mathcal{D}_{\mathsf{D}}(c)) + \mathcal{D}_R(R)$$
-
-$$\phi^n\frac{\theta^{n+1}-\theta^n}{\Delta t^n} + \mathcal{D}_{\textbf{u}, \theta}(\textbf{u}\cdot\nabla \theta) = \nabla\cdot(\mathsf{G}^n\cdot\nabla\mathcal{D}_{\mathsf{G}}(\theta)) + \mathcal{D}_Q(Q)$$
-
-$$\textbf{u}^n =-\frac{\partial\psi^n}{\partial y}\textbf{e}_x + \frac{\partial\psi^n}{\partial x}\textbf{e}_y$$
-
-$$\nabla\cdot\left(\frac{\mu^n(\mathsf{K}^n)^{\mathsf{T}}\cdot\nabla\psi^n}{\text{det}(\mathsf{K}^n)}\right)=-\frac{\partial(e_{g}^{y}\rho^n)}{\partial x} + \frac{\partial(e_{g}^{x}\rho^n)}{\partial y}$$
-
-### Discretization in space
-
-... --></section>
+</section>
+<section id="weak-forms-sequence-in-the-streamfunction-formulation">
+<h3>Weak forms sequence in the streamfunction formulation<a class="headerlink" href="#weak-forms-sequence-in-the-streamfunction-formulation" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+&amp;\text{Find} \\
+&amp;(\textbf{u}^n, p^n)\in V_\textbf{u}\times V_p \\
+&amp;c^{n+1}\in V_c \\
+&amp;\theta^{n+1}\in V_\theta \\
+&amp;\text{such that} \\
+&amp;\mathbb{F} = 
+\begin{cases}
+F_{\textbf{u},p}(\textbf{u}^n, p^n;\textbf{v}, q)=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p\\
+F_c(c^{n+1}, v) = 0\quad\forall v\in V_c \\ 
+F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\ 
+\end{cases}
+\end{align*}
+\end{split}\]</div>
+</section>
+</section>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -738,7 +768,11 @@ $$\nabla\cdot\left(\frac{\mu^n(\mathsf{K}^n)^{\mathsf{T}}\cdot\nabla\psi^n}{\tex
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
@@ -748,7 +782,12 @@ $$\nabla\cdot\left(\frac{\mu^n(\mathsf{K}^n)^{\mathsf{T}}\cdot\nabla\psi^n}{\tex
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-mixed-formulation">Weak forms sequence in the mixed formulation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms-sequence-in-the-streamfunction-formulation">Weak forms sequence in the streamfunction formulation</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

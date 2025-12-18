@@ -430,12 +430,12 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="poisson-equation">
 <h1>Poisson equation<a class="headerlink" href="#poisson-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the boundary value problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~ \text{such that} \\
-&amp;\begin{cases}
+&amp;\mathbb{BVP}\begin{cases}
 \nabla^2 u = f &amp; \forall\textbf{x}\in\Omega \\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot\nabla{u} = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
@@ -450,9 +450,16 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 &amp;F(u, v)=-\int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u + vf + \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0\quad\forall v\in V~.
 \end{align*}
 \end{split}\]</div>
-<p>problem specification</p>
+<p>specification</p>
 <div class="math notranslate nohighlight">
-\[\mathbb{S}=\{\Omega, \partial\Omega_{\text{D}}, \partial\Omega_{\text{N}}, u_{\text{D}}, u_{\text{N}}, f\}\]</div>
+\[\begin{split}\mathbb{S}=
+\begin{cases}
+\Omega \\
+u_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} \\
+u_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} \\ 
+f(\textbf{x}) \\
+\end{cases}
+\end{split}\]</div>
 <section id="poisson-equation-on-a-rectangle">
 <h2>Poisson equation on a rectangle<a class="headerlink" href="#poisson-equation-on-a-rectangle" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">

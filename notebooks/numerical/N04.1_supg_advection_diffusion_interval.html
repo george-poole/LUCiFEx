@@ -430,17 +430,18 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="supg-stabilization-of-the-advection-diffusion-reaction-equation">
 <h1>SUPG stabilization of the advection-diffusion-reaction equation<a class="headerlink" href="#supg-stabilization-of-the-advection-diffusion-reaction-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the initial boundary value problem
-$<span class="math notranslate nohighlight">\(
+<p>strong form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
-&amp;\text{Find \)</span>u(\textbf{x}): \Omega \to \mathbb{R}<span class="math notranslate nohighlight">\( such that } \\
+&amp;\text{Find $u(\textbf{x}): \Omega \to \mathbb{R}$ such that } \\
 &amp;\begin{cases}
 \frac{\partial u}{\partial t} + \textbf{a}\cdot\nabla u= \nabla\cdot(\mathsf{D}\cdot\nabla u) + Ru + J &amp; \forall\textbf{x}\in\Omega \\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot(\mathsf{D}\cdot\nabla{u}) = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
 \end{cases}~.
 \end{align*}
-\)</span>$</p>
+\end{split}\]</div>
 <section id="advection-diffusion-of-a-gaussian-profile-on-an-interval">
 <h2>Advection-diffusion of a Gaussian profile on an interval<a class="headerlink" href="#advection-diffusion-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h2>
 <p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 5.6.1\)</span></p>
@@ -449,13 +450,13 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \mathbb{S}=
 \begin{cases}
 \Omega = [0, 1] \\
-u_0(x) = \frac{5}{7}\exp\left(-(x-x_0)^2/\sigma^2\right) \\
+u_0(x) = U_0\exp\left(-(x-x_0)^2/\sigma^2\right) \\
 u_{\text{D}}(x=0,1)=0 \\
 \textbf{a}=a\,\textbf{e}_x \\
 \mathsf{D}=D\mathsf{I} \\
 R=0 \\
 J = 1 \\
-u_{\text{e}}(x, t)=\frac{5}{7\sqrt{1+4Dt/\sigma^2}}\exp\left(-\frac{(x-x_0-at)^2}{\sigma^2+4Dt}\right)
+u_{\text{e}}(x, t)=\frac{U_0}{\sqrt{1+4Dt/\sigma^2}}\exp\left(-\frac{(x-x_0-at)^2}{\sigma^2+4Dt}\right)
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
@@ -486,6 +487,7 @@ u_{\text{e}}(x, t)=\frac{5}{7\sqrt{1+4Dt/\sigma^2}}\exp\left(-\frac{(x-x_0-at)^2
     <span class="n">D_adv</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
     <span class="n">D_diff</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
     <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">U0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="o">/</span><span class="mi">7</span><span class="p">,</span>
     <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.03</span><span class="p">,</span>
     <span class="n">cache_matrix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -499,7 +501,7 @@ u_{\text{e}}(x, t)=\frac{5}{7\sqrt{1+4Dt/\sigma^2}}\exp\left(-\frac{(x-x_0-at)^2
     <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span> <span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">U0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span> <span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
         <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
