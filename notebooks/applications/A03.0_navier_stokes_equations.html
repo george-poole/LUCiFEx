@@ -476,7 +476,7 @@ p=p_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 F(\textbf{u}, p;\textbf{v}, q)&amp;=\dots \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
-\end{aligned}
+\end{align}
 \end{split}\]</div>
 </section>
 <section id="specification">
@@ -501,37 +501,49 @@ p_0(\textbf{x}) &amp; \text{initial pressure}\\
 <h3>Incremental pressure correction scheme<a class="headerlink" href="#incremental-pressure-correction-scheme" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
+\begin{aligned}
+&amp;\text{Find} \\
+&amp;\widetilde{\textbf{u}}^{n+1}\in V_{\textbf{u}}, \\
+&amp;p^{n+1}\in V_p, \\
+&amp;\textbf{u}^{n+1}\in V_{\textbf{u}} \\
+&amp;\text{such that} \\
+&amp;\mathbb{F} 
+\begin{cases}
 \begin{align*}
-&amp;\text{Find}~\widetilde{\textbf{u}}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
-&amp;\begin{align*}
 F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;= 
 \int_\Omega\text{d}\Omega~\rho\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
 &amp;\qquad\quad +\varepsilon(\textbf{v}):(-p^n\mathsf{I} + \mathcal{D}_\tau(\boldsymbol{\tau})) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) \\ 
 &amp;\quad -\int_{\partial\Omega}\text{d}\Gamma~\textbf{v}\cdot(-p^n\mathsf{I} + \mathcal{D}_\tau(\boldsymbol{\tau}))\cdot\textbf{n} \\
-&amp;=0 \quad\forall \textbf{v} \in V_{\textbf{u}}~. \\
+&amp;=0 \quad\forall \textbf{v} \in V_{\textbf{u}} 
 \end{align*} \\
-&amp;\text{Find}~p^{n+1}\in V_p~\text{such that} \\
-&amp;F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} - \nabla q\cdot\nabla p^n + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} =0 \quad\forall q\in V_p~. \\
-\\
-&amp;\text{Find}~\textbf{u}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
-&amp;F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1} - \textbf{v}\cdot\nabla p^n = 0 \quad\forall \textbf{v} \in V_{\textbf{u}}~. \\
-\end{align*}
+F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} - \nabla q\cdot\nabla p^n + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} =0 \quad\forall q\in V_p \\
+F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1} - \textbf{v}\cdot\nabla p^n = 0 \quad\forall \textbf{v} \in V_{\textbf{u}}
+\end{cases}
+\end{aligned}
 \end{split}\]</div>
 </section>
 <section id="chorin-s-scheme">
 <h3>Chorin’s scheme<a class="headerlink" href="#chorin-s-scheme" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
+\begin{aligned}
+&amp;\text{Find} \\
+&amp;\widetilde{\textbf{u}}^{n+1}\in V_{\textbf{u}}, \\
+&amp;p^{n+1}\in V_p, \\
+&amp;\textbf{u}^{n+1}\in V_{\textbf{u}} \\
+&amp;\text{such that} \\
+&amp;\mathbb{F} 
+\begin{cases}
 \begin{align*}
-&amp;\text{Find}~\widetilde{\textbf{u}}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
-&amp;F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \nabla\textbf{v}\cdot\nabla\mathcal{D}_{\tau}(\boldsymbol{\tau}) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) =0 \quad\forall \textbf{v} \in V_{\textbf{u}}~. \\
-\\
-&amp;\text{Find}~p^{n+1}\in V_p~\text{such that} \\
-&amp;F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} =0 \quad\forall q\in V_p~. \\
-\\
-&amp;\text{Find}~\textbf{u}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
-&amp;F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1}
-\end{align*}
+F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;= 
+\int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
+&amp;\qquad\quad + \nabla\textbf{v}\cdot\nabla\mathcal{D}_{\tau}(\boldsymbol{\tau}) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) \\
+&amp;=0 \quad\forall \textbf{v} \in V_{\textbf{u}} 
+\end{align*} \\
+F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}=0 \quad\forall q\in V_p \\
+F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1} =0 \quad\forall \textbf{v} \in V_{\textbf{u}}
+\end{cases}
+\end{aligned}
 \end{split}\]</div>
 </section>
 </section>
