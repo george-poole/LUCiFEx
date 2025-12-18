@@ -6,7 +6,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | -------- | ------- |
 | $\Omega$ | domain |
 | $\partial\Omega$ | domain boundary |
-| $\partial\Omega_i\sub\partial\Omega$ | subset of the domain boundary |
+| $\partial\Omega_i\subset\partial\Omega$ | subset of the domain boundary |
 | $\text{d}\Omega$ | integration measure over the cells | 
 | $\text{d}\Gamma$ | integration measure over the cell facets | 
 | $\textbf{e}_x, \textbf{e}_y, \textbf{e}_z$ | unit vectors | 
