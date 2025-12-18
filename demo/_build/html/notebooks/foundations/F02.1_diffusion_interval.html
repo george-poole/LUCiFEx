@@ -177,6 +177,7 @@
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="F00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
@@ -221,9 +222,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -425,12 +431,12 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="diffusion-equation">
 <h1>Diffusion equation<a class="headerlink" href="#diffusion-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the initial boundary value problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~u(\textbf{x}, t): \Omega\times[0,\infty) \to \mathbb{R}~\text{such that } \\
-&amp;\begin{cases}
+&amp;\mathbb{IBVP}\begin{cases}
 \frac{\partial u}{\partial t} = \nabla\cdot(\mathsf{D}\cdot\nabla u) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 u(\textbf{x}, t=0)=u_0 &amp; \forall\textbf{x}\in\Omega\\
 u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
@@ -448,12 +454,12 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \end{split}\]</div>
 <p>problem specification</p>
 <div class="math notranslate nohighlight">
-\[\mathbb{S}=\{\Omega, \partial\Omega_{\text{D}}, \partial\Omega_{\text{N}}, u_{\text{D}}, u_{\text{N}}, u_0, \mathsf{D}\}\]</div>
+\[\mathbb{S}\{\Omega, \partial\Omega_{\text{D}}, \partial\Omega_{\text{N}}, u_{\text{D}}, u_{\text{N}}, u_0, \mathsf{D}\}\]</div>
 <section id="diffusion-of-a-gaussian-profile-on-an-interval">
 <h2>Diffusion of a Gaussian profile on an interval<a class="headerlink" href="#diffusion-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}=
+\mathbb{S}
 \begin{cases}
 \Omega = [0, L_x] \\
 \mathsf{D}=D\mathsf{I} \\

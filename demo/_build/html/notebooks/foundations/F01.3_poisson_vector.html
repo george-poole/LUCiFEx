@@ -177,6 +177,7 @@
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="F00_notation.html">Notation</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Vector-valued Poisson equation</a></li>
@@ -221,9 +222,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -425,12 +431,12 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="vector-valued-poisson-equation">
 <h1>Vector-valued Poisson equation<a class="headerlink" href="#vector-valued-poisson-equation" title="Link to this heading">#</a></h1>
-<p>strong form of the boundary value problem</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{such that} \\
-&amp;\begin{cases}
+&amp;\mathbb{BVP}\begin{cases}
 \nabla^2\textbf{u} = \textbf{f} &amp; \forall\textbf{x}\in\Omega \\
 \textbf{u}=\textbf{u}_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot\nabla{\textbf{u}} = \textbf{u}_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
@@ -449,7 +455,7 @@ document.write(`
 <h2>Vector-valued Poisson equation on a rectangle<a class="headerlink" href="#vector-valued-poisson-equation-on-a-rectangle" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}=
+\mathbb{S}
 \begin{cases}
 \Omega = [0, L_x] \times [0, L_y] \\
 \textbf{f}(x,y)=(-y, x) \\

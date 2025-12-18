@@ -17,7 +17,7 @@ from lucifex.sim import configure_simulation
 
 from lucifex.pde.advection_diffusion import advection_diffusion, advection_diffusion_reaction
 from lucifex.pde.darcy import darcy_incompressible
-from lucifex.pde.evolution import evolution_expression
+from lucifex.pde.evolution import evolution_update
 
 
 @configure_simulation(
@@ -135,7 +135,7 @@ def darcy_plume_dissolution_rectangle(
     b_solver = ibvp(advection_diffusion, bcs=b_bcs, petsc=b_petsc)(
         c, dt[0], phi, u, Bu, 1, D_adv, D_diff, phi=phi,
     )
-    s_solver = interpolation(s, evolution_expression)(
+    s_solver = interpolation(s, evolution_update)(
         s, dt[0], -epsilon * Ki * (1 / varphi) * r , D_evol,
     )
 
