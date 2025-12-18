@@ -177,6 +177,7 @@
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
@@ -419,7 +420,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
 </ul>
 </li>
 </ul>
@@ -466,20 +469,26 @@ document.write(`
 <section id="general-definition">
 <h3>General definition<a class="headerlink" href="#general-definition" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0\]</div>
-<p>Newtonian stress with unit viscosity</p>
-<div class="math notranslate nohighlight">
-\[\tau(\textbf{u}) = \tfrac{1}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right)\]</div>
-<div class="math notranslate nohighlight">
-\[\implies\textbf{0}=\nabla^2(\nabla\times\boldsymbol{\psi}) + \nabla\times\textbf{f}\]</div>
+\[\begin{split}
+\begin{align*}
+&amp;\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0 \\
+&amp;\text{and}~\tau(\textbf{u}) = \tfrac{1}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
+&amp;\implies\textbf{0}=\nabla^2(\nabla\times\boldsymbol{\psi}) + \nabla\times\textbf{f}
+\end{align*}
+\end{split}\]</div>
 </section>
-<section id="cartesian-streamfunction-in-2d">
-<h3>Cartesian streamfunction in 2D<a class="headerlink" href="#cartesian-streamfunction-in-2d" title="Link to this heading">#</a></h3>
+<section id="d-cartesian-definition">
+<h3>2D Cartesian definition<a class="headerlink" href="#d-cartesian-definition" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\textbf{u}=\nabla\times\psi\textbf{e}_z=-\frac{\partial\psi}{\partial y}\textbf{e}_x + \frac{\partial\psi}{\partial x}\textbf{e}_y\]</div>
-<div class="math notranslate nohighlight">
-\[\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y\]</div>
-<p>strong form</p>
+\[\begin{split}
+\begin{align*}
+&amp;\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \\
+&amp;\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y
+\end{align*}
+\end{split}\]</div>
+</section>
+<section id="strong-form">
+<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -491,7 +500,9 @@ document.write(`
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
-<p>weak form with penalty parameter <span class="math notranslate nohighlight">\(\alpha\)</span> and local mesh cell size <span class="math notranslate nohighlight">\(h(\textbf{x})\)</span></p>
+</section>
+<section id="weak-form">
+<h3>Weak form<a class="headerlink" href="#weak-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -501,7 +512,8 @@ F(\psi, v) &amp;=
 \int_\Omega\text{d}\Omega~\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
 &amp;\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
 &amp;=0\quad\forall v\in V~.
-\end{align*}
+\end{align*} \\
+&amp;\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter}~h(\textbf{x})~\text{is the local mesh cell size.}
 \end{align*}
 \end{split}\]</div>
 </section>
@@ -577,7 +589,9 @@ F(\psi, v) &amp;=
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
 </ul>
 </li>
 </ul>
