@@ -457,7 +457,7 @@ document.write(`
 &amp;\text{Find}~\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d~\text{and}~p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{such that} \\
 &amp;\begin{cases}
 \nabla\cdot\textbf{u} = 0 &amp; \\
-\rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \textbf{f}(\textbf{x}, t) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+\rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \textbf{f} &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 \textbf{u}=\textbf{u}_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 p=p_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 \textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \times[0, \infty) \\
@@ -476,7 +476,7 @@ p=p_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 F(\textbf{u}, p;\textbf{v}, q)&amp;=\dots \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
-\end{align}
+\end{aligned}
 \end{split}\]</div>
 </section>
 <section id="specification">
@@ -488,9 +488,11 @@ F(\textbf{u}, p;\textbf{v}, q)&amp;=\dots \\
 \Omega &amp; \text{domain}\\
 \textbf{u}_0(\textbf{x}) &amp; \text{initial velocity}\\
 p_0(\textbf{x}) &amp; \text{initial pressure}\\ 
-\textbf{u}_{\text{E}}~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
-\boldsymbol{\tau}_{\text{N}}~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
-\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} 
+\textbf{u}_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
+\boldsymbol{\tau}_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
+\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} \\
+\textbf{f}(\textbf{x}, t) &amp; \text{body force} \\
+\rho(\textbf{x}, t) &amp; \text{density}
 \end{cases}
 \end{split}\]</div>
 </section>
