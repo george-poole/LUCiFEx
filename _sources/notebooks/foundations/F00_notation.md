@@ -29,7 +29,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathbb{IVP}$ | initial value problem |
 | $\mathbb{EVP}$ | eigenvalue problem |
 | $\mathbb{S}$ | problem specification |
-| $\mathbb{F}$ | sequence of time-discretized weak forms |
+| $\mathbb{F}$ | linearized or time-discretized weak forms sequence |
 | $u_0$ | initial condition on $u$ |
 | $u_\text{D}$ | Dirichlet boundary condition on $u$ |
 | $u_\text{N}$ | Neumann or natural boundary condition on $u$ |
