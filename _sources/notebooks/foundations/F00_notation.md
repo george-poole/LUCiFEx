@@ -23,7 +23,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathsf{U}, \mathsf{V}, \dots$ | tensor quantity | 
 | $\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) $ | tensor quantity components | 
 | $V_u$ | function space to which $u$ belongs
-| $\mathcal{D}$ | finite difference operator |
+| $\mathcal{D}(\cdot)$ | finite difference operator |
 | $\mathbb{BVP}$ | boundary value problem |
 | $\mathbb{IBVP}$ | initial boundary value problem |
 | $\mathbb{IVP}$ | initial value problem |
