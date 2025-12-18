@@ -417,8 +417,20 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -432,24 +444,27 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="abc-convection-reaction-equations">
 <h1>ABC convection-reaction equations<a class="headerlink" href="#abc-convection-reaction-equations" title="Link to this heading">#</a></h1>
+<p>Governing equations for triple solutal convection with an <span class="math notranslate nohighlight">\(\text{A}+\text{B}\to\text{C}\)</span> reaction coupled to Darcy flow.</p>
 <section id="dimensional-equations">
 <h2>Dimensional equations<a class="headerlink" href="#dimensional-equations" title="Link to this heading">#</a></h2>
-<p>strong form</p>
+<section id="strong-form">
+<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find} \\
-&amp;\text{$a(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, } \\
-&amp;\text{$b(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, } \\
-&amp;\text{$c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, } \\
-&amp;\text{$\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d$ and $p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$} \\
+&amp;a(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
+&amp;b(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
+&amp;c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
+&amp;\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
+&amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\begin{cases}
 \phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R(a,b) \\
 \phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R(a,b) \\
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R(a,b) \\
 \nabla\cdot\textbf{u}=0 \\
-\textbf{u}=-\frac{\mathsf{K}(\phi)}{\mu(a,b,c)}\cdot\left(\nabla p + \rho(a,b,c)g\,\textbf{e}_g\right) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
+\textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p + \rho g\,\textbf{e}_g\right) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
 a(\textbf{x},t=0)=a_0 \\
 b(\textbf{x},t=0)=b_0 \\
 c(\textbf{x},t=0)=c_0 \\
@@ -461,8 +476,25 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 \end{align*}
 \end{split}\]</div>
 </section>
+<section id="specification">
+<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\mathbb{S}=
+\begin{cases}
+\phi(\textbf{x}) \\
+\mathsf{K}(\phi) \\
+\rho(a,b,c) \\
+\mu(a,b,c) \\
+R(a,b )
+\end{cases}
+\end{split}\]</div>
+</section>
+</section>
 <section id="non-dimensional-equations">
 <h2>Non-dimensional equations<a class="headerlink" href="#non-dimensional-equations" title="Link to this heading">#</a></h2>
+<section id="scalings">
+<h3>Scalings<a class="headerlink" href="#scalings" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{cases}
@@ -473,6 +505,11 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 \textbf{u}=-\frac{\mathsf{K}(\phi)}{\mu(a,b,c)}\cdot\left(\nabla p + Bu\,\rho(a,b,c)g\,\textbf{e}_g\right) \\
 \end{cases}
 \end{split}\]</div>
+</section>
+<section id="dimensionless-numbers">
+<h3>Dimensionless numbers<a class="headerlink" href="#dimensionless-numbers" title="Link to this heading">#</a></h3>
+<section id="abstract-dimensionless-numbers">
+<h4>Abstract dimensionless numbers<a class="headerlink" href="#abstract-dimensionless-numbers" title="Link to this heading">#</a></h4>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -482,6 +519,12 @@ Ki&amp;=\frac{\mathcal{T}\Delta R}{\phi_{\text{ref}}\Delta c} \\
 Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 \end{align*} 
 \end{split}\]</div>
+</section>
+<section id="physical-dimensionless-numbers">
+<h4>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h4>
+<p>…</p>
+</section>
+</section>
 </section>
 <div class="toctree-wrapper compound">
 </div>
@@ -551,8 +594,20 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
