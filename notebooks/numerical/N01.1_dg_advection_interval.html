@@ -221,9 +221,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -444,21 +449,20 @@ u=u_{\text{I}} &amp; \forall(\textbf{x}, t)\in\Omega_{\text{I}}\times[0,\infty)
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~u^{n+1}\in V_{\text{CG}}~\text{such that} \\
-&amp;F(u^{n+1}, v)=\int_\Omega~\text{d}x~v\frac{u^{n+1} - u^n}{\Delta t^n} + v\,\mathcal{D}(\textbf{a}\cdot\nabla u) =0 \quad\forall v\in V_{\text{CG}}~.
+&amp;F(u^{n+1}, v)=\int_\Omega~\text{d}x~v\frac{u^{n+1} - u^n}{\Delta t^n} + v\,\mathcal{D}_{\textbf{a},u}(\textbf{a}\cdot\nabla u) =0 \quad\forall v\in V_{\text{CG}}~.
 \end{align*}
 \end{split}\]</div>
-<p>DG weak form assuming <span class="math notranslate nohighlight">\(\textbf{a}=\textbf{a}(\textbf{x})\)</span></p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
+<p>DG weak form
+$<span class="math notranslate nohighlight">\(
 \begin{align*}
 &amp;\text{Find}~u^{n+1}\in V_{\text{DG}}~\text{such that} \\
-&amp;F(u^{n+1}, v)=\int_\Omega\text{d}\Omega~v\frac{u^{n+1} - u^n}{\Delta t^n} - \mathcal{D}(u)\nabla\cdot(v\textbf{a}) \\
-&amp;+ \int_{\mathcal{F}}\text{d}\Gamma~\left[\!\left[ v\right]\!\right]\,\left[\!\left[ \mathcal{D}(u)\max(\textbf{a}\cdot\textbf{n}, 0)\right]\!\right] \\
-&amp;+ \int_{\partial\Omega_{\text{I}}}\text{d}\Gamma~vu_{\text{I}}\,\textbf{a}\cdot\textbf{n} \\
-&amp;+ \int_{\partial\Omega/\partial\Omega_{\text{I}}}\text{d}\Gamma~v\mathcal{D}(u)\,\textbf{a}\cdot\textbf{n} \\
+&amp;F(u^{n+1}, v)=\int_\Omega\text{d}\Omega~v\frac{u^{n+1} - u^n}{\Delta t^n} - \nabla\cdot(v\mathcal{D}_{\textbf{a}}(\textbf{a}))\mathcal{D}_u(u) \\
+&amp;+ \int_{\mathcal{F}}\text{d}\Gamma~\left[\!\left[ v\right]\!\right]\,\left[\!\left[ \mathcal{D}_u(u)\max(\textbf{a}\cdot\textbf{n}, 0)\right]\!\right] \\
+&amp;+ \int_{\partial\Omega_{\text{I}}}\text{d}\Gamma~vu_{\text{I}}\,\mathcal{D}_{\textbf{a}}(\textbf{a})\cdot\textbf{n} \\
+&amp;+ \int_{\partial\Omega/\partial\Omega_{\text{I}}}\text{d}\Gamma~v\mathcal{D}_u(u)\,\mathcal{D}_{\textbf{a}}(\textbf{a})\cdot\textbf{n} \\
 &amp;= 0 \quad\forall v\in V_{\text{DG}}~.
 \end{align*}
-\end{split}\]</div>
+\)</span>$</p>
 <section id="advection-of-a-step-profile-on-an-interval">
 <h2>Advection of a step profile on an interval<a class="headerlink" href="#advection-of-a-step-profile-on-an-interval" title="Link to this heading">#</a></h2>
 <p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 3.11.4\)</span></p>
