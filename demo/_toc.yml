@@ -55,7 +55,8 @@ parts:
     chapters:
       - file: notebooks/numerical/N01.1_dg_advection_interval
         sections: 
-          - file: notebooks/numerical/N01.2_dg_advection_rectangle
+          - file: notebooks/numerical/N01.2_dg_advection_rectangle_cone
+          - file: notebooks/numerical/N01.3_dg_advection_rectangle_vortex
       - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
         sections: 
           - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle
@@ -73,5 +74,5 @@ parts:
 
   - caption: Technical
     chapters:
-      - file: notebooks/technical/T01_series
+      - file: notebooks/technical/T01_timeseries
       - file: notebooks/technical/T02_finite_differences

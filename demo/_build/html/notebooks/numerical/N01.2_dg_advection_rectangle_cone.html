@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Darcy equations &#8212; LUCiFEx Demo</title>
+    <title>Rotating cone on a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A01.0_darcy_equations';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N01.2_dg_advection_rectangle_cone';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Flow of a Darcy fluid through a lens of low permeability" href="A01.1_darcy_lens.html" />
-    <link rel="prev" title="Mathieu equation" href="../foundations/F06_mathieu.html" />
+    <link rel="next" title="Spinning vortex on a rectangle" href="N01.3_dg_advection_rectangle_vortex.html" />
+    <link rel="prev" title="DG formulation of the advection equation" href="N01.1_dg_advection_interval.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -195,69 +195,69 @@
 <li class="toctree-l1"><a class="reference internal" href="../foundations/F06_mathieu.html">Mathieu equation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Darcy equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A03.1_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A03.2_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A03.1_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A03.2_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A05.4_darcy_convection_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A05.4_darcy_convection_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Rotating cone on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="N01.3_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="N08_bcs_periodic.html">Periodic boundary conditions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
 <ul class="nav bd-sidenav">
@@ -317,7 +317,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A01.0_darcy_equations.md" target="_blank"
+      <li><a href="../../_sources/notebooks/numerical/N01.2_dg_advection_rectangle_cone.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -327,7 +327,7 @@
 <span class="btn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="btn__text-container">.md</span>
+<span class="btn__text-container">.ipynb</span>
 </a>
 </li>
       
@@ -388,9 +388,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -401,24 +399,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Darcy equations</h1>
+    <h1>Rotating cone on a rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
-</ul>
-</li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -428,66 +413,44 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="darcy-equations">
-<h1>Darcy equations<a class="headerlink" href="#darcy-equations" title="Link to this heading">#</a></h1>
-<section id="mixed-formulation">
-<h2>Mixed formulation<a class="headerlink" href="#mixed-formulation" title="Link to this heading">#</a></h2>
-<p>strong form of the boundary value problem</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="rotating-cone-on-a-rectangle">
+<h1>Rotating cone on a rectangle<a class="headerlink" href="#rotating-cone-on-a-rectangle" title="Link to this heading">#</a></h1>
+<p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 3.11.3\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\begin{align*}
-&amp;\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{and}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
-\nabla\cdot\textbf{u} = 0 &amp; \\
-\textbf{u} = -\frac{\mathsf{K}(\textbf{x})}{\mu}\cdot(\nabla p - \textbf{f}\,) &amp; \forall\textbf{x}\in\Omega \\
-\textbf{n}\cdot\textbf{u} = u_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
-p = p_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
-\end{cases}~.
-\end{align*}
+\mathbb{S}=
+\begin{cases}
+\Omega = [-1/2, 1/2] \times [-1/2, 1/2] \\
+u_0(x,y) = \tfrac{1}{4}(1+\cos(\pi(x-x_0)))(1+\cos(\pi(y-y_0)))~\text{if}~(x-x_0)^2+(y-y_0)^2\leq1\\
+u_0(x,y) = 0~\text{if}~(x-x_0)^2+(y-y_0)^2&gt;1\\
+u_{\text{I}}=0 \\
+\textbf{a} = \begin{pmatrix}
+-y \\
+x
+\end{pmatrix}
+\end{cases}
 \end{split}\]</div>
-<p>incompressibility constraint if <span class="math notranslate nohighlight">\(\partial\Omega_{\text{N}}=\varnothing\iff\partial\Omega_{\text{E}}=\partial\Omega\)</span></p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\int_{\partial\\partial\Omega}\text{d}\Gamma~u_{\text{E}}=0\end{split}\]</div>
-<p>weak form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-\text{Find}~(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \\
-F(\textbf{u}, p;\textbf{v}, q) &amp;= \int_\Omega\text{d}\Omega~q(\nabla\cdot\textbf{u}) + \textbf{v}\cdot(\mu\mathsf{K}^{-1}\cdot\textbf{u}) - p(\nabla\cdot\textbf{v}) - \textbf{v}\cdot\textbf{f} \\
-&amp;\quad +\int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~p_{\text{N}}\,\textbf{v}\cdot\textbf{n} \\
-&amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="streamfunction-formulation">
-<h2>Streamfunction formulation<a class="headerlink" href="#streamfunction-formulation" title="Link to this heading">#</a></h2>
-<section id="general-definition">
-<h3>General definition<a class="headerlink" href="#general-definition" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0\]</div>
-<div class="math notranslate nohighlight">
-\[\implies\nabla\times\left(\mu\mathsf{K}^{-1}\cdot\nabla\times\boldsymbol{\psi}\right) = \nabla\times\textbf{f}\]</div>
-</section>
-<section id="cartesian-streamfunction-in-2d">
-<h3>Cartesian streamfunction in 2D<a class="headerlink" href="#cartesian-streamfunction-in-2d" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y\]</div>
-<div class="math notranslate nohighlight">
-\[\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y\]</div>
-<p>strong form of the boundary value problem
-$<span class="math notranslate nohighlight">\(
-\begin{align*}
-&amp;\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
-\nabla\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right)=-\frac{\partial(f_y)}{\partial x} + \frac{\partial(f_x)}{\partial y} &amp; \forall\textbf{x}\in\Omega \\
-\psi=\psi_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
-\textbf{n}\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right) = \psi_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
-\end{cases}~.
-\end{align*}
-\)</span>$</p>
-</section>
-</section>
-<div class="toctree-wrapper compound">
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span> 
+    <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span>
+    <span class="n">cfl_timestep</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">InitialBoundaryValueProblem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">advection_dg</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">():</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 
@@ -504,7 +467,7 @@ $<span class="math notranslate nohighlight">\(
         },
         kernelOptions: {
             name: "python3",
-            path: "./notebooks/applications"
+            path: "./notebooks/numerical"
         },
         predefinedOutput: true
     }
@@ -522,20 +485,20 @@ $<span class="math notranslate nohighlight">\(
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../foundations/F06_mathieu.html"
+       href="N01.1_dg_advection_interval.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Mathieu equation</p>
+        <p class="prev-next-title">DG formulation of the advection equation</p>
       </div>
     </a>
     <a class="right-next"
-       href="A01.1_darcy_lens.html"
+       href="N01.3_dg_advection_rectangle_vortex.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Flow of a Darcy fluid through a lens of low permeability</p>
+        <p class="prev-next-title">Spinning vortex on a rectangle</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -545,26 +508,6 @@ $<span class="math notranslate nohighlight">\(
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cartesian-streamfunction-in-2d">Cartesian streamfunction in 2D</a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
