@@ -513,7 +513,7 @@ p_0(\textbf{x}) &amp; \text{initial pressure}\\
 \begin{cases}
 \begin{align*}
 F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;= 
-\int_\Omega\text{d}\Omega~\rho\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
+\int_\Omega\text{d}\Omega~\mathcal{D}_\rho(\rho)\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \mathcal{D}_\rho(\rho)\textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
 &amp;\qquad\quad +\varepsilon(\textbf{v}):(-p^n\mathsf{I} + \mathcal{D}_\tau(\boldsymbol{\tau})) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) \\ 
 &amp;\quad -\int_{\partial\Omega}\text{d}\Gamma~\textbf{v}\cdot(-p^n\mathsf{I} + \mathcal{D}_\tau(\boldsymbol{\tau}))\cdot\textbf{n} \\
 &amp;=0 \quad\forall \textbf{v} \in V_{\textbf{u}} 
@@ -538,7 +538,7 @@ F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rh
 \begin{cases}
 \begin{align*}
 F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;= 
-\int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
+\int_\Omega\text{d}\Omega~\mathcal{D}_\rho(\rho)\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \mathcal{D}_\rho(\rho)\textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) \\
 &amp;\qquad\quad + \nabla\textbf{v}\cdot\nabla\mathcal{D}_{\tau}(\boldsymbol{\tau}) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) \\
 &amp;=0 \quad\forall \textbf{v} \in V_{\textbf{u}} 
 \end{align*} \\
