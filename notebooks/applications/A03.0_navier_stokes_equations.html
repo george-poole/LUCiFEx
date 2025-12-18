@@ -458,21 +458,23 @@ p(\textbf{x},t=0)=p_0 &amp; \forall\textbf{x}\in\Omega \\
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
-<p>weak form
-$<span class="math notranslate nohighlight">\(
+<p>weak form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
 &amp;\text{Find}~(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \\
 &amp;F(\textbf{u}, p;\textbf{v}, q)=\dots \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
-\)</span>$</p>
+\end{split}\]</div>
 </section>
 <section id="linearization-schemes">
 <h2>Linearization schemes<a class="headerlink" href="#linearization-schemes" title="Link to this heading">#</a></h2>
 <section id="incremental-pressure-correction-scheme-ipcs">
 <h3>Incremental pressure correction scheme (IPCS)<a class="headerlink" href="#incremental-pressure-correction-scheme-ipcs" title="Link to this heading">#</a></h3>
-<p>sequence of weak forms
-$<span class="math notranslate nohighlight">\(
+<p>sequence of weak forms</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\widetilde{\textbf{u}}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
 &amp;\begin{align*}
@@ -488,7 +490,7 @@ F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &amp;=
 &amp;\text{Find}~\textbf{u}^{n+1}\in V_{\textbf{u}}~\text{such that} \\
 &amp;F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1} - \textbf{v}\cdot\nabla p^n = 0 \quad\forall \textbf{v} \in V_{\textbf{u}}~. \\
 \end{align*}
-\)</span>$</p>
+\end{split}\]</div>
 </section>
 <section id="chorin-s-scheme">
 <h3>Chorin’s scheme<a class="headerlink" href="#chorin-s-scheme" title="Link to this heading">#</a></h3>
