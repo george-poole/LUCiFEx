@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Stokes equations &#8212; LUCiFEx Demo</title>
+    <title>Injection into a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,10 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A02.0_stokes_equations';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A11.1_darcy_porosity_evolution_injection';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Flow of a Stokes fluid in a Poisseuille channel" href="A02.1_stokes_poiseuille.html" />
-    <link rel="prev" title="Flow of a Darcy fluid across an anticline of heterogeneous permeability" href="A01.2_darcy_anticline.html" />
+    <link rel="prev" title="Porosity evolution by reaction with a Darcy fluid" href="A11.0_darcy_porosity_evolution_equations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -211,7 +210,7 @@
 <li class="toctree-l2"><a class="reference internal" href="A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Stokes equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 </ul>
@@ -247,8 +246,8 @@
 <li class="toctree-l2"><a class="reference internal" href="A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A11.0_darcy_porosity_evolution_equations.html">Porosity evolution by reaction with a Darcy fluid</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A11.1_darcy_porosity_evolution_injection.html">Injection into a rectangle</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="A11.0_darcy_porosity_evolution_equations.html">Porosity evolution by reaction with a Darcy fluid</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Injection into a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -305,7 +304,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A02.0_stokes_equations.md" target="_blank"
+      <li><a href="../../_sources/notebooks/applications/A11.1_darcy_porosity_evolution_injection.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -315,7 +314,7 @@
 <span class="btn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="btn__text-container">.md</span>
+<span class="btn__text-container">.ipynb</span>
 </a>
 </li>
       
@@ -376,9 +375,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -389,26 +386,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Stokes equations</h1>
+    <h1>Injection into a rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-</ul>
-</li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -418,89 +400,72 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="stokes-equations">
-<h1>Stokes equations<a class="headerlink" href="#stokes-equations" title="Link to this heading">#</a></h1>
-<section id="mixed-formulation">
-<h2>Mixed formulation<a class="headerlink" href="#mixed-formulation" title="Link to this heading">#</a></h2>
-<p>strong form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
+  <section class="tex2jax_ignore mathjax_ignore" id="injection-into-a-rectangle">
+<h1>Injection into a rectangle<a class="headerlink" href="#injection-into-a-rectangle" title="Link to this heading">#</a></h1>
+<p>horizontal rectangle
+$<span class="math notranslate nohighlight">\(\Omega = \left[-\tfrac{1}{2}L_x, \tfrac{1}{2}L_x\right] \times [0, L_y]\)</span><span class="math notranslate nohighlight">\(
+\)</span><span class="math notranslate nohighlight">\(\textbf{e}_g=-\textbf{e}_y\)</span>$</p>
+<p>constitutive relations
+$<span class="math notranslate nohighlight">\(
 \begin{align*}
-&amp;\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{and}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
-\nabla\cdot\textbf{u} = 0 &amp; \\
-\textbf{0}=-\nabla p + \nabla\cdot\tau(\textbf{u}) + \textbf{f} &amp; \forall\textbf{x}\in\Omega \\
-\textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
-(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
-\end{cases}~.
+\mathsf{S} &amp;= \mathsf{I} \\ 
+\mathsf{Z} &amp;= \mathsf{I} \\ 
+\mathsf{K} &amp;= \phi^2\mathsf{I} \\ 
+\mu &amp;= 1 \\
+\rho &amp;= s + \beta b 
 \end{align*}
-\end{split}\]</div>
-<p>weak form</p>
+\)</span>$</p>
+<p>initial conditions
+$<span class="math notranslate nohighlight">\(s_0 = 1\)</span><span class="math notranslate nohighlight">\(
+\)</span><span class="math notranslate nohighlight">\(0\leq z_0 \leq 1\)</span><span class="math notranslate nohighlight">\(
+\)</span><span class="math notranslate nohighlight">\(\phi_0 = 1\)</span>$</p>
+<p>prescribed concentrations on inflow portion of lower boundary</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~(\textbf{u}, p)\in V_{\textbf{u}} \times V_p~\text{such that} \\
-&amp;F(\textbf{u}, p;\textbf{v}, q)=\int_\Omega\text{d}\Omega~q(\nabla\cdot\textbf{u}) - p(\nabla\cdot\textbf{v}) + \nabla\textbf{v}:\tau - \textbf{v}\cdot\textbf{f} \\
-&amp;- \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~\,\textbf{v}\cdot\boldsymbol{\tau}_{\text{N}} \\
-&amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="streamfunction-formulation">
-<h2>Streamfunction formulation<a class="headerlink" href="#streamfunction-formulation" title="Link to this heading">#</a></h2>
-<section id="general-definition">
-<h3>General definition<a class="headerlink" href="#general-definition" title="Link to this heading">#</a></h3>
+\[c(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = 0\]</div>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0 \\
-&amp;\text{and}~\tau(\textbf{u}) = \tfrac{1}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
-&amp;\implies\textbf{0}=\nabla^2(\nabla\times\boldsymbol{\psi}) + \nabla\times\textbf{f}
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="d-cartesian-definition">
-<h3>2D Cartesian definition<a class="headerlink" href="#d-cartesian-definition" title="Link to this heading">#</a></h3>
+\[b(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = b_{\text{in}}\]</div>
+<p>no-flux on other boundaries</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \\
-&amp;\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="strong-form">
-<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
+\[\frac{\partial c}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial c}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial c}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0\]</div>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
-\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} &amp; \forall\textbf{x}\in\Omega \\
-\psi=\psi_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega \\
-\nabla^2\psi=\psi_{\text{L}} &amp; \forall \textbf{x}\in\partial\Omega
-\end{cases}~.
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="weak-form">
-<h3>Weak form<a class="headerlink" href="#weak-form" title="Link to this heading">#</a></h3>
+\[\frac{\partial b}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial b}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial b}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0\]</div>
+<p>inflow velocity on lower boundary</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~\psi\in V~\text{such that} \\
-&amp;\begin{align*}
-F(\psi, v) &amp;= 
-\int_\Omega\text{d}\Omega~\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
-&amp;\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
-&amp;=0\quad\forall v\in V~.
-\end{align*} \\
-&amp;\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter}~h(\textbf{x})~\text{is the local mesh cell size.}
-\end{align*}
-\end{split}\]</div>
-</section>
-</section>
-<div class="toctree-wrapper compound">
+\[\begin{split}\textbf{n}\cdot\textbf{u}|_{x,y=0} = -u_y\vert_{x,y=0} =
+\begin{cases}
+-1 &amp; |x| \leq \tfrac{1}{2}\delta L_x \\
+0 &amp; \text{otherwise}
+\end{cases}\end{split}\]</div>
+<p>outflow velocity on upper boundary (constrained by incompressibility)</p>
+<div class="math notranslate nohighlight">
+\[\textbf{n}\cdot\textbf{u}|_{x,y=L_y} = u_y\vert_{x,y=L_y} = \delta\]</div>
+<p>no-penetration on left and right boundaries</p>
+<div class="math notranslate nohighlight">
+\[\textbf{n}\cdot\textbf{u}|_{x=0,y}=\textbf{n}\cdot\textbf{u}|_{x=L_x,y}=0\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.darcy_plume_dissolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_plume_dissolution_rectangle</span>
+
+
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_plume_dissolution_rectangle</span><span class="p">(</span>
+    <span class="n">Lx</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">Ly</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+    <span class="n">Nx</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span>
+    <span class="n">Ny</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+    <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span> 
+    <span class="n">Pe</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+    <span class="n">Lmbda</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> 
+    <span class="n">D_adv</span><span class="o">=</span><span class="n">AB2</span><span class="p">,</span>
+    <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 
@@ -535,22 +500,13 @@ F(\psi, v) &amp;=
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="A01.2_darcy_anticline.html"
+       href="A11.0_darcy_porosity_evolution_equations.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Flow of a Darcy fluid across an anticline of heterogeneous permeability</p>
+        <p class="prev-next-title">Porosity evolution by reaction with a Darcy fluid</p>
       </div>
-    </a>
-    <a class="right-next"
-       href="A02.1_stokes_poiseuille.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Flow of a Stokes fluid in a Poisseuille channel</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
@@ -558,28 +514,6 @@ F(\psi, v) &amp;=
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
