@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Diffusion equation &#8212; LUCiFEx Demo</title>
+    <title>Diffusion of a Gaussian profile on an interval &#8212; LUCiFEx Demo</title>
   
   
   
@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Diffusion of a Gaussian profile on a rectangle" href="F02.2_diffusion_rectangle.html" />
-    <link rel="prev" title="Vector-valued Poisson equation" href="F01.3_poisson_vector.html" />
+    <link rel="prev" title="Diffusion equation" href="F02.0_diffusion_equation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -178,99 +178,28 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="F00_notation.html">Notation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Diffusion equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="F02.0_diffusion_equation.html">Diffusion equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="F03_advection.html">Advection equation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="F04_advection_diffusion.html">Advection-diffusion equation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F03.0_advection_equation.html">Advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F03.1_advection_interval.html">Advection of a Gaussian profile on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="F04.0_advection_diffusion_equation.html">Advection-diffusion equation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="F04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian on an interval</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="F06_mathieu.html">Mathieu equation</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A03.1_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A03.2_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A05.4_darcy_convection_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and viscous fingering</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A08.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../technical/T01_timeseries.html">Timeseries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../technical/T02_finite_differences.html">Finite differences</a></li>
 </ul>
 
     </div>
@@ -396,9 +325,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -409,19 +336,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Diffusion equation</h1>
+    <h1>Diffusion of a Gaussian profile on an interval</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diffusion-of-a-gaussian-profile-on-an-interval">Diffusion of a Gaussian profile on an interval</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -431,58 +350,31 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="diffusion-equation">
-<h1>Diffusion equation<a class="headerlink" href="#diffusion-equation" title="Link to this heading">#</a></h1>
-<p>strong form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~u(\textbf{x}, t): \Omega\times[0,\infty) \to \mathbb{R}~\text{such that } \\
-&amp;\mathbb{IBVP}\begin{cases}
-\frac{\partial u}{\partial t} = \nabla\cdot(\mathsf{D}\cdot\nabla u) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-u(\textbf{x}, t=0)=u_0 &amp; \forall\textbf{x}\in\Omega\\
-u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
-\textbf{n}\cdot(\mathsf{D}\cdot\nabla{u})  = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
-\end{cases}~.
-\end{align*}
-\end{split}\]</div>
-<p>weak form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~u^{n+1}\in V~\text{such that} \\
-&amp;F(u^{n+1}, v)=\int_\Omega\text{d}\Omega~v\frac{u^{n+1} - u^n}{\Delta t^n} + \nabla v\cdot\mathcal{D}(\mathsf{D}\cdot\nabla u) - \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0 \quad\forall v\in V~.
-\end{align*}
-\end{split}\]</div>
-<p>specification</p>
-<div class="math notranslate nohighlight">
-\[\mathbb{S}\{\Omega, \partial\Omega_{\text{D}}, \partial\Omega_{\text{N}}, u_{\text{D}}, u_{\text{N}}, u_0, \mathsf{D}\}\]</div>
-<section id="diffusion-of-a-gaussian-profile-on-an-interval">
-<h2>Diffusion of a Gaussian profile on an interval<a class="headerlink" href="#diffusion-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h2>
+  <section class="tex2jax_ignore mathjax_ignore" id="diffusion-of-a-gaussian-profile-on-an-interval">
+<h1>Diffusion of a Gaussian profile on an interval<a class="headerlink" href="#diffusion-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
 \Omega = [0, L_x] \\
-\mathsf{D}=D\mathsf{I} \\
 u_{\text{D}}(x=0) = 0 \\
-u_{\text{D}}(x=L_x) = 0 
+u_{\text{D}}(x=L_x) = 0 \\
+\mathsf{D}=D\mathsf{I} \\
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">interval_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FunctionSeries</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">diffusive_timestep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">diffusion</span>
 
 
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
@@ -494,14 +386,20 @@ u_{\text{D}}(x=L_x) = 0
 <span class="p">)</span>
 
 <span class="n">dt</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
-<span class="n">k</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+<span class="n">D_diff</span> <span class="o">=</span> <span class="n">BE</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">/</span> <span class="n">Nx</span>
+<span class="n">dt_courant</span> <span class="o">=</span> <span class="n">diffusive_timestep</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+<span class="n">courant</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="n">dt_courant</span>
 
 <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">Lx</span><span class="p">))</span>
 <span class="n">bcs</span> <span class="o">=</span>  <span class="n">BoundaryConditions</span><span class="p">(</span>
     <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span> 
 <span class="p">)</span>
 <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">diffusion</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">BE</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">diffusion</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -511,7 +409,7 @@ u_{\text{D}}(x=L_x) = 0
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">t_stop</span> <span class="o">=</span> <span class="mf">10.0</span>
 <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">10</span>
 
 <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">n_stop</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">t_stop</span><span class="p">:</span>
     <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
@@ -524,22 +422,30 @@ u_{\text{D}}(x=L_x) = 0
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">slc</span><span class="p">]]</span>
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">slc</span><span class="p">],</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=</span><span class="se">\\</span><span class="s2">mathrm</span><span class="se">{{</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">D_diff</span><span class="p">)</span><span class="si">}</span><span class="se">}}</span><span class="s2">~,~C=</span><span class="si">{</span><span class="n">courant</span><span class="si">}</span><span class="s2">$&quot;</span>
+<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
+<span class="n">legend_title</span> <span class="o">=</span> <span class="s1">&#39;$t$&#39;</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">legend_title</span><span class="p">,</span> 
+    <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$u$&#39;&gt;)
+<img alt="../../_images/c19effef8c5713c13d4dca4513824ab56ce1b1789be618cb914fefbb9b53860f.png" src="../../_images/c19effef8c5713c13d4dca4513824ab56ce1b1789be618cb914fefbb9b53860f.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
 </pre></div>
 </div>
-<img alt="../../_images/ed39871e3d650c609d484a116bb2c40483e9b42ec88fb7363f5e850f6abbace7.png" src="../../_images/ed39871e3d650c609d484a116bb2c40483e9b42ec88fb7363f5e850f6abbace7.png" />
 </div>
-</div>
-</section>
-<div class="toctree-wrapper compound">
 </div>
 </section>
 
@@ -574,12 +480,12 @@ u_{\text{D}}(x=L_x) = 0
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="F01.3_poisson_vector.html"
+       href="F02.0_diffusion_equation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Vector-valued Poisson equation</p>
+        <p class="prev-next-title">Diffusion equation</p>
       </div>
     </a>
     <a class="right-next"
@@ -597,21 +503,6 @@ u_{\text{D}}(x=L_x) = 0
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diffusion-of-a-gaussian-profile-on-an-interval">Diffusion of a Gaussian profile on an interval</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
