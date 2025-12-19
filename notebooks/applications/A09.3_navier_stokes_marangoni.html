@@ -62,7 +62,6 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A09.3_navier_stokes_marangoni';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="DG formulation of the advection equation" href="../numerical/N01.0_dg_advection.html" />
     <link rel="prev" title="Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle" href="A09.2_navier_stokes_rayleigh_taylor.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -178,18 +177,27 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../foundations/F00_notation.html">Notation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../foundations/F03_advection.html">Advection equation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../foundations/F04_advection_diffusion.html">Advection-diffusion equation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F03.0_advection_equation.html">Advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F03.1_advection_interval.html">Advection of a Gaussian profile on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F04.0_advection_diffusion_equation.html">Advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.0_helmholtz_equation.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz eigenvalue problem on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
@@ -238,39 +246,6 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../technical/T01_timeseries.html">Timeseries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../technical/T02_finite_differences.html">Finite differences</a></li>
 </ul>
 
     </div>
@@ -577,15 +552,6 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
         <p class="prev-next-subtitle">previous</p>
         <p class="prev-next-title">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</p>
       </div>
-    </a>
-    <a class="right-next"
-       href="../numerical/N01.0_dg_advection.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">DG formulation of the advection equation</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
