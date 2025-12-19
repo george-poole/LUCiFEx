@@ -55,13 +55,20 @@ parts:
           - file: notebooks/applications/A09.1_navier_stokes_double_diffusive
           - file: notebooks/applications/A09.2_navier_stokes_rayleigh_taylor
           - file: notebooks/applications/A09.3_navier_stokes_marangoni
+        - file: notebooks/applications/A11.0_darcy_porosity_evolution
+        sections: 
+          - file: notebooks/applications/A11.1_darcy_porosity_evolution
+          - file: notebooks/applications/A09.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/applications/A09.3_navier_stokes_marangoni
 
   - caption: Numerical
     chapters:
-      - file: notebooks/numerical/N01.1_dg_advection_interval
+      - file: notebooks/numerical/N01.0_dg_advection
         sections: 
-          - file: notebooks/numerical/N01.2_dg_advection_rectangle_cone
-          - file: notebooks/numerical/N01.3_dg_advection_rectangle_vortex
+          - file: notebooks/numerical/N01.1_dg_advection_interval_step
+          - file: notebooks/numerical/N01.2_dg_advection_interval_cosine
+          - file: notebooks/numerical/N01.3_dg_advection_rectangle_cone
+          - file: notebooks/numerical/N01.4_dg_advection_rectangle_vortex
       - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
         sections: 
           - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle

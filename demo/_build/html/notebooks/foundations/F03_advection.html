@@ -241,9 +241,11 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -258,8 +260,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
@@ -438,7 +440,7 @@ document.write(`
 &amp;\text{Find}~u(\textbf{x}, t): \Omega\times[0,\infty) \to \mathbb{R}~\text{such that} \\
 &amp;\mathbb{IBVP}\begin{cases}
 \frac{\partial u}{\partial t}+\textbf{a}\cdot\nabla u = 0 &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-u(\textbf{x}, t=0)=u_0 &amp; \forall\textbf{x}\in\Omega\\
+u=u_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\}\\
 u=u_{\text{I}} &amp; \forall(\textbf{x}, t)\in\Omega_{\text{I}}\times[0,\infty)~,~\partial\Omega_{I} = \{\textbf{x}\in\partial\Omega~:~\textbf{n}\cdot\textbf{a}&lt;0\}
 \end{cases}~.
 \end{align*}
@@ -451,9 +453,14 @@ u=u_{\text{I}} &amp; \forall(\textbf{x}, t)\in\Omega_{\text{I}}\times[0,\infty)~
 &amp;F(u^{n+1}, v)=\int_\Omega~\text{d}x~v\frac{u^{n+1} - u^n}{\Delta t^n} + v\,\mathcal{D}_{\textbf{a}}(\textbf{a}\cdot\nabla u)=0 \quad\forall v\in V~.
 \end{align*}
 \end{split}\]</div>
-<p>problem specification</p>
+<p>specification</p>
 <div class="math notranslate nohighlight">
-\[\mathbb{S}\{\Omega, u_0, u_{\text{I}}, \textbf{a}, \Delta t, \mathcal{D}_{\textbf{a}}\}\]</div>
+\[\begin{split}\mathbb{S}\begin{cases}
+\Omega \\
+u_0(\textbf{x}) \\
+u_{\text{I}}(\textbf{x}, t) \\
+\textbf{a}(\textbf{x}, t) \\ 
+\end{cases}\end{split}\]</div>
 <section id="advection-of-a-gaussian-profile-on-an-interval">
 <h2>Advection of a Gaussian profile on an interval<a class="headerlink" href="#advection-of-a-gaussian-profile-on-an-interval" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
@@ -462,7 +469,7 @@ u=u_{\text{I}} &amp; \forall(\textbf{x}, t)\in\Omega_{\text{I}}\times[0,\infty)~
 \begin{cases}
 \Omega = [0, L_x] \\
 u_0(x)=\exp\left(-\frac{(x - x_0)^2}{\sigma^2}\right) \\
-u_{\text{I}} = 1 \\
+u_{\text{I}}(x=0) = 1 \\
 \textbf{a}(t)=(1 + \epsilon\sqrt{t})\textbf{e}_x \\
 \end{cases}
 \end{split}\]</div>
@@ -516,7 +523,6 @@ u_{\text{I}} = 1 \\
     <span class="k">return</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">solvers</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
 
 
-
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">Nx</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.01</span>
@@ -525,7 +531,7 @@ u_{\text{I}} = 1 \\
 <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.001</span> <span class="o">**</span> <span class="mf">0.5</span>
 
 <span class="n">D_adv_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span> <span class="n">AB2</span><span class="p">)</span>
-<span class="n">simulations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">]</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
+<span class="n">simulations</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">((</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">))</span>
 
 <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_types</span><span class="p">:</span>
     <span class="n">simulations</span><span class="p">[</span><span class="n">D_adv</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_simulation</span><span class="p">(</span><span class="n">fdm</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
