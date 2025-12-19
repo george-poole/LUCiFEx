@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Poisson equation &#8212; LUCiFEx Demo</title>
+    <title>Spinning vortex on a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/foundations/F01.1_poisson_rectangle';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N01.4_dg_advection_rectangle_vortex';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Poisson equation on an annulus" href="F01.2_poisson_annulus.html" />
-    <link rel="prev" title="Notation" href="F00_notation.html" />
+    <link rel="next" title="SUPG stabilization of the steady advection-diffusion-reaction equation" href="N02.1_supg_steady_advection_diffusion_interval.html" />
+    <link rel="prev" title="Rotating cone on a rectangle" href="N01.3_dg_advection_rectangle_cone.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -176,24 +176,24 @@
             </li>
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="F00_notation.html">Notation</a></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Poisson equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F00_notation.html">Notation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="F03_advection.html">Advection equation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="F04_advection_diffusion.html">Advection-diffusion equation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F03_advection.html">Advection equation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F04_advection_diffusion.html">Advection-diffusion equation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="F06_mathieu.html">Mathieu equation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../foundations/F06_mathieu.html">Mathieu equation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="nav bd-sidenav">
@@ -240,32 +240,32 @@
 </details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="N01.0_dg_advection.html">DG formulation of the advection equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../numerical/N08_bcs_periodic.html">Periodic boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="N08_bcs_periodic.html">Periodic boundary conditions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
 <ul class="nav bd-sidenav">
@@ -325,7 +325,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/foundations/F01.1_poisson_rectangle.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/numerical/N01.4_dg_advection_rectangle_vortex.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -396,9 +396,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -409,19 +407,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Poisson equation</h1>
+    <h1>Spinning vortex on a rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#poisson-equation-on-a-rectangle">Poisson equation on a rectangle</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -431,116 +421,40 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="poisson-equation">
-<h1>Poisson equation<a class="headerlink" href="#poisson-equation" title="Link to this heading">#</a></h1>
-<p>strong form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~ \text{such that} \\
-&amp;\mathbb{BVP}\begin{cases}
-\nabla^2 u = f &amp; \forall\textbf{x}\in\Omega \\
-u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
-\textbf{n}\cdot\nabla{u} = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
-\end{cases}~.
-\end{align*}
-\end{split}\]</div>
-<p>weak form</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-&amp;\text{Find}~u\in V~\text{such that} \\
-&amp;F(u, v)=-\int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u + vf + \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0\quad\forall v\in V~.
-\end{align*}
-\end{split}\]</div>
-<p>specification</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\mathbb{S}
-\begin{cases}
-\Omega \\
-u_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} \\
-u_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} \\ 
-f(\textbf{x}) \\
-\end{cases}
-\end{split}\]</div>
-<section id="poisson-equation-on-a-rectangle">
-<h2>Poisson equation on a rectangle<a class="headerlink" href="#poisson-equation-on-a-rectangle" title="Link to this heading">#</a></h2>
+  <section class="tex2jax_ignore mathjax_ignore" id="spinning-vortex-on-a-rectangle">
+<h1>Spinning vortex on a rectangle<a class="headerlink" href="#spinning-vortex-on-a-rectangle" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\Omega = [0, L_x] \times [0, L_y] \\
-u_{\text{D}}(x,y=0)=0 \\
-u_{\text{D}}(x,y=L_y)=1 \\
-u_{\text{D}}(x=0,y)=y/L_y \\
-u_{\text{N}}(x=L_x,y)=y(L_y - y) \\
-f(x, y) = x + y^2  
+\Omega = [0, 1] \times [0, 1] \\
+u_0(x,y) = U_0x^2(1-x)^4y^2(1-y)^4 \\
+\textbf{a} = \begin{pmatrix}
+\sin(\pi x)\cos(\pi y) \\
+-\cos(\pi x)\sin(\pi y)
+\end{pmatrix}
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dolfinx.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionSpace</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span> <span class="k">as</span> <span class="n">Function</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span> 
+    <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span>
+    <span class="n">cfl_timestep</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">InitialBoundaryValueProblem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">advection_dg</span>
 
-<span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
-    <span class="n">mesh</span><span class="p">,</span> 
-    <span class="p">{</span>
-        <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span>
-        <span class="s2">&quot;lower&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="s2">&quot;upper&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
 
-<span class="n">fs</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-
-<span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">),</span>  
-    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Ly</span><span class="p">),</span> 
-    <span class="p">(</span><span class="s2">&quot;neumann&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ly</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
-<span class="p">)</span>
-<span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">():</span>
+    <span class="o">...</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-<span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
-
-<span class="n">y_axis</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">x_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">plot_line</span><span class="p">((</span><span class="n">y_axis</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(x=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$y$&#39;, ylabel=&#39;$u(x=0.50)$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" src="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" />
-<img alt="../../_images/416a02945bf7768929351e701e362d7ddd28b315db2fa8ca1dc392a28a153083.png" src="../../_images/416a02945bf7768929351e701e362d7ddd28b315db2fa8ca1dc392a28a153083.png" />
-<img alt="../../_images/830d58284c54746bcb6d9ff0b6aa3eb6df8d5dc2daaf362c38d982f5443e402a.png" src="../../_images/830d58284c54746bcb6d9ff0b6aa3eb6df8d5dc2daaf362c38d982f5443e402a.png" />
-</div>
-</div>
-</section>
-<div class="toctree-wrapper compound">
 </div>
 </section>
 
@@ -557,7 +471,7 @@ f(x, y) = x + y^2
         },
         kernelOptions: {
             name: "python3",
-            path: "./notebooks/foundations"
+            path: "./notebooks/numerical"
         },
         predefinedOutput: true
     }
@@ -575,20 +489,20 @@ f(x, y) = x + y^2
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="F00_notation.html"
+       href="N01.3_dg_advection_rectangle_cone.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Notation</p>
+        <p class="prev-next-title">Rotating cone on a rectangle</p>
       </div>
     </a>
     <a class="right-next"
-       href="F01.2_poisson_annulus.html"
+       href="N02.1_supg_steady_advection_diffusion_interval.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Poisson equation on an annulus</p>
+        <p class="prev-next-title">SUPG stabilization of the steady advection-diffusion-reaction equation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -598,21 +512,6 @@ f(x, y) = x + y^2
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#poisson-equation-on-a-rectangle">Poisson equation on a rectangle</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

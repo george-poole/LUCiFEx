@@ -13,6 +13,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\textbf{x}=(x, y, z) = x\textbf{e}_x + y\textbf{e}_y + z\textbf{e}_z$ | spatial coordinates |
 | $t$ | time |
 | $\Delta t$ | timestep |
+| $\mathcal{D}(\cdot)$ | finite difference operator |
 | $h(\textbf{x})$ | local cell size |
 | $\mathcal{F}$ | set of cell facets |
 | $\left[\!\left[ \cdot \right]\!\right]$ | cell facet jump operator |
@@ -23,12 +24,11 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathsf{U}, \mathsf{V}, \dots$ | tensor quantity | 
 | $\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) $ | tensor quantity components | 
 | $V_u$ | function space to which $u$ belongs
-| $\mathcal{D}(\cdot)$ | finite difference operator |
 | $\mathbb{BVP}$ | boundary value problem |
 | $\mathbb{IBVP}$ | initial boundary value problem |
 | $\mathbb{IVP}$ | initial value problem |
 | $\mathbb{EVP}$ | eigenvalue problem |
-| $\mathbb{S}$ | problem specification |
+| $\mathbb{S}$ | specification |
 | $\mathbb{F}$ | linearized or time-discretized weak forms sequence |
 | $u_0$ | initial condition on $u$ |
 | $u_\text{D}$ | Dirichlet boundary condition on $u$ |

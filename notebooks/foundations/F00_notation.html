@@ -241,9 +241,11 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -258,8 +260,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">DG formulation of the advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">name</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
@@ -456,38 +458,38 @@ document.write(`
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\Delta t\)</span></p></td>
 <td><p>timestep</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(h(\textbf{x})\)</span></p></td>
-<td><p>local cell size</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{F}\)</span></p></td>
-<td><p>set of cell facets</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\left[\!\left[ \cdot \right]\!\right]\)</span></p></td>
-<td><p>cell facet jump operator</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\{\cdot\}\)</span></p></td>
-<td><p>cell facet average operator</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(u, v, \dots\)</span></p></td>
-<td><p>scalar quantity</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\textbf{u}, \textbf{v}, \dots\)</span></p></td>
-<td><p>vector quantity</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\textbf{u} = u_x\textbf{e}_x + u_y\textbf{e}_y + u_z\textbf{e}_z\)</span></p></td>
-<td><p>vector quantity components</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathsf{U}, \mathsf{V}, \dots\)</span></p></td>
-<td><p>tensor quantity</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) \)</span></p></td>
-<td><p>tensor quantity components</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(V_u\)</span></p></td>
-<td><p>function space to which <span class="math notranslate nohighlight">\(u\)</span> belongs</p></td>
-</tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{D}(\cdot)\)</span></p></td>
 <td><p>finite difference operator</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(h(\textbf{x})\)</span></p></td>
+<td><p>local cell size</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{F}\)</span></p></td>
+<td><p>set of cell facets</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\left[\!\left[ \cdot \right]\!\right]\)</span></p></td>
+<td><p>cell facet jump operator</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\{\cdot\}\)</span></p></td>
+<td><p>cell facet average operator</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(u, v, \dots\)</span></p></td>
+<td><p>scalar quantity</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\textbf{u}, \textbf{v}, \dots\)</span></p></td>
+<td><p>vector quantity</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\textbf{u} = u_x\textbf{e}_x + u_y\textbf{e}_y + u_z\textbf{e}_z\)</span></p></td>
+<td><p>vector quantity components</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathsf{U}, \mathsf{V}, \dots\)</span></p></td>
+<td><p>tensor quantity</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) \)</span></p></td>
+<td><p>tensor quantity components</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(V_u\)</span></p></td>
+<td><p>function space to which <span class="math notranslate nohighlight">\(u\)</span> belongs</p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathbb{BVP}\)</span></p></td>
 <td><p>boundary value problem</p></td>
@@ -502,7 +504,7 @@ document.write(`
 <td><p>eigenvalue problem</p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathbb{S}\)</span></p></td>
-<td><p>problem specification</p></td>
+<td><p>specification</p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathbb{F}\)</span></p></td>
 <td><p>linearized or time-discretized weak forms sequence</p></td>

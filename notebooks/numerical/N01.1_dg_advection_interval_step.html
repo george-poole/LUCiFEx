@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Advection skew to the mesh on a rectangle &#8212; LUCiFEx Demo</title>
+    <title>Advection of a step profile on an interval &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N01.1_dg_advection_interval_step';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="DG formulation of the steady advection-diffusion-reaction equation" href="N03.1_dg_steady_advection_diffusion_interval.html" />
-    <link rel="prev" title="SUPG stabilization of the steady advection-diffusion-reaction equation" href="N02.1_supg_steady_advection_diffusion_interval.html" />
+    <link rel="next" title="Advection of a cosine profile on an interval" href="N01.2_dg_advection_interval_cosine.html" />
+    <link rel="prev" title="DG formulation of the advection equation" href="N01.0_dg_advection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -241,15 +241,15 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="N01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="N01.1_dg_advection_interval_step.html">Advection of a step profile on an interval</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="N01.0_dg_advection.html">DG formulation of the advection equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Advection of a step profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="N01.2_dg_advection_interval_cosine.html">Advection of a cosine profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="N01.3_dg_advection_rectangle_cone.html">Rotating cone on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -325,7 +325,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/numerical/N01.1_dg_advection_interval_step.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -396,7 +396,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -407,11 +409,19 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Advection skew to the mesh on a rectangle</h1>
+    <h1>Advection of a step profile on an interval</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advection-of-a-cosine-profile-on-an-interval">Advection of a cosine profile on an interval</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -421,123 +431,162 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="advection-skew-to-the-mesh-on-a-rectangle">
-<h1>Advection skew to the mesh on a rectangle<a class="headerlink" href="#advection-skew-to-the-mesh-on-a-rectangle" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="advection-of-a-step-profile-on-an-interval">
+<h1>Advection of a step profile on an interval<a class="headerlink" href="#advection-of-a-step-profile-on-an-interval" title="Link to this heading">#</a></h1>
+<p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 3.11.4\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\Omega = [0, 1]\times[0,1] \\
-u_{\text{D}}(x=0,y&lt;y_{\text{in}}) = 0 \\
-u_{\text{D}}(x=0,y \geq y_{\text{in}}) = u_{\text{in}} \\
-u_{\text{D}}(x,y=0) = 0 \\
-u_{\text{N}}(x,y=1)=u_{\text{D}}(x=1,y) = 0 ~\text{or}~ u_{\text{N}}(x,y=1)=u_{\text{N}}(x=1,y) = 0\\
-\textbf{a}=a\cos\theta\textbf{e}_x + a\sin\theta\textbf{e}_y \\
-\mathsf{D}=D\mathsf{I} \\
-R=0 \\
-J=0 \\
+\Omega = [0, L_x] \\
+u_0(x)=\text{H}(x_0-x) \\
+u_{\text{I}} = 1 \\
+\textbf{a}=a\,\textbf{e}_x \\
+u_{\text{e}}(x,t) = \text{H}(x_0 + at - x)
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryValueProblem</span><span class="p">,</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span> 
+    <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span>
+    <span class="n">cfl_timestep</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">InitialBoundaryValueProblem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">steady_advection_diffusion</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.supg</span><span class="w"> </span><span class="kn">import</span> <span class="n">peclet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">advection_dg</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">(</span>
-    <span class="n">supg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_simulation</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
     <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">Ly</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">u_inflow</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">y_inflow</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">bc_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>    
+    <span class="n">u_in</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">D_fdm</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
+    <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryValueProblem</span><span class="p">:</span>
-    <span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">)</span>
-    <span class="n">theta_rad</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span>
-    <span class="n">ay</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InitialBoundaryValueProblem</span><span class="p">:</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">)</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ConstantSeries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="o">*</span><span class="n">element</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x0</span><span class="p">)</span> 
     <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y_inflow</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">y_inflow</span><span class="p">),</span> <span class="n">u_inflow</span><span class="p">),</span>
-        <span class="p">(</span><span class="n">bc_type</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-        <span class="p">(</span><span class="n">bc_type</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u_in</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">steady_advection_diffusion</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)(</span>
-        <span class="n">u</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">supg</span><span class="o">=</span><span class="n">supg</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">u_solver</span>
+
+    <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_fdm</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">advection_dg</span><span class="p">,</span> <span class="n">ics</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_fdm</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+
+    <span class="k">return</span> <span class="n">Simulation</span><span class="p">([</span><span class="n">u_solver</span><span class="p">],</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
 
 
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">Nx</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">Ny</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">u_inflow</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">y_inflow</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">d</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
+<span class="n">u_in</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Lx</span>
+
 <span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">theta</span> <span class="o">=</span> <span class="mf">30.0</span>
+<span class="n">courant</span> <span class="o">=</span> <span class="mf">0.75</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">cfl_timestep</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
-<span class="n">hx</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
-<span class="n">hy</span> <span class="o">=</span> <span class="n">Ly</span> <span class="o">/</span> <span class="n">Ny</span>
-<span class="n">Pe_x</span> <span class="o">=</span> <span class="n">peclet</span><span class="p">(</span><span class="n">hx</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-<span class="n">Pe_y</span> <span class="o">=</span> <span class="n">peclet</span><span class="p">(</span><span class="n">hy</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">elem_opts</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">D_adv_opts</span> <span class="o">=</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">)</span>
+<span class="n">simulations</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">((</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">))</span>
 
-<span class="n">supg_types</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;coth&#39;</span><span class="p">,</span> <span class="s1">&#39;upwind&#39;</span><span class="p">)</span>
-<span class="n">bc_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;neumann&#39;</span><span class="p">,</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">)</span>
-<span class="n">solutions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Function</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_types</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bc_types</span><span class="p">:</span>
-        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">create_solver</span><span class="p">(</span><span class="n">supg</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">u_inflow</span><span class="p">,</span> <span class="n">y_inflow</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
-        <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-        <span class="n">solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">bc</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solution</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_simulation</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">u_in</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">]</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">n_stop</span><span class="p">)</span> 
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bc_types</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_types</span><span class="p">:</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">bc</span><span class="p">]</span>
-        <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">bc</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">supg</span><span class="si">}</span><span class="s1"> &#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">exact_step</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> 
+    <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">u</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> 
+    <span class="k">return</span> <span class="n">u</span>
+
+
+
+<span class="n">time_index</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+    
+    
+    <span class="o">...</span>
+
+<span class="n">time_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">solutions</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+<span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">times</span><span class="p">)</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">ue</span> <span class="o">=</span> <span class="n">exact_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+
+<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;exact&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">solutions</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;$_0$&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;$_1$&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">legend_labels</span><span class="p">]</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">ue</span><span class="p">),</span> <span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">solutions</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">x_lims</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">)</span>
+<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/b59d8dfa269912571422ce8d521eb92f6b20352befed5abc7397fba01c93443c.png" src="../../_images/b59d8dfa269912571422ce8d521eb92f6b20352befed5abc7397fba01c93443c.png" />
-<img alt="../../_images/1780f0630415082958df944f7bd7dbd98ee0300c5068deeac96c41cdca43eac1.png" src="../../_images/1780f0630415082958df944f7bd7dbd98ee0300c5068deeac96c41cdca43eac1.png" />
-<img alt="../../_images/60618d5f0ffdefb908d9dae17a5bf7055354a33ead0328ae2044d05ad488d6ed.png" src="../../_images/60618d5f0ffdefb908d9dae17a5bf7055354a33ead0328ae2044d05ad488d6ed.png" />
-<img alt="../../_images/48325e8d2610e54222a33e9f8dc8b312c3b516b6d8d8b6227feaddcd053c9ae0.png" src="../../_images/48325e8d2610e54222a33e9f8dc8b312c3b516b6d8d8b6227feaddcd053c9ae0.png" />
-<img alt="../../_images/5273e9e6c7b981cc50370ae6a25d4058207f896e64ce1012a8ba7e72a781d998.png" src="../../_images/5273e9e6c7b981cc50370ae6a25d4058207f896e64ce1012a8ba7e72a781d998.png" />
-<img alt="../../_images/85ff576ee77da584e5591b60762087576c30a6b96ee86fc4fe3ced7388dd91ce.png" src="../../_images/85ff576ee77da584e5591b60762087576c30a6b96ee86fc4fe3ced7388dd91ce.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
+<img alt="../../_images/79a6c9e1defa90296572ea8aa6447b911bb706cd0698361752276449f9fac581.png" src="../../_images/79a6c9e1defa90296572ea8aa6447b911bb706cd0698361752276449f9fac581.png" />
 </div>
 </div>
-</div>
+<section id="advection-of-a-cosine-profile-on-an-interval">
+<h2>Advection of a cosine profile on an interval<a class="headerlink" href="#advection-of-a-cosine-profile-on-an-interval" title="Link to this heading">#</a></h2>
+<p>c.f. Donea &amp; Huerta, <em>Finite Element Methods for Flow Problems</em> <span class="math notranslate nohighlight">\(\S 3.11.1\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\mathbb{S}
+\begin{cases}
+\Omega = [0, L_x] \\
+\textbf{a}=a\,\textbf{e}_x \\
+s = 0 \\
+u_0(x)=\frac{1}{2}(1+\cos(\pi(x-x_0)/\sigma))~\text{if}~|x-x_0|\leq\sigma \\
+u_0(x)=0~\text{if}~|x-x_0|&gt;\sigma \\
+u_{\text{I}} = 0 \\
+\end{cases}
+\end{split}\]</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -571,20 +620,20 @@ J=0 \\
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="N02.1_supg_steady_advection_diffusion_interval.html"
+       href="N01.0_dg_advection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">SUPG stabilization of the steady advection-diffusion-reaction equation</p>
+        <p class="prev-next-title">DG formulation of the advection equation</p>
       </div>
     </a>
     <a class="right-next"
-       href="N03.1_dg_steady_advection_diffusion_interval.html"
+       href="N01.2_dg_advection_interval_cosine.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">DG formulation of the steady advection-diffusion-reaction equation</p>
+        <p class="prev-next-title">Advection of a cosine profile on an interval</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -594,6 +643,21 @@ J=0 \\
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advection-of-a-cosine-profile-on-an-interval">Advection of a cosine profile on an interval</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
