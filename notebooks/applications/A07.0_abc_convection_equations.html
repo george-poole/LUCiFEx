@@ -241,16 +241,6 @@
 <li class="toctree-l2"><a class="reference internal" href="A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A11.0_darcy_porosity_evolution_equations.html">Porosity evolution by reaction with a Darcy fluid</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A11.1_darcy_porosity_evolution_injection.html">Injection into a rectangle</a></li>
-</ul>
-</details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Numerical</span></p>
 <ul class="nav bd-sidenav">
@@ -475,14 +465,12 @@ document.write(`
 &amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\begin{cases}
-\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R(a,b) \\
-\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R(a,b) \\
-\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R(a,b) \\
+\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R \\
+\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R \\
+\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
 \nabla\cdot\textbf{u}=0 \\
 \textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p + \rho g\,\textbf{e}_g\right) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
-a(\textbf{x},t=0)=a_0 \\
-b(\textbf{x},t=0)=b_0 \\
-c(\textbf{x},t=0)=c_0 \\
+w=w_0  &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
 w = w_{\text{D},w} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
 \textbf{n}\cdot(\mathsf{D}_w\nabla w) = w_{\text{N}, w} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
 \textbf{n}\cdot\textbf{u} = u_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
@@ -499,6 +487,9 @@ p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times 
 \begin{cases}
 \phi(\textbf{x}) \\
 \mathsf{K}(\phi) \\
+\mathsf{D}_a(\phi, \textbf{u}) \\
+\mathsf{D}_b(\phi, \textbf{u}) \\
+\mathsf{D}_c(\phi, \textbf{u}) \\
 \rho(a,b,c) \\
 \mu(a,b,c) \\
 R(a,b )
