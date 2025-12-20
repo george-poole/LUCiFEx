@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Vector-valued Poisson equation" href="F01.3_poisson_vector.html" />
-    <link rel="prev" title="Poisson equation" href="F01.1_poisson_rectangle.html" />
+    <link rel="prev" title="Poisson equation on a rectangle" href="F01.1_poisson_rectangle.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -178,18 +178,27 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="F00_notation.html">Notation</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="F01.0_poisson_equation.html">Poisson equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="F01.1_poisson_rectangle.html">Poisson equation on a rectangle</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F02.1_diffusion_interval.html">Diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="F03_advection.html">Advection equation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="F04_advection_diffusion.html">Advection-diffusion equation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F03.0_advection_equation.html">Advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F03.1_advection_interval.html">Advection of a Gaussian profile on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F04.0_advection_diffusion_equation.html">Advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F05.0_helmholtz_equation.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F05.1_helmholtz_evp.html">Helmholtz eigenvalue problem on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
@@ -232,10 +241,19 @@
 <li class="toctree-l2"><a class="reference internal" href="../applications/A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../applications/A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A09.0_darcy_porosity_evolution_equations.html">Porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A09.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A10.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A10.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A10.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A10.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A11.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A11.1_brinkman_convection_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A11.2_brinkman_convection_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -447,7 +465,6 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
 
-
 <span class="n">Rinner</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">Router</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">Nradial</span> <span class="o">=</span> <span class="mi">10</span>
@@ -493,15 +510,15 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">u_exact</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">exact_solution</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">):</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">Rinner</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Router</span> <span class="o">/</span> <span class="n">Rinner</span><span class="p">)</span>
 
-<span class="n">ue</span> <span class="o">=</span> <span class="p">[</span><span class="n">u_exact</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)]</span>
+<span class="n">ue</span> <span class="o">=</span> <span class="p">[</span><span class="n">exact_solution</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)]</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
     <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ue</span><span class="p">),</span> 
-    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{exact}</span><span class="s1">}$&#39;</span><span class="p">,</span> 
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{e}</span><span class="s1">}$&#39;</span><span class="p">,</span> 
     <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
     <span class="n">triangles</span><span class="o">=</span><span class="n">mesh_tri</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span>
 <span class="p">)</span>
@@ -517,7 +534,7 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">ue</span><span class="p">,</span> <span class="n">u_tri</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
     <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">error</span><span class="p">),</span> 
-    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{exact}</span><span class="s1">} - u$&#39;</span><span class="p">,</span> 
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{e}</span><span class="s1">} - u$&#39;</span><span class="p">,</span> 
     <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
     <span class="n">triangles</span><span class="o">=</span><span class="n">mesh_tri</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span>
 <span class="p">)</span>
@@ -526,6 +543,15 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 </div>
 <div class="cell_output docutils container">
 <img alt="../../_images/fd66f4d65ac8261879f08acecfba589ea1f293291e27b1592d2a3c240efcf34f.png" src="../../_images/fd66f4d65ac8261879f08acecfba589ea1f293291e27b1592d2a3c240efcf34f.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
 </div>
 </div>
 </section>
@@ -566,7 +592,7 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Poisson equation</p>
+        <p class="prev-next-title">Poisson equation on a rectangle</p>
       </div>
     </a>
     <a class="right-next"

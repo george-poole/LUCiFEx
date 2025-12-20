@@ -5,18 +5,25 @@ parts:
   - caption: Foundations
     chapters:
       - file: notebooks/foundations/F00_notation
-      - file: notebooks/foundations/F01.1_poisson_rectangle
+      - file: notebooks/foundations/F01.0_poisson_equation
         sections: 
+          - file: notebooks/foundations/F01.1_poisson_rectangle
           - file: notebooks/foundations/F01.2_poisson_annulus
           - file: notebooks/foundations/F01.3_poisson_vector
-      - file: notebooks/foundations/F02.1_diffusion_interval
+      - file: notebooks/foundations/F02.0_diffusion_equation
         sections: 
+          - file: notebooks/foundations/F02.1_diffusion_interval
           - file: notebooks/foundations/F02.2_diffusion_rectangle
-      - file: notebooks/foundations/F03_advection
-      - file: notebooks/foundations/F04_advection_diffusion
-      - file: notebooks/foundations/F05.1_helmholtz_evp
+      - file: notebooks/foundations/F03.0_advection_equation
         sections: 
-         - file: notebooks/foundations/F05.2_helmholtz_bvp
+          - file: notebooks/foundations/F03.1_advection_interval
+      - file: notebooks/foundations/F04.0_advection_diffusion_equation
+        sections: 
+          - file: notebooks/foundations/F04.1_advection_diffusion_interval
+      - file: notebooks/foundations/F05.0_helmholtz_equation
+        sections: 
+          - file: notebooks/foundations/F05.1_helmholtz_evp
+          - file: notebooks/foundations/F05.2_helmholtz_bvp
       - file: notebooks/foundations/F06_mathieu
 
   - caption: Applications
@@ -50,16 +57,18 @@ parts:
         sections:
           - file: notebooks/applications/A08.1_darcy_fingering_dirichlet
           - file: notebooks/applications/A08.2_darcy_fingering_periodic
-      - file: notebooks/applications/A09.0_navier_stokes_convection_equations
+      - file: notebooks/applications/A09.0_darcy_porosity_evolution_equations
         sections: 
-          - file: notebooks/applications/A09.1_navier_stokes_double_diffusive
-          - file: notebooks/applications/A09.2_navier_stokes_rayleigh_taylor
-          - file: notebooks/applications/A09.3_navier_stokes_marangoni
-        - file: notebooks/applications/A11.0_darcy_porosity_evolution
+          - file: notebooks/applications/A09.1_darcy_porosity_evolution_injection
+      - file: notebooks/applications/A10.0_navier_stokes_convection_equations
         sections: 
-          - file: notebooks/applications/A11.1_darcy_porosity_evolution
-          - file: notebooks/applications/A09.2_navier_stokes_rayleigh_taylor
-          - file: notebooks/applications/A09.3_navier_stokes_marangoni
+          - file: notebooks/applications/A10.1_navier_stokes_thermosolutal
+          - file: notebooks/applications/A10.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/applications/A10.3_navier_stokes_marangoni
+      - file: notebooks/applications/A11.0_brinkman_convection_equations
+        sections:
+          - file: notebooks/applications/A11.1_brinkman_convection_rayleigh_taylor
+          - file: notebooks/applications/A11.2_brinkman_convection_rayleigh_benard
 
   - caption: Numerical
     chapters:

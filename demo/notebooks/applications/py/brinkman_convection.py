@@ -1,19 +1,20 @@
 from ufl import as_vector, sqrt
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import Function as Function, SpatialConstant as Constant
+from lucifex.fem import Function, Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries, FiniteDifference,
+    FunctionSeries, ConstantSeries, FiniteDifference, FiniteDifferenceArgwise,
     ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
 )
-from lucifex.utils import SpatialPerturbation, cubic_noise
+from lucifex.fem import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
-from lucifex.pde.navier_stokes import ipcs_solvers, newtonian_stress
+from lucifex.pde.navier_stokes import ipcs_solvers
+from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
 
 
