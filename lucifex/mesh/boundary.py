@@ -32,23 +32,29 @@ class MeshBoundary:
             return [self._boundaries[t] for t in tag]
         else:
             return self._boundaries[tag]
-
+        
     @property
-    def union(self) -> list[SpatialMarker | SpatialMarkerAlias]:
+    def markers(self) -> list[SpatialMarker | SpatialMarkerAlias]:
         """
-        `∪ᵢ∂Ωᵢ`
+        Markers for all defined sub-boundaries `{∂Ωᵢ}`
         """
         return list(self._boundaries.values())
+
+    @property
+    def union(self) -> SpatialMarker:
+        """
+        Union of defined sub-boundaries `∪ᵢ∂Ωᵢ`
+        """
+        return as_spatial_marker(self.markers)
     
     @property
-    def union_difference(self) -> SpatialMarker:
+    def complement(self) -> SpatialMarker:
         """
-        `∂Ω \ ∪ᵢ∂Ωᵢ`
+        Complement of the union of defined sub-boundaries `∂Ω \ ∪ᵢ∂Ωᵢ`
 
         If the defined boundaries are complete, then `∂Ω = ∪ᵢ∂Ωᵢ` and hence `∂Ω \ ∪ᵢ∂Ωᵢ = ∅`.
         """
-        on_boundaries = as_spatial_marker(self.union)
-        return lambda x: np.logical_not(on_boundaries(x))
+        return lambda x: np.logical_not(self.union(x))
     
     @property
     def names(self) -> tuple[str | int, ...]:

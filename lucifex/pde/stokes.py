@@ -1,8 +1,8 @@
 from typing import Callable
 
-from ufl import (Form, FacetNormal, CellDiameter, dx, dS,
+from ufl import (Form, FacetNormal, CellDiameter,
     TestFunction, TrialFunction, TestFunctions, TrialFunctions,
-    inner, grad, div, avg, jump, Dx,
+    inner, grad, div, avg, jump, Dx, Measure
 )
 from ufl.core.expr import Expr
 
@@ -20,6 +20,7 @@ def stokes_incompressible(
     `∇·𝐮 = 0` \\
     `𝟎 = -∇p + ∇·𝜏(𝐮) + 𝐟`
     """
+    dx = Measure('dx', up.function_space.mesh)
     v, q = TestFunctions(up.function_space)
     u, p = TrialFunctions(up.function_space) 
 
@@ -53,6 +54,8 @@ def stokes_streamfunction(
     `∇⁴ψ = ∂fʸ/∂x - ∂fˣ/∂y`
     """
     _none = (None, 0)
+    dx = Measure('dx', psi.function_space.mesh)
+    dS = Measure('dS', psi.function_space.mesh)
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
     n = FacetNormal(psi.function_space.mesh)

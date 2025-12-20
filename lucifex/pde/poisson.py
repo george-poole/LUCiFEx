@@ -1,6 +1,6 @@
 from ufl.core.expr import Expr
 from ufl import (
-    Form, inner, grad, dx, ds, TestFunction, TrialFunction,
+    Form, inner, grad, Measure, TestFunction, TrialFunction,
     inner, grad, TestFunction, TrialFunction, FacetNormal,
 )
 from ufl.geometry import GeometricCellQuantity
@@ -23,6 +23,7 @@ def poisson(
         fs = u
     else:
         fs = u.function_space
+    dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     F_lhs = -inner(grad(v), grad(u_trial)) * dx
@@ -59,12 +60,12 @@ def poisson_weak(
     if isinstance(alpha, (float, int)):
         alpha = Constant(mesh, alpha)
 
+    ds, u_neumann, u_dirichlet = bcs.boundary_data(u.function_space, 'neumann', 'dirichlet')
+
     a_nistche = - v * u * inner(n, grad(u_trial)) * ds
     a_nistche += -inner(n, grad(v)) * u * ds 
     a_nistche += alpha / h * inner(u_trial, v) * ds
     forms.append(a_nistche)
-
-    ds, u_neumann, u_dirichlet = bcs.boundary_data(u.function_space, 'neumann', 'dirichlet')
 
     if u_neumann:
         F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])

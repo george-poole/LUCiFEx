@@ -1,6 +1,6 @@
 from ufl.core.expr import Expr
 from ufl import (
-    Form, inner, grad, dx, TestFunction, TrialFunction,
+    Form, inner, grad, Measure, TestFunction, TrialFunction,
     inner, grad, TestFunction, TrialFunction, cos,
     SpatialCoordinate,
 )
@@ -28,6 +28,7 @@ def helmholtz(
         fs = u
     else:
         fs = u.function_space
+    dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     F_lapl = -inner(grad(v), grad(u_trial)) * dx
@@ -62,6 +63,7 @@ def mathieu(
         fs = u
     else:
         fs = u.function_space
+    dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     x = SpatialCoordinate(fs.mesh)

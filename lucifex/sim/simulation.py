@@ -47,7 +47,7 @@ class Simulation:
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
-        self.namespace_extras = list(namespace)
+        self._namespace_append = list(namespace)
         self.stoppers = list(stoppers)
         self.dir_path = dir_path
         self.parameter_file = parameter_file
@@ -86,7 +86,7 @@ class Simulation:
             raise TypeError
         
     def __iter__(self):
-        for i in (self.solvers, self.t, self.dt, self.namespace_extras):
+        for i in (self.solvers, self.t, self.dt, self._namespace_append):
             yield i
 
     def _map_to_solver_series(
@@ -131,8 +131,8 @@ class Simulation:
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.name: s for s in self.series})
-        d.update({f.name: f for f in self.namespace_extras if not isinstance(f, tuple)})
-        d.update({f[0]: f[1] for f in self.namespace_extras if isinstance(f, tuple)})
+        d.update({f.name: f for f in self._namespace_append if not isinstance(f, tuple)})
+        d.update({f[0]: f[1] for f in self._namespace_append if isinstance(f, tuple)})
         return d
     
     @property
@@ -200,14 +200,12 @@ class Simulation:
             return indices[0]
         else:
             return tuple(indices)
-    
-    @property
-    def pre_solvers(self) -> list[Solver]:
-        """
-        Solvers prior to and including the solver for `dt`, if there is one.
-        """
-        return self.solvers[:self.solver_index(self.dt.name, -1) + 1]
-    
+        
+    def get_solver(
+        self,
+        name: str,
+    ) -> Solver:
+        return self.solvers[self.solver_index(name)]
 
     @property
     def dt_solver(self) -> Evaluation | None:
@@ -216,11 +214,20 @@ class Simulation:
             return self.solvers[i]
         except ValueError:
             return None
+        
+    @property
+    def pre_solvers(self) -> list[Solver]:
+        """
+        Solvers prior to and including the solver for `dt`, if there is one. \\
+        These are solved before the future time `tⁿ⁺¹` is evaluated.
+        """
+        return self.solvers[:self.solver_index(self.dt.name, -1) + 1]
 
     @property
     def post_solvers(self) -> list[Solver]:
         """
-        Solvers after and not including the solver for `dt`, if there is one.
+        Solvers after and not including the solver for `dt`, if there is one. \\
+        These are solved after the future time `tⁿ⁺¹ is evaluated.
         """
         return self.solvers[self.solver_index(self.dt.name, -1) + 1:]
     

@@ -1,5 +1,6 @@
 from typing import Literal, Callable, overload
 from functools import singledispatch
+from collections.abc import Iterable
 
 import numpy as np
 from ufl import max_value, sqrt, inner
@@ -21,7 +22,7 @@ def cfl_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tCFL = C minₓ(h(x) / |u(x)|)`
+    `∆tCFL = c minₓ(h(x) / |u(x)|)` where `c` is the Courant number.
     """
     ...
 
@@ -36,7 +37,7 @@ def cfl_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tCFL = C h / maxₓ|u(x)|)`
+    `∆tCFL = c h / maxₓ|u(x)|)` where `c` is the Courant number.
     """
     ...
 
@@ -51,7 +52,7 @@ def cfl_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tCFL = C h / u`
+    `∆tCFL = c h / u` where `c` is the Courant number.
     """
     ...
 
@@ -66,7 +67,7 @@ def cfl_timestep(
     tol: float = 1e-10,
 ) -> float:
     """
-    `∆tCFL = C minₓ(h(x)) / u`
+    `∆tCFL = c minₓ(h(x)) / u`
     """
     ...
 
@@ -114,6 +115,12 @@ def _(velocity, h, tol):
     return lambda: h / max(velocity, tol)
 
 
+@_cfl_dt_evaluation.register(Iterable)
+def _(velocity: Iterable[float], h, tol):
+    norm = np.linalg.norm(velocity, 2)
+    return _cfl_dt_evaluation(norm, h, tol)
+
+
 @overload
 def reactive_timestep(
     r: Function | Expr | Constant | float,
@@ -123,7 +130,7 @@ def reactive_timestep(
     tol: float = 1e-10,
 ): 
     """
-    `∆tK = C / maxₓr(x) `
+    `∆tR = c / maxₓr(x)` where `c` is the Courant number.
     """
     ...
 
@@ -136,7 +143,7 @@ def reactive_timestep(
     tol: float = 1e-10,
 ): 
     """
-    `∆tK = C / r `
+    `∆tR = c / r` where `c` is the Courant number.
     """
     ...
 
@@ -175,36 +182,6 @@ def _(reaction, tol):
     return lambda: 1.0 / max(reaction, tol)
 
 
-def cflr_timestep(
-    u: Function | Expr | Constant | float,
-    r: Function | Expr | Constant | float,
-    h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
-    cfl_courant: float | None = 1.0,
-    r_courant: float | None = 1.0,
-    dt_max: float = np.inf,
-    dt_min: float = 0.0,
-    tol: float = 1e-10,
-):
-    """
-    Calculates a timestep combining CFL and reactive constraints.
-
-    `∆tCFLK = min{cK minₓ(1 / r(x)), cCFL minₓ(h(x) / |u(x)|)}` 
-    """
-    if cfl_courant is None and r_courant is not None:
-        return reactive_timestep(r, r_courant, dt_max, dt_min, tol)
-    if r_courant is None and cfl_courant is not None:
-        return cfl_timestep(u, h, cfl_courant, dt_max, dt_min, tol)
-    if cfl_courant is None and r_courant is None:
-        return dt_max
-
-    _lambda_cfl = _cfl_dt_evaluation(u, h, tol)
-    _lambda_r = _reactive_dt_evaluation(r, tol)
-    _lambda_cflk = lambda: min(
-        r_courant * _lambda_r(), cfl_courant * _lambda_cfl()
-    )
-    return _bounded_timestep(_lambda_cflk, dt_max, dt_min, 1.0)
-
-
 def diffusive_timestep(
     d: Function | Expr | Constant | float,
     h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"] | float,
@@ -214,7 +191,7 @@ def diffusive_timestep(
     tol: float = 1e-10,
 ):
     """
-    `∆tCFL = C minₓ(h²(x) / d(x))`
+    `∆tD = c minₓ(h²(x) / d(x))` where `c` is the Courant number.
     """
     _lambda = _diffusive_dt_evaluation(d, h, tol)
     return _bounded_timestep(_lambda, dt_max, dt_min, courant)
@@ -252,11 +229,70 @@ def _(diffusion: Constant, h, tol):
 
 @_diffusive_dt_evaluation.register(float)
 @_diffusive_dt_evaluation.register(int)
-def _(velocity, h, tol):
+def _(d, h, tol):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
-    return lambda: h**2 / max(velocity, tol)
+    return lambda: h**2 / max(d, tol)
 
+
+def cflr_timestep(
+    u: Function | Expr | Constant | float,
+    r: Function | Expr | Constant | float,
+    h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
+    cfl_courant: float | None = 1.0,
+    r_courant: float | None = 1.0,
+    dt_max: float = np.inf,
+    dt_min: float = 0.0,
+    tol: float = 1e-10,
+):
+    """
+    Calculates a timestep combining CFL and reactive constraints.
+
+    `∆tCFLR = min{cR minₓ(1 / r(x)), cCFL minₓ(h(x) / |u(x)|)}` 
+    """
+    if cfl_courant is None and r_courant is not None:
+        return reactive_timestep(r, r_courant, dt_max, dt_min, tol)
+    if r_courant is None and cfl_courant is not None:
+        return cfl_timestep(u, h, cfl_courant, dt_max, dt_min, tol)
+    if cfl_courant is None and r_courant is None:
+        return dt_max
+
+    _lambda_cfl = _cfl_dt_evaluation(u, h, tol)
+    _lambda_r = _reactive_dt_evaluation(r, tol)
+    _lambda_cflr = lambda: min(
+        r_courant * _lambda_r(), cfl_courant * _lambda_cfl()
+    )
+    return _bounded_timestep(_lambda_cflr, dt_max, dt_min, 1.0)
+
+
+def cfld_timestep(
+    u: Function | Expr | Constant | float,
+    d: Function | Expr | Constant | float,
+    h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
+    cfl_courant: float | None = 1.0,
+    d_courant: float | None = 1.0,
+    dt_max: float = np.inf,
+    dt_min: float = 0.0,
+    tol: float = 1e-10,
+):
+    """
+    Calculates a timestep combining CFL and reactive constraints.
+
+    `∆tCFLD = min{cD minₓ(h²(x) / d(x)), cCFL minₓ(h(x) / |u(x)|)}` 
+    """
+    if cfl_courant is None and d_courant is not None:
+        return diffusive_timestep(d, h, d_courant, dt_max, dt_min, tol)
+    if d_courant is None and cfl_courant is not None:
+        return cfl_timestep(u, h, cfl_courant, dt_max, dt_min, tol)
+    if cfl_courant is None and d_courant is None:
+        return dt_max
+
+    _lambda_cfl = _cfl_dt_evaluation(u, h, tol)
+    _lambda_d = _diffusive_dt_evaluation(h, d, tol)
+    _lambda_cfld = lambda: min(
+        d_courant * _lambda_d(), cfl_courant * _lambda_cfl()
+    )
+    return _bounded_timestep(_lambda_cfld, dt_max, dt_min, 1.0)
 
 
 def _bounded_timestep(

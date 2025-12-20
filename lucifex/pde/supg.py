@@ -1,15 +1,14 @@
 from typing import Callable
 from functools import wraps
 
-import numpy as np
-from ufl import dx, Form, conditional, sqrt, conditional, lt, tanh, tr
+from ufl import Measure, Form, div, sqrt, conditional, lt, tanh, tr
 from ufl.core.expr import Expr
 from ufl.geometry import GeometricCellQuantity
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    BE, FiniteDifference, FiniteDifferenceArgwise, Series, 
-    ConstantSeries, ImplicitDiscretizationError,
+    BE, AB1, DT, FiniteDifference, FiniteDifferenceArgwise, Series, 
+    ConstantSeries, ExplicitDiscretizationError,
 )
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.utils import is_tensor, is_vector, extract_mesh, cell_size_quantity
@@ -25,8 +24,8 @@ class TauType(StrEnum):
     TRANSIENT = 'transient'
 
 
-def supg_stabilization(
-    supg: str | Callable,
+def supg_form(
+    tau_func: str | Callable,
     v: Expr,
     res: Expr,
     h: str | GeometricCellQuantity,
@@ -34,58 +33,64 @@ def supg_stabilization(
     d: Function | Constant | Series, 
     r: Function | Constant | Series = None,
     dt: Constant | ConstantSeries | None = None,
-    D_adv: FiniteDifference | None = None,
-    D_diff: FiniteDifference | None = None,
-    D_reac: FiniteDifference | None = None,
-    D_dt: FiniteDifference | None = None,
-    phi = 1,
-    petrov_func: Callable | None = None,
+    D_adv: FiniteDifference = BE,
+    D_diff: FiniteDifference = BE,
+    D_reac: FiniteDifference = BE,
+    D_dt: FiniteDifference = DT,
+    phi: Expr = 1,
+    petrov_func: str | Callable | None = None,
+    dx: Measure = 1,
 ) -> Form:
     """
-    `𝜏 (∇v·𝐚ᵉᶠᶠ)ℛ`
+    `𝜏 P(v, 𝐚ᵉᶠᶠ, Dᵉᶠᶠ, Rᵉᶠᶠ)ℛ`
+
+    Default value `petrov_func=None` returns `𝜏 (∇v·𝐚ᵉᶠᶠ)ℛ`.
     """
     if isinstance(dt, ConstantSeries):
         dt = dt[0]
 
-    if callable(supg):
-        tau = supg(*[arg for arg in (h, a, d, r, dt) if arg is not None])
-    else:
-        if r is None:
-            r = 0
-        if D_adv is None:
-            a_eff = (1 / phi) * a
-        else:
-            a_eff = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
-        if D_diff is None:
-            d_eff = (1/phi) * d
-        else:
-             d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
-        if D_reac is None:
-            r_eff = (1 / phi) * r
-        else:
-            r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
+    if r is None:
+        r = 0
+    a_eff = (1 / phi) * effective_velocity(a, D_adv, d, D_diff)
+    d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
+    r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
 
-        match supg:
-            case TauType.CODINA:
-                tau = tau_codina(h, a_eff, d_eff, r_eff)
-            case TauType.SHAKIB:
-                tau = tau_shakib(h, a_eff, d_eff, r_eff)
-            case TauType.COTH:
-                tau = tau_coth(h, a_eff, d_eff)
-            case TauType.TRANSIENT:
-                r_eff = (1 / phi) * effective_reaction(r, D_reac)
-                tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
-            case TauType.UPWIND:
-                tau = tau_upwind(h, a_eff)
-            case _:
-                raise ValueError(f"'{supg}' SUPG method not implemented.")
+    match tau_func:
+        case TauType.CODINA:
+            tau = tau_codina(h, a_eff, d_eff, r_eff)
+        case TauType.SHAKIB:
+            tau = tau_shakib(h, a_eff, d_eff, r_eff)
+        case TauType.COTH:
+            tau = tau_coth(h, a_eff, d_eff)
+        case TauType.TRANSIENT:
+            r_eff = (1 / phi) * effective_reaction(r, D_reac)
+            tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
+        case TauType.UPWIND:
+            tau = tau_upwind(h, a_eff)
+        case _ if callable(tau_func):
+            tau = tau_func(h, a_eff, d_eff, r_eff)
+        case _:
+            raise ValueError(f"'{tau_func}' tau-function method not implemented.")
             
-    if petrov_func is None:
-        Pv = inner(grad(v), a_eff)
-    else:
-        Pv = petrov_func(v, a_eff, d_eff, r_eff)
+    match petrov_func:
+        case 'petrov' | None:
+            Pv = Pv_petrov(v, a_eff)
+        case 'gls':
+            Pv = Pv_gls(v, a_eff, d_eff, r_eff)
+        case _ if callable(tau_func):
+            Pv = petrov_func(v, a_eff, d_eff, r_eff)
+        case _:
+            raise ValueError(f"'{tau_func}' Pv-function not implemented.")
 
     return tau * Pv * res * dx
+
+
+def Pv_petrov(v, a):
+    return inner(grad(v), a)
+
+
+def Pv_gls(v, a, d, r):
+    return inner(grad(v), a) - div(d * grad(v)) - v * (r if r is not None else 0)
 
 
 def tau_function(func):
@@ -204,41 +209,54 @@ def xi_approx(Pe):
     
 
 def effective_velocity(
-    a: Series, 
+    a: Series | Expr, 
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
     d: Function | Constant | None = None,
     D_diff: FiniteDifference | None = None,
+    strict: bool = True,
 ) -> Expr:
     """
-    `𝒟(𝐚·∇u) - ∇·(D𝒟(∇u)) = 𝐚ᵉᶠᶠ·∇uⁿ⁺¹ + ...` \\
+    `𝒟(𝐚·∇u) - ∇·(D𝒟(∇u)) = 𝐚ᵉᶠᶠ·∇uⁿ⁺¹ + other terms`
     """
     if isinstance(D_adv, FiniteDifference):
-        if D_adv.is_explicit:
-            raise ImplicitDiscretizationError(D_adv, 'Advection term must be implicit w.r.t. transported quantity')
-        a_eff = BE(a) * D_adv.explicit_coeff
+        if strict and D_adv.is_explicit:
+            raise ExplicitDiscretizationError(D_adv)
+        a_eff = BE(a) * D_adv.implicit_coeff
     else:
         D_adv_a, D_adv_u = D_adv
-        if D_adv_u.is_explicit:
-            raise ImplicitDiscretizationError(D_adv_u, 'Advection term must be implicit w.r.t. transported quantity')
-        a_eff = D_adv_a(a) * D_adv_u.explicit_coeff
+        if strict and D_adv_u.is_explicit:
+            raise ExplicitDiscretizationError(D_adv_u)
+        a_eff = D_adv_a(a) * D_adv_u.implicit_coeff
 
-    if d is not None:
-        if D_diff is None:
-            a_eff -= grad(d)
-        else:
-            a_eff -= grad(d) * D_diff.explicit_coeff
+    if d is None:
+        return a_eff
+    
+    if not isinstance(d, Series):
+        a_eff -= grad(d)
+    else:
+        a_eff -= grad(d) * D_diff.implicit_coeff
 
     return a_eff
 
 
 def effective_diffusivity(
-    d: Function | Constant,
-    D_diff: FiniteDifference,
+    d: Series | Expr,
+    D_diff: FiniteDifference | FiniteDifferenceArgwise,
+    strict: bool = True,
 ) -> Expr:
     """
-    `∇·(D𝒟(∇u)) = Dᵉᶠᶠ ∇²uⁿ⁺¹ + ...`
+    `∇·(𝒟(D∇u)) = ∇·(Dᵉᶠᶠ∇uⁿ⁺¹) + other terms`
     """
-    d_eff = d * D_diff.explicit_coeff
+    if isinstance(D_diff, FiniteDifference):
+        if strict and D_diff.is_explicit:
+            raise ExplicitDiscretizationError(D_diff)
+        d_eff = BE(d) * D_diff.implicit_coeff
+    else:
+        D_diff_a, D_diff_u = D_diff
+        if strict and D_diff_u.is_explicit:
+            raise ExplicitDiscretizationError(D_diff)
+        d_eff = D_diff_a(d) * D_diff_u.implicit_coeff
+
     return d_eff
 
 
@@ -249,18 +267,18 @@ def effective_reaction(
     D_dt: FiniteDifference | None = None,
 ):
     """
-    `𝒟(Ru) - ∂u/∂t = Rᵉᶠᶠ uⁿ⁺¹ + ...`
+    `𝒟(Ru) - 𝒟(∂u/∂t) = Rᵉᶠᶠ uⁿ⁺¹ + other terms`
     """
     if isinstance(D_reac, FiniteDifference):
-        r_eff = BE(r) * D_reac.explicit_coeff
+        r_eff = BE(r) * D_reac.implicit_coeff
     else:
         D_reac_r, D_reac_u = D_reac
-        r_eff = D_reac_r(r) * D_reac_u.explicit_coeff
+        r_eff = D_reac_r(r) * D_reac_u.implicit_coeff
 
     if dt is not None:
         if D_dt is None:
             r_eff -= 1 / dt
         else:
-            r_eff -= (1 / dt) * D_dt.explicit_coeff
+            r_eff -= (1 / dt) * D_dt.implicit_coeff
 
     return r_eff

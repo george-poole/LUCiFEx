@@ -1,17 +1,16 @@
 from ufl.core.expr import Expr
-from ufl import (
-    Form, inner, grad, dx, TestFunction, TrialFunction,
-    inner, grad, TestFunction, TrialFunction,
-)
-
+from ufl import Form,  Measure, TestFunction, TrialFunction
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, 
+    FunctionSeries, FiniteDifferenceDerivative, 
+    FiniteDifference, FiniteDifferenceArgwise, 
     DT, AB1,
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
+
+from .cg import derivative_form, diffusion_forms, reaction_forms, zero_form
 
 
 def diffusion(
@@ -19,68 +18,67 @@ def diffusion(
     dt: Constant | float,
     d: Function | Constant | Expr,
     D_diff: FiniteDifference, # TODO tuple
+    D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
     `∂u/∂t = ∇·(D·∇u)`
 
-    `(uⁿ⁺¹ - uⁿ) / Δtⁿ = ∇·(𝒟(D·∇u))`
+    `𝒟(∂u/∂t) = ∇·(𝒟(D·∇u))`
     """
-    v = TestFunction(u.function_space)
-    Ft = v * DT(u, dt) * dx
-    Fd = inner(grad(v), d * grad(D_diff(u))) * dx
-    forms = [Ft, Fd]
-    if bcs is not None:
-        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
-        F_neumann = sum([-v * uN * ds(i) for i, uN in u_neumann])
-        forms.append(F_neumann)
-    return forms
+    return diffusion_reaction(
+        u,
+        dt,
+        d,
+        D_diff=D_diff,
+        D_dt=D_dt,
+        bcs=bcs,
+    )
 
 
 def diffusion_reaction(
     u: FunctionSeries,
     dt: Constant | float,
     d: Function | Constant | Expr,
-    D_diff: FiniteDifference,
     r: Function | Constant | None = None,
+    j: Function | Constant | Expr | None = None,
+    D_diff: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
-    `∂u/∂t = ∇·(D·∇u) + R`
-
-    `(uⁿ⁺¹ - uⁿ) / Δtⁿ = ∇·(𝒟(D·∇u)) + 𝒟(R)`
+    `∂u/∂t = ∇·(D·∇u) + Ru + J`
     """
-    forms = diffusion(u, dt, d, D_diff, bcs)
-    if r is not None:
-        v = TestFunction(u.function_space)
-        F_reac = -v * D_reac(r) * dx
-        forms.append(F_reac)
-    return forms
+    v = TestFunction(u.function_space)
+    dx = Measure('dx', u.function_space.mesh)
+    return [
+        derivative_form(v, u, dt, D_dt, dx),
+        *diffusion_forms(-v, u, d, D_diff, bcs, dx),
+        *reaction_forms(-v, u, r, j, D_reac, D_src, dx),
+    ]
 
 
 def steady_diffusion_reaction(
-    u: Function,
+    u: Function | FunctionSeries,
     d: Constant,
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
+    bcs: BoundaryConditions | None = None,
     zero: bool = True,
 ) -> tuple[Form, Form]:
     """"
-    `∇·(D·∇u) = Ru + J`
+    `0 = ∇·(D·∇u) + Ru + J`
     """
-    u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
-    Fd =  -inner(grad(v), d * grad(u_trial)) * dx
-    forms = [Fd]
-    if r is not None:
-        Fr = -v * r * u_trial * dx
-        forms.append(Fr)
-    if j is not None:
-        Fs = -v * j * dx
-        forms.append(Fs)
+    u_trial = TrialFunction(u.function_space)
+    dx = Measure('dx', u.function_space.mesh)
+    forms = [
+        *diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx),
+        *reaction_forms(v, u_trial, r, j, dx=dx),
+    ]
     if zero:
-        Fzero = v * Constant(u.function_space.mesh, 0.0) * dx
-        forms.append(Fzero)
+        forms.append(zero_form(v, u.function_space.mesh, dx))
     return forms
 

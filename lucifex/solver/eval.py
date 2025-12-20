@@ -135,6 +135,9 @@ class Evaluation(GenericSolver[T, TS]):
         cls, 
         solution: T | TS, 
         expr_func: Callable[P, Any],
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
         future: bool = False,
         overwrite: bool = False,
     ):
@@ -142,7 +145,7 @@ class Evaluation(GenericSolver[T, TS]):
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: expr_func(*args, **kwargs), future, overwrite)
+            return cls(solution, lambda: expr_func(*args, **kwargs), corrector, future, overwrite)
         return _create
 
     def solve(

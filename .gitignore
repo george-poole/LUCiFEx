@@ -6,7 +6,7 @@
 *.vtk
 *.pickle
 *.mp4
-!demo/figures/*.mp4
+!demo/*/*/*/*.mp4
 
 # interactive
 .ipynb_checkpoints

@@ -1,16 +1,16 @@
 from typing import Callable
 
-from ufl import dx, TestFunction, Form
+from ufl import Measure, TestFunction, Form
 from ufl.core.expr import Expr
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, Series, 
-    FiniteDifferenceArgwise, ExplicitDiscretizationError
+    FiniteDifferenceArgwise, ImplicitDiscretizationError
 )
 
 
-def evolution_forms(
+def evolution(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Function | Expr | Series | tuple[Callable, tuple],
@@ -22,6 +22,7 @@ def evolution_forms(
     `𝜑∂u/∂t = R`
     """
     phi = D_phi(phi)
+    dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(u.function_space)
     F_dsdt = v * DT(u, dt) * dx
     r = D_rhs(r, trial=u)
@@ -30,7 +31,7 @@ def evolution_forms(
 
 
 
-def evolution_expression(
+def evolution_update(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Series | Expr | Function,
@@ -54,11 +55,11 @@ def evolution_expression(
 
     if isinstance(D_rhs, FiniteDifference):
         if D_rhs.is_implicit:
-            raise ExplicitDiscretizationError(D_rhs, f"Reaction must be explicit in '{u.name}'.")
+            raise ImplicitDiscretizationError(D_rhs, f"Reaction must be explicit in '{u.name}'.")
     else:
         if explicit is None:
             raise ValueError(f"Need to provide argument index of '{u.name}'")
         if D_rhs.finite_differences[explicit].is_implicit:
-            raise ExplicitDiscretizationError(D_rhs.finite_differences[explicit], f"Reaction must be explicit in '{u.name}'.")
+            raise ImplicitDiscretizationError(D_rhs.finite_differences[explicit], f"Reaction must be explicit in '{u.name}'.")
     
     return u[0] + (1 / phi) * dt * D_rhs(r, trial=u)

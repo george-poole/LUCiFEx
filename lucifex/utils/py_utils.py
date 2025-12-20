@@ -314,15 +314,18 @@ def nested_dict(
 
 
 def nested_dict(
-    _,
+    _: tuple | None = None,
     /,
     *,
     depth: int | None = None,
 ):
-    if depth is None:
+    if depth is None and _ is None:
         return defaultdict(nested_dict)
+    if depth is None and _ is not None:
+        depth = len(_) - 1
+
     if depth == 1:
-        return dict
+        return dict()
     if depth == 2:
         return defaultdict(dict)
     assert depth > 2

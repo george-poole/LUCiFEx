@@ -2,6 +2,7 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
+    Any,
 )
 from collections.abc import Iterable
 from types import EllipsisType
@@ -130,7 +131,7 @@ class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
             [i * j for i, j in zip(self._scalings, self._a_forms, strict=True) if j is not None]
         )
         if self._a_form_termwise == 0 or self._a_form_nontermwise == 0:
-            raise RuntimeError(f'{self.__class__.__name__} requires must have a bilinear form `a(u,v)` with test and trial functions `v, u`.')
+            raise RuntimeError(f'{self.__class__.__name__} requires a bilinear form `a(u,v)` with test and trial functions `v, u`.')
         # linear forms
         self._l_forms = [rhs(i) if not rhs(i).empty() else None for i in self._forms]
         self._l_form_termwise: Form = sum([i for i in self._l_forms if i is not None])
@@ -138,7 +139,7 @@ class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
         if self._l_form_termwise == 0 or self._l_form_nontermwise == 0:
-            raise RuntimeError(f'{self.__class__.__name__} requires must have a linear form `l(v)` with test function `v`.')
+            raise RuntimeError(f'{self.__class__.__name__} requires a linear form `l(v)` with test function `v`.')
         # setters
         self._create_form = partial(
             meta_form,
@@ -402,6 +403,16 @@ class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
     @property
     def mpc(self) -> MultiPointConstraint | None:
         return self._mpc
+    
+    def print_forms(
+        self, 
+        func: Callable[[Form], str | Any] = str,
+    ) -> list[str | Any]:
+        return [func(i) for i in self._forms]
+    
+    @property
+    def forms(self) -> list[Form]:
+        return self._forms
     
     @property
     def bilinear_forms(self) -> list[Form]:

@@ -1,5 +1,5 @@
 from ufl.core.expr import Expr
-from ufl import (dx, Form, FacetNormal, inner, inv, div,
+from ufl import (Measure, Form, FacetNormal, inner, inv, div,
                  Dx, TrialFunction, TestFunction,
                  det, transpose, TrialFunctions, TestFunctions)
 
@@ -28,6 +28,7 @@ def darcy_streamfunction(
     for scalar-valued `K`.
     """
     _none = (None, 0) 
+    dx = Measure('dx', psi.function_space.mesh)
     v = TestFunction(psi.function_space)
     psi_trial = TrialFunction(psi.function_space)
     if is_tensor(k):
@@ -61,6 +62,7 @@ def darcy_incompressible(
     `F(𝐮,p;𝐯,q) = ∫ q(∇·𝐮) dx ` \\
     `+ ∫ 𝐯·(μ K⁻¹⋅𝐮) dx - ∫ p(∇·𝐯) dx - ∫ 𝐯·𝐟 dx + ∫ p(𝐯·𝐧) ds`
     """
+    dx = Measure('dx', up.function_space.mesh)
     v, q = TestFunctions(up.function_space)
     u, p = TrialFunctions(up.function_space)
     n = FacetNormal(up.function_space.mesh)

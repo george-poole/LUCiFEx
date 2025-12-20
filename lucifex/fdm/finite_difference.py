@@ -1,8 +1,9 @@
 from typing import Iterable, Any, Callable, overload
+from types import EllipsisType
 from typing_extensions import Self
 
 from ufl.core.expr import Expr
-from ufl import TrialFunction
+from ufl import TrialFunction, replace
 from dolfinx.fem import Function, Constant
 
 from ..utils import MultipleDispatchTypeError
@@ -12,7 +13,7 @@ from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 class FiniteDifference:
     """
-    Finite difference operator for a time-dependent argument
+    Finite difference operator for time discretization
     """
 
     trial_default = True
@@ -61,7 +62,7 @@ class FiniteDifference:
         return self._coefficients
     
     @property
-    def explicit_coeff(self) -> float:
+    def implicit_coeff(self) -> float:
         return self.coefficients.get(Series.FUTURE_INDEX, 0.0)
 
     @property
@@ -100,29 +101,37 @@ class FiniteDifference:
     def __call__(
         self,
         u: Series,
-        trial: bool | None = None,
+        trial: FunctionSeries | None = None,
         strict: bool = False,
     ) -> Expr:
+        """
+        `𝒟(u) = Σⱼ αⱼuⁿ⁺ʲ` for an argument `u` of type `Series`
+        given a set of indices and coefficients `{(j, αⱼ)}` with `j ≤ 1`.
+
+        e.g. \\
+        `u(x, tⁿ) = uⁿ` of type `FunctionSeries` \\
+        `u(tⁿ) = uⁿ` of type `ConstantSeries` 
+        """
         ...
 
     @overload
     def __call__(
         self,
         u: Expr | Function | Constant,
-        **kwargs,
+        trial: FunctionSeries | None = None,
+        strict: bool = False,
     ) -> Expr | Function | Constant:
+        """
+        `𝒟(u) = u` for any argument `u` not of type `Series`.
+        """
         ...
 
     def __call__(
         self,
         u: Series | Expr | Function | Constant,
-        trial: bool | FunctionSeries | None = None,
+        trial: FunctionSeries | None = None,
         strict: bool = False,
     ) -> Expr:
-        """
-        `𝒟(u(x, tⁿ)) = Σⱼ αⱼu(x)ⁿ⁺ʲ` given a set of indices and 
-        coefficients `{(j, αⱼ)}` with `j ≤ 1`.
-        """
         if not isinstance(u, Series):
             if strict:
                 raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
@@ -134,21 +143,27 @@ class FiniteDifference:
                 f"Order of finite difference operator '{self.name}' exceeds order of series '{u.name}'",
             )
 
-        if isinstance(trial, FunctionSeries):
-            trial = u is trial
+        # if isinstance(u, FunctionSeries):
+        #     if trial is None:
+        #         trial = self._trial
+        #     if isinstance(trial, FunctionSeries):
+        #         trial  = u is trial
+        # else:
+        #     trial = False
 
-        if trial is None:
-            trial = self._trial if isinstance(u, FunctionSeries) else False
+        # if trial:
+        #     if not isinstance(u, FunctionSeries):
+        #         raise TypeError(f'Expected `FunctionSeries` type, not `{type(u)}`.')
+        #     _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
+        # else:
+        #     _u = lambda n: u[n]
 
-        assert isinstance(trial, bool)
-        if trial:
-            if not isinstance(u, FunctionSeries):
-                raise TypeError(f'Expected `FunctionSeries` type, not `{type(u)}`.')
-            _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
-        else:
-            _u = lambda n: u[n]
+        expr = sum((c * u[n] for n, c in self.coefficients.items()))
 
-        return sum((c * _u(n) for n, c in self.coefficients.items()))
+        if trial is not None:
+            expr = replace(expr, {trial[trial.FUTURE_INDEX]: TrialFunction(trial.function_space)})
+
+        return expr
     
     def __matmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
         if not isinstance(other, FiniteDifference):
@@ -178,8 +193,10 @@ class FiniteDifferenceDerivative(FiniteDifference):
         self, 
         u: FunctionSeries,
         dt: ConstantSeries | Constant | None = None,
-        trial: bool | None = None,
+        trial: FunctionSeries | None | EllipsisType = Ellipsis,
     ) -> Expr:
+        if trial is Ellipsis:
+            trial = u
         du = super().__call__(u, trial)
         if dt is None:
             return du
@@ -217,7 +234,7 @@ DT = FiniteDifferenceDerivative(
     },
     name='DT'
 )
-"""Forward first time derivative"""
+"""Forward first time derivative `(uⁿ⁺¹ - uⁿ) / Δtⁿ` """
 
 DTLF = FiniteDifferenceDerivative(
     lambda dt: dt,
@@ -228,7 +245,7 @@ DTLF = FiniteDifferenceDerivative(
     DT,
     name='LF'
 )
-"""Centred (leapfrog) first time derivative"""
+"""Centred (leapfrog) first time derivative `(uⁿ⁺¹ - uⁿ⁻¹) / 2Δtⁿ` """
 
 DT2 = FiniteDifferenceDerivative(
     lambda dt: dt ** 2,
@@ -415,7 +432,8 @@ class FiniteDifferenceArgwise:
     @overload
     def __call__(
         self, 
-        *args: Any | Callable[..., Expr], 
+        expr_func: Callable[..., Expr],
+        *args: Any,
         trial: FunctionSeries | None = None,
         strict: bool = False,
     ) -> Expr:
@@ -443,7 +461,7 @@ class FiniteDifferenceArgwise:
             raise TypeError
         
         if len(args) > 1:
-            *args, func = args
+            func, *args = args
             kws = {}
         else:
             u = args[0]
@@ -456,8 +474,8 @@ class FiniteDifferenceArgwise:
                 raise ValueError(f"Expression and arguments must be deducable '{u.name}'.")
             func, args, kws = u.expression
 
-        _args = [fd(arg, arg is trial) for fd, arg in zip(self._fd_args, args, strict=False)]
-        _kws = {k: fd(kws[k], kws[k] is trial) for k, fd in self._fd_kws.items()}
+        _args = [fd(arg, trial) for fd, arg in zip(self._fd_args, args, strict=False)]
+        _kws = {k: fd(kws[k],trial) for k, fd in self._fd_kws.items()}
         
         return func(*_args, **_kws)
     
@@ -544,7 +562,7 @@ class DiscretizationError(RuntimeError):
         super().__init__(f"{required} discretization required, not {fd}. {msg}")
 
 
-class ImplicitDiscretizationError(DiscretizationError):
+class ExplicitDiscretizationError(DiscretizationError):
     def __init__(
         self, 
         fd: FiniteDifference,
@@ -553,7 +571,7 @@ class ImplicitDiscretizationError(DiscretizationError):
         super().__init__('Implicit', fd, msg)
 
 
-class ExplicitDiscretizationError(DiscretizationError):
+class ImplicitDiscretizationError(DiscretizationError):
     def __init__(
         self, 
         fd: FiniteDifference,

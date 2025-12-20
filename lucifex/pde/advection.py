@@ -1,54 +1,61 @@
+from typing import Callable
+
 from ufl.core.expr import Expr
 from ufl import (
-    Form, inner, grad, dx, TestFunction,
-    inner, grad, TestFunction,
-    dS, div, jump, lt, conditional, FacetNormal,
+    Form, Measure, TestFunction, TestFunction, FacetNormal,
 )
 
-from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, 
-    DT, AB1,
+    FunctionSeries, FiniteDifference,
+    FiniteDifferenceDerivative, FiniteDifferenceArgwise, 
+    DT, BE, AB1, Series,
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 
 
+from .dg import dg_advection_forms
+from .cg import derivative_form, advection_form, reaction_forms
+
 
 def advection(
     u: FunctionSeries,
     dt: Constant,
-    a: Function | Constant,
+    a: Expr | Function | Constant,
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
+    D_dt: FiniteDifferenceDerivative = DT,
 ) -> tuple[Form, Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
     """
-    v = TestFunction(u.function_space)
-    Ft = v * DT(u, dt) * dx
-    Fa = v * inner(a, grad(D_adv(u))) * dx
-    return Fa, Ft
+    return advection_reaction(
+        u, dt, a, 
+        D_adv=D_adv, D_dt=D_dt,
+    )
 
 
 def advection_reaction(
     u: FunctionSeries,
     dt: Constant,
-    a: Function | Constant,
-    D_adv: FiniteDifference | FiniteDifferenceArgwise,
-    r: Function | Constant | None = None,
+    a: Expr | Function | Constant,
+    r: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    j: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_dt: FiniteDifferenceDerivative = DT,
 ) -> list[Form]:
     """
-    `∂u/∂t + 𝐚·∇u = R`
+    `∂u/∂t + 𝐚·∇u = Ru + J`
     """
-    forms = list(advection(u, dt, a, D_adv))
-    if r is not None:
-        v = TestFunction(u.function_space)
-        r = D_reac(D_reac, r)
-        F_reac = -v * r * dx
-        forms.append(F_reac)
-    return forms
+    v = TestFunction(u.function_space)
+    dx = Measure('dx', u.function_space.mesh)
+    return [
+        derivative_form(v, u, dt, D_dt, dx),
+        advection_form(v, u, a, D_adv, dx),
+        *reaction_forms(-v, u, r, j, D_reac, D_src, dx)
+    ]
 
 
 def advection_dg(
@@ -56,57 +63,44 @@ def advection_dg(
     dt: Constant,
     a: Function | Constant,
     D_adv: FiniteDifference,
+    D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
-    adv_dx: int = 0,
-    adv_dS: int= 0,
+    dx_opt: int = 0,
+    dS_opt: int= 0,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
     """
-    v = TestFunction(u.function_space)
-    n = FacetNormal(u.function_space.mesh)
-
-    F_dt = v * DT(u, dt) * dx
-
-    match adv_dx:
-        case 0:
-            F_adv_dx = -inner(grad(v), a) * D_adv(u) * dx
-        case 1: 
-            F_adv_dx = -div(v * a) * D_adv(u) * dx
-
-    match adv_dS:
-        case 0:
-            F_adv_dS = jump(v) * jump(0.5 * (inner(a, n) + abs(inner(a, n))) * D_adv(u)) * dS
-
-    forms = [F_dt, F_adv_dx, F_adv_dS]
-
-    if bcs is not None:
-        ds, u_inflow = bcs.boundary_data(u.function_space, 'dirichlet')
-        inflow = lambda uI: conditional(lt(inner(a, n), 0), uI, 0)
-        F_inflow = sum([v * inner(a, n) * inflow(uI) * ds(i) for i, uI in u_inflow])
-        ds_outflow = ds(len(u_inflow))
-        F_outflow = v * inner(a, n) * D_adv(u) * ds_outflow
-        forms.extend([F_inflow, F_outflow])
-
-    return forms
+    return advection_reaction_dg(
+        u, dt, a,
+        D_adv=D_adv, D_dt=D_dt, bcs=bcs, 
+        adv_dx=dx_opt, dS_opt=dS_opt,
+    )
 
 
 def advection_reaction_dg(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
-    D_adv: FiniteDifference,
-    r: Function | Constant | None = None,
+    r,
+    j,
+    D_adv: FiniteDifferenceArgwise = AB1 @ BE,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
+    dx_opt: int = 0,
+    dS_opt: int= 0,
 ) -> list[Form]:
     """
-    `∂u/∂t + 𝐚·∇u = R`
+    `∂u/∂t + 𝐚·∇u = Ru + J`
     """
-    forms = advection_dg(u, dt, a, D_adv, bcs)
-    if r is not None:
-        v = TestFunction(u.function_space)
-        F_reac = -v * D_reac(r) * dx
-        forms.append(F_reac)
-    return forms
-
+    v = TestFunction(u.function_space)
+    n = FacetNormal(u.function_space.mesh)
+    dx = Measure('dx', u.function_space.mesh)
+    dS = Measure('dS', u.function_space.mesh)
+    return [
+        derivative_form(v, u, dt, D_dt, dx),
+        *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, dS_opt=dS_opt)
+        *reaction_forms(v, u, r, j, D_reac, D_src, dx)
+    ]

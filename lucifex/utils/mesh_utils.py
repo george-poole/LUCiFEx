@@ -76,8 +76,8 @@ def create_tagged_measure(
     a measure `dx` such that `dx(i)` is the measure for 
     the `i`th subdomain, where `0 ≤ i ≤ n - 1` where and `n` is 
     the total number of specified subdomains. `dx(n)` is the 
-    measure for the complementary subdomain to the union of 
-    all specified subdomains.
+    measure for the subdomain that is the complement to the union of 
+    all defined subdomains.
     """
     if not markers:
         return Measure(measure, domain=mesh, metadata=measure_kwargs)

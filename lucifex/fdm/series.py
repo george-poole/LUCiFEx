@@ -70,6 +70,9 @@ class Series(ABC, Generic[T]):
     def sequence(
         self,
     ) -> tuple[T, ...]:
+        """
+        `(..., uⁿ⁻¹, uⁿ, uⁿ⁺¹)`
+        """
         return tuple((*self._previous, self._present, self._future))
     
     def __getitem__(
@@ -314,11 +317,17 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
     @property
     def time_series(self) -> list[float | None]:
+        """
+        `[t⁰, t¹, t², ...]`
+        """
         assert len(self._time_series) == len(self._series)
         return self._time_series
     
     @property
     def series(self) -> list[T]:
+        """
+        `[u⁰, u¹, u², ...]`
+        """
         return self._series
     
     @property
@@ -358,7 +367,8 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         """Steps the `Series` object forward in time.
 
         e.g.
-        `([Unsolved, u₋₂, u₋₁]; u₀; u₁) -> ([u₋₂, u₋₁, u₀]; u₁; Unsolved)`
+        `Series([Unsolved, uⁿ⁻², uⁿ⁻¹]; uⁿ; uⁿ⁺¹) -> 
+        Series([uⁿ⁻², uⁿ⁻¹, uⁿ]; uⁿ⁺¹; Unsolved)`
         """
         self._series_append.write(t)
 

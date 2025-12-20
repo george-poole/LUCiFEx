@@ -17,7 +17,7 @@ from lucifex.solver import (
     bvp, ibvp,
 )
 
-from .diffusion import poisson
+from .poisson import poisson
 from .advection_diffusion import advection_diffusion_reaction
 from .constitutive import strain
 
