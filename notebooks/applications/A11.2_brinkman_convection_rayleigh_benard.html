@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flow of a Darcy fluid across an anticline of heterogeneous permeability &#8212; LUCiFEx Demo</title>
+    <title>Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A01.2_darcy_anticline';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A11.2_brinkman_convection_rayleigh_benard';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Stokes equations" href="A02.0_stokes_equations.html" />
-    <link rel="prev" title="Flow of a Darcy fluid through a lens of low permeability" href="A01.1_darcy_lens.html" />
+    <link rel="next" title="DG formulation of the advection equation" href="../numerical/N01.0_dg_advection.html" />
+    <link rel="prev" title="Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle" href="A11.1_brinkman_convection_rayleigh_taylor.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -206,9 +206,9 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="A01.0_darcy_equations.html">Darcy equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="A01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -251,9 +251,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A10.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A11.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="A11.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="A11.1_brinkman_convection_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A11.2_brinkman_convection_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -343,7 +343,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A01.2_darcy_anticline.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/applications/A11.2_brinkman_convection_rayleigh_benard.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -425,7 +425,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Flow of a Darcy fluid across an anticline of heterogeneous permeability</h1>
+    <h1>Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -439,102 +439,115 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="flow-of-a-darcy-fluid-across-an-anticline-of-heterogeneous-permeability">
-<h1>Flow of a Darcy fluid across an anticline of heterogeneous permeability<a class="headerlink" href="#flow-of-a-darcy-fluid-across-an-anticline-of-heterogeneous-permeability" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="rayleigh-benard-convection-of-a-darcy-brinkman-fluid-in-a-partially-porous-rectangle">
+<h1>Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle<a class="headerlink" href="#rayleigh-benard-convection-of-a-darcy-brinkman-fluid-in-a-partially-porous-rectangle" title="Link to this heading">#</a></h1>
+<p>Refer to <code class="docutils literal notranslate"><span class="pre">A21.0_darcy_convection_equations.md</span></code> for details of the governing equations and non-dimensionalization. In the non-dimensionalization used for this problem, the domain’s dimensionless length is unity so the rectangle’s dimensionless width and depth are <span class="math notranslate nohighlight">\(L_x,L_y=\mathcal{O}(1)\)</span>. Furthermore if the domain length scale <span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span> is chosen as the rectangle’s depth, then <span class="math notranslate nohighlight">\(L_y=1\)</span> and <span class="math notranslate nohighlight">\(L_x\)</span> is the aspect ratio.</p>
+<p>horizontal rectangle</p>
+<div class="math notranslate nohighlight">
+\[\Omega = [0, L_x] \times [0, 1]\]</div>
+<div class="math notranslate nohighlight">
+\[\textbf{e}_g=-\textbf{e}_y \implies e_g^x=0~,~e_g^y=-1\]</div>
+<p>constitutive relations</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}
-\begin{cases}
-\Omega = \{(x,y)~:~~R_{\text{inner}}^2 &lt; x^2 + y^2 &lt; R_{\text{outer}}^2~,~y&gt;0\} \\
-\partial\Omega_{\text{upper}} = \{(x,y)~:~x^2 + y^2 &lt; R_{\text{outer}}^2\} \\
-\partial\Omega_{\text{lower}} = \{(x,y)~:~x^2 + y^2 &lt; R_{\text{inner}}^2\} \\
-\partial\Omega_{\text{in}} = \{(x,y)~:~y=0~,~-R_{\text{outer}}&lt;x&lt;-R_{\text{inner}}\} \\
-\partial\Omega_{\text{out}} = \{(x,y)~:~y=0~,~R_{\text{inner}}&lt;x&lt;R_{\text{outer}}\} \\
-\mathsf{K}(\textbf{x})=\mathcal{N}(\textbf{x})\mathsf{I} &amp; \text{random isotropic permeability} \\
-\mu=1 \\
-\psi_{\text{D}}\vert_{\partial\Omega_{\text{upper}}}=0 &amp; \text{no-penetration on upper and lower boundaries}\\
-\psi_{\text{D}}\vert_{\partial\Omega_{\text{lower}}}=-u_{\text{in}}(R_{\text{outer}}-R_{\text{inner}}) \\
-\psi_{\text{D}}\vert_{\partial\Omega_{\text{in}}}=-u_{\text{in}}(x+R_{\text{outer}}) &amp; \text{inflow boundary} \\
-\psi_{\text{D}}\vert_{\partial\Omega_{\text{out}}}=u_{\text{in}}(x-R_{\text{outer}}) &amp; \text{outflow boundary} \\
-\end{cases}
+\begin{align}
+\phi &amp;= 1 \\
+\mathsf{D} &amp;= \mathsf{I} \\
+K^{-1}(y) &amp;= \begin{cases}
+1 &amp; y &lt; h \\
+0 &amp; y &gt; h 
+\end{cases} \\
+\rho(c) &amp;= -c
+\end{align}
 \end{split}\]</div>
-<p>Note that <span class="math notranslate nohighlight">\(\psi_{\text{D}}\)</span> is piecewise continuous and satisfies the incompressibility constraint.</p>
+<p>diffusive base state initial conditions</p>
+<div class="math notranslate nohighlight">
+\[c_0(x, y)=1 - y +\mathcal{N}(x,y)\]</div>
+<div class="math notranslate nohighlight">
+\[\textbf{u}_0=\textbf{0}\]</div>
+<p>prescribed temperature on upper and lower boundaries</p>
+<div class="math notranslate nohighlight">
+\[c(x,y=0)=1\]</div>
+<div class="math notranslate nohighlight">
+\[c(x,y=L_y)=0\]</div>
+<p>no-flux on left and right boundaries</p>
+<div class="math notranslate nohighlight">
+\[(\textbf{n}\cdot\nabla c)\vert_{x=0,y}=(\textbf{n}\cdot\nabla c)\vert_{x=L_x,y}=0\]</div>
+<p>no-slip and no-penetration on entire boundary</p>
+<div class="math notranslate nohighlight">
+\[\textbf{u}\vert_{\partial\Omega}=\textbf{0}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">maximum</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span><span class="p">,</span> <span class="n">DofsPerturbation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">annulus_sector_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">bvp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_contours</span><span class="p">,</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">plot_colormap</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.darcy</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_streamfunction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">demo.py.brinkman_convection</span><span class="w"> </span><span class="kn">import</span> <span class="n">brinkman_convection_rayleigh_benard_rectangle</span>
 
 
-<span class="n">Rinner</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">Router</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="n">Nradial</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">dr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Router</span> <span class="o">-</span> <span class="n">Rinner</span><span class="p">)</span> <span class="o">/</span> <span class="n">Nradial</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">annulus_sector_mesh</span><span class="p">(</span><span class="n">dr</span><span class="p">,</span> <span class="s1">&#39;triangle&#39;</span><span class="p">,</span> <span class="s1">&#39;anticline&#39;</span><span class="p">)(</span><span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">,</span> <span class="mi">180</span><span class="p">)</span>
-
-<span class="n">r2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
-<span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
-    <span class="n">mesh</span><span class="p">,</span> 
-    <span class="p">{</span>
-        <span class="s2">&quot;lower&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">r2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rinner</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;upper&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">r2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">Router</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">),</span>
-        <span class="s2">&quot;out&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span>
-    <span class="p">},</span>
+<span class="n">Pr</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Ra</span> <span class="o">=</span> <span class="mf">1e7</span>
+<span class="n">Da</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">brinkman_convection_rayleigh_benard_rectangle</span><span class="p">(</span>
+    <span class="n">Lx</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>    
+    <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span>
+    <span class="n">Pr</span><span class="o">=</span><span class="n">Pr</span><span class="p">,</span>
+    <span class="n">Ra</span><span class="o">=</span><span class="n">Ra</span><span class="p">,</span>
+    <span class="n">Da</span><span class="o">=</span><span class="n">Da</span><span class="p">,</span>
+    <span class="n">noise_eps</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">dt_max</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> 
+    <span class="n">cfl_courant</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">mu</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">k_lims</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">k_noise</span> <span class="o">=</span> <span class="n">DofsPerturbation</span><span class="p">(</span>
-    <span class="mf">0.0</span><span class="p">,</span>
-    <span class="mi">1234</span><span class="p">,</span>
-    <span class="n">k_lims</span><span class="p">,</span>
-    <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
-<span class="p">)</span>
-<span class="n">k</span> <span class="o">=</span> <span class="n">k_noise</span><span class="o">.</span><span class="n">combine_base_noise</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
-
-<span class="n">psi</span> <span class="o">=</span> <span class="n">Function</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;psi&#39;</span><span class="p">)</span>
-<span class="n">u_in</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">psi_bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">u_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">Router</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="o">-</span><span class="n">u_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">Router</span> <span class="o">-</span> <span class="n">Rinner</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;out&#39;</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">u_in</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Router</span><span class="p">)),</span>
-<span class="p">)</span>
-<span class="n">psi_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">darcy_streamfunction</span><span class="p">,</span> <span class="n">psi_bcs</span><span class="p">)(</span><span class="n">psi</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
-<span class="n">psi_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="n">n_init</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
-<span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_mesh&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">file_ext</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../../_images/2142a8a735d68b2ac1991bac016ea4697ff793f7d8d021e96ec8d3ff45468c0e.png" src="../../_images/2142a8a735d68b2ac1991bac016ea4697ff793f7d8d021e96ec8d3ff45468c0e.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
-<span class="n">plot_contours</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_streamlines&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">file_ext</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">mesh</span>
+
+<span class="n">time_fractions</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">)</span>
+<span class="n">time_indices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span> <span class="k">for</span> <span class="n">frac</span> <span class="ow">in</span> <span class="n">time_fractions</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;A21_darcy_brinkman_c(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">file_ext</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/304a319f4cc9b9ac9d9a6c0a307095f0a90c7ac4e1fbeeaaadf351b9b3763ee3.png" src="../../_images/304a319f4cc9b9ac9d9a6c0a307095f0a90c7ac4e1fbeeaaadf351b9b3763ee3.png" />
+<img alt="../../_images/b2e39059a5f6394fb806d2397fa5f72640b26c77a0d182e6946fddd50e42c9b7.png" src="../../_images/b2e39059a5f6394fb806d2397fa5f72640b26c77a0d182e6946fddd50e42c9b7.png" />
+<img alt="../../_images/b35fdab7aae9d6a13b327ef6101a2a1f294d7618a4d2d609fb36c2bacf6ad778.png" src="../../_images/b35fdab7aae9d6a13b327ef6101a2a1f294d7618a4d2d609fb36c2bacf6ad778.png" />
+<img alt="../../_images/90abc2b6d19e483da0878947afe2244f926718b1b3a64df9129267862ef2326b.png" src="../../_images/90abc2b6d19e483da0878947afe2244f926718b1b3a64df9129267862ef2326b.png" />
+<img alt="../../_images/11fe79b3274cacae80d2977baf1b1f81073e86f8e61173d7d8aef7cf9a262bc1.png" src="../../_images/11fe79b3274cacae80d2977baf1b1f81073e86f8e61173d7d8aef7cf9a262bc1.png" />
+<img alt="../../_images/382d695b3c3dcadb298a637b0e6ac88dbfb733866084b185b7e0284a7b91001c.png" src="../../_images/382d695b3c3dcadb298a637b0e6ac88dbfb733866084b185b7e0284a7b91001c.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">u</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+<span class="n">uMax</span> <span class="o">=</span> <span class="p">[</span><span class="n">maximum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">]</span>
+
+<span class="n">plot_line</span><span class="p">((</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMax</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$\max_{</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{x}</span><span class="s1">}|</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{u}</span><span class="s1">|$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;,
+ &lt;Axes: xlabel=&#39;$t$&#39;, ylabel=&#39;$\\max_{\\textbf{x}}|\\textbf{u}|$&#39;&gt;)
+</pre></div>
+</div>
+<img alt="../../_images/2638d4d23ca8e364dcf2bcd8ab3997aa6bcb43be10e88f2935caeb902af08a95.png" src="../../_images/2638d4d23ca8e364dcf2bcd8ab3997aa6bcb43be10e88f2935caeb902af08a95.png" />
 </div>
 </div>
 </section>
@@ -570,20 +583,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="A01.1_darcy_lens.html"
+       href="A11.1_brinkman_convection_rayleigh_taylor.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Flow of a Darcy fluid through a lens of low permeability</p>
+        <p class="prev-next-title">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</p>
       </div>
     </a>
     <a class="right-next"
-       href="A02.0_stokes_equations.html"
+       href="../numerical/N01.0_dg_advection.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Stokes equations</p>
+        <p class="prev-next-title">DG formulation of the advection equation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
