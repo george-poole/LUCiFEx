@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Porosity evolution-reaction from an injected Darcy fluid in a rectangle &#8212; LUCiFEx Demo</title>
+    <title>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -242,7 +242,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Porosity evolution-dissolution equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Porosity evolution-reaction from an injected Darcy fluid in a rectangle</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A10.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -423,7 +423,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Porosity evolution-reaction from an injected Darcy fluid in a rectangle</h1>
+    <h1>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -437,48 +437,34 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="porosity-evolution-reaction-from-an-injected-darcy-fluid-in-a-rectangle">
-<h1>Porosity evolution-reaction from an injected Darcy fluid in a rectangle<a class="headerlink" href="#porosity-evolution-reaction-from-an-injected-darcy-fluid-in-a-rectangle" title="Link to this heading">#</a></h1>
-<p>horizontal rectangle
-$<span class="math notranslate nohighlight">\(\Omega = \left[-\tfrac{1}{2}L_x, \tfrac{1}{2}L_x\right] \times [0, L_y]\)</span><span class="math notranslate nohighlight">\(
-\)</span><span class="math notranslate nohighlight">\(\textbf{e}_g=-\textbf{e}_y\)</span>$</p>
-<p>constitutive relations
-$<span class="math notranslate nohighlight">\(
-\begin{align*}
-\mathsf{S} &amp;= \mathsf{I} \\ 
-\mathsf{Z} &amp;= \mathsf{I} \\ 
-\mathsf{K} &amp;= \phi^2\mathsf{I} \\ 
-\mu &amp;= 1 \\
-\rho &amp;= s + \beta b 
-\end{align*}
-\)</span>$</p>
-<p>initial conditions
-$<span class="math notranslate nohighlight">\(s_0 = 1\)</span><span class="math notranslate nohighlight">\(
-\)</span><span class="math notranslate nohighlight">\(0\leq z_0 \leq 1\)</span><span class="math notranslate nohighlight">\(
-\)</span><span class="math notranslate nohighlight">\(\phi_0 = 1\)</span>$</p>
-<p>prescribed concentrations on inflow portion of lower boundary</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="porosity-evolution-dissolution-from-an-injected-darcy-fluid-in-a-rectangle">
+<h1>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle<a class="headerlink" href="#porosity-evolution-dissolution-from-an-injected-darcy-fluid-in-a-rectangle" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
-\[c(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = 0\]</div>
-<div class="math notranslate nohighlight">
-\[b(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = b_{\text{in}}\]</div>
-<p>no-flux on other boundaries</p>
-<div class="math notranslate nohighlight">
-\[\frac{\partial c}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial c}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial c}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0\]</div>
-<div class="math notranslate nohighlight">
-\[\frac{\partial b}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial b}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial b}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0\]</div>
-<p>inflow velocity on lower boundary</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\textbf{n}\cdot\textbf{u}|_{x,y=0} = -u_y\vert_{x,y=0} =
+\[\begin{split}
+\mathbb{S}=
+\begin{cases}
+\Omega = \left[-\tfrac{1}{2}L_x, \tfrac{1}{2}L_x\right] \times [0, L_y] \\
+c_0 = 1 \\
+0\leq b_0 \leq 1 \\
+\phi_0 = 1 \\
+u_{\text{E}}(x,y=0) =
 \begin{cases}
 -1 &amp; |x| \leq \tfrac{1}{2}\delta L_x \\
 0 &amp; \text{otherwise}
-\end{cases}\end{split}\]</div>
-<p>outflow velocity on upper boundary (constrained by incompressibility)</p>
-<div class="math notranslate nohighlight">
-\[\textbf{n}\cdot\textbf{u}|_{x,y=L_y} = u_y\vert_{x,y=L_y} = \delta\]</div>
-<p>no-penetration on left and right boundaries</p>
-<div class="math notranslate nohighlight">
-\[\textbf{n}\cdot\textbf{u}|_{x=0,y}=\textbf{n}\cdot\textbf{u}|_{x=L_x,y}=0\]</div>
+\end{cases}  &amp; \text{inflow velocity boundary condition} \\
+u_{\text{E}}(x,y=L_y) = \delta &amp; \text{outflow velocity boundary condition} \\
+u_{\text{E}}(x=0,y) = u_{\text{E}}(x=L_x,y) = 0 &amp; \text{no-penetration boundary condition} \\
+c(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = 0 &amp; \text{inflow concentration boundary condition} \\
+b(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = b_{\text{in}} \\ 
+\frac{\partial c}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial c}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial c}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0 &amp; \text{no-flux on other boundaries}\\
+\frac{\partial b}{\partial x}\bigg\vert_{|x| &gt; \tfrac{1}{2}\delta L_x,y=0}=\frac{\partial b}{\partial x}\bigg\vert_{x,y=L_y}=\frac{\partial b}{\partial x}\bigg\vert_{x=\pm\tfrac{1}{2}L_x,y}=0 \\
+\mathsf{K} = \phi^2\mathsf{I} \\ 
+\mathsf{D}_b = \mathsf{I} \\ 
+\mathsf{D}_c = \mathsf{I} \\ 
+\mu = 1 \\
+\rho(b, c) = c + \beta b 
+\end{cases}
+\end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
