@@ -246,7 +246,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A10.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A10.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A10.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A10.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A10.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
@@ -276,10 +276,6 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N05.1_dg_advection_diffusion_interval.html">1D example</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N05.2_dg_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../numerical/N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
@@ -442,13 +438,17 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
 </ul>
 </li>
 </ul>
@@ -512,20 +512,11 @@ R(a,b )
 \end{split}\]</div>
 </section>
 </section>
-<section id="non-dimensional-equations">
-<h2>Non-dimensional equations<a class="headerlink" href="#non-dimensional-equations" title="Link to this heading">#</a></h2>
+<section id="non-dimensionalization">
+<h2>Non-dimensionalization<a class="headerlink" href="#non-dimensionalization" title="Link to this heading">#</a></h2>
 <section id="scalings">
 <h3>Scalings<a class="headerlink" href="#scalings" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{cases}
-\phi\frac{\partial a}{\partial t} + Ad\,\textbf{u}\cdot\nabla a = \frac{1}{Pe}\nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - Ki R(a,b) \\
-\phi\frac{\partial b}{\partial t} + Ad\,\textbf{u}\cdot\nabla b = \frac{1}{Le_bPe}\nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki R(a,b) \\
-\phi\frac{\partial c}{\partial t} + Ad\,\textbf{u}\cdot\nabla c = \frac{1}{Le_cPe}\nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki R(a,b) \\
-\nabla\cdot\textbf{u}=0 \\
-\textbf{u}=-\frac{\mathsf{K}(\phi)}{\mu(a,b,c)}\cdot\left(\nabla p + Bu\,\rho(a,b,c)g\,\textbf{e}_g\right) \\
-\end{cases}
-\end{split}\]</div>
+<p>…</p>
 </section>
 <section id="dimensionless-numbers">
 <h3>Dimensionless numbers<a class="headerlink" href="#dimensionless-numbers" title="Link to this heading">#</a></h3>
@@ -545,6 +536,22 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 <h4>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h4>
 <p>…</p>
 </section>
+</section>
+</section>
+<section id="non-dimensional-equations">
+<h2>Non-dimensional equations<a class="headerlink" href="#non-dimensional-equations" title="Link to this heading">#</a></h2>
+<section id="time-discretized-strong-form">
+<h3>Time-discretized strong form<a class="headerlink" href="#time-discretized-strong-form" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{cases}
+\phi\frac{\partial a}{\partial t} + Ad\,\textbf{u}\cdot\nabla a = \frac{1}{Pe}\nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - Ki R(a,b) \\
+\phi\frac{\partial b}{\partial t} + Ad\,\textbf{u}\cdot\nabla b = \frac{1}{Le_bPe}\nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki R(a,b) \\
+\phi\frac{\partial c}{\partial t} + Ad\,\textbf{u}\cdot\nabla c = \frac{1}{Le_cPe}\nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki R(a,b) \\
+\nabla\cdot\textbf{u}=0 \\
+\textbf{u}=-\frac{\mathsf{K}(\phi)}{\mu(a,b,c)}\cdot\left(\nabla p + Bu\,\rho(a,b,c)g\,\textbf{e}_g\right) \\
+\end{cases}
+\end{split}\]</div>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -620,13 +627,17 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#time-discretized-strong-form">Time-discretized strong form</a></li>
 </ul>
 </li>
 </ul>
