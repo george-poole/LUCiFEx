@@ -87,8 +87,9 @@ parts:
       - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
         sections: 
           - file: notebooks/numerical/N04.2_supg_advection_diffusion_rectangle
-      - file: notebooks/numerical/N05.1_dg_advection_diffusion_interval
-        sections: 
+      - file: notebooks/numerical/N05.0_dg_advection_diffusion
+        sections:
+          - file: notebooks/numerical/N05.1_dg_advection_diffusion_interval
           - file: notebooks/numerical/N05.2_dg_advection_diffusion_rectangle
       - file: notebooks/numerical/N07_bcs_time_dependent
       - file: notebooks/numerical/N08_bcs_periodic
