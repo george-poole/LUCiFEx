@@ -178,18 +178,27 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Foundations</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../foundations/F00_notation.html">Notation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F01.1_poisson_rectangle.html">Poisson equation on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F02.1_diffusion_interval.html">Diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../foundations/F03_advection.html">Advection equation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../foundations/F04_advection_diffusion.html">Advection-diffusion equation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F03.0_advection_equation.html">Advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F03.1_advection_interval.html">Advection of a Gaussian profile on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F04.0_advection_diffusion_equation.html">Advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian on an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F05.0_helmholtz_equation.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F05.1_helmholtz_evp.html">Helmholtz eigenvalue problem on a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
@@ -236,6 +245,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../applications/A09.1_navier_stokes_double_diffusive.html">Double-diffusive convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A09.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A09.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A11.0_darcy_porosity_evolution_equations.html">Porosity evolution by reaction with a Darcy fluid</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A11.1_darcy_porosity_evolution_injection.html">Injection into a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -542,31 +555,7 @@ u_{\text{e}}(x, t)=\frac{U_0}{\sqrt{1+4Dt/\sigma^2}}\exp\left(-\frac{(x-x_0-at)^
 <span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_opts</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_opts</span><span class="p">:</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)</span> <span class="ow">in</span> <span class="n">D_adv_diff_opts</span><span class="p">:</span>
-            <span class="n">sim</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">d</span><span class="p">][(</span><span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)]</span>
-            <span class="n">run</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">t_stop</span><span class="o">=</span><span class="n">t_stop</span><span class="p">)</span> 
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_index</span> <span class="o">=</span> <span class="mi">10</span>
-
-<span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="kc">None</span><span class="p">][</span><span class="mf">0.1</span><span class="p">][(</span><span class="n">CN</span><span class="p">,</span> <span class="n">CN</span><span class="p">)][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.03266666666666666
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+            <span class="n">run</span><span class="p">(</span><span class="n">simulations</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">d</span><span class="p">][(</span><span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)],</span> <span class="n">t_stop</span><span class="o">=</span><span class="n">t_stop</span><span class="p">)</span> 
 </pre></div>
 </div>
 </div>
