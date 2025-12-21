@@ -202,10 +202,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../foundations/F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../foundations/F06_mathieu.html">Mathieu equation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../foundations/F06.0_mathieu_equation.html">Mathieu equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../foundations/F06.1_mathieu_evp.html">Mathieu eigenvalue problem on an interval</a></li>
+</ul>
+</details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="A00_notation.html">Notation</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A01.0_darcy_equations.html">Darcy equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
@@ -468,13 +472,14 @@ p_{\text{N}}(x=L_x/2,y) = 0
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">OptionsPETSc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_component_fem_functions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_streamlines</span><span class="p">,</span> <span class="n">plot_quiver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipynb_write</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_streamlines</span><span class="p">,</span> <span class="n">plot_quiver</span><span class="p">,</span> <span class="n">save_figure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.darcy</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_incompressible</span>
 
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">((</span><span class="o">-</span><span class="n">Lx</span><span class="o">/</span><span class="mi">2</span> <span class="p">,</span> <span class="n">Lx</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">Ly</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ly</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">Ny</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">((</span><span class="o">-</span><span class="n">Lx</span><span class="o">/</span><span class="mi">2</span> <span class="p">,</span> <span class="n">Lx</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">Ly</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">Ly</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
 <span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
     <span class="n">mesh</span><span class="p">,</span> 
     <span class="p">{</span>
@@ -504,7 +509,7 @@ p_{\text{N}}(x=L_x/2,y) = 0
 <span class="n">petsc</span> <span class="o">=</span> <span class="n">OptionsPETSc</span><span class="p">(</span>
     <span class="n">ksp_type</span><span class="o">=</span><span class="s1">&#39;gmres&#39;</span><span class="p">,</span> 
     <span class="n">pc_type</span><span class="o">=</span><span class="s1">&#39;lu&#39;</span><span class="p">,</span> 
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;pc_factor_mat_solver_type&#39;</span><span class="p">:</span> <span class="s1">&#39;mumps&#39;</span><span class="p">},</span>
+    <span class="n">pc_factor_mat_solver_type</span><span class="o">=</span><span class="s1">&#39;mumps&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">k_minus</span><span class="p">,</span> <span class="n">k_plus</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span>
@@ -518,7 +523,7 @@ p_{\text{N}}(x=L_x/2,y) = 0
 <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.2</span>
 <span class="n">k_cts</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span>
     <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
-    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_plus</span> <span class="o">-</span> <span class="n">k_minus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">r2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_plus</span> <span class="o">+</span> <span class="n">k_minus</span><span class="p">),</span> 
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_plus</span> <span class="o">-</span> <span class="n">k_minus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">((</span><span class="n">r2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">k_plus</span> <span class="o">+</span> <span class="n">k_minus</span><span class="p">),</span> 
     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;kP&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -526,7 +531,7 @@ p_{\text{N}}(x=L_x/2,y) = 0
 
 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="n">k_dcts</span><span class="p">,</span> <span class="n">k_cts</span><span class="p">):</span>
     <span class="n">up</span> <span class="o">=</span> <span class="n">Function</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="n">u_p_elem</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;up&quot;</span><span class="p">)</span>
-    <span class="n">up_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">darcy_incompressible</span><span class="p">,</span> <span class="n">u_bcs</span><span class="p">,</span> <span class="n">petsc</span><span class="p">)(</span><span class="n">up</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">p_bcs</span><span class="o">=</span><span class="n">p_bcs</span><span class="p">)</span>
+    <span class="n">up_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">darcy_incompressible</span><span class="p">,</span> <span class="n">u_bcs</span><span class="p">,</span> <span class="n">petsc</span><span class="p">)(</span><span class="n">up</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">p_bcs</span><span class="p">)</span>
     <span class="n">up_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
     <span class="n">solutions</span><span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">up</span>
 </pre></div>
@@ -541,43 +546,20 @@ p_{\text{N}}(x=L_x/2,y) = 0
     <span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
     <span class="n">plot_streamlines</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">density</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
-    <span class="c1"># ipynb_write(f&#39;{k.name}_p&#39;)()</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_p&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_quiver</span><span class="p">((</span><span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">textbf</span><span class="si">{u}</span><span class="s2">=(u_x, u_y)$&quot;</span><span class="p">)</span>
-    <span class="c1"># ipynb_write(f&#39;{k.name}_u&#39;)(fig)</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_u&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/dc1ec0b70113a548c79e8769bebd1793567f8a18d3641cf68bc126c76d22752b.png" src="../../_images/dc1ec0b70113a548c79e8769bebd1793567f8a18d3641cf68bc126c76d22752b.png" />
-<img alt="../../_images/1e0c95df57e07b329de02f376ce7e5a930f7d92a9573eb6935eba8536c98a011.png" src="../../_images/1e0c95df57e07b329de02f376ce7e5a930f7d92a9573eb6935eba8536c98a011.png" />
-<img alt="../../_images/dc1ec0b70113a548c79e8769bebd1793567f8a18d3641cf68bc126c76d22752b.png" src="../../_images/dc1ec0b70113a548c79e8769bebd1793567f8a18d3641cf68bc126c76d22752b.png" />
-<img alt="../../_images/1e0c95df57e07b329de02f376ce7e5a930f7d92a9573eb6935eba8536c98a011.png" src="../../_images/1e0c95df57e07b329de02f376ce7e5a930f7d92a9573eb6935eba8536c98a011.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_quiver</span><span class="p">((</span><span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">textbf</span><span class="si">{u}</span><span class="s2">=(u_x, u_y)$&quot;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_u&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">file_ext</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../../_images/27eff7ca011f65359b1ad34ac35ca426664420944920805bfa4ebe9d21381041.png" src="../../_images/27eff7ca011f65359b1ad34ac35ca426664420944920805bfa4ebe9d21381041.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_colormap</span><span class="p">(</span><span class="n">k_dcts</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;,
- &lt;Axes: title={&#39;center&#39;: &#39;$K$&#39;}, xlabel=&#39;$x$&#39;, ylabel=&#39;$y$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/2f583b95a0597ba4bfcb834fbb68664841d93f6879220473fcc4064d7b2284af.png" src="../../_images/2f583b95a0597ba4bfcb834fbb68664841d93f6879220473fcc4064d7b2284af.png" />
+<img alt="../../_images/cd216be880a8a8982cccf1da049be35103e6e2867e0baa44ade3d8ae475f1198.png" src="../../_images/cd216be880a8a8982cccf1da049be35103e6e2867e0baa44ade3d8ae475f1198.png" />
+<img alt="../../_images/b1d0efdf6d555f74e7084f7a09178b0145f65fe22ea571ef0113f40586e45163.png" src="../../_images/b1d0efdf6d555f74e7084f7a09178b0145f65fe22ea571ef0113f40586e45163.png" />
+<img alt="../../_images/3d40ff1280b622f6a5e6fbdc8fe873963bf6992856476e48d45602e8e3d50ef5.png" src="../../_images/3d40ff1280b622f6a5e6fbdc8fe873963bf6992856476e48d45602e8e3d50ef5.png" />
+<img alt="../../_images/41903197ee8c29b23cd38417baccef4ec54ddb2c0b662130398ae9df461902af.png" src="../../_images/41903197ee8c29b23cd38417baccef4ec54ddb2c0b662130398ae9df461902af.png" />
+<img alt="../../_images/c093717fcaf892cdfc75b4c91251581a3d025d7c2097c605f290959a4ab2be80.png" src="../../_images/c093717fcaf892cdfc75b4c91251581a3d025d7c2097c605f290959a4ab2be80.png" />
+<img alt="../../_images/7c73c995a42f1a0dba686db00226b72b5b21446b497fd7b6edba387cdc3bed04.png" src="../../_images/7c73c995a42f1a0dba686db00226b72b5b21446b497fd7b6edba387cdc3bed04.png" />
 </div>
 </div>
 </section>
