@@ -24,7 +24,9 @@ parts:
         sections: 
           - file: notebooks/foundations/F05.1_helmholtz_evp
           - file: notebooks/foundations/F05.2_helmholtz_bvp
-      - file: notebooks/foundations/F06_mathieu
+      - file: notebooks/foundations/F06.0_mathieu_equation.md
+        sections: 
+          - file: notebooks/foundations/F06.1_mathieu_evp.ipynb
 
   - caption: Applications
     chapters:

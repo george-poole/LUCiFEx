@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Diffusion equation &#8212; LUCiFEx Demo</title>
+    <title>Mathieu equation &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/foundations/F02.0_diffusion_equation';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/foundations/F06.0_mathieu_equation';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Diffusion of a Gaussian profile on an interval" href="F02.1_diffusion_interval.html" />
-    <link rel="prev" title="Vector-valued Poisson equation" href="F01.3_poisson_vector.html" />
+    <link rel="next" title="Mathieu eigenvalue problem on an interval" href="F06.1_mathieu_evp.html" />
+    <link rel="prev" title="Helmholtz boundary value problem on a rectangle" href="F05.2_helmholtz_bvp.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -184,7 +184,7 @@
 <li class="toctree-l2"><a class="reference internal" href="F01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Diffusion equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="F02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="F02.1_diffusion_interval.html">Diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F02.2_diffusion_rectangle.html">Diffusion of a Gaussian profile on a rectangle</a></li>
 </ul>
@@ -202,7 +202,10 @@
 <li class="toctree-l2"><a class="reference internal" href="F05.2_helmholtz_bvp.html">Helmholtz boundary value problem on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="F06_mathieu.html">Mathieu equation</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Mathieu equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="F06.1_mathieu_evp.html">Mathieu eigenvalue problem on an interval</a></li>
+</ul>
+</details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="nav bd-sidenav">
@@ -348,7 +351,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/foundations/F02.0_diffusion_equation.md" target="_blank"
+      <li><a href="../../_sources/notebooks/foundations/F06.0_mathieu_equation.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -432,7 +435,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Diffusion equation</h1>
+    <h1>Mathieu equation</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -444,7 +447,6 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
             </nav>
         </div>
@@ -456,19 +458,18 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="diffusion-equation">
-<h1>Diffusion equation<a class="headerlink" href="#diffusion-equation" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="mathieu-equation">
+<h1>Mathieu equation<a class="headerlink" href="#mathieu-equation" title="Link to this heading">#</a></h1>
 <section id="strong-form">
 <h2>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-&amp;\text{Find}~u(\textbf{x}, t): \Omega\times[0,\infty) \to \mathbb{R}~\text{such that } \\
-&amp;\mathbb{IBVP}\begin{cases}
-\frac{\partial u}{\partial t} = \nabla\cdot(\mathsf{D}\cdot\nabla u) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-u=u_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\}\\
-u=u_{\text{D}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{D}}\times[0,\infty) \\
-\textbf{n}\cdot(\mathsf{D}\cdot\nabla{u})  = u_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0,\infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
+&amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
+&amp;\mathbb{EVP} | \mathbb{BVP}\begin{cases}
+-\nabla^2u + 2q\cos(\textbf{k}\cdot\textbf{x}) u = \lambda u &amp; \forall\textbf{x}\in\Omega \\
+u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
+\textbf{n}\cdot\nabla{u} = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
 \end{cases}~.
 \end{align*}
 \end{split}\]</div>
@@ -478,21 +479,13 @@ u=u_{\text{D}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{D}}\times[0,\
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
-&amp;\text{Find}~u^{n+1}\in V~\text{such that} \\
-&amp;F(u^{n+1}, v)=\int_\Omega\text{d}\Omega~v\frac{u^{n+1} - u^n}{\Delta t^n} + \nabla v\cdot\mathcal{D}_{\mathsf{D},u}(\mathsf{D}\cdot\nabla u) - \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0 \quad\forall v\in V~.
+&amp; \partial\Omega_{\text{N}}=\varnothing \\
+\implies &amp;\text{Find}~u\in V~\text{and}~\lambda\in\mathbb{C}~\text{such that}\\
+&amp;L(u, v)=\lambda R(u,v) \quad\forall v\in V \\
+&amp;\text{where }\\
+&amp;L(u, v) = \int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u + 2q\cos(\textbf{k}\cdot\textbf{x}) vu\\
+&amp;R(u,v) = \int_\Omega\text{d}\Omega~vu \\
 \end{align*}
-\end{split}\]</div>
-</section>
-<section id="specification">
-<h2>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h2>
-<div class="math notranslate nohighlight">
-\[\begin{split}\mathbb{S}\begin{cases}
-\Omega \\
-u_0(\textbf{x}) \\
-u_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D}} \\
-u_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} \\
-\mathsf{D}(\textbf{x}, t) \\
-\end{cases}
 \end{split}\]</div>
 </section>
 <div class="toctree-wrapper compound">
@@ -530,20 +523,20 @@ u_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} \\
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="F01.3_poisson_vector.html"
+       href="F05.2_helmholtz_bvp.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Vector-valued Poisson equation</p>
+        <p class="prev-next-title">Helmholtz boundary value problem on a rectangle</p>
       </div>
     </a>
     <a class="right-next"
-       href="F02.1_diffusion_interval.html"
+       href="F06.1_mathieu_evp.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Diffusion of a Gaussian profile on an interval</p>
+        <p class="prev-next-title">Mathieu eigenvalue problem on an interval</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -565,7 +558,6 @@ u_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} \\
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
   </nav></div>
 
