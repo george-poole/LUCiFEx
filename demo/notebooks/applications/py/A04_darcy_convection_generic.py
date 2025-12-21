@@ -14,9 +14,8 @@ from lucifex.fdm import (
 )
 from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
-    integration, interpolation
+    integration, interpolation, extrema
 )
-from lucifex.utils import extrema
 from lucifex.sim import Simulation
 
 from lucifex.pde.streamfunction import streamfunction_velocity
@@ -81,11 +80,11 @@ def darcy_convection_generic(
     order = finite_difference_order(D_adv, D_diff)
     t = ConstantSeries(Omega, "t", order, ics=0.0)  
     dt = ConstantSeries(Omega, 'dt')
-
     # default boundary conditions
-    c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0)) if c_bcs is Ellipsis else c_bcs
-    psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0)) if psi_bcs is Ellipsis else psi_bcs
-
+    if c_bcs is Ellipsis:
+        c_bcs = BoundaryConditions(("neumann", dOmega.union, 0.0))
+    if psi_bcs is Ellipsis:
+        psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
     # flow
     psi_deg = 2
     psi = FunctionSeries((Omega, 'P', psi_deg), 'psi')
@@ -101,7 +100,6 @@ def darcy_convection_generic(
         d: Expr = dispersion(phi)
     rho = ExprSeries(density(c), 'rho')
     mu = ExprSeries(viscosity(c), 'mu')
-
     # solvers
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
@@ -114,7 +112,6 @@ def darcy_convection_generic(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
-
     if secondary:
         uMinMax = ConstantSeries(Omega, "uMinMax", shape=(2,))
         cMinMax = ConstantSeries(Omega, "cMinMax", shape=(2,))
@@ -128,10 +125,7 @@ def darcy_convection_generic(
                 integration(fBoundary, flux, 'ds', *dOmega.union)(c[0], u[0], d[0]),
             ]
         )
-
     namespace = [phi, ('k', k), ('d', d), rho, mu]
-
     solvers.extend(secondary_extras)
     namespace.extend(namespace_extras)
-
     return Simulation(solvers, t, dt, namespace)

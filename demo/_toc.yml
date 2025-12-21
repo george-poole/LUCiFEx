@@ -60,15 +60,18 @@ parts:
       - file: notebooks/applications/A09.0_darcy_porosity_evolution_equations
         sections: 
           - file: notebooks/applications/A09.1_darcy_porosity_evolution_injection
-      - file: notebooks/applications/A10.0_navier_stokes_convection_equations
+      - file: notebooks/applications/A10.0_stokes_convection_equations
         sections: 
-          - file: notebooks/applications/A10.1_navier_stokes_thermosolutal
-          - file: notebooks/applications/A10.2_navier_stokes_rayleigh_taylor
-          - file: notebooks/applications/A10.3_navier_stokes_marangoni
-      - file: notebooks/applications/A11.0_brinkman_convection_equations
+          - file: notebooks/applications/A10.1_stokes_convection_viscosity
+      - file: notebooks/applications/A11.0_navier_stokes_convection_equations
+        sections: 
+          - file: notebooks/applications/A11.1_navier_stokes_thermosolutal
+          - file: notebooks/applications/A11.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/applications/A11.3_navier_stokes_marangoni
+      - file: notebooks/applications/A12.0_brinkman_convection_equations
         sections:
-          - file: notebooks/applications/A11.1_brinkman_convection_rayleigh_taylor
-          - file: notebooks/applications/A11.2_brinkman_convection_rayleigh_benard
+          - file: notebooks/applications/A12.1_brinkman_convection_rayleigh_taylor
+          - file: notebooks/applications/A12.2_brinkman_convection_rayleigh_benard
 
   - caption: Numerical
     chapters:

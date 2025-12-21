@@ -1,7 +1,7 @@
 from ufl import as_vector
 
 from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
@@ -75,20 +75,17 @@ def navier_stokes_double_diffusive_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
-
     # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
-
     # constants
     Le = Constant(Omega, Le, 'Le')  
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     beta = Constant(Omega, beta, 'beta')
-
     # initial conditions
     c_ics = SpatialPerturbation(
         lambda x: x[1] / Ly,
@@ -102,7 +99,6 @@ def navier_stokes_double_diffusive_rectangle(
         [Lx, Ly],
         noise_eps,
     )  
-
     # boundary conditions
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['lower'], 0.0),
@@ -117,7 +113,6 @@ def navier_stokes_double_diffusive_rectangle(
     u_bcs = BoundaryConditions(
         ('dirichlet', dOmega.union, u_zero),
     )  
-
     # flow
     u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
@@ -129,7 +124,6 @@ def navier_stokes_double_diffusive_rectangle(
     rho = ExprSeries(c - beta * theta, 'rho')
     eg = as_vector([0, -1])
     f = Pr * Ra * rho * eg
-
     # solvers
     dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
@@ -143,7 +137,6 @@ def navier_stokes_double_diffusive_rectangle(
     theta_solver = ibvp(advection_diffusion, bcs=theta_bcs)(
         theta, dt[0], u, 1/Le, D_adv_ad, D_diff_ad,
     )
-
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
     namespace = [Le, Pr, Ra, beta, rho]
     return solvers, t, dt, namespace

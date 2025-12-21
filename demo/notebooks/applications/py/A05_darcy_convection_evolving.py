@@ -11,7 +11,7 @@ from lucifex.sim import Simulation, configure_simulation
 from lucifex.utils import CellType
 
 from lucifex.pde.constitutive import permeability_cross_bedded
-from .darcy_convection_generic import darcy_convection_generic
+from .A04_darcy_convection_generic import darcy_convection_generic
 
 
 

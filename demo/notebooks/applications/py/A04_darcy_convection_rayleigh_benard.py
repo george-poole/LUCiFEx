@@ -8,7 +8,7 @@ from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
-from .darcy_convection_generic import darcy_convection_generic
+from .A04_darcy_convection_generic import darcy_convection_generic
 
 
 @configure_simulation(
