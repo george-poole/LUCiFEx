@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ABC convection with a stabilising reaction and destabilising viscosity &#8212; LUCiFEx Demo</title>
+    <title>Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A07.2_abc_convection_viscosity';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A12.1_brinkman_convection_rayleigh_taylor';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Darcy fingering equations" href="A08.0_darcy_fingering_equations.html" />
-    <link rel="prev" title="ABC convection with a destabilising reaction" href="A07.1_abc_convection_density.html" />
+    <link rel="next" title="Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle" href="A12.2_brinkman_convection_rayleigh_benard.html" />
+    <link rel="prev" title="Darcy-Brinkman convection equations" href="A12.0_brinkman_convection_equations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -231,9 +231,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -255,8 +255,8 @@
 <li class="toctree-l2"><a class="reference internal" href="A11.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A12.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A12.1_brinkman_convection_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="A12.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A12.2_brinkman_convection_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
@@ -348,7 +348,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A07.2_abc_convection_viscosity.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/applications/A12.1_brinkman_convection_rayleigh_taylor.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -419,7 +419,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -430,11 +432,19 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>ABC convection with a stabilising reaction and destabilising viscosity</h1>
+    <h1>Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#d-2-rectangle"><span class="math notranslate nohighlight">\(d=2\)</span> rectangle</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -444,36 +454,153 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity">
-<h1>ABC convection with a stabilising reaction and destabilising viscosity<a class="headerlink" href="#abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="rayleigh-taylor-instability-of-a-darcy-brinkman-fluid-in-a-partially-porous-rectangle">
+<h1>Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle<a class="headerlink" href="#rayleigh-taylor-instability-of-a-darcy-brinkman-fluid-in-a-partially-porous-rectangle" title="Link to this heading">#</a></h1>
+<p>initial-boundary value problem on <span class="math notranslate nohighlight">\((\textbf{x}, t)\in\Omega\times[0,\infty)\)</span></p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c=\frac{1}{\sqrt{RaPr}}\nabla^2c\]</div>
+<div class="math notranslate nohighlight">
+\[\nabla\cdot\textbf{u}=0\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}=-\nabla p + \sqrt{\frac{Pr}{Ra}}\nabla^2\textbf{u}+\rho(c)\,\textbf{e}_g - \frac{\chi(\textbf{x})}{Da}\sqrt{\frac{Pr}{Ra}}\textbf{u}\]</div>
+<p>constitutive relation</p>
+<div class="math notranslate nohighlight">
+\[\rho(c) = -c \]</div>
+<p>initial conditions</p>
+<div class="math notranslate nohighlight">
+\[c(\textbf{x},t=0)=c_0(\textbf{x})\]</div>
+<div class="math notranslate nohighlight">
+\[\textbf{u}(\textbf{x},t=0)=\textbf{u}_0(\textbf{x})\]</div>
+<div class="math notranslate nohighlight">
+\[p(\textbf{x},t=0)=p_0(\textbf{x})\]</div>
+<p>Dirichlet boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{D}}\)</span></p>
+<div class="math notranslate nohighlight">
+\[c = c_{\text{D}}\]</div>
+<p>Neumann boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\textbf{n}\cdot\nabla c = c_{\text{N}}\]</div>
+<p>essential boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_E\)</span></p>
+<div class="math notranslate nohighlight">
+\[\textbf{u}=\textbf{u}_{\text{E}}\]</div>
+<p>natural boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\sigma\cdot\textbf{n} = \boldsymbol{\sigma}_{\text{N}}\]</div>
+<p>mapping to Navier-Stokes equations defined in <code class="docutils literal notranslate"><span class="pre">demo/py/navier_stokes.py</span></code></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}
-\begin{cases}
-\mathcal{L} = \sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}} &amp; \text{scaling with diffusive length and reactive time} \\
-\mathcal{U} = \phi_{\text{ref}}\mathcal{L}/\mathcal{T} \\
-\mathcal{T} = \phi_{\text{ref}}\Delta c/\Delta R \\
-\Omega = [0, \sqrt{RaDa}\mathcal{A}] \times [0, \sqrt{RaDa}] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1) \\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards} \\
-\mathsf{D}_a = \mathsf{I} &amp; \text{constitutive relations}\\ 
-\mathsf{D}_b = \mathsf{I} \\ 
-\mathsf{D}_c = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I} \\ 
-R(a,b) = ab \\
-\mu = \exp(-\Lambda c) &amp; \text{$\Lambda&gt;0$ for viscous fingering} \\
-\rho(a,b,c) = a + \beta b + \gamma c \\
-a_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-\sqrt{RaDa}}{\epsilon \sqrt{RaDa}}\right)\right)+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
-b_0&gt;0 \\
-c_0\geq0 \\
-a_{\text{D}}(x,y=\sqrt{RaDa})=1 &amp; \text{prescribed concentration on upper boundary} \\
-a_{\text{N}}(x,y=0) &amp; \text{no-flux on remaining boundary} \\
-a_{\text{N}}(x=0,y) \\
-a_{\text{N}}(x=\sqrt{RaDa}\mathcal{A},y) \\
-b_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-\psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
-\end{cases}
+\begin{Bmatrix}
+\rho \\
+\mu \\
+\textbf{f}
+\end{Bmatrix}
+\mapsto
+\begin{Bmatrix}
+1 \\ 
+\sqrt{\frac{Pr}{Ra}} \\
+\rho\,\textbf{e}_g - \frac{\chi(\textbf{x})}{Da}\sqrt{\frac{Pr}{Ra}}\textbf{u}
+\end{Bmatrix}
 \end{split}\]</div>
+<section id="d-2-rectangle">
+<h2><span class="math notranslate nohighlight">\(d=2\)</span> rectangle<a class="headerlink" href="#d-2-rectangle" title="Link to this heading">#</a></h2>
+<p>horizontal rectangle</p>
+<div class="math notranslate nohighlight">
+\[\Omega = [0, L_x] \times [0, L_y]\]</div>
+<div class="math notranslate nohighlight">
+\[\textbf{e}_g=-\textbf{e}_y\]</div>
+<p>pure fluid and porous medium in upper and lower subdomains</p>
+<div class="math notranslate nohighlight">
+\[\chi(y)=\text{H}(\tfrac{1}{2}L_y - y)\]</div>
+<p>diffusive base state initial conditions</p>
+<div class="math notranslate nohighlight">
+\[c_0(x, y)=1 - y +\mathcal{N}(x,y)\]</div>
+<div class="math notranslate nohighlight">
+\[\textbf{u}_0=\textbf{0}\]</div>
+<p>prescribed temperature on upper and lower boundaries</p>
+<div class="math notranslate nohighlight">
+\[c(x,y=0)=1\]</div>
+<div class="math notranslate nohighlight">
+\[c(x,y=L_y)=0\]</div>
+<p>no-flux on left and right boundaries</p>
+<div class="math notranslate nohighlight">
+\[(\textbf{n}\cdot\nabla c)\vert_{x=0,y}=(\textbf{n}\cdot\nabla c)\vert_{x=L_x,y}=0\]</div>
+<p>no-slip and no-penetration on entire boundary</p>
+<div class="math notranslate nohighlight">
+\[\textbf{u}\vert_{\partial\Omega}=\textbf{0}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">maximum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.darcy_brinkman</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_brinkman_rectangle</span>
+
+
+<span class="n">Pr</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Ra</span> <span class="o">=</span> <span class="mf">1e7</span>
+<span class="n">Da</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_brinkman_rectangle</span><span class="p">(</span>
+    <span class="n">Lx</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>    
+    <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span>
+    <span class="n">Pr</span><span class="o">=</span><span class="n">Pr</span><span class="p">,</span>
+    <span class="n">Ra</span><span class="o">=</span><span class="n">Ra</span><span class="p">,</span>
+    <span class="n">Da</span><span class="o">=</span><span class="n">Da</span><span class="p">,</span>
+    <span class="n">noise_eps</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">dt_max</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> 
+    <span class="n">cfl_courant</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="n">n_init</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">mesh</span>
+
+<span class="n">time_fractions</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">)</span>
+<span class="n">time_indices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span> <span class="k">for</span> <span class="n">frac</span> <span class="ow">in</span> <span class="n">time_fractions</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;A21_darcy_brinkman_c(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">file_ext</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/b2e39059a5f6394fb806d2397fa5f72640b26c77a0d182e6946fddd50e42c9b7.png" src="../../_images/b2e39059a5f6394fb806d2397fa5f72640b26c77a0d182e6946fddd50e42c9b7.png" />
+<img alt="../../_images/b35fdab7aae9d6a13b327ef6101a2a1f294d7618a4d2d609fb36c2bacf6ad778.png" src="../../_images/b35fdab7aae9d6a13b327ef6101a2a1f294d7618a4d2d609fb36c2bacf6ad778.png" />
+<img alt="../../_images/90abc2b6d19e483da0878947afe2244f926718b1b3a64df9129267862ef2326b.png" src="../../_images/90abc2b6d19e483da0878947afe2244f926718b1b3a64df9129267862ef2326b.png" />
+<img alt="../../_images/11fe79b3274cacae80d2977baf1b1f81073e86f8e61173d7d8aef7cf9a262bc1.png" src="../../_images/11fe79b3274cacae80d2977baf1b1f81073e86f8e61173d7d8aef7cf9a262bc1.png" />
+<img alt="../../_images/382d695b3c3dcadb298a637b0e6ac88dbfb733866084b185b7e0284a7b91001c.png" src="../../_images/382d695b3c3dcadb298a637b0e6ac88dbfb733866084b185b7e0284a7b91001c.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">u</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+<span class="n">uMax</span> <span class="o">=</span> <span class="p">[</span><span class="n">maximum</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">]</span>
+
+<span class="n">plot_line</span><span class="p">((</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMax</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$\max_{</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{x}</span><span class="s1">}|</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{u}</span><span class="s1">|$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;,
+ &lt;Axes: xlabel=&#39;$t$&#39;, ylabel=&#39;$\\max_{\\textbf{x}}|\\textbf{u}|$&#39;&gt;)
+</pre></div>
+</div>
+<img alt="../../_images/2638d4d23ca8e364dcf2bcd8ab3997aa6bcb43be10e88f2935caeb902af08a95.png" src="../../_images/2638d4d23ca8e364dcf2bcd8ab3997aa6bcb43be10e88f2935caeb902af08a95.png" />
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -507,20 +634,20 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="A07.1_abc_convection_density.html"
+       href="A12.0_brinkman_convection_equations.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ABC convection with a destabilising reaction</p>
+        <p class="prev-next-title">Darcy-Brinkman convection equations</p>
       </div>
     </a>
     <a class="right-next"
-       href="A08.0_darcy_fingering_equations.html"
+       href="A12.2_brinkman_convection_rayleigh_benard.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Darcy fingering equations</p>
+        <p class="prev-next-title">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -530,6 +657,21 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#d-2-rectangle"><span class="math notranslate nohighlight">\(d=2\)</span> rectangle</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

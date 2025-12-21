@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ABC convection with a stabilising reaction and destabilising viscosity &#8212; LUCiFEx Demo</title>
+    <title>Darcy-Brinkman convection equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A07.2_abc_convection_viscosity';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A12.0_brinkman_convection_equations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Darcy fingering equations" href="A08.0_darcy_fingering_equations.html" />
-    <link rel="prev" title="ABC convection with a destabilising reaction" href="A07.1_abc_convection_density.html" />
+    <link rel="next" title="Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle" href="A12.1_brinkman_convection_rayleigh_taylor.html" />
+    <link rel="prev" title="Marangoni convection of a Navier-Stokes fluid in a rectangle" href="A11.3_navier_stokes_marangoni.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -231,9 +231,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -255,7 +255,7 @@
 <li class="toctree-l2"><a class="reference internal" href="A11.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A12.0_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Darcy-Brinkman convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A12.1_brinkman_convection_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A12.2_brinkman_convection_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
@@ -348,7 +348,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A07.2_abc_convection_viscosity.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/applications/A12.0_brinkman_convection_equations.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -358,7 +358,7 @@
 <span class="btn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="btn__text-container">.ipynb</span>
+<span class="btn__text-container">.md</span>
 </a>
 </li>
       
@@ -419,7 +419,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -430,11 +432,27 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>ABC convection with a stabilising reaction and destabilising viscosity</h1>
+    <h1>Darcy-Brinkman convection equations</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#some-common-choices">Some common choices</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mapping-to-the-non-dimensional-navier-stokes-convection-equations">Mapping to the non-dimensional Navier-Stokes convection equations</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -444,36 +462,173 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity">
-<h1>ABC convection with a stabilising reaction and destabilising viscosity<a class="headerlink" href="#abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="darcy-brinkman-convection-equations">
+<h1>Darcy-Brinkman convection equations<a class="headerlink" href="#darcy-brinkman-convection-equations" title="Link to this heading">#</a></h1>
+<p>Governing equations for thermosolutal convection coupled to Darcy-Brinkman flow, working in the Boussinesq approximation with constant viscosity.</p>
+<section id="dimensional-equations">
+<h2>Dimensional equations<a class="headerlink" href="#dimensional-equations" title="Link to this heading">#</a></h2>
+<p>Working in the Boussinesq approximation and with uniform viscosity.</p>
+<p>strong form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}
+\begin{align*}
+&amp;\text{Find} \\
+&amp;\text{$c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$, $\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d$ and $p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}$} \\
+&amp;\text{such that} \\
+&amp;\begin{cases}
+\phi\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\phi, \textbf{u})\cdot\nabla c) &amp; \\
+\nabla\cdot\textbf{u} = 0 &amp; \\
+\rho_{\text{ref}}\left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla(\phi^{-1}\textbf{u})\right)=-\phi\nabla p + \mu_{\text{ref}}\nabla^2\textbf{u}+\phi\rho(c) g\,\textbf{e}_g - \mu_{\text{ref}}\,\phi\mathsf{K}^{-1}(\phi)\cdot\textbf{u} \\
+c(\textbf{x},t=0)=c_0 &amp; \forall\textbf{x}\in\Omega \\
+\textbf{u}(\textbf{x},t=0)=\textbf{u}_0 &amp; \forall\textbf{x}\in\Omega \\
+p(\textbf{x},t=0)=p_0 &amp; \forall\textbf{x}\in\Omega \\
+c=c_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}
+\times [0,\infty]~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}} \\
+\textbf{u} = \textbf{u}_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
+(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+\end{cases}~.
+\end{align*}
+\end{split}\]</div>
+</section>
+<section id="non-dimensionalization">
+<h2>Non-dimensionalization<a class="headerlink" href="#non-dimensionalization" title="Link to this heading">#</a></h2>
+<section id="scalings">
+<h3>Scalings<a class="headerlink" href="#scalings" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Quantity</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\textbf{x}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\textbf{u}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(t\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(c\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\rho g\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(p\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\psi\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Scaling</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{T}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta c\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta\theta\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(g \Delta\rho\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu_{\text{ref}}\,\mathcal{U}\mathcal{L}/K_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{U}\mathcal{L}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(\mu\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\phi\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(K\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{G}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Q\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mu_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(G_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta R\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta Q\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="dimensionless-numbers">
+<h3>Dimensionless numbers<a class="headerlink" href="#dimensionless-numbers" title="Link to this heading">#</a></h3>
+<p>dimensionless domain length (given a domain length scale <span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span>)
+$<span class="math notranslate nohighlight">\(Xl=\frac{\mathcal{L}_\Omega}{\mathcal{L}}\)</span>$</p>
+<p>Prandtl number
+$<span class="math notranslate nohighlight">\(Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}\)</span>$</p>
+<p>Rayleigh number</p>
+<div class="math notranslate nohighlight">
+\[Ra=\frac{\mathcal{L}^3_\Omega g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}\]</div>
+<p>Darcy number</p>
+<div class="math notranslate nohighlight">
+\[Da = \frac{K_{\text{ref}}}{\mathcal{L}_\Omega^2}\]</div>
+</section>
+<section id="non-dimensional-equations">
+<h3>Non-dimensional equations<a class="headerlink" href="#non-dimensional-equations" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{cases}
-\mathcal{L} = \sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}} &amp; \text{scaling with diffusive length and reactive time} \\
-\mathcal{U} = \phi_{\text{ref}}\mathcal{L}/\mathcal{T} \\
-\mathcal{T} = \phi_{\text{ref}}\Delta c/\Delta R \\
-\Omega = [0, \sqrt{RaDa}\mathcal{A}] \times [0, \sqrt{RaDa}] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1) \\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards} \\
-\mathsf{D}_a = \mathsf{I} &amp; \text{constitutive relations}\\ 
-\mathsf{D}_b = \mathsf{I} \\ 
-\mathsf{D}_c = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I} \\ 
-R(a,b) = ab \\
-\mu = \exp(-\Lambda c) &amp; \text{$\Lambda&gt;0$ for viscous fingering} \\
-\rho(a,b,c) = a + \beta b + \gamma c \\
-a_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-\sqrt{RaDa}}{\epsilon \sqrt{RaDa}}\right)\right)+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
-b_0&gt;0 \\
-c_0\geq0 \\
-a_{\text{D}}(x,y=\sqrt{RaDa})=1 &amp; \text{prescribed concentration on upper boundary} \\
-a_{\text{N}}(x,y=0) &amp; \text{no-flux on remaining boundary} \\
-a_{\text{N}}(x=0,y) \\
-a_{\text{N}}(x=\sqrt{RaDa}\mathcal{A},y) \\
-b_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-\psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
+\phi\frac{\partial c}{\partial t}+Ad\,\textbf{u}\cdot\nabla c=\frac{1}{Pe}\nabla\cdot(\mathsf{D}\cdot\nabla c) \\
+\nabla\cdot\textbf{u}=0 \\
+\frac{\partial\textbf{u}}{\partial t}+Ad\,\textbf{u}\cdot\nabla(\phi^{-1}\textbf{u})=-\phi\nabla p + Vi\,\nabla^2\textbf{u} + Bu\,\phi\rho\,\textbf{e}_g - Pm\,\phi\mathsf{K}^{-1}\cdot\textbf{u} \\
 \end{cases}
 \end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+Ad&amp;=\frac{\mathcal{U}\mathcal{T}}{\mathcal{L}} \\
+Pe&amp;=\frac{\mathcal{L}^2}{D_{\text{ref}}\mathcal{T}} \\
+Vi&amp;=\frac{\mu_{\text{ref}}\mathcal{T}}{\rho_{\text{ref}}\mathcal{L}^2} \\
+Bu&amp;=\frac{\,g\Delta\rho\,\mathcal{T}}{\rho_{\text{ref}}\,\mathcal{U}} \\
+Pm&amp;=\frac{\mu_{\text{ref}}\,\,\mathcal{T}}{K_{\text{ref}}\,\rho_{\text{ref}}\,\mathcal{U}} 
+\end{align*}
+\end{split}\]</div>
+<p>These equations are mapped to the previously written non-dimensionalized equations for the convection of a Navier-Stokes fluid by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{Bmatrix}
+Ad \\
+Pe \\
+Vi \\
+\nabla^2\textbf{u}\\ 
+Bu\,\rho\,\textbf{e}_g - Pm\,\mathsf{K}^{-1}\cdot\textbf{u} \\
+\phi
+\end{Bmatrix}
+\mapsto
+\begin{Bmatrix}
+Ad \\
+Pe \\
+Vi \\
+\nabla\cdot\tau \\
+Bu\,\rho\,\textbf{e}_g \\
+1
+\end{Bmatrix}
+\end{split}\]</div>
+</section>
+<section id="some-common-choices">
+<h3>Some common choices<a class="headerlink" href="#some-common-choices" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\( \mathcal{T}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\{Ad, Pe, Vi, Bu, Pm, Xl\}\)</span></p></th>
+<th class="head"><p>Examples</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt{\mathcal{L}g\Delta\rho/\rho_{\text{ref}}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{1, \sqrt{RaPr}, \sqrt{Pr/Ra}, 1, \sqrt{Pr/RaDa^2}, 1\}\)</span></p></td>
+<td><p><a class="reference external" href="https://www.cambridge.org/core/product/identifier/S0022112021004493/type/journal_article">Le Reun &amp; Hewitt (2021)</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="mapping-to-the-non-dimensional-navier-stokes-convection-equations">
+<h3>Mapping to the non-dimensional Navier-Stokes convection equations<a class="headerlink" href="#mapping-to-the-non-dimensional-navier-stokes-convection-equations" title="Link to this heading">#</a></h3>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+</div>
 </section>
 
     <script type="text/x-thebe-config">
@@ -507,20 +662,20 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="A07.1_abc_convection_density.html"
+       href="A11.3_navier_stokes_marangoni.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ABC convection with a destabilising reaction</p>
+        <p class="prev-next-title">Marangoni convection of a Navier-Stokes fluid in a rectangle</p>
       </div>
     </a>
     <a class="right-next"
-       href="A08.0_darcy_fingering_equations.html"
+       href="A12.1_brinkman_convection_rayleigh_taylor.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Darcy fingering equations</p>
+        <p class="prev-next-title">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -530,6 +685,29 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensionless-numbers">Dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-equations">Non-dimensional equations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#some-common-choices">Some common choices</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mapping-to-the-non-dimensional-navier-stokes-convection-equations">Mapping to the non-dimensional Navier-Stokes convection equations</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

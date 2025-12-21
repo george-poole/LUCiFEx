@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ABC convection with a stabilising reaction and destabilising viscosity &#8212; LUCiFEx Demo</title>
+    <title>Stokes convection equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A07.2_abc_convection_viscosity';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A10.0_stokes_convection_equations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Darcy fingering equations" href="A08.0_darcy_fingering_equations.html" />
-    <link rel="prev" title="ABC convection with a destabilising reaction" href="A07.1_abc_convection_density.html" />
+    <link rel="next" title="Rayleigh-Bénard convection of a Stokes fluid with a destabilising viscosity" href="A10.1_stokes_convection_viscosity.html" />
+    <link rel="prev" title="Porosity evolution-dissolution from an injected Darcy fluid in a rectangle" href="A09.1_darcy_porosity_evolution_injection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -231,9 +231,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -245,7 +245,7 @@
 <li class="toctree-l2"><a class="reference internal" href="A09.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A10.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Stokes convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A10.1_stokes_convection_viscosity.html">Rayleigh-Bénard convection of a Stokes fluid with a destabilising viscosity</a></li>
 </ul>
 </details></li>
@@ -348,7 +348,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/applications/A07.2_abc_convection_viscosity.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/applications/A10.0_stokes_convection_equations.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -358,7 +358,7 @@
 <span class="btn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="btn__text-container">.ipynb</span>
+<span class="btn__text-container">.md</span>
 </a>
 </li>
       
@@ -419,7 +419,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -430,11 +432,24 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>ABC convection with a stabilising reaction and destabilising viscosity</h1>
+    <h1>Stokes convection equations</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -444,36 +459,61 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity">
-<h1>ABC convection with a stabilising reaction and destabilising viscosity<a class="headerlink" href="#abc-convection-with-a-stabilising-reaction-and-destabilising-viscosity" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="stokes-convection-equations">
+<h1>Stokes convection equations<a class="headerlink" href="#stokes-convection-equations" title="Link to this heading">#</a></h1>
+<section id="mixed-formulation">
+<h2>Mixed formulation<a class="headerlink" href="#mixed-formulation" title="Link to this heading">#</a></h2>
+<p>Governing equations for thermosolutal convection coupled to Stokes flow.</p>
+</section>
+<section id="dimensional-equations">
+<h2>Dimensional equations<a class="headerlink" href="#dimensional-equations" title="Link to this heading">#</a></h2>
+<section id="strong-form">
+<h3>Strong form<a class="headerlink" href="#strong-form" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}
+\begin{align*}
+&amp;\text{Find} \\
+&amp;c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}, \\
+&amp;\theta(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}, \\
+&amp;\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
+&amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
+&amp;\text{such that} \\
+&amp;\begin{cases}
+\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\phi, \textbf{u})\cdot\nabla c) &amp; \\
+\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}(\phi, \textbf{u})\cdot\nabla\theta) &amp; \\
+\nabla\cdot\textbf{u} = 0 &amp; \\
+\textbf{0}=-\nabla p + \nabla\cdot\tau + \rho g\,\textbf{e}_g &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+c(\textbf{x},t=0)=c_0 &amp; \forall\textbf{x}\in\Omega \\
+\theta(\textbf{x},t=0)=\theta_0 &amp; \forall\textbf{x}\in\Omega \\
+\textbf{u}(\textbf{x},t=0)=\textbf{u}_0 &amp; \forall\textbf{x}\in\Omega \\
+p(\textbf{x},t=0)=p_0 &amp; \forall\textbf{x}\in\Omega \\
+c=c_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\
+\theta=\theta_{\text{D}} &amp; \forall (\textbf{x}, t)\in\partial\Omega_{\text{D}, \theta} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{G}\cdot\nabla \theta) = \theta_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, \theta}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, \theta}=\partial\Omega/\partial\Omega_{\text{D}, \theta} \\
+\textbf{u} = \textbf{u}_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
+(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+\end{cases}~.
+\end{align*}
+\end{split}\]</div>
+</section>
+<section id="specification">
+<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\mathbb{S}=
 \begin{cases}
-\mathcal{L} = \sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}} &amp; \text{scaling with diffusive length and reactive time} \\
-\mathcal{U} = \phi_{\text{ref}}\mathcal{L}/\mathcal{T} \\
-\mathcal{T} = \phi_{\text{ref}}\Delta c/\Delta R \\
-\Omega = [0, \sqrt{RaDa}\mathcal{A}] \times [0, \sqrt{RaDa}] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1) \\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards} \\
-\mathsf{D}_a = \mathsf{I} &amp; \text{constitutive relations}\\ 
-\mathsf{D}_b = \mathsf{I} \\ 
-\mathsf{D}_c = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I} \\ 
-R(a,b) = ab \\
-\mu = \exp(-\Lambda c) &amp; \text{$\Lambda&gt;0$ for viscous fingering} \\
-\rho(a,b,c) = a + \beta b + \gamma c \\
-a_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-\sqrt{RaDa}}{\epsilon \sqrt{RaDa}}\right)\right)+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
-b_0&gt;0 \\
-c_0\geq0 \\
-a_{\text{D}}(x,y=\sqrt{RaDa})=1 &amp; \text{prescribed concentration on upper boundary} \\
-a_{\text{N}}(x,y=0) &amp; \text{no-flux on remaining boundary} \\
-a_{\text{N}}(x=0,y) \\
-a_{\text{N}}(x=\sqrt{RaDa}\mathcal{A},y) \\
-b_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
-\psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
+\tau(\mu, \textbf{u}) \\
+\mu(c,\theta) \\
+\rho(c, \theta)
 \end{cases}
 \end{split}\]</div>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+</div>
 </section>
 
     <script type="text/x-thebe-config">
@@ -507,20 +547,20 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="A07.1_abc_convection_density.html"
+       href="A09.1_darcy_porosity_evolution_injection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ABC convection with a destabilising reaction</p>
+        <p class="prev-next-title">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</p>
       </div>
     </a>
     <a class="right-next"
-       href="A08.0_darcy_fingering_equations.html"
+       href="A10.1_stokes_convection_viscosity.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Darcy fingering equations</p>
+        <p class="prev-next-title">Rayleigh-Bénard convection of a Stokes fluid with a destabilising viscosity</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -530,6 +570,26 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary} \\
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
