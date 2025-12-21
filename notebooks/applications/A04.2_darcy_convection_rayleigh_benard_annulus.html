@@ -298,6 +298,7 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../technical/T01_timeseries.html">Timeseries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../technical/T02_finite_differences.html">Finite differences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/T03_perturbation.html">Perturbations</a></li>
 </ul>
 
     </div>
@@ -452,16 +453,15 @@ document.write(`
 <h1>Rayleigh-Bénard convection of a Darcy fluid in a porous annulus<a class="headerlink" href="#rayleigh-benard-convection-of-a-darcy-fluid-in-a-porous-annulus" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\begin{cases}
 \mathbb{S}
+\begin{cases}
 \mathcal{L} = \mathcal{L}_\Omega &amp; \text{scaling with annulus size and convective speed} \\
 \mathcal{U} = K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}} \\
 \mathcal{T} = \phi_{\text{ref}}\mathcal{L}/\mathcal{U} \\
 \Omega = \Omega = \{(x, y)~:~R_{\text{inner}}^2 &lt; x^2 + y^2 &lt; R_{\text{outer}}^2\} &amp; R_{\text{inner}}, R_{\text{outer}}=\mathcal{O}(1) \\
 \partial\Omega_{\text{inner}} = \{(x, y)~:~ x^2 + y^2 = R_{\text{inner}}^2 \} \\
 \partial\Omega_{\text{outer}} = \{(x, y)~:~ x^2 + y^2 = R_{\text{outer}}^2 \} \\
-e_g^x = -\frac{x}{\sqrt{x^2+y^2}} &amp; \text{gravity acting radially towards centre} \\ 
-e_g^y = -\frac{y}{\sqrt{x^2+y^2}} \\
+\textbf{e}_g = -\frac{x}{\sqrt{x^2+y^2}}\textbf{e}_x -\frac{y}{\sqrt{x^2+y^2}}\textbf{e}_y &amp; \text{gravity acting radially towards centre} \\ 
 \phi = 1 &amp; \text{constitutive relations} \\
 \mathsf{D} = \mathsf{I} \\ 
 \mathsf{K} = \mathsf{I}\\ 
