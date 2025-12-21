@@ -469,8 +469,7 @@ f(x, y) = x + y^2
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span> <span class="k">as</span> <span class="n">Function</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
 
@@ -502,25 +501,11 @@ f(x, y) = x + y^2
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">5</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span> <span class="k">as</span> <span class="n">Function</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="ne">----&gt; </span><span class="mi">5</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;get_ipynb_file_name&#39; from &#39;lucifex.io&#39; (/Users/George/Desktop/LUCiFEx/lucifex/io/__init__.py)
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
@@ -532,15 +517,40 @@ f(x, y) = x + y^2
 </div>
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span><span class="p">(),</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="ne">KeyError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 <span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
 
-<span class="ne">NameError</span>: name &#39;plot_colormap&#39; is not defined
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/utils/py_utils.py:48,</span> in <span class="ni">replicate_callable.&lt;locals&gt;._decorator.&lt;locals&gt;._wrapper</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span> <span class="k">def</span><span class="w"> </span><span class="nf">_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">48</span>     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/viz/ipynb.py:48,</span> in <span class="ni">_save_figure.&lt;locals&gt;._</span><span class="nt">(file_name, dir_path, prefix_ipynb, get_path)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span> <span class="k">def</span><span class="w"> </span><span class="nf">_</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span>     <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>     <span class="n">dir_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span>     <span class="n">prefix_ipynb</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">44</span>     <span class="n">get_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">Concatenate</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">P</span><span class="p">],</span> <span class="n">R</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="n">Concatenate</span><span class="p">[</span><span class="n">FuncAnimation</span><span class="p">,</span> <span class="n">Q</span><span class="p">],</span> <span class="n">R</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span>     <span class="k">if</span> <span class="n">prefix_ipynb</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">48</span>         <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span>     <span class="k">if</span> <span class="n">dir_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">50</span>         <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dir_path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/viz/ipynb.py:25,</span> in <span class="ni">get_ipynb_file_name</span><span class="nt">(key, ext)</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span>     <span class="n">_globals</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()</span>
+<span class="ne">---&gt; </span><span class="mi">25</span> <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">_globals</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+<span class="g g-Whitespace">     </span><span class="mi">27</span> <span class="k">if</span> <span class="n">ext</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">28</span>     <span class="k">return</span> <span class="n">basename</span>
+
+<span class="ne">KeyError</span>: &#39;__vsc_ipynb_file__&#39;
 </pre></div>
 </div>
+<img alt="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" src="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" />
 </div>
 </div>
 </section>
