@@ -546,12 +546,12 @@ def spacetime_grid(
 ) -> np.ndarray:
     _cross_sections = []
     xaxis, _csec, value  = cross_section(
-        u[0], axis, value, fraction, use_cache, axis_names,
+        u[0], axis, value, fraction, axis_names, use_cache,
     )
     _cross_sections.append(_csec)
 
     for _u in u[1:]:
-        _xaxis, _csec, _value  = cross_section(_u, axis, value, fraction, use_cache, axis_names)
+        _xaxis, _csec, _value  = cross_section(_u, axis, value, fraction, axis_names, use_cache)
         assert np.isclose(value, _value)
         assert np.all(np.isclose(xaxis, _xaxis))
         _cross_sections.append(_csec)

@@ -1,12 +1,11 @@
 from ufl.core.expr import Expr
-from ufl import (Measure, Form, FacetNormal, inner, inv, div,
+from ufl import (Measure, Form, FacetNormal, inner, grad, inv, div,
                  Dx, TrialFunction, TestFunction,
                  det, transpose, TrialFunctions, TestFunctions)
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import FunctionSeries
 
-from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
 from lucifex.utils import is_tensor
 
@@ -53,7 +52,7 @@ def darcy_incompressible(
     k: Expr | Function | Constant,
     mu: Expr | Function | Constant,
     f: Expr | None = None,
-    p_bcs: BoundaryConditions | None = None,
+    bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
     `∇⋅𝐮 = 0` \\
@@ -80,8 +79,8 @@ def darcy_incompressible(
         F_buoyancy = inner(v, f) * dx
         forms.append(F_buoyancy)
 
-    if p_bcs is not None:
-        ds, p_natural = p_bcs.boundary_data(up.function_space, 'natural')
+    if bcs is not None:
+        ds, p_natural = bcs.boundary_data(up.function_space, 'natural')
         F_bcs = sum([inner(v, n) * pN * ds(i) for i, pN in p_natural])
         forms.append(F_bcs)
 

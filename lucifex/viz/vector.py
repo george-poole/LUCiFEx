@@ -6,7 +6,7 @@ from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ..utils import is_vector, grid, create_fem_function, get_component_fem_functions, is_cartesian
+from ..utils import is_vector, grid, create_fem_function, get_component_fem_functions, is_cartesian, filter_kwargs
 from .utils import set_axes, optional_ax
 
 
@@ -52,7 +52,9 @@ def _plot_quiver(
 ) -> tuple[Figure, Axes]:
     x, y, fx, fy = f
 
-    set_axes(ax, x, y, **kwargs)
+    _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
+    _axs_kwargs.update(**kwargs)
+    filter_kwargs(set_axes)(ax, **_axs_kwargs)
 
     nx_arrow, ny_arrow = n_arrow
     nx_freq = int(np.ceil(len(x) / nx_arrow))
@@ -114,7 +116,9 @@ def _plot_streamlines(
     else:
         color, color_func = color
 
-    set_axes(ax, x, y, **kwargs)
+    _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
+    _axs_kwargs.update(**kwargs)
+    filter_kwargs(set_axes)(ax, **_axs_kwargs)
 
     if color in list(mpl_colormaps):
         # line colour varying according to vector magnitude |f(x,y)|

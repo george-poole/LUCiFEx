@@ -26,6 +26,7 @@ def create_animation(
     clear_func: Callable[[Figure, Axes], None] | None = None,
     millisecs: int = 100,
     anim_kwargs: dict | None = None,
+    close: bool = True,
     **plt_kwargs,
 ) -> FuncAnimationFromSeries[T]:
     """
@@ -68,7 +69,7 @@ def create_animation(
         if anim_kwargs is None:
             anim_kwargs = {}
 
-        return FuncAnimation(
+        anim = FuncAnimation(
             fig, 
             _update, 
             n_snapshots, 
@@ -76,6 +77,10 @@ def create_animation(
             interval=millisecs, 
             **anim_kwargs,
         )
+        if close:
+            plt.close(fig)
+
+        return anim
         
     return _
     

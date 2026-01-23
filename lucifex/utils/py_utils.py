@@ -7,6 +7,8 @@ from typing import (
     overload,
     TypeAlias,
     Any,
+)
+from collections.abc import (
     Iterable,
     Hashable,
 )
@@ -218,8 +220,7 @@ COLON = ':'
 DOUBLE_COLON = f'{COLON}{COLON}'
 
 
-# TODO slice[int, int, int] in Python 3.11+
-def as_slice(s: str | slice) -> slice:
+def as_slice(s: str | slice| Iterable[int]) -> slice:
     if not is_slice(s):
         raise ValueError(f'Invalid string {s} representing a slice.')
 
@@ -257,14 +258,19 @@ def as_slice(s: str | slice) -> slice:
 
         return slice(start, stop, step)
     
+    if isinstance(s, Iterable):
+        return slice(*s)
+    
     raise MultipleDispatchTypeError(s)
 
 
-def is_slice(s: str | slice | Any) -> bool:
+def is_slice(s: str | slice | Iterable[int] | Any) -> bool:
     if isinstance(s, slice):
         return True
     elif isinstance(s, str):
         return s.count(COLON) >= 1 and s.count(COLON) <= 2
+    elif isinstance(s, tuple) and all(isinstance(i, int) for i in s):
+        return len(s) > 0 and len(s) <= 3
     else:
         return False
     

@@ -23,10 +23,10 @@ def stokes_incompressible(
     dx = Measure('dx', up.function_space.mesh)
     v, q = TestFunctions(up.function_space)
     u, p = TrialFunctions(up.function_space) 
+    tau = deviatoric_stress(u)
 
     F_incomp = q * div(u) * dx
     F_pressure = -p * div(v) * dx
-    tau = deviatoric_stress(u)
     F_stress = inner(grad(v), tau) * dx 
 
     if f is None:

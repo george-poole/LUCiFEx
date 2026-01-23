@@ -135,7 +135,7 @@ def write(
     dpi: int = 150,
     file_ext: str | Iterable[str] = "pdf",
     **savefig_kwargs,
-):
+) -> None:
     ...
 
 

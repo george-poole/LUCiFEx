@@ -100,26 +100,6 @@ def dofs_array_dim(
             raise NotImplementedError(f'I/O with shape {shape} is not supported.')
         
 
-def get_ipynb_file_name(
-    key: str = '__vsc_ipynb_file__',
-    ext: bool = False,
-) -> str:
-    try:
-        from IPython import get_ipython
-        ip = get_ipython()
-        if ip is not None:
-            _globals = ip.user_global_ns 
-    except Exception:
-        _globals = globals()
-
-    basename = os.path.basename(_globals[key])
-
-    if ext:
-        return basename
-    else:
-        return os.path.splitext(basename)[0]
-
-
 def io_element(
     u: FunctionSpace | Function | FunctionSeries,
 ) -> tuple[str, int] | tuple[str, int, int]:
