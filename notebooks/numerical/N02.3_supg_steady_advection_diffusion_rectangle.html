@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Periodic boundary conditions &#8212; LUCiFEx Demo</title>
+    <title>Advection skew to the mesh on a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -59,11 +59,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N08_bcs_periodic';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N02.3_supg_steady_advection_diffusion_rectangle';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Timeseries" href="../technical/T01_timeseries.html" />
-    <link rel="prev" title="Time-dependent boundary conditions" href="N07_bcs_time_dependent.html" />
+    <link rel="next" title="DG formulation of the steady advection-diffusion-reaction equation" href="N03.0_dg_steady_advection_diffusion.html" />
+    <link rel="prev" title="Stabilizing a boundary layer on an interval" href="N02.1_supg_steady_advection_diffusion_interval.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -274,9 +274,9 @@
 <li class="toctree-l2"><a class="reference internal" href="N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="N03.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -295,7 +295,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="N07_bcs_time_dependent.html">Time-dependent boundary conditions</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Periodic boundary conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="N08_bcs_periodic.html">Periodic boundary conditions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technical</span></p>
 <ul class="nav bd-sidenav">
@@ -356,7 +356,7 @@
       
       
       
-      <li><a href="../../_sources/notebooks/numerical/N08_bcs_periodic.ipynb" target="_blank"
+      <li><a href="../../_sources/notebooks/numerical/N02.3_supg_steady_advection_diffusion_rectangle.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -427,9 +427,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -440,22 +438,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Periodic boundary conditions</h1>
+    <h1>Advection skew to the mesh on a rectangle</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#periodic-in-the-x-direction-partial-omega-text-d-cup-partial-omega-text-n-neq-varnothing">Periodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}\neq\varnothing\)</span>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#periodic-in-the-x-and-y-directions-partial-omega-text-d-cup-partial-omega-text-n-varnothing">Periodic in the <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> directions (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}=\varnothing\)</span>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#antiperiodic-in-the-x-direction">Antiperiodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-periodicity">Cross-periodicity</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -465,208 +452,112 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="periodic-boundary-conditions">
-<h1>Periodic boundary conditions<a class="headerlink" href="#periodic-boundary-conditions" title="Link to this heading">#</a></h1>
-<p>boundary value problem on <span class="math notranslate nohighlight">\(\textbf{x}\in\Omega\)</span></p>
+  <section class="tex2jax_ignore mathjax_ignore" id="advection-skew-to-the-mesh-on-a-rectangle">
+<h1>Advection skew to the mesh on a rectangle<a class="headerlink" href="#advection-skew-to-the-mesh-on-a-rectangle" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
-\[\nabla^2 u = f(\textbf{x})\]</div>
-<p>Neumann boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{D}}\)</span></p>
-<div class="math notranslate nohighlight">
-\[u = u_{\text{D}}\]</div>
-<p>Neumann boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{N}}\)</span></p>
-<div class="math notranslate nohighlight">
-\[\textbf{n}\cdot\nabla u = u_{\text{N}}\]</div>
-<p>periodic boundary condition on <span class="math notranslate nohighlight">\(\textbf{x}\in\partial\Omega_{\text{M}}\cup\in\partial\Omega_{\text{S}}\)</span></p>
-<div class="math notranslate nohighlight">
-\[u\vert_{\partial\Omega_{\text{M}}} = u\vert_{\partial\Omega_{\text{S}}}\]</div>
+\[\begin{split}
+\mathbb{S}
+\begin{cases}
+\Omega = [0, 1]\times[0,1] \\
+u_{\text{D}}(x=0,y&lt;y_{\text{in}}) = 0 \\
+u_{\text{D}}(x=0,y \geq y_{\text{in}}) = u_{\text{in}} \\
+u_{\text{D}}(x,y=0) = 0 \\
+u_{\text{N}}(x,y=1)=u_{\text{D}}(x=1,y) = 0 ~\text{or}~ u_{\text{N}}(x,y=1)=u_{\text{N}}(x=1,y) = 0\\
+\textbf{a}=a\cos\theta\textbf{e}_x + a\sin\theta\textbf{e}_y \\
+\mathsf{D}=D\mathsf{I} \\
+R=0 \\
+J=0 \\
+\end{cases}
+\end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dolfinx.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionSpace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryValueProblem</span><span class="p">,</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">steady_advection_diffusion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.supg</span><span class="w"> </span><span class="kn">import</span> <span class="n">peclet</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">OptionsPETSc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">(</span>
+    <span class="n">supg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Ly</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">u_inflow</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">y_inflow</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">bc_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryValueProblem</span><span class="p">:</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">)</span>
+    <span class="n">theta_rad</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span>
+    <span class="n">ay</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+    <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y_inflow</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">y_inflow</span><span class="p">),</span> <span class="n">u_inflow</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">bc_type</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">bc_type</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">steady_advection_diffusion</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)(</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">supg</span><span class="o">=</span><span class="n">supg</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">u_solver</span>
 
 
-<span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-<span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
-    <span class="n">mesh</span><span class="p">,</span> 
-    <span class="p">{</span>
-        <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span>
-        <span class="s2">&quot;lower&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="s2">&quot;upper&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">Ny</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">u_inflow</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">y_inflow</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="mf">30.0</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">right_to_left</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+<span class="n">hx</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
+<span class="n">hy</span> <span class="o">=</span> <span class="n">Ly</span> <span class="o">/</span> <span class="n">Ny</span>
+<span class="n">Pe_x</span> <span class="o">=</span> <span class="n">peclet</span><span class="p">(</span><span class="n">hx</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">Pe_y</span> <span class="o">=</span> <span class="n">peclet</span><span class="p">(</span><span class="n">hy</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">upper_to_lower</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">))</span>
-
-<span class="n">fs</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">supg_types</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;coth&#39;</span><span class="p">,</span> <span class="s1">&#39;upwind&#39;</span><span class="p">)</span>
+<span class="n">bc_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;neumann&#39;</span><span class="p">,</span> <span class="s1">&#39;dirichlet&#39;</span><span class="p">)</span>
+<span class="n">solutions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Function</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_types</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bc_types</span><span class="p">:</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">create_solver</span><span class="p">(</span><span class="n">supg</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">u_inflow</span><span class="p">,</span> <span class="n">y_inflow</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">bc</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solution</span>
 </pre></div>
 </div>
-</div>
-</div>
-<section id="periodic-in-the-x-direction-partial-omega-text-d-cup-partial-omega-text-n-neq-varnothing">
-<h2>Periodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}\neq\varnothing\)</span>)<a class="headerlink" href="#periodic-in-the-x-direction-partial-omega-text-d-cup-partial-omega-text-n-neq-varnothing" title="Link to this heading">#</a></h2>
-<div class="math notranslate nohighlight">
-\[c(x=0,y)=c(x=L_x,y)\]</div>
-<div class="math notranslate nohighlight">
-\[c(x,y=0)=c(x,y=L_y)=0\]</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bcs_pbc_x</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;periodic&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="n">right_to_left</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-<span class="p">)</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Ly</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-<span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs_pbc_x</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-
-<span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$y$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/8c6025790b3f0322c140b24f2ca3331db9098ed2bb9615c38f055b2eb457e348.png" src="../../_images/8c6025790b3f0322c140b24f2ca3331db9098ed2bb9615c38f055b2eb457e348.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">bc</span> <span class="ow">in</span> <span class="n">bc_types</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_types</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">][</span><span class="n">bc</span><span class="p">]</span>
+        <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">bc</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">supg</span><span class="si">}</span><span class="s1"> &#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$u(y=0.50)$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/1f567548013e4d4693225164320cd15728ff4abc3810b5186d472b6601ca677e.png" src="../../_images/1f567548013e4d4693225164320cd15728ff4abc3810b5186d472b6601ca677e.png" />
-</div>
-</div>
-</section>
-<section id="periodic-in-the-x-and-y-directions-partial-omega-text-d-cup-partial-omega-text-n-varnothing">
-<h2>Periodic in the <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> directions (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}=\varnothing\)</span>)<a class="headerlink" href="#periodic-in-the-x-and-y-directions-partial-omega-text-d-cup-partial-omega-text-n-varnothing" title="Link to this heading">#</a></h2>
-<div class="math notranslate nohighlight">
-\[c(x=0,y)=c(x=L_x,y)\]</div>
-<div class="math notranslate nohighlight">
-\[c(x,y=0)=c(x,y=L_y)\]</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;periodic&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="n">upper_to_lower</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;periodic&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="n">right_to_left</span><span class="p">),</span>
-<span class="p">)</span>
-
-<span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Ly</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-
-<span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$y$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/e420626579a9844a3b53dfa2739460a0818fddf9b81397c61d4a91f5de4ab441.png" src="../../_images/e420626579a9844a3b53dfa2739460a0818fddf9b81397c61d4a91f5de4ab441.png" />
-</div>
-</div>
-</section>
-<section id="antiperiodic-in-the-x-direction">
-<h2>Antiperiodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction<a class="headerlink" href="#antiperiodic-in-the-x-direction" title="Link to this heading">#</a></h2>
-<div class="math notranslate nohighlight">
-\[c(x=0,y)=-c(x=L_x,y)\]</div>
-<div class="math notranslate nohighlight">
-\[c(x,y=0)=c(x,y=L_y)=0\]</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;antiperiodic&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="n">right_to_left</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-<span class="p">)</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-<span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-
-<span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$y$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/6ee35699275c96066da8e04e0a9ee576ebe907ef6c61b11fadb7713e1009ebbe.png" src="../../_images/6ee35699275c96066da8e04e0a9ee576ebe907ef6c61b11fadb7713e1009ebbe.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$u(y=0.50)$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/b635b0dc693b4629ec934f927712e13b7ba247e739e0eb63dba6a65dcd007a8c.png" src="../../_images/b635b0dc693b4629ec934f927712e13b7ba247e739e0eb63dba6a65dcd007a8c.png" />
-</div>
-</div>
-</section>
-<section id="cross-periodicity">
-<h2>Cross-periodicity<a class="headerlink" href="#cross-periodicity" title="Link to this heading">#</a></h2>
-<div class="math notranslate nohighlight">
-\[c(x,y=L_y)=c(x=0,y)\]</div>
-<div class="math notranslate nohighlight">
-\[c(x=0,y)=c(x=L_x,y)=0\]</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">upper_to_left</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">Ly</span> <span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-
-
-<span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-
-<span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;periodic&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="n">upper_to_left</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
-<span class="p">)</span>
-
-<span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-
-<span class="n">petsc</span> <span class="o">=</span> <span class="n">OptionsPETSc</span><span class="p">(</span><span class="s1">&#39;preonly&#39;</span><span class="p">,</span> <span class="s1">&#39;lu&#39;</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="mf">1e-14</span><span class="p">)</span>
-<span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">petsc</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-<span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-
-<span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;$x$&#39;, ylabel=&#39;$y$&#39;&gt;)
-</pre></div>
-</div>
-<img alt="../../_images/86dbc296467a1f67b434e23c99a84da7334acdcbc34d15d2a8a9b0fd235cb8e4.png" src="../../_images/86dbc296467a1f67b434e23c99a84da7334acdcbc34d15d2a8a9b0fd235cb8e4.png" />
+<img alt="../../_images/b59d8dfa269912571422ce8d521eb92f6b20352befed5abc7397fba01c93443c.png" src="../../_images/b59d8dfa269912571422ce8d521eb92f6b20352befed5abc7397fba01c93443c.png" />
+<img alt="../../_images/1780f0630415082958df944f7bd7dbd98ee0300c5068deeac96c41cdca43eac1.png" src="../../_images/1780f0630415082958df944f7bd7dbd98ee0300c5068deeac96c41cdca43eac1.png" />
+<img alt="../../_images/60618d5f0ffdefb908d9dae17a5bf7055354a33ead0328ae2044d05ad488d6ed.png" src="../../_images/60618d5f0ffdefb908d9dae17a5bf7055354a33ead0328ae2044d05ad488d6ed.png" />
+<img alt="../../_images/48325e8d2610e54222a33e9f8dc8b312c3b516b6d8d8b6227feaddcd053c9ae0.png" src="../../_images/48325e8d2610e54222a33e9f8dc8b312c3b516b6d8d8b6227feaddcd053c9ae0.png" />
+<img alt="../../_images/5273e9e6c7b981cc50370ae6a25d4058207f896e64ce1012a8ba7e72a781d998.png" src="../../_images/5273e9e6c7b981cc50370ae6a25d4058207f896e64ce1012a8ba7e72a781d998.png" />
+<img alt="../../_images/85ff576ee77da584e5591b60762087576c30a6b96ee86fc4fe3ced7388dd91ce.png" src="../../_images/85ff576ee77da584e5591b60762087576c30a6b96ee86fc4fe3ced7388dd91ce.png" />
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
 
 <span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
@@ -678,7 +569,6 @@ document.write(`
 </div>
 </div>
 </div>
-</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -712,20 +602,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="N07_bcs_time_dependent.html"
+       href="N02.1_supg_steady_advection_diffusion_interval.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Time-dependent boundary conditions</p>
+        <p class="prev-next-title">Stabilizing a boundary layer on an interval</p>
       </div>
     </a>
     <a class="right-next"
-       href="../technical/T01_timeseries.html"
+       href="N03.0_dg_steady_advection_diffusion.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Timeseries</p>
+        <p class="prev-next-title">DG formulation of the steady advection-diffusion-reaction equation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -735,24 +625,6 @@ document.write(`
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#periodic-in-the-x-direction-partial-omega-text-d-cup-partial-omega-text-n-neq-varnothing">Periodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}\neq\varnothing\)</span>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#periodic-in-the-x-and-y-directions-partial-omega-text-d-cup-partial-omega-text-n-varnothing">Periodic in the <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> directions (<span class="math notranslate nohighlight">\(\partial\Omega_{\text{D}}\cup\partial\Omega_{\text{N}}=\varnothing\)</span>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#antiperiodic-in-the-x-direction">Antiperiodic in the <span class="math notranslate nohighlight">\(x\)</span>-direction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-periodicity">Cross-periodicity</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
