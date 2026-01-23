@@ -467,12 +467,11 @@ document.write(`
 \mathsf{K}(\textbf{x})=\mathcal{N}(\textbf{x})\mathsf{I} &amp; \text{random isotropic permeability} \\
 \mu=1 \\
 \psi_{\text{D}}\vert_{\partial\Omega_{\text{upper}}}=0 &amp; \text{no-penetration on upper and lower boundaries}\\
-\psi_{\text{D}}\vert_{\partial\Omega_{\text{lower}}}=-u_{\text{in}}(R_{\text{outer}}-R_{\text{inner}}) \\
 \psi_{\text{D}}\vert_{\partial\Omega_{\text{in}}}=-u_{\text{in}}(x+R_{\text{outer}}) &amp; \text{inflow boundary} \\
 \psi_{\text{D}}\vert_{\partial\Omega_{\text{out}}}=u_{\text{in}}(x-R_{\text{outer}}) &amp; \text{outflow boundary} \\
+\psi_{\text{D}}\vert_{\partial\Omega_{\text{lower}}}=-u_{\text{in}}(R_{\text{outer}}-R_{\text{inner}}) &amp; \text{piecewise continuous to satisfy the incompressibility constraint} \\
 \end{cases}
 \end{split}\]</div>
-<p>Note that <span class="math notranslate nohighlight">\(\psi_{\text{D}}\)</span> is piecewise continuous and satisfies the incompressibility constraint.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>

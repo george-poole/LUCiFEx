@@ -489,7 +489,7 @@ document.write(`
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d~\text{and}~p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
+&amp;\mathbb{IBVP}\begin{cases}
 \nabla\cdot\textbf{u} = 0 &amp; \\
 \rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \textbf{f} &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 \textbf{u}=\textbf{u}_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
@@ -592,7 +592,7 @@ F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rh
 \begin{align*}
 &amp;\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0~, \\
 &amp;\tau(\textbf{u}) = \frac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right)~, \\
-&amp;\boldsymbol{\omega}=\nabla\times\textbf{u}=\nabla\times(\nabla\times\boldsymbol{\psi})~, \\
+&amp;\boldsymbol{\omega}=\nabla\times\textbf{u}=\nabla\times(\nabla\times\boldsymbol{\psi}) \\
 &amp;\text{and}~\nabla\rho=\nabla\mu=\textbf{0} \\
 &amp;\implies\rho\left(\frac{\partial\boldsymbol{\omega}}{\partial t}+(\nabla\times\boldsymbol{\psi})\cdot\nabla\boldsymbol{\omega} - \boldsymbol{\omega}\cdot\nabla(\nabla\times\boldsymbol{\psi})\right)=\mu\nabla^2\boldsymbol{\omega} + \nabla\times\textbf{f}
 \end{align*}
@@ -601,11 +601,13 @@ F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rh
 <section id="d-cartesian-definitions">
 <h3>2D Cartesian definitions<a class="headerlink" href="#d-cartesian-definitions" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y\]</div>
-<div class="math notranslate nohighlight">
-\[\boldsymbol{\omega}=\omega\textbf{e}_z=\left(\frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}\right)\textbf{e}_z\]</div>
-<div class="math notranslate nohighlight">
-\[\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y\]</div>
+\[\begin{split}
+\begin{align*}
+&amp;\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \\
+&amp;\boldsymbol{\omega}=\omega\textbf{e}_z=\left(\frac{\partial u_y}{\partial x} - \frac{\partial u_x}{\partial y}\right)\textbf{e}_z \\
+&amp;\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y
+\end{align*}
+\end{split}\]</div>
 </section>
 <section id="id1">
 <h3>Strong form<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
@@ -613,7 +615,7 @@ F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rh
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\psi(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{and}~\omega(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
+&amp;\mathbb{IBVP}\begin{cases}
 \nabla^2\psi =\omega &amp; \\
 \rho\left(\frac{\partial\omega}{\partial t}+\left(-\frac{\partial\psi}{\partial y}, \frac{\partial\psi}{\partial x}\right)\cdot\nabla\omega\right) =\mu\nabla^2\omega + \frac{\partial f_y}{\partial x} - \frac{\partial f_x}{\partial y} &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 \omega(\textbf{x}, t=0)=\omega_0 &amp; \forall \textbf{x}\in\Omega \\
