@@ -274,7 +274,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -499,6 +499,25 @@ c_{\text{N}}(x,y=L_y)=0 \\
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
+<span class="ne">----&gt; </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">from</span><span class="w"> </span><span class="nn">py.darcy_saffman_taylor</span><span class="w"> </span><span class="kn">import</span> <span class="n">saffman_taylor_rectangle</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="n">simulation</span> <span class="o">=</span> <span class="n">saffman_taylor_rectangle</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="n">Lx</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span>     <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="p">)</span>
+
+<span class="ne">ImportError</span>: cannot import name &#39;get_ipynb_file_name&#39; from &#39;lucifex.io&#39; (/Users/George/Desktop/LUCiFEx/lucifex/io/__init__.py)
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -517,6 +536,18 @@ c_{\text{N}}(x,y=L_y)=0 \\
         <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
         <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">c</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;psi&#39;</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">i_qrt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.25</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">i_mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
+
+<span class="ne">NameError</span>: name &#39;simulation&#39; is not defined
 </pre></div>
 </div>
 </div>

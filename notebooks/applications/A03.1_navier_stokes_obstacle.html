@@ -274,7 +274,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -503,6 +503,42 @@ document.write(`
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="n">r</span> <span class="o">=</span> <span class="n">Ly</span> <span class="o">/</span> <span class="mi">5</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Lx</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Ly</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">12</span> <span class="n">simulation</span> <span class="o">=</span> <span class="n">navier_stokes_circle_obstacle</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="n">Lx</span><span class="o">=</span><span class="n">Lx</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span>     <span class="n">Ly</span><span class="o">=</span><span class="n">Ly</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span>     <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">16</span>     <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span>     <span class="n">dx</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">18</span>     <span class="n">rho</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">mu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">p_in</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span>     <span class="n">dt_max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="n">dt_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span>     <span class="n">cfl_courant</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span>     <span class="n">ns_scheme</span><span class="o">=</span><span class="s1">&#39;ipcs&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span>     <span class="n">D_adv</span><span class="o">=</span><span class="n">FE</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span>     <span class="n">D_visc</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">27</span> <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">29</span> <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="g g-Whitespace">     </span><span class="mi">30</span> <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/sim/simulation.py:378,</span> in <span class="ni">configure_simulation.&lt;locals&gt;._decorator.&lt;locals&gt;._</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">376</span> <span class="n">error_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">simulation_func_params</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">377</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">378</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognised keyword argument: </span><span class="si">{</span><span class="n">error_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">379</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">380</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognised keyword arguments: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">error_params</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+<span class="ne">TypeError</span>: Unrecognised keyword argument: c.
+</pre></div>
+</div>
+</div>
 </div>
 <!-- # Navier-Stokes flow
 
@@ -585,6 +621,18 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">mesh</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">time_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="ne">NameError</span>: name &#39;simulation&#39; is not defined
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -606,9 +654,16 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/de77910a04d608a143bc3b7167f6874bf7579625be592b4c530fc15d5fd5acf2.png" src="../../_images/de77910a04d608a143bc3b7167f6874bf7579625be592b4c530fc15d5fd5acf2.png" />
-<img alt="../../_images/188d4fab93602ecce3d66a74109941e09701446c1fa1bb108975daccad6fea69.png" src="../../_images/188d4fab93602ecce3d66a74109941e09701446c1fa1bb108975daccad6fea69.png" />
-<img alt="../../_images/927e677538897a5b0c6612f456b3a6bb31eb264276c3a0ab4c10ca2246e92dfa.png" src="../../_images/927e677538897a5b0c6612f456b3a6bb31eb264276c3a0ab4c10ca2246e92dfa.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">pn_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">pn</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">ux_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;mesh&#39; is not defined
+</pre></div>
+</div>
 </div>
 </div>
 <!-- # Navier-Stokes flow

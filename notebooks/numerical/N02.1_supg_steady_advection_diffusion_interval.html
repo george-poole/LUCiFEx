@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SUPG stabilization of the steady advection-diffusion-reaction equation &#8212; LUCiFEx Demo</title>
+    <title>Stabilizing a boundary layer on an interval &#8212; LUCiFEx Demo</title>
   
   
   
@@ -274,7 +274,7 @@
 <li class="toctree-l2"><a class="reference internal" href="N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Stabilizing a boundary layer on an interval</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -437,7 +437,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>SUPG stabilization of the steady advection-diffusion-reaction equation</h1>
+    <h1>Stabilizing a boundary layer on an interval</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -447,7 +447,6 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stabilizing-a-boundary-layer-on-an-interval">Stabilizing a boundary layer on an interval</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-hemker-problem">The Hemker problem</a></li>
 </ul>
             </nav>
@@ -460,32 +459,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="supg-stabilization-of-the-steady-advection-diffusion-reaction-equation">
-<h1>SUPG stabilization of the steady advection-diffusion-reaction equation<a class="headerlink" href="#supg-stabilization-of-the-steady-advection-diffusion-reaction-equation" title="Link to this heading">#</a></h1>
-<p>strong form
-$<span class="math notranslate nohighlight">\(
-\begin{align*}
-&amp;\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\begin{cases}
-\textbf{a}\cdot\nabla u= \nabla\cdot(\mathsf{D}\cdot\nabla u) + Ru + J &amp; \forall\textbf{x}\in\Omega \\
-u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
-\textbf{n}\cdot(\mathsf{D}\cdot\nabla{u}) = u_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
-\end{cases}~.
-\end{align*}
-\)</span>$</p>
-<p>stabilized weak form
-$<span class="math notranslate nohighlight">\(
-\begin{align*}
-&amp;\text{Find}~u\in V ~\text{such that} \\
-&amp;F(u,v)+F_{\text{SUPG}}(u,v)=0 \quad\forall v\in V~.
-\end{align*}
-\)</span>$</p>
-<p>stabilization term
-$<span class="math notranslate nohighlight">\(
-F_{\text{SUPG}}(u,v)=...
-\)</span>$</p>
-<section id="stabilizing-a-boundary-layer-on-an-interval">
-<h2>Stabilizing a boundary layer on an interval<a class="headerlink" href="#stabilizing-a-boundary-layer-on-an-interval" title="Link to this heading">#</a></h2>
+  <section class="tex2jax_ignore mathjax_ignore" id="stabilizing-a-boundary-layer-on-an-interval">
+<h1>Stabilizing a boundary layer on an interval<a class="headerlink" href="#stabilizing-a-boundary-layer-on-an-interval" title="Link to this heading">#</a></h1>
 <p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 2.3.1\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
@@ -589,7 +564,6 @@ u_{\text{e}}(x)=\frac{1}{a}\frac{(x-e^{ax/D})}{1-e^{a/D}}
 <img alt="../../_images/e6c76fb21775e0e6678db13f560bf7f03f18ca19bd760f3571e7fcf1d92c9828.png" src="../../_images/e6c76fb21775e0e6678db13f560bf7f03f18ca19bd760f3571e7fcf1d92c9828.png" />
 </div>
 </div>
-</section>
 <section id="the-hemker-problem">
 <h2>The Hemker problem<a class="headerlink" href="#the-hemker-problem" title="Link to this heading">#</a></h2>
 <p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 2.6.6\)</span></p>
@@ -750,7 +724,6 @@ u_{\text{e}}(x)=\cos(\pi x)+\frac{\text{erf}\left(\frac{x}{\sqrt{2D}}\right)}{\t
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stabilizing-a-boundary-layer-on-an-interval">Stabilizing a boundary layer on an interval</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-hemker-problem">The Hemker problem</a></li>
 </ul>
   </nav></div>
