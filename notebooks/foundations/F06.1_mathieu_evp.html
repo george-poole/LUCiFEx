@@ -513,6 +513,25 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">8</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">evp</span><span class="p">,</span> <span class="n">EigenvalueProblem</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">OptionsSLEPc</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">create_cycler</span>
+<span class="ne">----&gt; </span><span class="mi">8</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.eigen</span><span class="w"> </span><span class="kn">import</span> <span class="n">mathieu</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span>     <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span>     <span class="n">nev</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EigenvalueProblem</span><span class="p">:</span>
+
+<span class="ne">ImportError</span>: cannot import name &#39;get_ipynb_file_name&#39; from &#39;lucifex.io&#39; (/Users/George/Desktop/LUCiFEx/lucifex/io/__init__.py)
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -520,6 +539,18 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 <span class="n">eigenvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
 <span class="n">eigenreals</span> <span class="o">=</span> <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lmbdas</span><span class="p">]</span> <span class="k">for</span> <span class="n">lmbdas</span> <span class="ow">in</span> <span class="n">eigenvalues</span><span class="p">]</span>
 <span class="n">eigenreals_q0</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nev</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">eigenvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">eigenreals</span> <span class="o">=</span> <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lmbdas</span><span class="p">]</span> <span class="k">for</span> <span class="n">lmbdas</span> <span class="ow">in</span> <span class="n">eigenvalues</span><span class="p">]</span>
+
+<span class="ne">NameError</span>: name &#39;solvers&#39; is not defined
 </pre></div>
 </div>
 </div>
@@ -545,7 +576,19 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/b7723b9c05de0dfbac25b0042511e19ff46afb95dbbb8325ede4bbe23f2bcfae.png" src="../../_images/b7723b9c05de0dfbac25b0042511e19ff46afb95dbbb8325ede4bbe23f2bcfae.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+<span class="nn">      2     (q_axis, [eigenreals[q_index][n] for q_index</span> in <span class="ni">range(len</span><span class="nt">(q_axis))])</span>
+<span class="nn">----&gt; 3     for n</span> in <span class="ni">range</span><span class="nt">(nev)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">cyc</span> <span class="o">=</span> <span class="n">create_cycler</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dashed&#39;</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">],</span> <span class="n">ms</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;black&#39;</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;nev&#39; is not defined
+</pre></div>
+</div>
 </div>
 </div>
 </section>

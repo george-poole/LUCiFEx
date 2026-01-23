@@ -505,6 +505,47 @@ k = 1 \\
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">38</span>
+<span class="g g-Whitespace">     </span><span class="mi">32</span> <span class="n">k</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">33</span> <span class="n">s</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">34</span>     <span class="n">fs</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">35</span>     <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Ly</span><span class="p">),</span> 
+<span class="g g-Whitespace">     </span><span class="mi">36</span>     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> <span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">38</span> <span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">helmholtz</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">solution</span><span class="o">=</span><span class="n">u</span><span class="p">)(</span><span class="n">fs</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:273,</span> in <span class="ni">BoundaryValueProblem.from_forms_func.&lt;locals&gt;._create</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">269</span>     <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">270</span>         <span class="n">solution</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">272</span>     <span class="n">solution</span><span class="p">,</span> 
+<span class="ne">--&gt; </span><span class="mi">273</span>     <span class="n">forms_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> 
+<span class="g g-Whitespace">    </span><span class="mi">274</span>     <span class="n">bcs</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">275</span>     <span class="n">petsc</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">276</span>     <span class="n">jit</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">277</span>     <span class="n">ffcx</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">278</span>     <span class="n">corrector</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">279</span>     <span class="n">cache_matrix</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">280</span>     <span class="n">assemble_termwise</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">281</span>     <span class="n">future</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">282</span>     <span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">283</span> <span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/pde/eigen.py:31,</span> in <span class="ni">helmholtz</span><span class="nt">(u, k, f, bcs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">29</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">30</span>     <span class="n">fs</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">function_space</span>
+<span class="ne">---&gt; </span><span class="mi">31</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s1">&#39;dx&#39;</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">32</span> <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">33</span> <span class="n">u_trial</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+<span class="ne">AttributeError</span>: &#39;FunctionSpace&#39; object has no attribute &#39;function_space&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -514,7 +555,7 @@ k = 1 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/0b499e7b205343d8c375a4429abad96f7890448e9f09af76e48eef4888518e1c.png" src="../../_images/0b499e7b205343d8c375a4429abad96f7890448e9f09af76e48eef4888518e1c.png" />
+<img alt="../../_images/4ea99e56fd71ded3a3214faaf3437e5c5df31c27ad1a7acd51bd78a83840d844.png" src="../../_images/4ea99e56fd71ded3a3214faaf3437e5c5df31c27ad1a7acd51bd78a83840d844.png" />
 </div>
 </div>
 </section>
