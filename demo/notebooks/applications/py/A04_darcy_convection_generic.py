@@ -4,17 +4,18 @@ from types import EllipsisType
 import numpy as np
 from dolfinx.mesh import Mesh
 from ufl.core.expr import Expr
+from ufl import inner, sqrt
 
 from lucifex.fdm import FiniteDifference
 from lucifex.fem import Function, Constant
 from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries, FiniteDifference, AB1, Series, 
+    FunctionSeries, ConstantSeries, FiniteDifference, FE, Series, 
     ExprSeries, FiniteDifferenceArgwise, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
-    integration, interpolation, extrema
+    BoundaryConditions, OptionsPETSc, Solver, bvp, ibvp, evaluation, 
+    integration, interpolation, extrema, L_norm,
 )
 from lucifex.sim import Simulation
 
@@ -50,32 +51,20 @@ def darcy_convection_generic(
     cfl_h: str | float = "hmin",
     cfl_courant: float | None = 0.75,
     # time discretization
-    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_diff: FiniteDifference = AB1,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_diff: FiniteDifference = FE,
     # TODO supg stabilization
     # c_stabilization: str | None = None,
     # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
     psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
-    # optional solvers
+    # optional on-the-fly postprocessing
     secondary: bool = False,    
-    # solvers
-    secondary_extras: Iterable = (),
-    namespace_extras: Iterable = (),
+    tertiary: Iterable[Solver] = (),
+    namespace: Iterable = (),
       
 ) -> Simulation:
-    """
-    2D streamfunction formulation with boundary conditions `ψ = 0` on `∂Ω`.
-
-    Default gravity unit vector is `𝐞₉ = -𝐞ʸ`.
-    
-    Default boundary conditions are no flux of solute everywhere on `∂Ω`. 
-    
-    Default constitutive relations are uniform porosity `ϕ = 1`, 
-    isotropic quadratic permeability `K(ϕ) = ϕ²`, isotropic linear solutal
-    dispersion `D(ϕ) = ϕ` and uniform viscosity `μ = 1`.
-    """ 
     # time
     order = finite_difference_order(D_adv, D_diff)
     t = ConstantSeries(Omega, "t", order, ics=0.0)  
@@ -112,20 +101,22 @@ def darcy_convection_generic(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
+    namespace = [phi, ('k', k), ('d', d), rho, mu, *namespace]
     if secondary:
         uMinMax = ConstantSeries(Omega, "uMinMax", shape=(2,))
+        uRMS = ConstantSeries(Omega, 'uRMS')
+        rms_norm = 2
         cMinMax = ConstantSeries(Omega, "cMinMax", shape=(2,))
         dtCFL = ConstantSeries(Omega, "dtCFL")
-        fBoundary = ConstantSeries(Omega, "fBoundary", shape=(len(dOmega.union), 2))
+        fBoundary = ConstantSeries(Omega, "fBoundary", shape=(len(dOmega.markers), 2))
         solvers.extend(
             [
                 evaluation(uMinMax, extrema)(u[0]),
+                integration(uRMS, L_norm, 'dx', norm=rms_norm)(sqrt(inner(u[0], u[0])), rms_norm),
                 evaluation(cMinMax, extrema)(c[0]),
                 evaluation(dtCFL, cfl_timestep)(u[0], cfl_h),
-                integration(fBoundary, flux, 'ds', *dOmega.union)(c[0], u[0], d[0]),
+                integration(fBoundary, flux, 'ds', *dOmega.markers)(c[0], u[0], FE(d)),
             ]
         )
-    namespace = [phi, ('k', k), ('d', d), rho, mu]
-    solvers.extend(secondary_extras)
-    namespace.extend(namespace_extras)
+    solvers.extend(tertiary)
     return Simulation(solvers, t, dt, namespace)

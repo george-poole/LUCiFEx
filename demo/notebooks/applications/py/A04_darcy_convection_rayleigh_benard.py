@@ -42,8 +42,7 @@ def darcy_convection_rayleigh_benard_rectangle(
     Non-dimensionalization choosing `ℒ` as rectangle depth, 
     `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
 
-    `∂c/∂t + 𝐮·∇c = 1/Ra ∇²c`
-
+    `∂c/∂t + 𝐮·∇c = 1/Ra ∇²c` \\
     `∇⋅𝐮 = 0` \\
     `𝐮 = -(∇p + c𝐞ʸ)`
     """
@@ -87,7 +86,7 @@ def darcy_convection_rayleigh_benard_rectangle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         secondary=secondary,
-        namespace_extras=[Ra],
+        namespace=[Ra],
     )
 
 
