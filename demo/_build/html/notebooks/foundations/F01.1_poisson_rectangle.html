@@ -509,9 +509,11 @@ f(x, y) = x + y^2
 
 <span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">y_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plot_line</span><span class="p">((</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ux</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;u(x,y=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">y_axis</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">x_value</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plot_line</span><span class="p">((</span><span class="n">y_axis</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(x=</span><span class="si">{</span><span class="n">y_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;u(x=</span><span class="si">{</span><span class="n">x_value</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -519,9 +521,9 @@ f(x, y) = x + y^2
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Figure size 640x480 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$y$&#39;, ylabel=&#39;$u(x=0.50)$&#39;&gt;)
 </pre></div>
 </div>
-<img alt="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" src="../../_images/9ac044e943ca02373095306922f49bc38fd0adff206715fbee1d37f71493202e.png" />
-<img alt="../../_images/416a02945bf7768929351e701e362d7ddd28b315db2fa8ca1dc392a28a153083.png" src="../../_images/416a02945bf7768929351e701e362d7ddd28b315db2fa8ca1dc392a28a153083.png" />
-<img alt="../../_images/830d58284c54746bcb6d9ff0b6aa3eb6df8d5dc2daaf362c38d982f5443e402a.png" src="../../_images/830d58284c54746bcb6d9ff0b6aa3eb6df8d5dc2daaf362c38d982f5443e402a.png" />
+<img alt="../../_images/460b59f67b0cda96ca6e2a0fc5944cf7b0b75e15fadb5b34ba72f7c8779a8312.png" src="../../_images/460b59f67b0cda96ca6e2a0fc5944cf7b0b75e15fadb5b34ba72f7c8779a8312.png" />
+<img alt="../../_images/5cf36194860d26a1180caa84b672543be3ca2dbf415fffac06f51c895bf5ac3c.png" src="../../_images/5cf36194860d26a1180caa84b672543be3ca2dbf415fffac06f51c895bf5ac3c.png" />
+<img alt="../../_images/1703b989ecebc03c6021e4e00c5d1f59f978df0ff1280ba2ef808f5177d5e6c3.png" src="../../_images/1703b989ecebc03c6021e4e00c5d1f59f978df0ff1280ba2ef808f5177d5e6c3.png" />
 </div>
 </div>
 </section>
