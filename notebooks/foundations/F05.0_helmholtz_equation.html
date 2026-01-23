@@ -448,7 +448,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form2">Weak form2</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
 </ul>
             </nav>
         </div>
@@ -476,8 +476,8 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \end{align*}
 \end{split}\]</div>
 </section>
-<section id="weak-form2">
-<h2>Weak form2<a class="headerlink" href="#weak-form2" title="Link to this heading">#</a></h2>
+<section id="weak-form">
+<h2>Weak form<a class="headerlink" href="#weak-form" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{aligned}
@@ -489,16 +489,17 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 &amp;F_L(u, v) = \int_\Omega\text{d}\Omega~\nabla v\cdot\nabla u \\
 &amp;F_R(u,v) = \int_\Omega\text{d}\Omega~vu \\
 &amp;\lambda = k^2
-\end{align*} \\
-\\
-&amp; f\neq0~\text{or}~\partial\Omega_{\text{N}}\neq\varnothing \\
-&amp;\begin{align*}
-\implies&amp; \text{Find}~u\in V~\text{such that} \\
-&amp;F(u, v)=\int_\Omega\text{d}\Omega~-\nabla v\cdot\nabla u + k^2vu - vf + \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0\quad\forall v\in V~.
 \end{align*}
 \end{aligned}
 \end{split}\]</div>
-</section>
+<!-- \\
+& f\neq0~\text{or}~\partial\Omega_{\text{N}}\neq\varnothing \\
+&\begin{align*}
+\implies& \text{Find}~u\in V~\text{such that} \\
+&F(u, v)=\int_\Omega\text{d}\Omega~-\nabla v\cdot\nabla u + k^2vu - vf + \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~vu_{\text{N}}=0\quad\forall v\in V~.
+\end{align*}
+\end{aligned}
+$$ --></section>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -568,7 +569,7 @@ u=u_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form2">Weak form2</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
 </ul>
   </nav></div>
 
