@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flow of a Navier-Stokes fluid with vertical forcing &#8212; LUCiFEx Demo</title>
+    <title>Flow of a Navier-Stokes fluid with vertical forcing &#8212; LUCiFEx Benchmarks</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Demo</p>
+    <p class="title logo__title">LUCiFEx Benchmarks</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -216,8 +216,9 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -235,17 +236,12 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A08.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A09.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
@@ -469,7 +465,6 @@ f_y(x,y) = 5y\sin(6\pi x/L_x) \\
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span> <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FiniteDifferenceArgwise</span><span class="p">,</span>
@@ -483,77 +478,9 @@ f_y(x,y) = 5y\sin(6\pi x/L_x) \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.streamfunction</span><span class="w"> </span><span class="kn">import</span> <span class="n">streamfunction_velocity</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.navier_stokes</span><span class="w"> </span><span class="kn">import</span> <span class="n">vorticity_poisson</span><span class="p">,</span> <span class="n">vorticity_transport</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.A03_navier_stokes_forced</span><span class="w"> </span><span class="kn">import</span> <span class="n">streamfunction_vorticity_2d</span>
 
-
-
-<span class="nd">@configure_simulation</span><span class="p">(</span>
-    <span class="n">store_delta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">write_delta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">streamfunction_vorticity_2d</span><span class="p">(</span>
-    <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">Ly</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="n">Ny</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="n">cell</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">CellType</span><span class="o">.</span><span class="n">QUADRILATERAL</span><span class="p">,</span>
-    <span class="n">dt_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">dt_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">cfl_courant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
-    <span class="n">D_adv</span><span class="p">:</span> <span class="n">FiniteDifference</span> <span class="o">|</span> <span class="n">FiniteDifferenceArgwise</span> <span class="o">=</span> <span class="n">AB1</span><span class="p">,</span>
-    <span class="n">D_diff</span><span class="p">:</span> <span class="n">FiniteDifference</span> <span class="o">=</span> <span class="n">CN</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="n">order</span> <span class="o">=</span> <span class="n">finite_difference_order</span><span class="p">(</span><span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)</span>
-    <span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">Ny</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
-    <span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
-        <span class="n">mesh</span><span class="p">,</span> 
-        <span class="p">{</span>
-            <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span>
-            <span class="s2">&quot;lower&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-            <span class="s2">&quot;upper&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Ly</span><span class="p">,</span>
-        <span class="p">},</span>
-    <span class="p">)</span>
-
-    <span class="n">t</span> <span class="o">=</span> <span class="n">ConstantSeries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    <span class="n">dt</span> <span class="o">=</span> <span class="n">ConstantSeries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;dt&#39;</span><span class="p">)</span>
-    <span class="n">psi</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;psi&#39;</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
-    <span class="n">omega</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;omega&#39;</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
-
-    <span class="n">rho</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;rho&#39;</span><span class="p">)</span>
-    <span class="n">mu</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mu&#39;</span><span class="p">)</span>
-
-    <span class="n">fx</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">fy</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
-        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Lx</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fy&#39;</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">psi_bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">((</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="o">.</span><span class="n">union</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
-    <span class="n">psi_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">vorticity_poisson</span><span class="p">,</span> <span class="n">psi_bcs</span><span class="p">)(</span><span class="n">psi</span><span class="p">,</span> <span class="n">omega</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-    <span class="n">u_solver</span> <span class="o">=</span> <span class="n">interpolation</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">streamfunction_velocity</span><span class="p">)(</span><span class="n">psi</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-    <span class="n">dt_solver</span> <span class="o">=</span> <span class="n">evaluation</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">cfl_timestep</span><span class="p">)(</span>
-        <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;hmin&#39;</span><span class="p">,</span> <span class="n">cfl_courant</span><span class="p">,</span> <span class="n">dt_max</span><span class="p">,</span> <span class="n">dt_min</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">omega_bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">((</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="o">.</span><span class="n">union</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
-    <span class="n">omega_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">vorticity_transport</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">omega_bcs</span><span class="p">)(</span>
-        <span class="n">omega</span><span class="p">,</span> <span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">)</span>
-    
-    <span class="n">solvers</span> <span class="o">=</span> <span class="p">[</span><span class="n">psi_solver</span><span class="p">,</span> <span class="n">u_solver</span><span class="p">,</span> <span class="n">dt_solver</span><span class="p">,</span> <span class="n">omega_solver</span><span class="p">]</span>
-    <span class="n">namespace</span> <span class="o">=</span> <span class="p">[</span><span class="n">rho</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">fy</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">solvers</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">namespace</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simulation</span> <span class="o">=</span> <span class="n">streamfunction_vorticity_2d</span><span class="p">(</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">streamfunction_vorticity_2d</span><span class="p">(</span>
     <span class="n">Lx</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
@@ -564,105 +491,6 @@ f_y(x,y) = 5y\sin(6\pi x/L_x) \\
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">simulation</span> <span class="o">=</span> <span class="n">streamfunction_vorticity_2d</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="n">Lx</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span>     <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/sim/simulation.py:381,</span> in <span class="ni">configure_simulation.&lt;locals&gt;._decorator.&lt;locals&gt;._</span><span class="nt">(*args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">379</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">380</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognised keyword arguments: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">error_params</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">381</span> <span class="k">return</span> <span class="n">_</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">382</span>     <span class="n">petsc</span><span class="o">=</span><span class="n">petsc</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">383</span>     <span class="n">jit</span><span class="o">=</span><span class="n">jit</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">384</span>     <span class="n">ffcx</span><span class="o">=</span><span class="n">ffcx</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">385</span>     <span class="n">store_delta</span><span class="o">=</span><span class="n">store_delta</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">386</span>     <span class="n">write_delta</span><span class="o">=</span><span class="n">write_delta</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">387</span>     <span class="n">dir_base</span><span class="o">=</span><span class="n">dir_base</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">388</span>     <span class="n">dir_params</span><span class="o">=</span><span class="n">dir_params</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">389</span>     <span class="n">dir_prefix</span><span class="o">=</span><span class="n">dir_prefix</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">390</span>     <span class="n">dir_suffix</span><span class="o">=</span><span class="n">dir_suffix</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">391</span>     <span class="n">dir_timestamp</span><span class="o">=</span><span class="n">dir_timestamp</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">392</span>     <span class="n">write_file</span><span class="o">=</span><span class="n">write_file</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">393</span>     <span class="n">parameter_file</span><span class="o">=</span><span class="n">parameter_file</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">394</span>     <span class="n">checkpoint_file</span><span class="o">=</span><span class="n">checkpoint_file</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">395</span>     <span class="n">timing_file</span><span class="o">=</span><span class="n">timing_file</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">396</span> <span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/sim/simulation.py:350,</span> in <span class="ni">configure_simulation.&lt;locals&gt;._decorator.&lt;locals&gt;._.&lt;locals&gt;._inner</span><span class="nt">(*sim_func_args, **sim_func_kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">341</span> <span class="n">classes</span> <span class="o">=</span> <span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">342</span>     <span class="n">BoundaryValueProblem</span><span class="p">,</span> 
-<span class="g g-Whitespace">    </span><span class="mi">343</span>     <span class="n">InitialBoundaryValueProblem</span><span class="p">,</span> 
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">347</span>     <span class="n">Interpolation</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">348</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">349</span> <span class="p">[</span><span class="n">filter_kwargs</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">)(</span><span class="o">**</span><span class="n">kwargs_complete</span><span class="p">)</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">]</span>
-<span class="ne">--&gt; </span><span class="mi">350</span> <span class="n">simulation_func_return</span> <span class="o">=</span> <span class="n">simulation_func</span><span class="p">(</span><span class="o">*</span><span class="n">sim_func_args</span><span class="p">,</span> <span class="o">**</span><span class="n">sim_func_kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">351</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">()</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">]</span>
-<span class="g g-Whitespace">    </span><span class="mi">353</span> <span class="n">sim_parameters</span> <span class="o">=</span> <span class="p">{</span>
-<span class="g g-Whitespace">    </span><span class="mi">354</span>     <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">default</span>
-<span class="nn">    355     for k, v</span> in <span class="ni">simulation_func_params.items</span><span class="nt">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">356</span>     <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">empty</span>
-<span class="g g-Whitespace">    </span><span class="mi">357</span> <span class="p">}</span>
-
-<span class="nn">Cell In[1], line 73,</span> in <span class="ni">streamfunction_vorticity_2d</span><span class="nt">(Lx, Ly, Nx, Ny, cell, dt_max, dt_min, cfl_courant, D_adv, D_diff)</span>
-<span class="g g-Whitespace">     </span><span class="mi">68</span> <span class="n">dt_solver</span> <span class="o">=</span> <span class="n">evaluation</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">cfl_timestep</span><span class="p">)(</span>
-<span class="g g-Whitespace">     </span><span class="mi">69</span>     <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;hmin&#39;</span><span class="p">,</span> <span class="n">cfl_courant</span><span class="p">,</span> <span class="n">dt_max</span><span class="p">,</span> <span class="n">dt_min</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">70</span> <span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">72</span> <span class="n">omega_bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">((</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="o">.</span><span class="n">union</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
-<span class="ne">---&gt; </span><span class="mi">73</span> <span class="n">omega_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">vorticity_transport</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">omega_bcs</span><span class="p">)(</span>
-<span class="g g-Whitespace">     </span><span class="mi">74</span>     <span class="n">omega</span><span class="p">,</span> <span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">76</span> <span class="n">solvers</span> <span class="o">=</span> <span class="p">[</span><span class="n">psi_solver</span><span class="p">,</span> <span class="n">u_solver</span><span class="p">,</span> <span class="n">dt_solver</span><span class="p">,</span> <span class="n">omega_solver</span><span class="p">]</span>
-<span class="g g-Whitespace">     </span><span class="mi">77</span> <span class="n">namespace</span> <span class="o">=</span> <span class="p">[</span><span class="n">rho</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">fy</span><span class="p">]</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:554,</span> in <span class="ni">InitialBoundaryValueProblem.from_forms_func.&lt;locals&gt;._create</span><span class="nt">(*args, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">552</span>     <span class="k">else</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">553</span>         <span class="n">solution</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-<span class="ne">--&gt; </span><span class="mi">554</span> <span class="n">forms</span> <span class="o">=</span> <span class="n">forms_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">556</span> <span class="k">def</span><span class="w"> </span><span class="nf">_init</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">557</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="p">(</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FiniteDifferenceArgwise</span><span class="p">)):</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/pde/navier_stokes.py:238,</span> in <span class="ni">vorticity_transport</span><span class="nt">(omega, dt, u, rho, mu, D_adv, D_diff, D_reac, fx, fy)</span>
-<span class="g g-Whitespace">    </span><span class="mi">236</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">fy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_none</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">237</span>     <span class="n">r</span> <span class="o">+=</span> <span class="n">Dx</span><span class="p">(</span><span class="n">fy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">rho</span>
-<span class="ne">--&gt; </span><span class="mi">238</span> <span class="k">return</span> <span class="n">advection_diffusion_reaction</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">,</span> <span class="n">D_reac</span><span class="p">)</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/pde/advection_diffusion.py:75,</span> in <span class="ni">advection_diffusion_reaction</span><span class="nt">(u, dt, a, d, r, j, D_adv, D_diff, D_reac, D_src, D_phi, D_dt, phi, bcs, supg, h)</span>
-<span class="g g-Whitespace">     </span><span class="mi">70</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s1">&#39;dx&#39;</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">71</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">D_phi</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">72</span> <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span>
-<span class="g g-Whitespace">     </span><span class="mi">73</span>     <span class="n">derivative_form</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">D_dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">74</span>     <span class="n">advection_form</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">dx</span><span class="p">),</span>
-<span class="ne">---&gt; </span><span class="mi">75</span>     <span class="o">*</span><span class="n">diffusion_forms</span><span class="p">(</span><span class="o">-</span><span class="n">v</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">dx</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">76</span>     <span class="o">*</span><span class="n">reaction_forms</span><span class="p">(</span><span class="o">-</span><span class="n">v</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">D_reac</span><span class="p">,</span> <span class="n">D_src</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">77</span> <span class="p">]</span>
-<span class="g g-Whitespace">     </span><span class="mi">78</span> <span class="k">if</span> <span class="n">supg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">79</span>     <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span>
-<span class="g g-Whitespace">     </span><span class="mi">80</span>         <span class="n">derivative_form</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">D_dt</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">81</span>         <span class="n">advection_form</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">82</span>         <span class="o">*</span><span class="n">diffusion_forms</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">,</span> <span class="n">divergence</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">83</span>         <span class="o">*</span><span class="n">reaction_forms</span><span class="p">(</span><span class="o">-</span><span class="n">v</span><span class="o">/</span><span class="n">phi</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">D_reac</span><span class="p">,</span> <span class="n">D_src</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">84</span>     <span class="p">]</span>
-
-<span class="nn">File ~/Desktop/LUCiFEx/lucifex/pde/cg.py:68,</span> in <span class="ni">diffusion_forms</span><span class="nt">(v, u, d, D_diff, bcs, dx, divergence)</span>
-<span class="g g-Whitespace">     </span><span class="mi">66</span>         <span class="n">diff</span> <span class="o">=</span> <span class="n">D_diff</span><span class="p">(</span><span class="n">expr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span> <span class="n">trial</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">67</span>     <span class="k">else</span><span class="p">:</span>
-<span class="ne">---&gt; </span><span class="mi">68</span>         <span class="n">diff</span> <span class="o">=</span> <span class="n">D_diff</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">trial</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">69</span>     <span class="n">F_diff</span> <span class="o">=</span> <span class="o">-</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">diff</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span>    
-<span class="g g-Whitespace">     </span><span class="mi">71</span> <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="n">F_diff</span><span class="p">]</span>
-
-<span class="ne">TypeError</span>: &#39;NoneType&#39; object is not callable
 </pre></div>
 </div>
 </div>
