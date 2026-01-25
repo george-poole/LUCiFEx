@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flow of a Stokes fluid in a lid-driven cavity &#8212; LUCiFEx Demo</title>
+    <title>Flow of a Stokes fluid in a lid-driven cavity &#8212; LUCiFEx Benchmarks</title>
   
   
   
@@ -62,8 +62,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/applications/A02.2_stokes_cavity';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Navier-Stokes equations" href="A03.0_navier_stokes_equations.html" />
-    <link rel="prev" title="Flow of a Stokes fluid in a Poisseuille channel" href="A02.1_stokes_poiseuille.html" />
+    <link rel="next" title="Flow of a Stokes fluid with vertical forcing" href="A02.3_stokes_forced.html" />
+    <link rel="prev" title="Flow of a Stokes fluid in a Poiseuille channel" href="A02.1_stokes_poiseuille.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Demo</p>
+    <p class="title logo__title">LUCiFEx Benchmarks</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -216,8 +216,9 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Flow of a Stokes fluid in a lid-driven cavity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -235,9 +236,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_darcy_abc_convection_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="A07.1_darcy_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_darcy_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -245,7 +246,7 @@
 <li class="toctree-l2"><a class="reference internal" href="A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A09.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
@@ -274,15 +275,19 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">1D example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.0_supg_advection_diffusion.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">Advection-diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
@@ -470,9 +475,8 @@ p(x=0, y=0)=0 &amp; \text{pressure constrained at a point to remove singularity}
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">OptionsPETSc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_component_functions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_streamlines</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_component_fem_functions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_streamlines</span><span class="p">,</span> <span class="n">save_figure</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.stokes</span><span class="w"> </span><span class="kn">import</span> <span class="n">stokes_incompressible</span>
 
@@ -510,7 +514,7 @@ p(x=0, y=0)=0 &amp; \text{pressure constrained at a point to remove singularity}
 <span class="n">up_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 
 <span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">up</span><span class="o">.</span><span class="n">split</span><span class="p">((</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">),</span> <span class="n">collapse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
+<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -519,12 +523,12 @@ p(x=0, y=0)=0 &amp; \text{pressure constrained at a point to remove singularity}
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
 <span class="n">plot_streamlines</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">ux</span><span class="p">,</span> <span class="n">uy</span><span class="p">),</span> <span class="n">density</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;streamlines&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/6f5053939161fab69ceee35feed57d1cfca12207f6241f46e04818cca9c204ec.png" src="../../_images/6f5053939161fab69ceee35feed57d1cfca12207f6241f46e04818cca9c204ec.png" />
+<img alt="../../_images/aa83426763c00ee7a94e57dd9ddbe8eca282c9ec31ebe99970b44069ac31359e.png" src="../../_images/aa83426763c00ee7a94e57dd9ddbe8eca282c9ec31ebe99970b44069ac31359e.png" />
 </div>
 </div>
 </section>
@@ -565,15 +569,15 @@ p(x=0, y=0)=0 &amp; \text{pressure constrained at a point to remove singularity}
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Flow of a Stokes fluid in a Poisseuille channel</p>
+        <p class="prev-next-title">Flow of a Stokes fluid in a Poiseuille channel</p>
       </div>
     </a>
     <a class="right-next"
-       href="A03.0_navier_stokes_equations.html"
+       href="A02.3_stokes_forced.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Navier-Stokes equations</p>
+        <p class="prev-next-title">Flow of a Stokes fluid with vertical forcing</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

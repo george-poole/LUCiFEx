@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flow of Navier-Stokes fluid past a circular obstacle &#8212; LUCiFEx Demo</title>
+    <title>Flow of Navier-Stokes fluid past a circular obstacle &#8212; LUCiFEx Benchmarks</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Demo</p>
+    <p class="title logo__title">LUCiFEx Benchmarks</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -216,8 +216,9 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poisseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -235,9 +236,9 @@
 <li class="toctree-l2"><a class="reference internal" href="A06_darcy_convection_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_abc_convection_equations.html">ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A07.1_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="A07.2_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A07.0_darcy_abc_convection_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="A07.1_darcy_abc_convection_density.html">ABC convection with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A07.2_darcy_abc_convection_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="A08.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -245,7 +246,7 @@
 <li class="toctree-l2"><a class="reference internal" href="A08.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="A09.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A09.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
@@ -274,15 +275,19 @@
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N01.4_dg_advection_rectangle_vortex.html">Spinning vortex on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N03.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N03.1_dg_steady_advection_diffusion_interval.html">1D example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N03.2_dg_steady_advection_diffusion_rectangle.html">2D example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N04.0_supg_advection_diffusion.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N04.1_supg_advection_diffusion_interval.html">Advection-diffusion of a Gaussian profile on an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N04.2_supg_advection_diffusion_rectangle.html">Rotating pulse on a rectangle</a></li>
 </ul>
 </details></li>
@@ -472,18 +477,15 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">get_component_fem_functions</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.A03_navier_stokes_obstacle</span><span class="w"> </span><span class="kn">import</span> <span class="n">navier_stokes_circle_obstacle</span>
 
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">r</span> <span class="o">=</span> <span class="n">Ly</span> <span class="o">/</span> <span class="mi">5</span>
-<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Lx</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Ly</span><span class="p">)</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">navier_stokes_circle_obstacle</span><span class="p">(</span>
     <span class="n">Lx</span><span class="o">=</span><span class="n">Lx</span><span class="p">,</span>
     <span class="n">Ly</span><span class="o">=</span><span class="n">Ly</span><span class="p">,</span>
     <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> 
-    <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
     <span class="n">dx</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> 
     <span class="n">rho</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">mu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
@@ -500,6 +502,11 @@ document.write(`
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>None
 </pre></div>
 </div>
 </div>
@@ -595,20 +602,20 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">pn_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">)</span>
 <span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_p&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">ux_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_x$&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_ux&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">uy_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_y$&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_uy&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;uy&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/de77910a04d608a143bc3b7167f6874bf7579625be592b4c530fc15d5fd5acf2.png" src="../../_images/de77910a04d608a143bc3b7167f6874bf7579625be592b4c530fc15d5fd5acf2.png" />
-<img alt="../../_images/188d4fab93602ecce3d66a74109941e09701446c1fa1bb108975daccad6fea69.png" src="../../_images/188d4fab93602ecce3d66a74109941e09701446c1fa1bb108975daccad6fea69.png" />
-<img alt="../../_images/927e677538897a5b0c6612f456b3a6bb31eb264276c3a0ab4c10ca2246e92dfa.png" src="../../_images/927e677538897a5b0c6612f456b3a6bb31eb264276c3a0ab4c10ca2246e92dfa.png" />
+<img alt="../../_images/5e0daf6a928cfb113f2e655f3fb27886e021eaf8d78cb0c86a227fed1a529dbb.png" src="../../_images/5e0daf6a928cfb113f2e655f3fb27886e021eaf8d78cb0c86a227fed1a529dbb.png" />
+<img alt="../../_images/f0044da538d0a3ee2f58dcf2bf7334b9035f887b418c226a304ddee40c7284ff.png" src="../../_images/f0044da538d0a3ee2f58dcf2bf7334b9035f887b418c226a304ddee40c7284ff.png" />
+<img alt="../../_images/2b0e858b058a8564b79b750255a5c86545b2ff9f79a734e494461dd67902f0f7.png" src="../../_images/2b0e858b058a8564b79b750255a5c86545b2ff9f79a734e494461dd67902f0f7.png" />
 </div>
 </div>
 <!-- # Navier-Stokes flow

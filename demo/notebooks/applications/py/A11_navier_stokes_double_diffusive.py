@@ -16,6 +16,7 @@ from lucifex.sim import configure_simulation
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.constitutive import newtonian_stress
+from lucifex.pde.scaling import AdvectionDiffusionScaling
 
 
 @configure_simulation(
@@ -24,11 +25,12 @@ from lucifex.pde.constitutive import newtonian_stress
 )
 def navier_stokes_double_diffusive_rectangle(
     # domain
-    Lx: float = 2.0,
+    aspect: float = 2.0,
     Nx: int = 64,
     Ny: int = 64,
     cell: str = 'quadrilateral',
     # physical
+    scaling: AdvectionDiffusionScaling = AdvectionDiffusionScaling.ADVECTIVE,
     Le = 1.0,
     Pr = 1.0,
     Ra = 1e2,
@@ -50,19 +52,17 @@ def navier_stokes_double_diffusive_rectangle(
     D_diff_ad: FiniteDifference = CN,
 ):
     """
-    Non-dimensionalization choosing `ℒ` as rectangle depth, 
-    `𝒰` as diffusive speed and `𝒯` constructed from `ℒ` and `𝒰`.
-
-    `∂c/∂t + 𝐮·∇c = ∇²c`
-
-    `∂θ/∂t + 𝐮·∇θ = 1/Le ∇²θ`
-
-    `∇·𝐮 = 0`
-
+    `∂c/∂t + 𝐮·∇c = ∇²c` \\
+    `∂θ/∂t + 𝐮·∇θ = 1/Le ∇²θ` \\
+    `∇·𝐮 = 0` \\
     `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) - PrRa(c - βθ)𝐞ʸ`
     """
+    scaling_map = AdvectionDiffusionScaling(scaling).create_map(Ra)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+
     # space
-    Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -82,6 +82,7 @@ def navier_stokes_double_diffusive_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
+    Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
     Le = Constant(Omega, Le, 'Le')  
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
@@ -123,7 +124,7 @@ def navier_stokes_double_diffusive_rectangle(
     deviatoric_stress = lambda u: Pr * newtonian_stress(u, 1)
     rho = ExprSeries(c - beta * theta, 'rho')
     eg = as_vector([0, -1])
-    f = Pr * Ra * rho * eg
+    f = Bu * rho * eg
     # solvers
     dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
@@ -132,10 +133,10 @@ def navier_stokes_double_diffusive_rectangle(
         u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs, p_coeff=Pr,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
-        c, dt[0], u, 1, D_adv_ad, D_diff_ad,
+        c, dt[0], u, Di, D_adv_ad, D_diff_ad,
     )
     theta_solver = ibvp(advection_diffusion, bcs=theta_bcs)(
-        theta, dt[0], u, 1/Le, D_adv_ad, D_diff_ad,
+        theta, dt[0], u, Di/Le, D_adv_ad, D_diff_ad,
     )
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
     namespace = [Le, Pr, Ra, beta, rho]

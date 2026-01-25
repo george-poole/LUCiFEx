@@ -19,9 +19,36 @@ from lucifex.solver import (
 )
 from lucifex.sim import Simulation
 
+from lucifex.pde.scaling import ScalingOptions
 from lucifex.pde.streamfunction import streamfunction_velocity
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
+
+
+DARCY_CONVECTION_SCALINGS = ScalingOptions(
+    ('Ad', 'Di', 'Bu', 'Xl'),
+    lambda Ra: (
+        {'advective': (1, 1/Ra, 1, 1)},
+        {'diffusive': (1, 1, Ra, 1)},
+        {'advective_diffusive': (1, 1, 1, Ra)},
+    )
+)
+"""
+Choice of length scale `ℒ`, velocity scale `𝒰`
+and time scale `𝒯` in the non-dimensionalization.
+
+`'advective'` \\
+`ℒ` = domain size \\
+`𝒰` = advective speed
+
+`'diffusive'` \\
+`ℒ` = domain size \\
+`𝒰` = diffusive speed
+
+`'advective_diffusive'` \\
+`ℒ` = diffusive length \\
+`𝒰` = advective speed
+"""
 
 
 Phi: TypeAlias = Function
@@ -63,8 +90,12 @@ def darcy_convection_generic(
     secondary: bool = False,    
     tertiary: Iterable[Solver] = (),
     namespace: Iterable = (),
-      
 ) -> Simulation:
+    """
+    `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
+    `∇⋅𝐮 = 0` \\
+    `𝐮 = -(K(ϕ)/μ(c))·(∇p + ρ(c)e₉)` 
+    """
     # time
     order = finite_difference_order(D_adv, D_diff)
     t = ConstantSeries(Omega, "t", order, ics=0.0)  

@@ -12,8 +12,8 @@ In these notebooks covering applications to fluid dynamics a consistent notation
 | $\textbf{f}$ | body force |
 | $g$ | gravity constant |
 | $\,{\textbf{e}}_g$ | gravity unit vector |
-| $\phi$ | porosity |
 | $\tau$ | deviatoric stress |
+| $\phi$ | porosity |
 | $\mathsf{K}$ | permeability |
 | $c$ | solute concentration | 
 | $\theta$ | temperature | 

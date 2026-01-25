@@ -1,8 +1,10 @@
 from lucifex.mesh import rectangle_mesh, mesh_boundary
+from lucifex.fem import  Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
+from lucifex.pde.scaling import AdvectionDiffusionScaling
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, cubic_noise
+from lucifex.utils import CellType
 
 from .A04_darcy_convection_generic import darcy_convection_generic
 
@@ -12,11 +14,12 @@ from .A04_darcy_convection_generic import darcy_convection_generic
     write_delta=None,
 )
 def darcy_convection_elder_rectangle(
-    Lx: float = 2.0,
+    aspect: float = 2.0,
     Ly: float = 1.0,
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
+    scaling: AdvectionDiffusionScaling = AdvectionDiffusionScaling.ADVECTIVE,
     Ra: float = 5e2,
     c_eps: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
@@ -30,7 +33,12 @@ def darcy_convection_elder_rectangle(
     c_petsc: OptionsPETSc | None = None,
     secondary: bool = False,
 ):
-    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
+    scaling_map = AdvectionDiffusionScaling(scaling).create_map(Ra)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+
+    Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
         {
@@ -40,6 +48,9 @@ def darcy_convection_elder_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Ra = Constant(Omega, Ra, 'Ra')
+
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['lower'], 0.0),
         ("dirichlet", dOmega['upper'], lambda x: 0.0 + 1.0 * (x[0] < Lx / 2)),
@@ -51,13 +62,15 @@ def darcy_convection_elder_rectangle(
         [Lx, Ly],
         c_eps,
         ) 
-    density = lambda c: c
+    dispersion = lambda phi: Di * phi
+    density = lambda c: Bu * c
     return darcy_convection_generic(
         Omega=Omega, 
         dOmega=dOmega, 
         Pe=Ra, 
         c_ics=c_ics, 
         c_bcs=c_bcs, 
+        dispersion=dispersion,
         density=density, 
         dt_max=dt_max, 
         cfl_h=cfl_h, 

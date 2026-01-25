@@ -4,11 +4,12 @@ from ufl import SpatialCoordinate, sqrt
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
 from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
+from lucifex.pde.scaling import DarcyConvectionScaling
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
-from .A04_darcy_convection_generic import darcy_convection_generic
+from .A04_darcy_convection_generic import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -17,11 +18,12 @@ from .A04_darcy_convection_generic import darcy_convection_generic
 )
 def darcy_convection_rayleigh_benard_rectangle(
     # domain
-    Lx: float = 2.0,
+    aspect: float = 2.0,
     Nx: int = 64,
     Ny: int = 64,
     cell: str = CellType.QUADRILATERAL,
     # physical
+    scaling: str = 'advective',
     Ra: float = 1e2,
     c_eps: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
@@ -39,14 +41,18 @@ def darcy_convection_rayleigh_benard_rectangle(
     secondary: bool = False,
 ):
     """
-    Non-dimensionalization choosing `ℒ` as rectangle depth, 
-    `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
-
-    `∂c/∂t + 𝐮·∇c = 1/Ra ∇²c` \\
+    `∂c/∂t + 𝐮·∇c = 1/Pe ∇²c` \\
     `∇⋅𝐮 = 0` \\
-    `𝐮 = -(∇p + c𝐞ʸ)`
+    `𝐮 = -(∇p + Bu c𝐞ʸ)`
+
+    `scaling` determines `Di, Bu, Xl` from `Ra`. \\
+    `Ω = [0, aspect·Xl] × [0, Xl]`
     """
-    Ly = 1.0
+    scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -57,7 +63,9 @@ def darcy_convection_rayleigh_benard_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
+
     c_ics = SpatialPerturbation(
         lambda x: 1 - x[1] / Ly,
         cubic_noise(['neumann', 'dirichlet'], [Lx, Ly], c_freq, c_seed),
@@ -69,8 +77,8 @@ def darcy_convection_rayleigh_benard_rectangle(
         ("dirichlet", dOmega['upper'], 0.0),
         ('neumann', dOmega['left', 'right'], 0.0)
     )
-    dispersion = lambda phi: (1/Ra) * phi
-    density = lambda c: -c
+    dispersion = lambda phi: Di * phi
+    density = lambda c: -Bu * c
     return darcy_convection_generic(
         Omega=Omega, 
         dOmega=dOmega, 
@@ -86,7 +94,7 @@ def darcy_convection_rayleigh_benard_rectangle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         secondary=secondary,
-        namespace=[Ra],
+        namespace=(Ra, Di, Bu),
     )
 
 
@@ -95,10 +103,10 @@ def darcy_convection_rayleigh_benard_rectangle(
     write_delta=None,
 )
 def darcy_convection_rayleigh_benard_annulus(
-    Rinner: float = 1.0,
-    Router: float = 2.0,
+    Rratio: float = 0.5,
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
+    scaling: DarcyConvectionScaling = DarcyConvectionScaling.ADVECTIVE,
     Ra: float = 5e2,
     c_eps: float = 1e-6,
     c_freq: int = 8,
@@ -111,10 +119,11 @@ def darcy_convection_rayleigh_benard_annulus(
     c_petsc: OptionsPETSc | None = None,
     secondary: bool = False,
 ):
-    """
-    Non-dimensionalization choosing `ℒ` as annulus length scale, 
-    `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
-    """
+    scaling_map = DarcyConvectionScaling(scaling).create_map(Ra)
+    Xl = scaling_map['Xl']
+    Router = 1.0 * Xl
+    Rinner = Rratio * Xl
+
     r2 = lambda x: x[0]**2 + x[1]**2
     r = lambda x, sqrt: sqrt(r2(x))
     dr = (Router - Rinner) / Nradial
@@ -126,7 +135,9 @@ def darcy_convection_rayleigh_benard_annulus(
             "outer": lambda x: r2(x) - Router**2,
         },
     )
+    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
+
     radial_noise = lambda x: c_eps * np.sin(c_freq * np.pi * (r(x, np.sqrt) - Rinner) / (Router - Rinner))
     c_ics = SpatialPerturbation(
         lambda x: np.log(Router / r(x, np.sqrt)) / np.log(Router / Rinner),
@@ -138,8 +149,8 @@ def darcy_convection_rayleigh_benard_annulus(
         ("dirichlet", dOmega['inner'], 1.0),
         ("dirichlet", dOmega['outer'], 0.0),  
     ) 
-    dispersion = lambda phi: (1/Ra) * phi
-    density = lambda c: -c
+    dispersion = lambda phi: Di * phi
+    density = lambda c: -Bu * c
     x = SpatialCoordinate(Omega)
     egx = -x[0] / r(x, sqrt)
     egy = -x[1] / r(x, sqrt)
@@ -160,6 +171,7 @@ def darcy_convection_rayleigh_benard_annulus(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         secondary=secondary,
+        namespace=(Ra, Di, Bu),
     )
 
 
@@ -170,6 +182,7 @@ def darcy_convection_rayleigh_benard_annulus(
 def darcy_convection_rayleigh_benard_semicircle(
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
+    scaling: DarcyConvectionScaling = DarcyConvectionScaling.ADVECTIVE,
     Ra: float = 5e2,
     c_eps: float = 1e-6,
     c_freq: int = 8,
@@ -186,9 +199,12 @@ def darcy_convection_rayleigh_benard_semicircle(
     Non-dimensionalization choosing `ℒ` as semicircle radius, 
     `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
     """
+    scaling_map = DarcyConvectionScaling(scaling).create_map(Ra)
+    Xl = scaling_map['Xl']
+
     r2 = lambda x: x[0]**2 + x[1]**2
     r = lambda x, sqrt=np.sqrt: sqrt(r2(x))
-    radius = 1.0
+    radius = 1.0 * Xl 
     dr = radius / Nradial
     Omega = circle_sector_mesh(dr, cell, 'semicircle')(radius, 180)
     dOmega = mesh_boundary(
@@ -198,6 +214,9 @@ def darcy_convection_rayleigh_benard_semicircle(
             "outer": lambda x: r2(x) - radius**2,
         },
     )
+    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Ra = Constant(Omega, Ra, 'Ra')
+
     radial_noise = lambda x: c_eps * np.sin(c_freq * np.pi * (r(x, np.sqrt)) / radius)
     c_ics = SpatialPerturbation(
         0.0,
@@ -209,13 +228,11 @@ def darcy_convection_rayleigh_benard_semicircle(
         ("dirichlet", dOmega['lower'], 1.0),
         ("dirichlet", dOmega['outer'], 0.0),  
     )
-    dispersion = lambda phi: (1/Ra) * phi
-    density = lambda c: -c
+    dispersion = lambda phi: Di * phi
+    density = lambda c: -Bu * c
     return darcy_convection_generic(
         Omega=Omega, 
-        dOmega=dOmega, 
-        Ad=1,
-        Pe=Ra, 
+        dOmega=dOmega,  
         c_ics=c_ics, 
         c_bcs=c_bcs, 
         dispersion=dispersion,
@@ -228,4 +245,5 @@ def darcy_convection_rayleigh_benard_semicircle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         secondary=secondary,
+        namespace=(Ra, Di, Bu),
     )

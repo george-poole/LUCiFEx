@@ -39,6 +39,7 @@ parts:
         sections: 
           - file: notebooks/applications/A02.1_stokes_poiseuille
           - file: notebooks/applications/A02.2_stokes_cavity
+          - file: notebooks/applications/A02.3_stokes_forced
       - file: notebooks/applications/A03.0_navier_stokes_equations
         sections: 
           - file: notebooks/applications/A03.1_navier_stokes_obstacle
@@ -47,15 +48,16 @@ parts:
         sections: 
           - file: notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle
           - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_annulus
+          - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_semicircle
           - file: notebooks/applications/A05.1_darcy_convection_evolving_isotropic
           - file: notebooks/applications/A05.2_darcy_convection_evolving_crossbedded
           - file: notebooks/applications/A05.3_darcy_convection_evolving_layered
           - file: notebooks/applications/A05.4_darcy_convection_evolving_inclined
           - file: notebooks/applications/A06_darcy_convection_elder
-      - file: notebooks/applications/A07.0_abc_convection_equations
+      - file: notebooks/applications/A07.0_darcy_abc_convection_equations
         sections:
-          - file: notebooks/applications/A07.1_abc_convection_density
-          - file: notebooks/applications/A07.2_abc_convection_viscosity
+          - file: notebooks/applications/A07.1_darcy_abc_convection_density
+          - file: notebooks/applications/A07.2_darcy_abc_convection_viscosity
       - file: notebooks/applications/A08.0_darcy_fingering_equations
         sections:
           - file: notebooks/applications/A08.1_darcy_fingering_dirichlet
@@ -84,14 +86,18 @@ parts:
           - file: notebooks/numerical/N01.2_dg_advection_interval_cosine
           - file: notebooks/numerical/N01.3_dg_advection_rectangle_cone
           - file: notebooks/numerical/N01.4_dg_advection_rectangle_vortex
-      - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
+      - file: notebooks/numerical/N02.0_supg_steady_advection_diffusion
         sections: 
-          - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_rectangle
-      - file: notebooks/numerical/N03.1_dg_steady_advection_diffusion_interval
+          - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
+          - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_hemker
+          - file: notebooks/numerical/N02.3_supg_steady_advection_diffusion_rectangle
+      - file: notebooks/numerical/N03.0_dg_steady_advection_diffusion
         sections: 
+          - file: notebooks/numerical/N03.1_dg_steady_advection_diffusion_interval
           - file: notebooks/numerical/N03.2_dg_steady_advection_diffusion_rectangle
-      - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
+      - file: notebooks/numerical/N04.0_supg_advection_diffusion
         sections: 
+          - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
           - file: notebooks/numerical/N04.2_supg_advection_diffusion_rectangle
       - file: notebooks/numerical/N05.0_dg_advection_diffusion
         sections:

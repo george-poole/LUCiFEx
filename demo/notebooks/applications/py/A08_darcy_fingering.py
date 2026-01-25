@@ -4,35 +4,68 @@ import scipy.special as sp
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.fdm.ufl_operators import exp
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import BoundaryConditions
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise, BoundaryType
+from lucifex.utils import CellType, BoundaryType
+from lucifex.pde.scaling import ScalingOptions
+
 from .A04_darcy_convection_generic import darcy_convection_generic
+
+
+DARCY_FINGERING_SCALINGS = ScalingOptions(
+    ('Ad', 'Di', 'In', 'Xl'),
+    lambda Pe: (
+        {'advective': (1, 1/Pe, 1, 1)},
+        {'diffusive': (1, 1, Pe, 1)}
+    )
+)
+"""
+Choice of length scale `ℒ`, velocity scale `𝒰`
+and time scale `𝒯` in the non-dimensionalization.
+
+`'advective'` \\
+`ℒ` = domain size \\
+`𝒰` = injection speed
+
+`'diffusive'` \\
+`ℒ` = domain size \\
+`𝒰` = diffusive speed
+"""
 
 
 @configure_simulation(
     store_delta=1,
     write_delta=None,
 )
-def saffman_taylor_rectangle(
-    Lx: float = 2.0,
+def darcy_fingering_rectangle(
+    # domain
+    aspect: float = 2.0,
     Ly: float = 1.0,
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
-    Pi: float = 5e2,
+    # physical
+    scaling: str = 'advective',
+    Pe: float = 5e2,
     Lmbda: float = 1e1,
     bc_type: BoundaryType = BoundaryType.DIRICHLET,
     erf_eps: float = 1e-2,
     c_eps: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
+    # time step
     dt_max: float = 0.25,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.25,
+   # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
 ):
+    scaling_map = DARCY_FINGERING_SCALINGS[scaling](Pe)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+
     Omega = rectangle_mesh(
         (-0.5 * Lx, 0.5 * Lx), 
         (0, Ly), 
@@ -51,7 +84,10 @@ def saffman_taylor_rectangle(
     )
 
     # constants
-    Pi = Constant(dOmega, Pi, 'Pi')
+    Di, In = scaling_map[Omega, 'Di', 'In']
+    Di = Constant(Omega, Di, 'Di')
+    In = Constant(Omega, In, 'In')
+    Pe = Constant(Omega, Pe, 'Pe')
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')
 
     # initial and boundary conditions
@@ -84,14 +120,17 @@ def saffman_taylor_rectangle(
         raise ValueError
     
     # constitutive
+    dispersion = lambda phi: Di * phi
     viscosity = lambda c: exp(-Lmbda * c)
+    density = lambda c: In * viscosity(c)
 
     simulation = darcy_convection_generic(
         Omega=Omega, 
         dOmega=dOmega, 
         egx=1,
         egy=None,
-        density=viscosity,
+        dispersion=dispersion,
+        density=density,
         viscosity=viscosity,
         c_ics=c_ics, 
         c_bcs=c_bcs, 
