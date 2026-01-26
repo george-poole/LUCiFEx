@@ -1,4 +1,4 @@
-from typing import overload
+from typing import overload, Callable, ParamSpec, TypeVar
 
 import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary

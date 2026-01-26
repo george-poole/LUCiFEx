@@ -15,10 +15,10 @@ from .A04_darcy_convection_generic import darcy_convection_generic
 
 DARCY_FINGERING_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'In', 'Xl'),
-    lambda Pe: (
-        {'advective': (1, 1/Pe, 1, 1)},
-        {'diffusive': (1, 1, Pe, 1)}
-    )
+    lambda Pe: {
+        'advective': (1, 1/Pe, 1, 1),
+        'diffusive': (1, 1, Pe, 1),
+    }
 )
 """
 Choice of length scale `ℒ`, velocity scale `𝒰`
@@ -41,7 +41,6 @@ and time scale `𝒯` in the non-dimensionalization.
 def darcy_fingering_rectangle(
     # domain
     aspect: float = 2.0,
-    Ly: float = 1.0,
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,

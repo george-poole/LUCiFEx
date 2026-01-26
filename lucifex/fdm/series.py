@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec, overload
-from typing_extensions import Self, TypeVarTuple, Unpack
+from typing_extensions import Self
+from functools import singledispatch
 
 import numpy as np
 from ufl import split
@@ -8,7 +9,7 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space
+from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space, MultipleDispatchTypeError
 from ..utils.deferred import Writer
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
@@ -51,6 +52,22 @@ class Series(ABC, Generic[T]):
     def mesh(self) -> Mesh:
         """Time-independent mesh that the series is defined on."""
         ... 
+
+    @property
+    @abstractmethod
+    def series(self) -> list[T]:
+        """
+        `[u⁰, u¹, u², ...]`
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def time_series(self) -> list[float | None]:
+        """
+        `[t⁰, t¹, t², ...]`
+        """
+        ...
 
     @property
     def name(self) -> str:
@@ -157,29 +174,68 @@ class Series(ABC, Generic[T]):
                 getattr(i, method)(j) for i, j in zip(reversed(self), reversed(other))
             ]
             seq = seq_reversed[::-1]
+            time_series = lambda: [i for i, j in zip(self.time_series, other.time_series) if np.isclose(i, j)]
+            series = lambda: [getattr(i, method)(j) for i, j, t in zip(self.series, other.series, self.time_series) if t in time_series()]
         else:
             seq = [getattr(i, method)(other) for i in self]
-        return ExprSeries(seq)
+            time_series = lambda: self.time_series
+            series = lambda: [getattr(i, method)(other) for i in self.series]
+
+        return ExprSeries(seq, series=series, time_series=time_series)
 
 
 P = ParamSpec('P')
 class ExprSeries(
-    Series[Expr | Function | Constant],
+    Series[Expr],
 ):
     _func_args = None
 
+    @overload
     def __init__(
         self,
-        arg: Iterable[Expr | Function | Constant] | Self,
+        arg: Self,
         name: str | None = None,
     ):
-        if isinstance(arg, Series):
+        ...
+
+    @overload
+    def __init__(
+        self,
+        arg: Iterable[Expr],
+        name: str | None = None,
+        series: Callable[[], list[Expr]] | None = None,
+        time_series: Callable[[], list[float]] | None = None,
+    ):
+        ...
+
+    def __init__(
+        self,
+        arg,
+        name: str | None = None,
+        series: Callable |  None = None,
+        time_series: Callable |  None = None,
+    ):
+        if isinstance(arg, ExprSeries):
             if name is None:
                 name = arg.name
-            self.__init__(arg.sequence, name)
+            self.__init__(arg.sequence, name, arg._series, arg._time_series)
         else:
             order = len(arg) - 1
             super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
+            self._series = series
+            self._time_series = time_series
+
+    @property
+    def series(self):
+        if self._series is None:
+            return []
+        return self._series()
+    
+    @property
+    def time_series(self):
+        if self._time_series is None:
+            return []
+        return self._time_series()
 
     @overload
     @classmethod
@@ -260,7 +316,7 @@ class ExprSeries(
         return self.sequence[0].ufl_shape
 
 
-class ContainerType(Protocol):
+class SolutionType(Protocol):
     @property
     def name(self) -> str:
         ...
@@ -268,10 +324,34 @@ class ContainerType(Protocol):
         ...
 
 
-T = TypeVar('T', bound=ContainerType)
+def set_solution(solution: Function | Constant | Any, value: Any) -> None:
+    return _set_solution(solution, value)
+
+@singledispatch
+def _set_solution(solution, _) -> None:
+    raise MultipleDispatchTypeError(solution, set_solution)
+
+@_set_solution.register(Function)
+def _(solution: Function, value):
+    if value is Unsolved:
+        return set_fem_function(solution, value.value, dofs_indices=':')
+    elif isinstance(value, Function) and value.function_space == solution.function_space:
+        return set_fem_function(solution, value, dofs_indices=':')
+    else:
+        return set_fem_function(solution, value)
+    
+@_set_solution.register(Constant)
+def _(solution: Constant, value):
+    if value is Unsolved:
+        return set_fem_constant(solution, value.value)
+    else:
+        return set_fem_constant(solution, value)
+
+
+T = TypeVar('T', bound=SolutionType)
 U = TypeVar('U')
 I = TypeVar('I') # TODO python 3.13 default=None
-class ContainerSeries(Series[T], Generic[T, U, I]):
+class SolutionSeries(Series[T], Generic[T, U, I]):
 
     @abstractmethod
     def __init__(
@@ -292,7 +372,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
           
     @staticmethod
     @abstractmethod
-    def set_container(container: T, value: T | U | UnsolvedType) -> None:
+    def set_solution(container: T, value: T | U | UnsolvedType) -> None:
         ...
     
     @Series.name.setter
@@ -317,17 +397,11 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
     @property
     def time_series(self) -> list[float | None]:
-        """
-        `[t⁰, t¹, t², ...]`
-        """
         assert len(self._time_series) == len(self._series)
         return self._time_series
     
     @property
-    def series(self) -> list[T]:
-        """
-        `[u⁰, u¹, u², ...]`
-        """
+    def series(self):
         return self._series
     
     @property
@@ -358,7 +432,7 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
         if not overwrite:
             if not is_unsolved(container):
                 raise RuntimeError('Cannot overwrite the solution if `overwrite=False`.')
-        self.set_container(container, value)
+        self.set_solution(container, value)
 
     def forward(
         self, 
@@ -374,19 +448,19 @@ class ContainerSeries(Series[T], Generic[T, U, I]):
 
         for i in range(-self.order + 1, 0):
             if i == -1:
-                self.set_container(self._previous[i], self._present)
+                self.set_solution(self._previous[i], self._present)
             else:
-                self.set_container(self._previous[i], self._previous[i + 1])
+                self.set_solution(self._previous[i], self._previous[i + 1])
 
         if not is_unsolved(self._future):
-            self.set_container(self._present, self._future)
-            self.set_container(self._future, Unsolved)
+            self.set_solution(self._present, self._future)
+            self.set_solution(self._future, Unsolved)
         else:
-            self.set_container(self._present, Unsolved)
+            self.set_solution(self._present, Unsolved)
 
 
 class FunctionSeries(
-    ContainerSeries[
+    SolutionSeries[
         Function, 
         Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float], 
         Perturbation,
@@ -397,7 +471,7 @@ class FunctionSeries(
         fs: FunctionSpace
         | tuple[Mesh, str, int]
         | tuple[Mesh, str, int, int],
-        name: str | tuple[str, Iterable[str]] | None,
+        name: str | tuple[str, Iterable[str]] | None = None,
         order: int = 1,
         store: int | float | Callable[[], bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
@@ -410,13 +484,8 @@ class FunctionSeries(
             assert len(self._subnames) == self._function_space.num_sub_spaces
 
     @staticmethod
-    def set_container(container: Function, value):
-        if value is Unsolved:
-            return set_fem_function(container, value.value, dofs_indices=':')
-        elif isinstance(value, Function) and value.function_space == container.function_space:
-            return set_fem_function(container, value, dofs_indices=':')
-        else:
-            return set_fem_function(container, value)
+    def set_solution(solution: Function, value):
+        return set_solution(solution, value)
 
     @property
     def function_space(
@@ -512,12 +581,12 @@ class SubFunctionSeries(Series[Expr]):
 
 
 class ConstantSeries(
-    ContainerSeries[Constant, float | Iterable[float], None],
+    SolutionSeries[Constant, float | Iterable[float], None],
 ):
     def __init__(
         self,
         mesh: Mesh,
-        name: str | tuple[str, Iterable[str]] | None,
+        name: str | tuple[str, Iterable[str]] | None = None,
         order: int = 1,
         shape: tuple[int, ...] = (),
         store: int | float | Callable[[], bool] | None = None,
@@ -532,11 +601,8 @@ class ConstantSeries(
             assert len(self._subnames) == self.shape[0]
 
     @staticmethod
-    def set_container(container: Constant, value):
-        if value is Unsolved:
-            return set_fem_constant(container, value.value)
-        else:
-            return set_fem_constant(container, value)
+    def set_solution(container: Constant, value):
+        return set_solution(container, value)
 
     @property
     def mesh(self) -> Mesh:

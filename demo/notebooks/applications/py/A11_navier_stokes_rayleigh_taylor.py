@@ -1,21 +1,21 @@
 from ufl import as_vector
 
-from lucifex.fdm import FiniteDifference, FE, CN, BE
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries, FiniteDifference,
-        FiniteDifferenceArgwise, ExprSeries, finite_difference_order, cfl_timestep,
+    FunctionSeries, ConstantSeries, FiniteDifference, FE, CN, BE,
+    FiniteDifferenceArgwise, ExprSeries, finite_difference_order, cfl_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
 )
-from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
+
+from .A11_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -24,12 +24,12 @@ from lucifex.pde.advection_diffusion import advection_diffusion
 )
 def navier_stokes_rayleigh_taylor_rectangle(
     # domain
-    Lx: float,
-    Ly: float,
-    Nx: int,
-    Ny: int,
+    aspect: float = 2.0,
+    Nx: int = 64,
+    Ny: int = 64,
     cell: str = 'quadrilateral',
     # physical
+    scaling: str = 'diffusive',
     Pr = 1.0,
     Ra = 1e3,
     # initial perturbation
@@ -54,9 +54,12 @@ def navier_stokes_rayleigh_taylor_rectangle(
 
     `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) + PrRa ρ 𝐞₉`
     """
+    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+
     # space
-    Lx = 2.0
-    Ly = 1.0
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -77,8 +80,8 @@ def navier_stokes_rayleigh_taylor_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
 
-
     # constants
+    Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')  
 
@@ -101,16 +104,16 @@ def navier_stokes_rayleigh_taylor_rectangle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
     # constitutive
-    deviatoric_stress = lambda u: Pr * newtonian_stress(u, 1)
+    deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
     rho = ExprSeries(c, 'rho')
-    f = Pr * Ra * rho * as_vector([0, -1]) 
+    f = Bu * rho * as_vector([0, -1]) 
 
     # solvers
     dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_coeff=Pr,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_scale=Pr,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_ad, D_diff_ad,

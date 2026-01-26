@@ -377,11 +377,15 @@ def where_on_grid(
 def as_index(
     arr: np.ndarray | Iterable[float],
     target: int | float,
+    fraction: bool = False,
     ineq: Callable[[float, float], bool] | str | None = None,
     ineq_msg: str = 'Target inequality cannot be satisfied.',
 ) -> int:
     if isinstance(target, int):
         return target
+    
+    if fraction:
+        return int(target * len(arr))
     
     arr = np.sort(arr)
     
@@ -404,6 +408,7 @@ def as_index(
 def as_indices(
     arr: np.ndarray | Iterable[float],
     targets: range | list[int | float] | int | StrSlice,
+    fraction: bool = False,
     tol: float | None = None,
     window: bool = False,
 ) -> Iterable[int]:
@@ -417,7 +422,7 @@ def as_indices(
         step = stop // targets
         indices = range(0, stop, step)
     else:
-        indices = [as_index(arr, i, tol) for i in targets]
+        indices = [as_index(arr, i, fraction, tol) for i in targets]
         if window:
             if indices[0] < targets[0]:
                 indices[0] += 1

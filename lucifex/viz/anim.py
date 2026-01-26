@@ -27,7 +27,7 @@ def create_animation(
     millisecs: int = 100,
     anim_kwargs: dict | None = None,
     close: bool = True,
-    **plt_kwargs,
+    **plot_func_kwargs,
 ) -> FuncAnimationFromSeries[T]:
     """
     To display `anim: FunctionAnimation` in an IPython environment
@@ -51,7 +51,7 @@ def create_animation(
                 ax,
                 arg_series[n],
                 **__kwargs_series,
-                **plt_kwargs
+                **plot_func_kwargs
             )
             return fig, ax
         

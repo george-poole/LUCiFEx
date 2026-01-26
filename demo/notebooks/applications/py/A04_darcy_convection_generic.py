@@ -19,19 +19,19 @@ from lucifex.solver import (
 )
 from lucifex.sim import Simulation
 
-from lucifex.pde.scaling import ScalingOptions
 from lucifex.pde.streamfunction import streamfunction_velocity
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
+from lucifex.pde.scaling import ScalingOptions
 
 
 DARCY_CONVECTION_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'Bu', 'Xl'),
-    lambda Ra: (
-        {'advective': (1, 1/Ra, 1, 1)},
-        {'diffusive': (1, 1, Ra, 1)},
-        {'advective_diffusive': (1, 1, 1, Ra)},
-    )
+    lambda Ra: {
+        'advective': (1, 1/Ra, 1, 1),
+        'diffusive': (1, 1, Ra, 1),
+        'advective_diffusive': (1, 1, 1, Ra),
+    }
 )
 """
 Choice of length scale `ℒ`, velocity scale `𝒰`

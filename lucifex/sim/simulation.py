@@ -61,14 +61,14 @@ class Simulation:
     def __getitem__(
         self, 
         key: str,
-    ) -> FunctionSeries | ConstantSeries:
+    ) -> FunctionSeries | ConstantSeries | ExprSeries:
         ...
     
     @overload
     def __getitem__(
         self, 
         key: tuple[str, ...],
-    ) -> list[FunctionSeries | ConstantSeries]:
+    ) -> tuple[FunctionSeries | ConstantSeries | ExprSeries, ...]:
         ...
     
     def __getitem__(
@@ -76,7 +76,7 @@ class Simulation:
         key: str | tuple[str, ...],
     ):
         if isinstance(key, tuple):
-            return [self[i] for i in key]
+            return tuple(self[i] for i in key)
         elif isinstance(key, str):
             try:
                 return self.namespace[key]

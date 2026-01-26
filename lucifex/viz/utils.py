@@ -132,18 +132,25 @@ def set_axes(
     title: str | None = None,
     x_label: str | None = None,
     y_label: str | None = None,
+    fontsizes: float | tuple[float, float, float] = (16.0, 14.0, 14.0),
     aspect: float | Literal['auto', 'equal'] | None = None,
-) -> None:        
+) -> None:     
+
+    if isinstance(fontsizes, (float, int)):
+        fontsizes = tuple([fontsizes] * 3)
+    title_fsz, x_label_fsz, y_label_fsz = fontsizes
+
+
     if x_lims is not None:
         ax.set_xlim((np.min(x_lims), np.max(x_lims)))
     if y_lims is not None:
         ax.set_ylim((np.min(y_lims), np.max(y_lims)))
     if x_label is not None:
-        ax.set_xlabel(x_label)
+        ax.set_xlabel(x_label, fontsize=x_label_fsz)
     if y_label is not None:
-        ax.set_ylabel(y_label)
+        ax.set_ylabel(y_label, fontsize=y_label_fsz)
     if title is not None:
-        ax.set_title(title)
+        ax.set_title(title, fontsize=title_fsz)
     if aspect is not None:
         ax.set_aspect(aspect)
 
@@ -156,6 +163,7 @@ def set_legend(
     loc="upper left",
     bbox_to_anchor=(1, 1),
     frameon=False,
+    legend_fontsizes: float = (14.0, 12.0),
 ) -> None:    
     legend_labels = [str(i) for i in legend_labels]
     if handles is None:
@@ -163,12 +171,19 @@ def set_legend(
     else:
         args = (handles, legend_labels)
 
+    if isinstance(legend_fontsizes, (float, int)):
+        legend_fontsizes = tuple([legend_fontsizes] * 3)
+
+    title_fontsize, label_fontsize = legend_fontsizes
+
     ax.legend(
         *args,
         title=legend_title,
         loc=loc,
         bbox_to_anchor=bbox_to_anchor,
         frameon=frameon,
+        title_fontsize=title_fontsize,
+        fontsize=label_fontsize,
     )
 
 
@@ -176,13 +191,16 @@ def create_multifigure(
     n_rows: int,
     n_cols: int,
     suptitle: str | None = None,
+    colorbar: bool | tuple[float, float] = False,
     figscale: float = 1.0,
-    indexing: Literal['xy', 'ij', 'ji'] = 'xy',
+    width_ratio: float = 0.025,
     **kwargs,
-) -> tuple[Figure, np.ndarray]:
+) -> tuple[Figure, list[Axes], list[Axes | None]]:
+    if colorbar is True:
+        kwargs.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
+        n_cols = 2 * n_cols
 
-    fig: Figure
-    fig, axs = plt.subplots(
+    fig, _ = plt.subplots(
         n_rows, 
         n_cols,
         figsize=figscale * np.multiply((n_cols, n_rows), plt.rcParams["figure.figsize"]), 
@@ -191,12 +209,14 @@ def create_multifigure(
     )
 
     if suptitle:
-        ax: Axes = axs.flat[n_cols - 1]
+        ax: Axes = fig.axes[n_cols - 1]
         ax.text(1.0, 1.25, suptitle, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
 
-    if indexing == 'xy':
-        axs = axs.T[:, ::-1]
-    elif indexing == 'ij':
-        axs = axs.T
+    if colorbar is True:
+        axs_main = fig.axes[0::2]
+        axs_cbar = fig.axes[1::2]
+    else:
+        axs_main = fig.axes
+        axs_cbar = [None] * len(axs_main)
 
-    return fig, axs
+    return fig, axs_main, axs_cbar

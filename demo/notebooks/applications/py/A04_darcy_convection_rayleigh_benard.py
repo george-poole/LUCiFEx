@@ -4,7 +4,6 @@ from ufl import SpatialCoordinate, sqrt
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
 from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
-from lucifex.pde.scaling import DarcyConvectionScaling
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
@@ -41,12 +40,12 @@ def darcy_convection_rayleigh_benard_rectangle(
     secondary: bool = False,
 ):
     """
-    `∂c/∂t + 𝐮·∇c = 1/Pe ∇²c` \\
+    `Ω = [0, aspect·Xl] × [0, Xl]` \\
+    `∂c/∂t + 𝐮·∇c = Di ∇²c` \\
     `∇⋅𝐮 = 0` \\
     `𝐮 = -(∇p + Bu c𝐞ʸ)`
 
-    `scaling` determines `Di, Bu, Xl` from `Ra`. \\
-    `Ω = [0, aspect·Xl] × [0, Xl]`
+    `scaling` determines `Di, Bu, Xl` from `Ra`.
     """
     scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
     Xl = scaling_map['Xl']
@@ -106,7 +105,7 @@ def darcy_convection_rayleigh_benard_annulus(
     Rratio: float = 0.5,
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
-    scaling: DarcyConvectionScaling = DarcyConvectionScaling.ADVECTIVE,
+    scaling: str = 'advective',
     Ra: float = 5e2,
     c_eps: float = 1e-6,
     c_freq: int = 8,
@@ -119,7 +118,7 @@ def darcy_convection_rayleigh_benard_annulus(
     c_petsc: OptionsPETSc | None = None,
     secondary: bool = False,
 ):
-    scaling_map = DarcyConvectionScaling(scaling).create_map(Ra)
+    scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
     Xl = scaling_map['Xl']
     Router = 1.0 * Xl
     Rinner = Rratio * Xl
@@ -182,7 +181,7 @@ def darcy_convection_rayleigh_benard_annulus(
 def darcy_convection_rayleigh_benard_semicircle(
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
-    scaling: DarcyConvectionScaling = DarcyConvectionScaling.ADVECTIVE,
+    scaling: str = 'advective',
     Ra: float = 5e2,
     c_eps: float = 1e-6,
     c_freq: int = 8,
@@ -199,7 +198,7 @@ def darcy_convection_rayleigh_benard_semicircle(
     Non-dimensionalization choosing `ℒ` as semicircle radius, 
     `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
     """
-    scaling_map = DarcyConvectionScaling(scaling).create_map(Ra)
+    scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
     Xl = scaling_map['Xl']
 
     r2 = lambda x: x[0]**2 + x[1]**2

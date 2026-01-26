@@ -74,8 +74,8 @@ def save_figure():
     """
     For interactive use in a `.ipynb` file. \\
     See `lucifex.io.write` for the general purpose `write` function. \\
-    Default argument values from `write` are overridden and 
-    File name dynamically created from notebook can be returned with `get_path=True`.
+    Default argument values from `write` are overridden. \\
+    File name dynamically created from notebook name can be returned with `get_path=True`.
     """
     pass
 

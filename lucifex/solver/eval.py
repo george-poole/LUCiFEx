@@ -6,13 +6,13 @@ from typing import (
 from typing_extensions import Self
 import numpy as np
 
-from dolfinx.fem import Expression #Function, Constant,
+from dolfinx.fem import Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
 from ..utils import replicate_callable, SpatialMarkerAlias, MultipleDispatchTypeError
 from ..fem import Constant, Function
-from ..fdm.series import ConstantSeries, FunctionSeries
+from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
 from .options import OptionsFFCX, OptionsJIT
 
 
@@ -153,7 +153,7 @@ class Evaluation(GenericSolver[T, TS]):
         future: bool | None = None, 
         overwrite: bool | None = None,
     ) -> None:
-        self._series.set_container(self._solution, self._evaluation())
+        set_solution(self._solution, self._evaluation())
         super().solve(future, overwrite)
 
 

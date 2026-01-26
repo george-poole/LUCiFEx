@@ -10,27 +10,47 @@ from lucifex.fdm import (
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
 )
-from lucifex.utils import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.constitutive import newtonian_stress
-from lucifex.pde.scaling import AdvectionDiffusionScaling
+from lucifex.pde.scaling import ScalingOptions
+
+
+NAVIER_STOKES_CONVECTION_SCALINGS = ScalingOptions(
+    ('Ad', 'Di', 'Vi', 'Bu', 'Xl'),
+    lambda Ra, Pr: {
+        'advective': (1, 1/Ra, Pr/Ra, Pr/Ra, 1),
+        'diffusive': (1, 1, Pr, Pr * Ra, 1),
+    }
+)
+"""
+Choice of length scale `ℒ`, velocity scale `𝒰`
+and time scale `𝒯` in the non-dimensionalization.
+
+`'advective'` \\
+`ℒ` = domain size \\
+`𝒰` = advective speed
+
+`'diffusive'` \\
+`ℒ` = domain size \\
+`𝒰` = diffusive speed
+"""
 
 
 @configure_simulation(
     store_delta=1,
     write_delta=None,
 )
-def navier_stokes_double_diffusive_rectangle(
+def navier_stokes_thermosolutal_rectangle(
     # domain
     aspect: float = 2.0,
     Nx: int = 64,
     Ny: int = 64,
     cell: str = 'quadrilateral',
     # physical
-    scaling: AdvectionDiffusionScaling = AdvectionDiffusionScaling.ADVECTIVE,
+    scaling: str = 'diffusive',
     Le = 1.0,
     Pr = 1.0,
     Ra = 1e2,
@@ -52,16 +72,15 @@ def navier_stokes_double_diffusive_rectangle(
     D_diff_ad: FiniteDifference = CN,
 ):
     """
-    `∂c/∂t + 𝐮·∇c = ∇²c` \\
-    `∂θ/∂t + 𝐮·∇θ = 1/Le ∇²θ` \\
+    `∂c/∂t + 𝐮·∇c = Di∇²c` \\
+    `∂θ/∂t + 𝐮·∇θ = Di/Le ∇²θ` \\
     `∇·𝐮 = 0` \\
-    `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) - PrRa(c - βθ)𝐞ʸ`
+    `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu(c - βθ)𝐞ʸ`
     """
-    scaling_map = AdvectionDiffusionScaling(scaling).create_map(Ra)
+    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
     Xl = scaling_map['Xl']
     Lx = aspect * Xl
     Ly = 1.0 * Xl
-
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
@@ -121,7 +140,7 @@ def navier_stokes_double_diffusive_rectangle(
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
     theta = FunctionSeries((Omega, 'P', 1), 'theta', order, ics=theta_ics)
     # constitutive
-    deviatoric_stress = lambda u: Pr * newtonian_stress(u, 1)
+    deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
     rho = ExprSeries(c - beta * theta, 'rho')
     eg = as_vector([0, -1])
     f = Bu * rho * eg
@@ -130,7 +149,7 @@ def navier_stokes_double_diffusive_rectangle(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs, p_coeff=Pr,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs, p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, Di, D_adv_ad, D_diff_ad,

@@ -68,6 +68,8 @@ class DofsPerturbation:
         self._amplitude = amplitude
         self._freq = freq
         self._rng = np.random.default_rng(seed)
+        if corrector is None:
+            corrector = lambda _: None
         self._corrector = corrector
 
     def base(
@@ -76,7 +78,7 @@ class DofsPerturbation:
         correct: bool = True,
     ) -> Function:
         f = create_fem_function(fs, self._base)
-        if correct and self._corrector:
+        if correct:
             self._corrector(f.x.array)
         return f
         
@@ -153,6 +155,8 @@ class SpatialPerturbation:
     ) -> None:
         self._base = base
         self._noise = rescale(noise_shape, domain_lims, amplitude, **rescale_kwargs)
+        if corrector is None:
+            corrector = lambda _: None
         self._corrector = corrector
 
     def base(
@@ -161,7 +165,7 @@ class SpatialPerturbation:
         correct: bool = True,
     ) -> Function:
         f = create_fem_function(fs, self._base)
-        if correct and self._corrector:
+        if correct:
             self._corrector(f.x.array)
         return f
 
@@ -187,7 +191,7 @@ class SpatialPerturbation:
             perturbation = self.noise(fs)
             perturbed = operator(base, perturbation)
         f = create_fem_function(fs, perturbed)
-        if correct and self._corrector:
+        if correct:
             self._corrector(f.x.array)
         if name is not None:
             f.name = name

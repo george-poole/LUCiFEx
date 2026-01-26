@@ -28,19 +28,19 @@ def helmholtz(
         fs = u
     else:
         fs = u.function_space
-    dx = Measure('dx', u.function_space.mesh)
+    dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     F_lapl = -inner(grad(v), grad(u_trial)) * dx
-    F_eig = v * u * dx
+    F_eig = v * u_trial * dx
     F_neumann = None
 
     if bcs is not None:
-        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
+        ds, u_neumann = bcs.boundary_data(fs, 'neumann')
         F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
 
     if k is None and f is None and F_neumann is None:
-        return F_lapl, -F_eig
+        return F_lapl, F_eig
     else:
         F_eig = k**2 * F_eig
         F_src =  -v * f * dx
@@ -63,7 +63,7 @@ def mathieu(
         fs = u
     else:
         fs = u.function_space
-    dx = Measure('dx', u.function_space.mesh)
+    dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     x = SpatialCoordinate(fs.mesh)
@@ -72,7 +72,7 @@ def mathieu(
     F_eig = v * u_trial * dx
 
     if bcs is not None:
-        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
+        ds, u_neumann = bcs.boundary_data(fs, 'neumann')
         F_neumann = sum([-v * uN * ds(i) for i, uN in u_neumann])
         return F_lapl, -F_eig, F_neumann
     else:

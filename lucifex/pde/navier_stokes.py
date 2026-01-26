@@ -2,7 +2,7 @@ from typing import Callable
 
 from ufl import (
     dx, ds, Dx, Form, FacetNormal,
-    TrialFunction, TestFunction, Identity, sym,
+    TrialFunction, TestFunction, Identity,
 )
 from ufl.core.expr import Expr
 
@@ -32,8 +32,8 @@ def ipcs_1(
     D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
     sigma_bcs: BoundaryConditions | None = None,
-    adv_coeff:  Constant | float = 1,
-    p_coeff: Constant | float = 1,
+    adv_scale:  Constant | float = 1,
+    p_scale: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     n = FacetNormal(u.function_space.mesh)
@@ -41,9 +41,9 @@ def ipcs_1(
     epsilon = strain(v)
 
     F_dudt = inner(v, DT(u, dt)) * dx
-    F_adv = adv_coeff * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
-    tau = deviatoric_stress(D_visc(u))
-    sigma = -p_coeff * p[0] * Identity(dim) + tau
+    F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u))), trial=u) * dx
+    tau = deviatoric_stress(D_visc(u, trial=u))
+    sigma = -p_scale * p[0] * Identity(dim) + tau
 
     F_stress = inner(epsilon, sigma) * dx 
     if sigma_bcs is None:
@@ -54,7 +54,7 @@ def ipcs_1(
     forms = [F_dudt, F_adv, F_stress, F_ds]
 
     if f is not None:
-        f = D_force(f)
+        f = D_force(f, trial=u)
         F_f = -inner(v, f) * dx
         forms.append(F_f)
 
@@ -65,12 +65,12 @@ def ipcs_2(
     p: FunctionSeries,
     u: FunctionSeries,
     dt: Constant,
-    p_coeff:  Constant | float = 1,
+    p_scale:  Constant | float = 1,
 ) -> tuple[Form, Form, Form]:
     p_trial = TrialFunction(p.function_space)
     q = TestFunction(p.function_space)
-    F_trial = p_coeff * inner(grad(q), grad(p_trial)) * dx
-    F_grad = -p_coeff * inner(grad(q), grad(p[0])) * dx
+    F_trial = p_scale * inner(grad(q), grad(p_trial)) * dx
+    F_grad = -p_scale * inner(grad(q), grad(p[0])) * dx
     F_div = q * (1 / dt) * div(u[1])  * dx
     return F_trial, F_grad, F_div
     
@@ -79,12 +79,12 @@ def ipcs_3(
     u: FunctionSeries,
     p: FunctionSeries,
     dt: Constant,
-    p_coeff:  Constant | float = 1,
+    p_scale:  Constant | float = 1,
 ) -> tuple[Form, Form]:
     u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
     F_dudt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
-    F_grad = p_coeff * inner(v, grad(p[1]) - grad(p[0])) * dx
+    F_grad = p_scale * inner(v, grad(p[1]) - grad(p[0])) * dx
     return F_dudt, F_grad
 
 
@@ -100,24 +100,24 @@ def ipcs_solvers(
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,
     sigma_bcs: BoundaryConditions | None = None,
-    adv_coeff: Constant | float = 1,
-    p_coeff: Constant | float = 1,
+    adv_scale: Constant | float = 1,
+    p_scale: Constant | float = 1,
 ) -> tuple[IBVP, BVP, BVP]:
     """
     `∇·𝐮 = 0` \\
     `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇·𝜏(𝐮) + 𝐟`
 
-    If `adv_coeff` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
-    If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
+    If `adv_scale` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
+    If `p_scale` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
     ipcs1_solver = ibvp(ipcs_1, bcs=u_bcs)(
-        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, f, sigma_bcs, adv_coeff, p_coeff,
+        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, f, sigma_bcs, adv_scale, p_scale,
     )
     ipcs2_solver = bvp(ipcs_2, bcs=p_bcs, future=True)(
-        p, u, dt, p_coeff,
+        p, u, dt, p_scale,
     )
     ipcs3_solver = bvp(ipcs_3, future=True, overwrite=True)(
-        u, p, dt, p_coeff,
+        u, p, dt, p_scale,
     )
     return ipcs1_solver, ipcs2_solver, ipcs3_solver
 
@@ -130,11 +130,11 @@ def chorin_1(
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
     f: FunctionSeries | Function | Constant| None = None,
-    adv_coeff: Constant | float = 1,
+    adv_scale: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     F_dudt = inner(v, DT(u, dt)) * dx
-    F_adv = adv_coeff * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
+    F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
     tau = deviatoric_stress(D_visc(u))
     F_visc = inner(grad(v), tau) * dx
     
@@ -153,11 +153,11 @@ def chorin_2(
     p: FunctionSeries,
     u: FunctionSeries,
     dt: Constant,
-    p_coeff:  Constant | float = 1,
+    p_scale:  Constant | float = 1,
 ) -> tuple[Form, Form]:
     p_trial = TrialFunction(p.function_space)
     q = TestFunction(p.function_space)
-    F_trial = p_coeff * inner(grad(q), grad(p_trial)) * dx
+    F_trial = p_scale * inner(grad(q), grad(p_trial)) * dx
     F_div = q * (1 / dt) * div(u[1])  * dx
     return F_trial, F_div
 
@@ -166,12 +166,12 @@ def chorin_3(
     u: FunctionSeries,
     p: FunctionSeries,
     dt: Constant,
-    p_coeff:  Constant | float = 1,
+    p_scale:  Constant | float = 1,
 ) -> tuple[Form, Form]:
     u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
     F_dudt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
-    F_grad = p_coeff * inner(v, grad(p[1])) * dx
+    F_grad = p_scale * inner(v, grad(p[1])) * dx
     return F_dudt, F_grad
 
 
@@ -186,25 +186,24 @@ def chorin_solvers(
     f: FunctionSeries | Function | Constant| None = None,
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,    
-    adv_coeff: Constant | float = 1,
-    p_coeff: Constant | float = 1,
+    adv_scale: Constant | float = 1,
+    p_scale: Constant | float = 1,
 ):
     """
     `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇·𝜏(𝐮) + 𝐟` \\
     `∇·𝐮 = 0`
 
-    If `adv_coeff` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
-    If `visc_coeff` argument specified, then `∇²𝐮 -> V ∇²𝐮` with constant `V`. \\
-    If `p_coeff` argument specified, then `∇p -> P ∇p` with constant `P`.
+    If `adv_scale` argument specified, then `𝐮·∇𝐮 -> A 𝐮·∇𝐮` with constant `A`. \\
+    If `p_scale` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
     chorin1_solver = ibvp(chorin_1, bcs=u_bcs)(
-        u, dt, deviatoric_stress, D_adv, D_visc, D_force, f, adv_coeff,
+        u, dt, deviatoric_stress, D_adv, D_visc, D_force, f, adv_scale,
     )
     chorin2_solver = bvp(chorin_2, bcs=p_bcs, future=True)(
-        p, u, dt, p_coeff,
+        p, u, dt, p_scale,
     )
     chorin3_solver = bvp(chorin_3, future=True, overwrite=True)(
-        u, p, dt, p_coeff,
+        u, p, dt, p_scale,
     )
     return chorin1_solver, chorin2_solver, chorin3_solver
 

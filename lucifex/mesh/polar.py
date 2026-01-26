@@ -33,7 +33,7 @@ def circle_sector_model(
 ) -> gmsh.model:
     if not isinstance(angle, tuple):
         angle = (0.0, angle)
-    angle = tuple(np.pi * i / 180 for i in angle)
+    angle = tuple(np.radians(i) for i in angle)
     centre = (*centre, 0)
     start = (
         centre[0] + radius * np.cos(angle[0]), 
@@ -74,7 +74,7 @@ def annulus_sector_model(
 ) -> gmsh.model:
     if not isinstance(angle, tuple):
         angle = (0.0, angle)
-    angle = tuple(np.pi * i / 180 for i in angle)
+    angle = tuple(np.radians(i) for i in angle)
     centre = (*centre, 0)
 
     inner_start = (

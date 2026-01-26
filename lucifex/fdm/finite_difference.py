@@ -143,21 +143,6 @@ class FiniteDifference:
                 f"Order of finite difference operator '{self.name}' exceeds order of series '{u.name}'",
             )
 
-        # if isinstance(u, FunctionSeries):
-        #     if trial is None:
-        #         trial = self._trial
-        #     if isinstance(trial, FunctionSeries):
-        #         trial  = u is trial
-        # else:
-        #     trial = False
-
-        # if trial:
-        #     if not isinstance(u, FunctionSeries):
-        #         raise TypeError(f'Expected `FunctionSeries` type, not `{type(u)}`.')
-        #     _u = lambda n: u[n] if n != u.FUTURE_INDEX else TrialFunction(u.function_space)
-        # else:
-        #     _u = lambda n: u[n]
-
         expr = sum((c * u[n] for n, c in self.coefficients.items()))
 
         if trial is not None:
