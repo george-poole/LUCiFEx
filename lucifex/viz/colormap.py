@@ -16,7 +16,7 @@ from ..mesh.cartesian import CellType
 from ..utils import (is_scalar, grid, triangulation, create_fem_function, is_cartesian, 
                      filter_kwargs, MultipleDispatchTypeError, UnstructuredQuadError, extract_mesh)
 
-from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, create_multifigure
+from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_fig_axs
 
 
 @overload
@@ -244,24 +244,19 @@ def _plot_contours(
             x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
             f_grid = grid(use_cache=use_func_cache)(f)
             return _plot_contours(ax, (x, y, f_grid), levels, use_cache, **kwargs)
-        
+                
 
+@optional_fig_axs
 def plot_colormap_multifigure(
+    fig: Figure,
+    axs_main: list[Axes],
+    axs_cbar: list[Axes | None],
     u: Iterable[Function | Expr],
     cmaps: Iterable[str] | str = 'hot',
-    colorbar: bool | tuple[float, float] = True,
     titles: Iterable[str] | None = None,
-    n_cols: int = 1,
-    multifig_kwargs: dict | None = None,
     **plt_kwargs,
-) -> Figure:
+) -> None:
     
-    if multifig_kwargs is None:
-        multifig_kwargs = {}
-    
-    n_rows = len(u) // n_cols
-    fig, axs_main, axs_cbar = create_multifigure(n_rows, n_cols, colorbar=colorbar, **multifig_kwargs)
-
     if titles is None:
         titles = [None] * len(u)
 
@@ -276,12 +271,12 @@ def plot_colormap_multifigure(
             colorbar=False, 
             **plt_kwargs,
         ) 
-        if isinstance(colorbar, tuple):
+        if isinstance(ax_cbar, tuple):
             cmap: ScalarMappable = ax_main.collections[0]
-            cmap.set_clim(*colorbar)
-            if ax_main is axs_main[n_cols - 1]:
-                fig.colorbar(cmap, ax=ax_main)
-        if colorbar is True:
+            cmap.set_clim(*ax_cbar)
+            fig.colorbar(cmap, ax=ax_main)
+        if ax_cbar is not None:
             fig.colorbar(ax_main.collections[0], ax_cbar)
 
-    return fig
+
+plot_colormap_multifigure()

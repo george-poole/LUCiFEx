@@ -1,6 +1,6 @@
 from inspect import signature
 from typing import (
-    Callable, Iterable, ParamSpec, Concatenate, 
+    Callable, Iterable, ParamSpec, TypeVar, Concatenate, 
     Literal, Any, overload,
 )
 
@@ -195,7 +195,7 @@ def create_multifigure(
     figscale: float = 1.0,
     width_ratio: float = 0.025,
     **kwargs,
-) -> tuple[Figure, list[Axes], list[Axes | None]]:
+) -> tuple[Figure, list[Axes], list[Axes | None] | list[tuple[float, float] | None]]:
     if colorbar is True:
         kwargs.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
         n_cols = 2 * n_cols
@@ -218,5 +218,53 @@ def create_multifigure(
     else:
         axs_main = fig.axes
         axs_cbar = [None] * len(axs_main)
+        if isinstance(colorbar, tuple):
+            axs_cbar[n_cols - 1] = colorbar
 
     return fig, axs_main, axs_cbar
+
+
+P = ParamSpec('P')
+R = TypeVar('R')
+def optional_fig_axs(
+    plot_func: Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], R],
+):
+    
+    @overload
+    def _(
+        multifig_kwargs: dict,
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> tuple[Figure, list[Axes], list[Axes | None]]:
+        ...
+    
+    @overload
+    def _(
+        fig: Figure,
+        axs_main: list[Axes],
+        axs_cbar: list[Axes | None],
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ):
+        ...
+
+    def _(*args, **kwargs):
+        if isinstance(args[0], Figure):
+            fig, axs_main, axs_cbar, *_args = args
+            return plot_func(fig, axs_main, axs_cbar, *_args, **kwargs)
+        if isinstance(args[0], dict):
+            multifig_kwargs, plot_objs, *_args = args
+            n_cols = multifig_kwargs.get('n_cols')
+            n_rows = multifig_kwargs.get('n_rows')
+            assert (n_cols, n_rows).count(None) != len(n_cols, n_rows)
+            if n_cols is None:
+                n_cols = len(plot_objs) // n_rows
+            if n_rows is None:
+                n_rows = len(plot_objs) // n_cols
+            fig, axs_main, axs_cbar = create_multifigure(n_rows, n_cols, **multifig_kwargs)
+            plot_func(fig, axs_main, axs_cbar, plot_objs, *_args, **kwargs)
+            return fig, axs_main, axs_cbar
+        else:
+            raise TypeError
+
+    return _
