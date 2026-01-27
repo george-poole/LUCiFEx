@@ -60,6 +60,12 @@ def darcy_fingering_rectangle(
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
 ):
+    """
+    `Ω = [0, A·Xl] × [0, Xl]` \\
+    `∂c/∂t + 𝐮·∇c = Di ∇²c` \\
+    `∇⋅𝐮 = 0` \\
+    `𝐮 = -(1 / μ(c)) · (∇p + In μ(c)𝐞ˣ)`
+    """
     scaling_map = DARCY_FINGERING_SCALINGS[scaling](Pe)
     Xl = scaling_map['Xl']
     Lx = aspect * Xl
@@ -84,15 +90,13 @@ def darcy_fingering_rectangle(
 
     # constants
     Di, In = scaling_map[Omega, 'Di', 'In']
-    Di = Constant(Omega, Di, 'Di')
-    In = Constant(Omega, In, 'In')
     Pe = Constant(Omega, Pe, 'Pe')
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')
 
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
-        lambda x: 0.5 * (1.0 + sp.erf(x[0] / (Lx * erf_eps))),
-        sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], c_freq),
+        lambda x: 0.5 * (1.0 + sp.erf(-x[0] / (Lx * erf_eps))),
+        sinusoid_noise([bc_type, 'neumann'], [Lx, Ly], c_freq),
         [Lx, Ly],
         c_eps,
     ) 
@@ -101,8 +105,8 @@ def darcy_fingering_rectangle(
             (BoundaryType.DIRICHLET, dOmega.union, 0.0),
         )
         c_bcs = BoundaryConditions(
-            ("dirichlet", dOmega['left'], 0.0),
-            ("dirichlet", dOmega['right'], 1.0),
+            ("dirichlet", dOmega['left'], 1.0),
+            ("dirichlet", dOmega['right'], 0.0),
             ("neumann", dOmega['upper', 'lower'], 0.0),
         )
     elif bc_type == BoundaryType.PERIODIC:
@@ -116,7 +120,7 @@ def darcy_fingering_rectangle(
             ("neumann", dOmega['upper', 'lower'], 0.0),
         )
     else:
-        raise ValueError
+        raise ValueError(f"Expected {BoundaryType.DIRICHLET}' or '{BoundaryType.PERIODIC}'.")
     
     # constitutive
     dispersion = lambda phi: Di * phi
@@ -127,7 +131,7 @@ def darcy_fingering_rectangle(
         Omega=Omega, 
         dOmega=dOmega, 
         egx=1,
-        egy=None,
+        egy=0,
         dispersion=dispersion,
         density=density,
         viscosity=viscosity,
@@ -139,5 +143,6 @@ def darcy_fingering_rectangle(
         cfl_courant=cfl_courant,
         D_adv=D_adv,
         D_diff=D_diff,
+        namespace=[Pe, Lmbda, Di, In],
     )
     return simulation

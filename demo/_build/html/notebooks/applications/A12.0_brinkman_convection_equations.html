@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Darcy-Brinkman convection equations &#8212; LUCiFEx Benchmarks</title>
+    <title>Darcy-Brinkman convection equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -574,7 +575,7 @@ $<span class="math notranslate nohighlight">\(Pr=\frac{\mu_{\text{ref}}}{\rho_{\
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{cases}
-\phi\frac{\partial c}{\partial t}+Ad\,\textbf{u}\cdot\nabla c=\frac{1}{Pe}\nabla\cdot(\mathsf{D}\cdot\nabla c) \\
+\phi\frac{\partial c}{\partial t}+Ad\,\textbf{u}\cdot\nabla c=Di\nabla\cdot(\mathsf{D}\cdot\nabla c) \\
 \nabla\cdot\textbf{u}=0 \\
 \frac{\partial\textbf{u}}{\partial t}+Ad\,\textbf{u}\cdot\nabla(\phi^{-1}\textbf{u})=-\phi\nabla p + Vi\,\nabla^2\textbf{u} + Bu\,\phi\rho\,\textbf{e}_g - Pm\,\phi\mathsf{K}^{-1}\cdot\textbf{u} \\
 \end{cases}
@@ -583,7 +584,7 @@ $<span class="math notranslate nohighlight">\(Pr=\frac{\mu_{\text{ref}}}{\rho_{\
 \[\begin{split}
 \begin{align*}
 Ad&amp;=\frac{\mathcal{U}\mathcal{T}}{\mathcal{L}} \\
-Pe&amp;=\frac{\mathcal{L}^2}{D_{\text{ref}}\mathcal{T}} \\
+Di&amp;=\frac{D_{\text{ref}}\mathcal{T}}{\mathcal{L}^2} \\
 Vi&amp;=\frac{\mu_{\text{ref}}\mathcal{T}}{\rho_{\text{ref}}\mathcal{L}^2} \\
 Bu&amp;=\frac{\,g\Delta\rho\,\mathcal{T}}{\rho_{\text{ref}}\,\mathcal{U}} \\
 Pm&amp;=\frac{\mu_{\text{ref}}\,\,\mathcal{T}}{K_{\text{ref}}\,\rho_{\text{ref}}\,\mathcal{U}} 

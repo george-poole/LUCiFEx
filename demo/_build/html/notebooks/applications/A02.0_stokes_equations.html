@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Stokes equations &#8212; LUCiFEx Benchmarks</title>
+    <title>Stokes equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -455,7 +456,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
@@ -491,7 +491,16 @@ document.write(`
 \textbf{0}=-\nabla p + \nabla\cdot\tau + \textbf{f} &amp; \forall\textbf{x}\in\Omega \\
 \textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
 (-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
-\end{cases}~.
+\end{cases} \\
+&amp;\text{given} \\
+&amp;\mathbb{S}\begin{cases}
+\Omega &amp; \text{domain}\\
+\textbf{u}_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
+\boldsymbol{\tau}_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
+\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} \\
+\textbf{f}(\textbf{x}) &amp; \text{body force} \\
+\rho(\textbf{x}) &amp; \text{density}
+\end{cases}
 \end{align*}
 \end{split}\]</div>
 </section>
@@ -505,21 +514,6 @@ document.write(`
 &amp;- \int_{\partial\Omega_{\text{N}}}\text{d}\Gamma~\,\textbf{v}\cdot\boldsymbol{\tau}_{\text{N}} \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
-\end{split}\]</div>
-</section>
-<section id="specification">
-<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\mathbb{S}
-\begin{cases}
-\Omega &amp; \text{domain}\\
-\textbf{u}_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
-\boldsymbol{\tau}_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
-\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} \\
-\textbf{f}(\textbf{x}) &amp; \text{body force} \\
-\rho(\textbf{x}) &amp; \text{density}
-\end{cases}
 \end{split}\]</div>
 </section>
 </section>
@@ -564,7 +558,7 @@ document.write(`
 <h3>Weak form<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\begin{align*}
+\begin{aligned}
 &amp;\text{Find}~\psi\in V~\text{such that} \\
 &amp;\begin{align*}
 F(\psi, v) &amp;= 
@@ -572,8 +566,8 @@ F(\psi, v) &amp;=
 &amp;\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
 &amp;=0\quad\forall v\in V~.
 \end{align*} \\
-&amp;\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter}~h(\textbf{x})~\text{is the local mesh cell size.}
-\end{align*}
+&amp;\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter and}~h(\textbf{x})~\text{is the local mesh cell size.}
+\end{aligned}
 \end{split}\]</div>
 </section>
 </section>
@@ -648,7 +642,6 @@ F(\psi, v) &amp;=
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixed-formulation">Mixed formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">

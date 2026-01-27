@@ -48,17 +48,14 @@ def navier_stokes_rayleigh_taylor_rectangle(
     D_diff_ad: FiniteDifference = CN,
 ):
     """
-    `∂c/∂t + 𝐮·∇c = ∇²c`
-
-    `∇·𝐮 = 0`
-
-    `∂𝐮/∂t + 𝐮·∇𝐮 = Pr(-∇p + ∇²𝐮) + PrRa ρ 𝐞₉`
+    `∂c/∂t + 𝐮·∇c = Di∇²c` \\
+    `∇·𝐮 = 0` \\
+    `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu c 𝐞ʸ`
     """
     scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
     Xl = scaling_map['Xl']
     Lx = aspect * Xl
     Ly = 1.0 * Xl
-
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
@@ -113,10 +110,10 @@ def navier_stokes_rayleigh_taylor_rectangle(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_scale=Pr,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
-        c, dt[0], u, 1, D_adv_ad, D_diff_ad,
+        c, dt[0], u, Di, D_adv_ad, D_diff_ad,
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]

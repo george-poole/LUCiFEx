@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Navier-Stokes equations &#8212; LUCiFEx Benchmarks</title>
+    <title>Navier-Stokes equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -455,7 +456,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearized-weak-forms-sequences">Linearized weak forms sequences</a><ul class="nav section-nav flex-column">
@@ -497,7 +497,18 @@ document.write(`
 p=p_0 &amp; \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 \textbf{u} = \textbf{u}_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \times[0, \infty) \\
 (-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
-\end{cases}~.
+\end{cases} \\
+&amp;\text{given} \\
+&amp;\mathbb{S}\begin{cases}
+\Omega &amp; \text{domain}\\
+\textbf{u}_0(\textbf{x}) &amp; \text{velocity initial condition}\\
+p_0(\textbf{x}) &amp; \text{pressure initial condition}\\ 
+\textbf{u}_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
+\boldsymbol{\tau}_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
+\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} \\
+\textbf{f}(\textbf{x}, t) &amp; \text{body force} \\
+\rho(\textbf{x}, t) &amp; \text{density}
+\end{cases}
 \end{align*}
 \end{split}\]</div>
 </section>
@@ -512,23 +523,6 @@ F(\textbf{u}, p;\textbf{v}, q)&amp;=\dots \\
 &amp;=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p~.
 \end{align*}
 \end{aligned}
-\end{split}\]</div>
-</section>
-<section id="specification">
-<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\mathbb{S}
-\begin{cases}
-\Omega &amp; \text{domain}\\
-\textbf{u}_0(\textbf{x}) &amp; \text{initial velocity}\\
-p_0(\textbf{x}) &amp; \text{initial pressure}\\ 
-\textbf{u}_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} &amp; \text{velocity essential boundary condition} \\
-\boldsymbol{\tau}_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} &amp; \text{traction natural boundary condition} \\
-\tau(\textbf{u}) &amp; \text{deviatoric stress constitutive relation} \\
-\textbf{f}(\textbf{x}, t) &amp; \text{body force} \\
-\rho(\textbf{x}, t) &amp; \text{density}
-\end{cases}
 \end{split}\]</div>
 </section>
 </section>
@@ -701,7 +695,6 @@ F_3(\textbf{u}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rh
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-equations">Nonlinear equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-form">Weak form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearized-weak-forms-sequences">Linearized weak forms sequences</a><ul class="nav section-nav flex-column">

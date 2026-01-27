@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Stabilizing a boundary layer on an interval &#8212; LUCiFEx Benchmarks</title>
+    <title>Stabilizing a boundary layer on an interval &#8212; LUCiFEx Demo</title>
   
   
   
@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Stabilizing a boundary layer on an interval" href="N02.2_supg_steady_advection_diffusion_hemker.html" />
+    <link rel="next" title="The Hemker problem" href="N02.2_supg_steady_advection_diffusion_hemker.html" />
     <link rel="prev" title="SUPG stabilization of the steady advection-diffusion-reaction equation" href="N02.0_supg_steady_advection_diffusion.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../applications/A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../applications/A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../applications/A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -277,7 +278,7 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Stabilizing a boundary layer on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_hemker.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="N02.2_supg_steady_advection_diffusion_hemker.html">The Hemker problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -429,9 +430,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -447,14 +446,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-hemker-problem">The Hemker problem</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -488,15 +479,12 @@ u_{\text{e}}(x)=\frac{1}{a}\frac{(x-e^{ax/D})}{1-e^{a/D}}
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryValueProblem</span><span class="p">,</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">steady_advection_diffusion</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.supg</span><span class="w"> </span><span class="kn">import</span> <span class="n">peclet</span>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">create_bl_solver</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_solver</span><span class="p">(</span>
     <span class="n">supg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -533,7 +521,7 @@ u_{\text{e}}(x)=\frac{1}{a}\frac{(x-e^{ax/D})}{1-e^{a/D}}
 <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_opts</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_opts</span><span class="p">:</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
-        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">create_bl_solver</span><span class="p">(</span><span class="n">supg</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">Lx</span><span class="p">)</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">create_solver</span><span class="p">(</span><span class="n">supg</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">Lx</span><span class="p">)</span>
         <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
         <span class="n">bl_solutions</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="n">supg</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solution</span>
 </pre></div>
@@ -559,7 +547,7 @@ u_{\text{e}}(x)=\frac{1}{a}\frac{(x-e^{ax/D})}{1-e^{a/D}}
         <span class="n">legend_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">supg</span><span class="p">)</span>
     <span class="n">Pe</span> <span class="o">=</span> <span class="n">peclet</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$Pe=</span><span class="si">{</span><span class="n">Pe</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
-    <span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_Pe=</span><span class="si">{</span><span class="n">Pe</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Pe=</span><span class="si">{</span><span class="n">Pe</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -569,98 +557,6 @@ u_{\text{e}}(x)=\frac{1}{a}\frac{(x-e^{ax/D})}{1-e^{a/D}}
 <img alt="../../_images/e6c76fb21775e0e6678db13f560bf7f03f18ca19bd760f3571e7fcf1d92c9828.png" src="../../_images/e6c76fb21775e0e6678db13f560bf7f03f18ca19bd760f3571e7fcf1d92c9828.png" />
 </div>
 </div>
-<section id="the-hemker-problem">
-<h2>The Hemker problem<a class="headerlink" href="#the-hemker-problem" title="Link to this heading">#</a></h2>
-<p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 2.6.6\)</span></p>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{cases}
-\Omega = [-1, 1] \\
-u_{\text{D}}(x=-1)=-2 \\
-u_{\text{D}}(x=1)=0 \\
-\textbf{a}=x\,\textbf{e}_x \\
-\mathsf{D}=-\nu\mathsf{I} \\
-R=0 \\
-J = -D\pi^2\cos(\pi x) -\pi x\sin(\pi x) \\
-u_{\text{e}}(x)=\cos(\pi x)+\frac{\text{erf}\left(\frac{x}{\sqrt{2D}}\right)}{\text{erf}\left(\frac{1}{\sqrt{2D}}\right)}
-\end{cases}
-\end{split}\]</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_hemker_solver</span><span class="p">(</span>
-    <span class="n">supg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">nu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-    <span class="n">Lx</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-    <span class="n">dirichlet</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryValueProblem</span><span class="p">:</span>
-    <span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">)</span>
-    <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dirichlet</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dirichlet</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">SpatialCoordinate</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">as_vector</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">))</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="o">-</span><span class="n">nu</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
-    <span class="n">nu</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;nu&#39;</span><span class="p">)</span>
-    <span class="n">j</span> <span class="o">=</span> <span class="o">-</span><span class="n">nu</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">CellDiameter</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-    <span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">steady_advection_diffusion</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)(</span>
-        <span class="n">u</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">supg</span><span class="o">=</span><span class="n">supg</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">u_solver</span>
-
-
-<span class="n">Nx</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">nu</span> <span class="o">=</span> <span class="mf">1e-6</span>
-<span class="n">supg_opts</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;coth&#39;</span><span class="p">)</span>
-<span class="n">hemker_solutions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Function</span><span class="p">]</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
-
-<span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_opts</span><span class="p">:</span>
-    <span class="n">u_solver</span> <span class="o">=</span> <span class="n">create_hemker_solver</span><span class="p">(</span><span class="n">supg</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
-    <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-    <span class="n">hemker_solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solution</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">exact_hemker</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>   
-    <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>    
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="p">))</span> <span class="o">/</span> <span class="n">sp</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="p">))</span>
-
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
-
-<span class="n">lines</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">exact_hemker</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">nu</span><span class="p">))]</span>
-<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;exact&#39;</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">supg</span> <span class="ow">in</span> <span class="n">supg_opts</span><span class="p">:</span>
-    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hemker_solutions</span><span class="p">[</span><span class="n">supg</span><span class="p">])</span>
-    <span class="n">legend_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">supg</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">)</span>
-<span class="n">write</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">get_ipynb_file_name</span><span class="p">()</span><span class="si">}</span><span class="s1">_hemker&#39;</span><span class="p">,</span> <span class="s1">&#39;./figures&#39;</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pickle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../../_images/9dab6abe6bbd31231f2628d2d682eaaf311841ef63d168adeae6c0a1e24253a8.png" src="../../_images/9dab6abe6bbd31231f2628d2d682eaaf311841ef63d168adeae6c0a1e24253a8.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -707,7 +603,7 @@ u_{\text{e}}(x)=\cos(\pi x)+\frac{\text{erf}\left(\frac{x}{\sqrt{2D}}\right)}{\t
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Stabilizing a boundary layer on an interval</p>
+        <p class="prev-next-title">The Hemker problem</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -717,21 +613,6 @@ u_{\text{e}}(x)=\cos(\pi x)+\frac{\text{erf}\left(\frac{x}{\sqrt{2D}}\right)}{\t
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-hemker-problem">The Hemker problem</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle &#8212; LUCiFEx Benchmarks</title>
+    <title>Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -460,15 +461,12 @@ document.write(`
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\mathcal{L} = \mathcal{L}_\Omega &amp; \text{scaling with rectangle depth and convective speed} \\
-\mathcal{U} = K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}} \\
-\mathcal{T} = \phi_{\text{ref}}\mathcal{L}/\mathcal{U} \\
-\Omega = [0, L_x] \times [0, 1] &amp; \text{aspect ratio } L_x=\mathcal{O}(1)\\
+\Omega = [0, \mathcal{A}Xl] \times [0, Xl] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
 \textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards}\\ 
-\phi = 1 &amp; \text{constitutive relations} \\
-\mathsf{D} = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I}\\ 
-\mu = 1 \\
+\phi = 1 &amp; \text{constant porosity} \\
+\mathsf{D} = \mathsf{I} &amp; \text{isotropic dispersion}\\ 
+\mathsf{K} = \mathsf{I} &amp; \text{isotropic permeability}\\ 
+\mu = 1 &amp; \text{constant viscosity} \\
 \rho(c) = -c \\
 c_0(x,y)=1-y+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
 c_{\text{D}}(x,y=0)=1 &amp; \text{prescribed temperature on upper and lower boundaries} \\
@@ -520,7 +518,7 @@ c_{\text{N}}(x=L_x,y)=0 \\
     <span class="n">plot_colormap</span><span class="p">,</span>
     <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">)</span>
-<span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;c(t)&#39;</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
+<span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t)&#39;</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
 
 <span class="n">display_animation</span><span class="p">(</span><span class="n">anim_path</span><span class="p">)</span>
 </pre></div>

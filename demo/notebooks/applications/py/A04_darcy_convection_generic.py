@@ -94,7 +94,7 @@ def darcy_convection_generic(
     """
     `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
     `∇⋅𝐮 = 0` \\
-    `𝐮 = -(K(ϕ)/μ(c))·(∇p + ρ(c)e₉)` 
+    `𝐮 = -(K(ϕ)/μ(c))·(∇p - ρ(c)e₉)` 
     """
     # time
     order = finite_difference_order(D_adv, D_diff)

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle &#8212; LUCiFEx Benchmarks</title>
+    <title>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -277,7 +278,7 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">The Hemker problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -458,7 +459,7 @@ document.write(`
 <h1>Porosity evolution-dissolution from an injected Darcy fluid in a rectangle<a class="headerlink" href="#porosity-evolution-dissolution-from-an-injected-darcy-fluid-in-a-rectangle" title="Link to this heading">#</a></h1>
 <div class="math notranslate nohighlight">
 \[\begin{split}
-\mathbb{S}=
+\mathbb{S}
 \begin{cases}
 \Omega = \left[-\tfrac{1}{2}L_x, \tfrac{1}{2}L_x\right] \times [0, L_y] \\
 c_0 = 1 \\
@@ -486,11 +487,8 @@ b(|x| \leq \tfrac{1}{2}\delta L_x, y=0) = b_{\text{in}} \\
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.darcy_plume_dissolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_plume_dissolution_rectangle</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.A09_darcy_porosity_evolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_plume_dissolution_rectangle</span>
 
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_plume_dissolution_rectangle</span><span class="p">(</span>
     <span class="n">Lx</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>

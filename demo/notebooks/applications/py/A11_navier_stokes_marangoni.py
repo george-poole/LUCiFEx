@@ -4,20 +4,22 @@ import numpy as np
 from ufl import as_vector, Dx
 
 from lucifex.fdm import (
-    BE, FE, CN, FiniteDifference, cfl_timestep, 
+    BE, FE, CN, FiniteDifference, FiniteDifferenceArgwise, cfl_timestep, 
     FunctionSeries, ConstantSeries, ExprSeries, finite_difference_order,
 )
-from lucifex.fem import Constant
+from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
 )
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, SpatialPerturbation, sinusoid_noise
+from lucifex.utils import CellType
 
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
+
+from .A11_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -26,17 +28,18 @@ from lucifex.pde.advection_diffusion import advection_diffusion
 )
 def navier_stokes_marangoni(
     # domain
-    Lx: float,
-    Ly: float,
+    aspect: float,
     Nx: int,
     Ny: int,
     cell: str = CellType.QUADRILATERAL,
     # physical
+    scaling: str = 'advective',
     Ra: float = 1.0,
     Pr: float = 1.0,
     Ma: float = 1.0,
     # initial perturbation
-    c_base: Callable[[np.ndarray], np.ndarray] = lambda x: 0 * x[0],
+    h_frac: float = 0.8,
+    eps_frac: float = 0.01,
     noise_eps: float = 1e-6,
     noise_freq: tuple[int, int] = (8, 8),
     # time step
@@ -50,6 +53,13 @@ def navier_stokes_marangoni(
     D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE, BE),
     D_diff_c: FiniteDifference = CN,
 ):
+    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra)
+    Xl = scaling_map['Xl']
+    Lx = aspect * Xl
+    Ly = 1.0 * Xl
+    h = h_frac * Ly
+    eps = eps_frac * Ly
+
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
@@ -63,23 +73,19 @@ def navier_stokes_marangoni(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
-
     # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_c, D_diff_c,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
-
-
     # constants
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     Ma = Constant(Omega, Ma, 'Ma')
-
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
-        c_base,
+        lambda x: np.exp(-(x[1] - h)**2 / eps),
         sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], noise_freq),
         [Lx, Ly],
         noise_eps,
@@ -87,38 +93,31 @@ def navier_stokes_marangoni(
     c_bcs = BoundaryConditions(
         ('neumann', dOmega.union, 0.0)
     )
-    
-    # flow and transport
-    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
-    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
-    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
-
-    rho = ExprSeries(-Ra * c, 'rho')
-    f = rho * as_vector([0, -1])
-
     u_bcs = BoundaryConditions(
         ('dirichlet', dOmega['lower', 'left', 'right'], u_zero),
         ('dirichlet', dOmega['upper'], 0.0, 1),
     )  
-
     sigma_bcs = BoundaryConditions(
         ('natural', dOmega['upper'], as_vector([-Ma * Dx(c[0], 0), 0.0])),
     )
-
+    # flow
+    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
+    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
+    # transport
+    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
+    rho = ExprSeries(-Ra * c, 'rho')
+    f = rho * as_vector([0, -1])
+    # solvers
     dt_solver = evaluation(dt, cfl_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
-
     ns_solvers = ipcs_solvers(
         u, p, dt[0], 1/Pr, 1, newtonian_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, sigma_bcs=sigma_bcs,
     )
-
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, 1, D_adv_c, D_diff_c,
     )
-
     solvers = [dt_solver, *ns_solvers, c_solver]
     namespace = [Pr, Ra, Ma, rho]
-
     return solvers, t, dt, namespace 
     

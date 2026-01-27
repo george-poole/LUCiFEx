@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Darcy porosity evolution-dissolution equations &#8212; LUCiFEx Benchmarks</title>
+    <title>Darcy porosity evolution-dissolution equations &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -277,7 +278,7 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../numerical/N02.0_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.1_supg_steady_advection_diffusion_interval.html">Stabilizing a boundary layer on an interval</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">Stabilizing a boundary layer on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numerical/N02.2_supg_steady_advection_diffusion_hemker.html">The Hemker problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../numerical/N02.3_supg_steady_advection_diffusion_rectangle.html">Advection skew to the mesh on a rectangle</a></li>
 </ul>
 </details></li>
@@ -454,7 +455,6 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 </ul>
@@ -479,41 +479,36 @@ document.write(`
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find} \\
-&amp;a(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
+&amp;\phi(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
 &amp;b(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
 &amp;c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R},  \\
 &amp;\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
 &amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\begin{cases}
+\frac{\partial\phi}{\partial t} = \varepsilon R \\
 \phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla c) \\
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
 \nabla\cdot\textbf{u}=0 \\
-\textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p + \rho g\,\textbf{e}_g\right) \\ 
-\frac{\partial\phi}{\partial t} = \varepsilon R &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
-w=w_0  &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty]\quad\forall w\in\{b, c, \phi\}\\
+\textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p + \rho g\,\textbf{e}_g\right) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
+w=w_0  &amp; \forall(\textbf{x}, t)\in\Omega\times\{0\}\quad\forall w\in\{b, c, \phi\}\\
 w = w_{\text{D},w} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} {0}\quad\forall w\in\{b, c\}\\
 \textbf{n}\cdot(\mathsf{D}_w\nabla w) = w_{\text{N}, w} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N},w} \times [0,\infty]\quad\forall w\in\{b, c\}\\
 \textbf{n}\cdot\textbf{u} = u_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
 p = p_{\text{N}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty]~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
-\end{cases}~.
-\end{align*}
-\end{split}\]</div>
-</section>
-<section id="specification">
-<h3>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h3>
-<div class="math notranslate nohighlight">
-\[\begin{split}
-\mathbb{S}=
+\end{cases} \\
+&amp;\text{given} \\
+&amp;\mathbb{S}=
 \begin{cases}
-\phi(\textbf{x}) \\
-\mathsf{K}(\phi) \\
-\mathsf{D}_b(\phi, \textbf{u}) \\
-\mathsf{D}_c(\phi, \textbf{u}) \\
+\Omega\subset\mathbb{R}^d &amp; \text{domain} \\
+w_0~\forall w\in\{\phi, b, c\} &amp; \text{initial conditions} \\
+\mathsf{K}(\phi) &amp; \text{permeability} \\
+\mathsf{D}_w(\phi, \textbf{u})~\forall w\in\{b,c\} &amp; \text{solutal dispersions}\\
 \rho(b,c) \\
 \mu(b,c) \\
 R(b, c, \phi)
 \end{cases}
+\end{align*}
 \end{split}\]</div>
 </section>
 </section>
@@ -587,7 +582,6 @@ R(b, c, \phi)
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 </ul>
 </li>
 </ul>

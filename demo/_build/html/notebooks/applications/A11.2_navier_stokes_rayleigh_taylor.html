@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle &#8212; LUCiFEx Benchmarks</title>
+    <title>Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle &#8212; LUCiFEx Demo</title>
   
   
   
@@ -151,7 +151,7 @@
   
   
   
-    <p class="title logo__title">LUCiFEx Benchmarks</p>
+    <p class="title logo__title">LUCiFEx Demo</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -229,6 +229,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="A04.0_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="A04.1_darcy_convection_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A04.2_darcy_convection_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A04.3_darcy_convection_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection in a porous semicircle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.1_darcy_convection_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.2_darcy_convection_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="A05.3_darcy_convection_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
@@ -460,7 +461,7 @@ document.write(`
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\Omega = [0, L_x] \times [0, 1] &amp; \text{aspect ratio } L_x=\mathcal{O}(1) \\
+\Omega = [0, \mathcal{A}] \times [0, 1] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1) \\
 \textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards} \\
 \rho(c) = c &amp; \text{constitutive relation} \\
 c_0(x, y)=\text{H}(y-\tfrac{1}{2})+\mathcal{N}(x,y) &amp; \text{initial stratification plus noise} \\
@@ -474,15 +475,13 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary}\\
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">create_animation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.navier_stokes_rayleigh_taylor</span><span class="w"> </span><span class="kn">import</span> <span class="n">navier_stokes_rayleigh_taylor_rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.A11_navier_stokes_rayleigh_taylor</span><span class="w"> </span><span class="kn">import</span> <span class="n">navier_stokes_rayleigh_taylor_rectangle</span>
 
 
 <span class="n">Ra</span> <span class="o">=</span> <span class="mf">1e5</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">navier_stokes_rayleigh_taylor_rectangle</span><span class="p">(</span>
-    <span class="n">Lx</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">Ly</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>    
+    <span class="n">aspect</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>    
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="n">Ra</span><span class="p">,</span>
@@ -493,16 +492,16 @@ c_{\text{N}}\vert_{\partial\Omega}=0 &amp; \text{no-flux on entire boundary}\\
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">mesh</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">mesh</span>
-
-<span class="n">i_qrt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.25</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">i_qrt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.25</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
 <span class="n">i_mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
 <span class="n">time_indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_qrt</span><span class="p">,</span> <span class="n">i_mid</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>

@@ -48,7 +48,7 @@ parts:
         sections: 
           - file: notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle
           - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_annulus
-          - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_semicircle
+          - file: notebooks/applications/A04.3_darcy_convection_rayleigh_benard_semicircle
           - file: notebooks/applications/A05.1_darcy_convection_evolving_isotropic
           - file: notebooks/applications/A05.2_darcy_convection_evolving_crossbedded
           - file: notebooks/applications/A05.3_darcy_convection_evolving_layered

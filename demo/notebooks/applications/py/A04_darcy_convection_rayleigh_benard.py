@@ -40,7 +40,7 @@ def darcy_convection_rayleigh_benard_rectangle(
     secondary: bool = False,
 ):
     """
-    `Ω = [0, aspect·Xl] × [0, Xl]` \\
+    `Ω = [0, A·Xl] × [0, Xl]` \\
     `∂c/∂t + 𝐮·∇c = Di ∇²c` \\
     `∇⋅𝐮 = 0` \\
     `𝐮 = -(∇p + Bu c𝐞ʸ)`
