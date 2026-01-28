@@ -219,6 +219,8 @@ class ExprSeries(
             if name is None:
                 name = arg.name
             self.__init__(arg.sequence, name, arg._series, arg._time_series)
+        elif isinstance(arg, Series):
+            self.__init__(1.0 * arg, name)
         else:
             order = len(arg) - 1
             super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
@@ -401,7 +403,7 @@ class SolutionSeries(Series[T], Generic[T, U, I]):
         return self._time_series
     
     @property
-    def series(self):
+    def series(self) -> list[T]:
         return self._series
     
     @property

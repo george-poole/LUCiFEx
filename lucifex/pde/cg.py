@@ -100,7 +100,7 @@ def reaction_forms(
         F_reac = v * expr * dx
         forms.append(F_reac)
     if j is not None:
-        F_src = v * D_src(j) * dx
+        F_src = v * D_src(j, trial=u) * dx
         forms.append(F_src)
     return forms
 

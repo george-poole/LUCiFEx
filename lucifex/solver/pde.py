@@ -25,7 +25,7 @@ from ..utils import (
 )
 from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
-from ..fem import Function, Constant, Perturbation
+from ..fem import Function, Constant, Perturbation, is_unsolved
 from .bcs import BoundaryConditions, Value, SubspaceIndex
 from .options import (
     OptionsPETSc, OptionsSLEPc,
@@ -289,8 +289,14 @@ class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
         overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] | None = None,
         assemble_termwise: tuple[bool, bool] | None = None,
+        assert_solved: bool = False,
     ) -> None:
         """Mutates the data structures `self.solution` and `self.series` containing the solution"""
+        if assert_solved:
+            if not all(not is_unsolved(i) for i in self.forms):
+                raise RuntimeError(
+                    f"Cannot solve for '{self.solution.name}' because forms contain an unsolved quantity. Check finite difference discretizations or solvers sequence's order."
+                )
         if cache_matrix is None:
             cache_matrix = self._cache_matrix
         if assemble_termwise is None:

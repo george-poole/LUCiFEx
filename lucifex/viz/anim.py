@@ -22,8 +22,9 @@ class FuncAnimationFromSeries(Protocol, Generic[T]):
 P = ParamSpec('P')
 T = TypeVar('T')
 def create_animation(    
-    plot_func: Callable[Concatenate[Figure, Axes, T, P], None],
-    clear_func: Callable[[Figure, Axes], None] | None = None,
+    plot_func: Callable[Concatenate[Figure, Axes, T, P], None]
+    | Callable[Concatenate[Figure, list, list, T, P], None],
+    clear_func: Callable[[Figure], None] | None = None,
     millisecs: int = 100,
     anim_kwargs: dict | None = None,
     close: bool = True,
@@ -36,33 +37,48 @@ def create_animation(
     HTML(anim.to_html5_video())
     ```
     """
+
     def _(
         arg_series: list[T],
         **kwargs_series: list[Any],
     ) -> FuncAnimation:
+        
         n_snapshots = len(arg_series)
+        assert all(len(i) == n_snapshots for i in kwargs_series.values())
 
-        fig, ax = plt.subplots()
-
-        def _snapshot(n: int) -> tuple[Figure, Axes]:
-            __kwargs_series = {k: v[n] for k, v in kwargs_series.items()}
-            plot_func(
-                fig,
-                ax,
-                arg_series[n],
-                **__kwargs_series,
-                **plot_func_kwargs
-            )
-            return fig, ax
+        def _snapshot(
+            n: int,
+            setup: bool = False,
+        ) -> tuple[Figure, ...]:
+            _kwargs_series = {k: v[n] for k, v in kwargs_series.items()}
+            if setup:
+                return plot_func(
+                    arg_series[n],
+                    **_kwargs_series,
+                    **plot_func_kwargs
+                )
+            else:
+                plot_func(
+                    fig, 
+                    *ax_objects,
+                    arg_series[n],
+                    **_kwargs_series,
+                    **plot_func_kwargs
+                )
+                return fig, *ax_objects
+            
+        fig, *ax_objects = _snapshot(0, setup=True)
         
         _setup = lambda: _snapshot(n=0)
 
         nonlocal clear_func
         if clear_func is None:
-            clear_func = lambda _, ax: [i.remove() for i in (*ax.collections, *ax.lines, *ax.images)]
+            clear_func = lambda fig: [
+                i.remove() for ax in fig.axes for i in (*ax.collections, *ax.lines, *ax.images)
+            ]
 
         def _update(n: int):
-            clear_func(fig, ax)
+            clear_func(fig)
             return _snapshot(n)
         
         nonlocal anim_kwargs

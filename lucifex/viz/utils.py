@@ -225,17 +225,20 @@ def create_multifigure(
 
 
 P = ParamSpec('P')
-R = TypeVar('R')
 def optional_fig_axs(
-    plot_func: Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], R],
+    plot_func: Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], None],
 ):
-    
+
     @overload
     def _(
-        multifig_kwargs: dict,
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> tuple[Figure, list[Axes], list[Axes | None]]:
+        **multifig_kwargs: dict,
+    ) -> Callable[P, tuple[Figure, list[Axes], list[Axes | None]]]:
+        ...
+
+    @overload
+    def _(
+        **multifig_kwargs: dict,
+    ) -> Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], None]:
         ...
     
     @overload
@@ -245,25 +248,37 @@ def optional_fig_axs(
         axs_cbar: list[Axes | None],
         *args: P.args,
         **kwargs: P.kwargs,
-    ):
+    ) -> None:
         ...
 
+    N_COLS = 'n_cols'
+    N_ROWS = 'n_rows'
+
     def _(*args, **kwargs):
-        if isinstance(args[0], Figure):
+        if not args and kwargs:
+            def _inner(*a, **k):
+                if isinstance(a[0], Figure):
+                    return plot_func(*a, **k)
+                else:
+                    plot_objs = a[0]
+                    n_cols = kwargs.get(N_COLS)
+                    n_rows = kwargs.get(N_ROWS)
+                    assert (n_cols, n_rows).count(None) != 2
+                    if n_cols is None:
+                        n_cols = len(plot_objs) // n_rows
+                    if n_rows is None:
+                        n_rows = len(plot_objs) // n_cols
+                    fig, axs_main, axs_cbar = create_multifigure(
+                        n_rows, 
+                        n_cols, 
+                        **{k: v for k, v in kwargs.items() if not k in (N_COLS, N_ROWS)}
+                    )
+                    plot_func(fig, axs_main, axs_cbar, *a, **k)
+                    return fig, axs_main, axs_cbar
+            return _inner
+        elif isinstance(args[0], Figure):
             fig, axs_main, axs_cbar, *_args = args
             return plot_func(fig, axs_main, axs_cbar, *_args, **kwargs)
-        if isinstance(args[0], dict):
-            multifig_kwargs, plot_objs, *_args = args
-            n_cols = multifig_kwargs.get('n_cols')
-            n_rows = multifig_kwargs.get('n_rows')
-            assert (n_cols, n_rows).count(None) != len(n_cols, n_rows)
-            if n_cols is None:
-                n_cols = len(plot_objs) // n_rows
-            if n_rows is None:
-                n_rows = len(plot_objs) // n_cols
-            fig, axs_main, axs_cbar = create_multifigure(n_rows, n_cols, **multifig_kwargs)
-            plot_func(fig, axs_main, axs_cbar, plot_objs, *_args, **kwargs)
-            return fig, axs_main, axs_cbar
         else:
             raise TypeError
 

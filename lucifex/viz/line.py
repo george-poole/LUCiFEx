@@ -52,8 +52,8 @@ def plot_line(
             else:
                 _plot_line(fi, ax, cyc=Ellipsis, **_kwargs)
 
-        if legend_labels is not None and not isinstance(legend_labels, tuple):
-            filter_kwargs(set_legend)(ax, legend_labels, legend_title, **_kwargs)
+    if legend_labels is not None and not isinstance(legend_labels, tuple):
+        filter_kwargs(set_legend)(ax, legend_labels, legend_title, **kwargs)
 
 
 @singledispatch

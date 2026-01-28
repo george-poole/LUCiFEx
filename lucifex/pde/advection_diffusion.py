@@ -70,14 +70,14 @@ def advection_diffusion_reaction(
     dx = Measure('dx', u.function_space.mesh)
     phi = D_phi(phi)
     forms = [
-        derivative_form(v/phi, u, dt, D_dt, dx),
+        derivative_form(v, u, dt, D_dt, dx),
         advection_form(v/phi, u, a, D_adv, dx),
         *diffusion_forms(-v/phi, u, d, D_diff, bcs, dx),
         *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx)
     ]
     if supg is not None:
         terms = [
-            derivative_form(1/phi, u, dt, D_dt),
+            derivative_form(1, u, dt, D_dt),
             advection_form(1/phi, u, a, D_adv),
             *diffusion_forms(-1/phi, u, d, D_diff, divergence=True),
             *reaction_forms(-v/phi, u, r, j, D_reac, D_src),

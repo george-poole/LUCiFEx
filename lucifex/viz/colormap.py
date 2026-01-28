@@ -277,6 +277,3 @@ def plot_colormap_multifigure(
             fig.colorbar(cmap, ax=ax_main)
         if ax_cbar is not None:
             fig.colorbar(ax_main.collections[0], ax_cbar)
-
-
-plot_colormap_multifigure()

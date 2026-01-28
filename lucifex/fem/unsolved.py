@@ -3,6 +3,7 @@ from functools import singledispatch
 from typing_extensions import Self
 
 import numpy as np
+from ufl import Form
 from ufl.core.expr import Expr
 from ufl.algorithms.analysis import extract_coefficients, extract_constants
 from dolfinx.fem import Function, Constant
@@ -11,7 +12,7 @@ from ..utils.py_utils import MultipleDispatchTypeError
 
 
 class UnsolvedType:
-    """Singleton object representing an unsolved value"""
+    """Singleton with a numerical sentinel value to represent an unsolved object"""
     value: float = np.nan
     is_unsolved = staticmethod(np.isnan)
 
@@ -51,7 +52,7 @@ Unsolved = UnsolvedType()
 
 
 def is_unsolved(
-    obj: Function | Constant | Expr,
+    obj: Function | Constant | Expr | Form,
     iter_func: Callable[[Iterable], bool] = np.any,
 ) -> bool:
     return _is_unsolved(obj, iter_func)
@@ -79,3 +80,11 @@ def _(obj: Constant, iter_func):
 def _(obj: Expr, iter_func):
     coeffs_consts = (*extract_coefficients(obj), *extract_constants(obj))
     return iter_func([_is_unsolved(i, iter_func) for i in coeffs_consts])
+
+
+@_is_unsolved.register(Form)
+def _(form: Form, iter_func):
+    for i in [*form.coefficients(), *form.constants()]:
+        if is_unsolved(i, iter_func):
+            return True
+    return False

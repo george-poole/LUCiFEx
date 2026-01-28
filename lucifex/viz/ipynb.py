@@ -46,12 +46,15 @@ def _save_figure(
         dir_path: str | None = './figures',
         prefix_ipynb: bool = True,
         get_path: bool = False,
+        mkdirs: bool = True,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
         if prefix_ipynb:
             file_name = f'{get_ipynb_file_name()}_{file_name}'
         if dir_path is not None:
-            file_name = f'{dir_path}/{file_name}'
+            file_name = os.path.join(dir_path, file_name)
+        if mkdirs:
+            os.makedirs(dir_path, exist_ok=True)
 
         @wraps(func)
         def __(obj, **kwargs):
