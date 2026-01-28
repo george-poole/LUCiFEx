@@ -2,112 +2,122 @@ format: jb-book
 root: home
 
 parts:
-  - caption: Foundations
+  - caption: Tutorial
     chapters:
-      - file: notebooks/foundations/F00_notation
-      - file: notebooks/foundations/F01.0_poisson_equation
-        sections: 
-          - file: notebooks/foundations/F01.1_poisson_rectangle
-          - file: notebooks/foundations/F01.2_poisson_annulus
-          - file: notebooks/foundations/F01.3_poisson_vector
-      - file: notebooks/foundations/F02.0_diffusion_equation
-        sections: 
-          - file: notebooks/foundations/F02.1_diffusion_interval
-          - file: notebooks/foundations/F02.2_diffusion_rectangle
-      - file: notebooks/foundations/F03.0_advection_equation
-        sections: 
-          - file: notebooks/foundations/F03.1_advection_interval
-      - file: notebooks/foundations/F04.0_advection_diffusion_equation
-        sections: 
-          - file: notebooks/foundations/F04.1_advection_diffusion_interval
-      - file: notebooks/foundations/F05.0_helmholtz_equation
-        sections: 
-          - file: notebooks/foundations/F05.1_helmholtz_evp
-          - file: notebooks/foundations/F05.2_helmholtz_bvp
-      - file: notebooks/foundations/F06.0_mathieu_equation.md
-        sections: 
-          - file: notebooks/foundations/F06.1_mathieu_evp.ipynb
+      - file: notebooks/P01_tutorial/T00_introduction
+      - file: notebooks/P01_tutorial/T01_timeseries
+      - file: notebooks/P01_tutorial/T02_finite_differences
+      - file: notebooks/P01_tutorial/T03_perturbation
 
-  - caption: Applications
+  - caption: Introductory
     chapters:
-      - file: notebooks/applications/A00_notation
-      - file: notebooks/applications/A01.0_darcy_equations
+      - file: notebooks/P02_introductory/I00_notation
+      - file: notebooks/P02_introductory/I01.0_poisson_equation
         sections: 
-          - file: notebooks/applications/A01.1_darcy_lens
-          - file: notebooks/applications/A01.2_darcy_anticline
-      - file: notebooks/applications/A02.0_stokes_equations
+          - file: notebooks/P02_introductory/I01.1_poisson_rectangle
+          - file: notebooks/P02_introductory/I01.2_poisson_annulus
+          - file: notebooks/P02_introductory/I01.3_poisson_vector
+      - file: notebooks/P02_introductory/I02.0_diffusion_equation
         sections: 
-          - file: notebooks/applications/A02.1_stokes_poiseuille
-          - file: notebooks/applications/A02.2_stokes_cavity
-          - file: notebooks/applications/A02.3_stokes_forced
-      - file: notebooks/applications/A03.0_navier_stokes_equations
+          - file: notebooks/P02_introductory/I02.1_diffusion_interval
+          - file: notebooks/P02_introductory/I02.2_diffusion_rectangle
+      - file: notebooks/P02_introductory/I03.0_advection_equation
         sections: 
-          - file: notebooks/applications/A03.1_navier_stokes_obstacle
-          - file: notebooks/applications/A03.2_navier_stokes_forced
-      - file: notebooks/applications/A04.0_darcy_convection_equations
+          - file: notebooks/P02_introductory/I03.1_advection_interval
+      - file: notebooks/P02_introductory/I04.0_advection_diffusion_equation
         sections: 
-          - file: notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle
-          - file: notebooks/applications/A04.2_darcy_convection_rayleigh_benard_annulus
-          - file: notebooks/applications/A04.3_darcy_convection_rayleigh_benard_semicircle
-          - file: notebooks/applications/A05.1_darcy_convection_evolving_isotropic
-          - file: notebooks/applications/A05.2_darcy_convection_evolving_crossbedded
-          - file: notebooks/applications/A05.3_darcy_convection_evolving_layered
-          - file: notebooks/applications/A05.4_darcy_convection_evolving_inclined
-          - file: notebooks/applications/A06_darcy_convection_elder
-      - file: notebooks/applications/A07.0_darcy_abc_convection_equations
+          - file: notebooks/P02_introductory/I04.1_advection_diffusion_interval
+      - file: notebooks/P02_introductory/I05.0_helmholtz_equation
+        sections: 
+          - file: notebooks/P02_introductory/I05.1_helmholtz_evp
+          - file: notebooks/P02_introductory/I05.2_helmholtz_bvp
+      - file: notebooks/P02_introductory/I06.0_mathieu_equation.md
+        sections: 
+          - file: notebooks/P02_introductory/I06.1_mathieu_evp.ipynb
+
+  - caption: Fluids
+    chapters:
+      - file: notebooks/P03_fluids/F00_notation
+      - file: notebooks/P03_fluids/F01.0_darcy_equations
+        sections: 
+          - file: notebooks/P03_fluids/F01.1_darcy_lens
+          - file: notebooks/P03_fluids/F01.2_darcy_anticline
+      - file: notebooks/P03_fluids/F02.0_stokes_equations
+        sections: 
+          - file: notebooks/P03_fluids/F02.1_stokes_poiseuille
+          - file: notebooks/P03_fluids/F02.2_stokes_cavity
+          - file: notebooks/P03_fluids/F02.3_stokes_forced
+      - file: notebooks/P03_fluids/F03.0_navier_stokes_equations
+        sections: 
+          - file: notebooks/P03_fluids/F03.1_navier_stokes_obstacle
+          - file: notebooks/P03_fluids/F03.2_navier_stokes_forced
+      - file: notebooks/P03_fluids/F04.0_darcy_brinkman_equations
+        sections: 
+          - file: notebooks/P03_fluids/F04.1_darcy_brinkman_lens
+
+  - caption: Convection 
+    chapters:
+      - file: notebooks/P04_convection/C01.0_darcy_convection_equations
+        sections: 
+          - file: notebooks/P04_convection/C01.1_darcy_rayleigh_benard_rectangle
+          - file: notebooks/P04_convection/C01.2_darcy_rayleigh_benard_annulus
+          - file: notebooks/P04_convection/C01.3_darcy_rayleigh_benard_semicircle
+          - file: notebooks/P04_convection/C01.4_darcy_evolving_isotropic
+          - file: notebooks/P04_convection/C01.5_darcy_evolving_crossbedded
+          - file: notebooks/P04_convection/C01.6_darcy_evolving_layered
+          - file: notebooks/P04_convection/C01.7_darcy_evolving_inclined
+          - file: notebooks/P04_convection/C01.8_darcy_elder
+      - file: notebooks/P04_convection/C02.0_stokes_convection_equations
+        sections: 
+          - file: notebooks/P04_convection/C02.1_stokes_viscosity
+      - file: notebooks/P04_convection/C03.0_navier_stokes_convection_equations
+        sections: 
+          - file: notebooks/P04_convection/C03.1_navier_stokes_thermosolutal
+          - file: notebooks/P04_convection/C03.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/P04_convection/C03.3_navier_stokes_marangoni
+      - file: notebooks/P04_convection/C04.0_darcy_brinkman_convection_equations
         sections:
-          - file: notebooks/applications/A07.1_darcy_abc_convection_density
-          - file: notebooks/applications/A07.2_darcy_abc_convection_viscosity
-      - file: notebooks/applications/A08.0_darcy_fingering_equations
+          - file: notebooks/P04_convection/C04.1_darcy_brinkman_rayleigh_taylor
+          - file: notebooks/P04_convection/C04.2_darcy_brinkman_rayleigh_benard
+
+  - caption: Advanced 
+    chapters:
+      - file: notebooks/P05_advanced/A01.0_darcy_fingering_equations
         sections:
-          - file: notebooks/applications/A08.1_darcy_fingering_dirichlet
-          - file: notebooks/applications/A08.2_darcy_fingering_periodic
-      - file: notebooks/applications/A09.0_darcy_porosity_evolution_equations
-        sections: 
-          - file: notebooks/applications/A09.1_darcy_porosity_evolution_injection
-      - file: notebooks/applications/A10.0_stokes_convection_equations
-        sections: 
-          - file: notebooks/applications/A10.1_stokes_convection_viscosity
-      - file: notebooks/applications/A11.0_navier_stokes_convection_equations
-        sections: 
-          - file: notebooks/applications/A11.1_navier_stokes_thermosolutal
-          - file: notebooks/applications/A11.2_navier_stokes_rayleigh_taylor
-          - file: notebooks/applications/A11.3_navier_stokes_marangoni
-      - file: notebooks/applications/A12.0_brinkman_convection_equations
+          - file: notebooks/P05_advanced/A01.1_darcy_fingering_dirichlet
+          - file: notebooks/P05_advanced/A01.2_darcy_fingering_periodic
+      - file: notebooks/P05_advanced/A02.0_darcy_abc_reaction_equations
         sections:
-          - file: notebooks/applications/A12.1_brinkman_convection_rayleigh_taylor
-          - file: notebooks/applications/A12.2_brinkman_convection_rayleigh_benard
+          - file: notebooks/P05_advanced/A02.1_darcy_abc_reaction_density
+          - file: notebooks/P05_advanced/A02.2_darcy_abc_reaction_viscosity
+      - file: notebooks/P05_advanced/A03.0_darcy_porosity_evolution_equations
+        sections: 
+          - file: notebooks/P05_advanced/A03.1_darcy_porosity_evolution_injection
 
   - caption: Numerical
     chapters:
-      - file: notebooks/numerical/N01.0_dg_advection
+      - file: notebooks/P06_numerical/N01.0_dg_advection
         sections: 
-          - file: notebooks/numerical/N01.1_dg_advection_interval_step
-          - file: notebooks/numerical/N01.2_dg_advection_interval_cosine
-          - file: notebooks/numerical/N01.3_dg_advection_rectangle_cone
-          - file: notebooks/numerical/N01.4_dg_advection_rectangle_vortex
-      - file: notebooks/numerical/N02.0_supg_steady_advection_diffusion
+          - file: notebooks/P06_numerical/N01.1_dg_advection_interval_step
+          - file: notebooks/P06_numerical/N01.2_dg_advection_interval_cosine
+          - file: notebooks/P06_numerical/N01.3_dg_advection_rectangle_cone
+          - file: notebooks/P06_numerical/N01.4_dg_advection_rectangle_vortex
+      - file: notebooks/P06_numerical/N02.0_supg_steady_advection_diffusion
         sections: 
-          - file: notebooks/numerical/N02.1_supg_steady_advection_diffusion_interval
-          - file: notebooks/numerical/N02.2_supg_steady_advection_diffusion_hemker
-          - file: notebooks/numerical/N02.3_supg_steady_advection_diffusion_rectangle
-      - file: notebooks/numerical/N03.0_dg_steady_advection_diffusion
+          - file: notebooks/P06_numerical/N02.1_supg_steady_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N02.2_supg_steady_advection_diffusion_hemker
+          - file: notebooks/P06_numerical/N02.3_supg_steady_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N03.0_dg_steady_advection_diffusion
         sections: 
-          - file: notebooks/numerical/N03.1_dg_steady_advection_diffusion_interval
-          - file: notebooks/numerical/N03.2_dg_steady_advection_diffusion_rectangle
-      - file: notebooks/numerical/N04.0_supg_advection_diffusion
+          - file: notebooks/P06_numerical/N03.1_dg_steady_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N03.2_dg_steady_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N04.0_supg_advection_diffusion
         sections: 
-          - file: notebooks/numerical/N04.1_supg_advection_diffusion_interval
-          - file: notebooks/numerical/N04.2_supg_advection_diffusion_rectangle
-      - file: notebooks/numerical/N05.0_dg_advection_diffusion
+          - file: notebooks/P06_numerical/N04.1_supg_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N04.2_supg_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N05.0_dg_advection_diffusion
         sections:
-          - file: notebooks/numerical/N05.1_dg_advection_diffusion_interval
-          - file: notebooks/numerical/N05.2_dg_advection_diffusion_rectangle
-      - file: notebooks/numerical/N07_bcs_time_dependent
-      - file: notebooks/numerical/N08_bcs_periodic
-
-  - caption: Technical
-    chapters:
-      - file: notebooks/technical/T01_timeseries
-      - file: notebooks/technical/T02_finite_differences
-      - file: notebooks/technical/T03_perturbation
+          - file: notebooks/P06_numerical/N05.1_dg_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N05.2_dg_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N07_bcs_time_dependent
+      - file: notebooks/P06_numerical/N08_bcs_periodic
