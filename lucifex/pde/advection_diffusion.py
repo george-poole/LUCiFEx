@@ -230,10 +230,10 @@ def diffusive_flux(
     d: Function | Constant,
 ) -> Expr:
     """
-    `Fᴰ = ∫ 𝐧·(D·∇u) ds`
+    `Fᴰ = ∫ 𝐧·(-D·∇u) ds`
     """
     n = FacetNormal(u.function_space.mesh)
-    return inner(n, d * grad(u))
+    return -inner(n, d * grad(u))
 
 
 @mesh_integral
@@ -243,6 +243,6 @@ def flux(
     d: Function,
 ) -> tuple[Expr, Expr]:
     """
-    `Fᵁ = ∫ (𝐧·𝐚)u ds`, `Fᴰ = ∫ 𝐧·(D·∇u) ds`
+    `Fᵁ = ∫ (𝐧·𝐚)u ds`, `Fᴰ = ∫ 𝐧·(-D·∇u) ds`
     """
     return advective_flux(u, a), diffusive_flux(u, d)

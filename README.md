@@ -22,15 +22,15 @@ Development has primarily been motivated by the numerical study of fluid dynamic
     <td><img src="demo/notebooks/applications/figures/A15d_rayleigh_benard_semicircle_c(t=21.75).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> <a href="demo/notebooks/applications/A04.1_darcy_convection_rayleigh_benard_rectangle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </a> </td>
-    <td align="left"> <a href="demo/notebooks/applications/A04.2_darcy_convection_rayleigh_benard_semicircle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </a> </td>
+    <td align="left"> <a href="demo/notebooks/applications/A04.1_darcy_rayleigh_benard_rectangle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle </a> </td>
+    <td align="left"> <a href="demo/notebooks/applications/A04.2_darcy_rayleigh_benard_semicircle.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle </a> </td>
   </tr>
     <tr>
     <td><img src="demo/notebooks/applications/figures/A15c_rayleigh_benard_annulus_c(t=27.95).png" width="400"/></td>
     <td><img src="demo/notebooks/applications/figures/A16d_porous_convection_inclined_c(t=5.24).png" width="400"/></td>
   </tr>
   <tr>
-    <td align="left"> <a href="demo/notebooks/applications/A04.3_darcy_convection_rayleigh_benard_annulus.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </a> </td>
+    <td align="left"> <a href="demo/notebooks/applications/A04.3_darcy_rayleigh_benard_annulus.ipynb"> Rayleigh-Bénard convection of a Darcy fluid in a porous annulus </a> </td>
     <td align="left"> <a href="demo/notebooks/applications/A05.4_darcy_convection_evolving_inclined.ipynb"> Evolving convection of a Darcy fluid in an inclined domain </a> </td>
   </tr>
   </tr>

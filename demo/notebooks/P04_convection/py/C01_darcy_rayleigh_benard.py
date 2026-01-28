@@ -15,7 +15,7 @@ from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCA
     store_delta=1,
     write_delta=None,
 )
-def darcy_convection_rayleigh_benard_rectangle(
+def darcy_rayleigh_benard_rectangle(
     # domain
     aspect: float = 2.0,
     Nx: int = 64,
@@ -47,11 +47,11 @@ def darcy_convection_rayleigh_benard_rectangle(
 
     `scaling` determines `Di, Bu, Xl` from `Ra`.
     """
+    # space
     scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
-
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -62,9 +62,10 @@ def darcy_convection_rayleigh_benard_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+    # constants
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
-
+    # initial and boundary conditions
     c_ics = SpatialPerturbation(
         lambda x: 1 - x[1] / Ly,
         cubic_noise(['neumann', 'dirichlet'], [Lx, Ly], c_freq, c_seed),
@@ -76,6 +77,7 @@ def darcy_convection_rayleigh_benard_rectangle(
         ("dirichlet", dOmega['upper'], 0.0),
         ('neumann', dOmega['left', 'right'], 0.0)
     )
+    # constitutive
     dispersion = lambda phi: Di * phi
     density = lambda c: -Bu * c
     return darcy_convection_generic(
@@ -101,28 +103,35 @@ def darcy_convection_rayleigh_benard_rectangle(
     store_delta=1,
     write_delta=None,
 )
-def darcy_convection_rayleigh_benard_annulus(
+def darcy_rayleigh_benard_annulus(
+    # domain
     Rratio: float = 0.5,
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
+    # physical
     scaling: str = 'advective',
     Ra: float = 5e2,
+    # initial conditions
     c_eps: float = 1e-6,
     c_freq: int = 8,
+    # time step
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
     cfl_courant: float = 0.75,
+    # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
+    # linear algebra
     psi_petsc: OptionsPETSc | None = None,
     c_petsc: OptionsPETSc | None = None,
+    # optional post-processing
     diagnostic: bool = False,
 ):
+    # space
     scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
-    X = scaling_map['Xl']
-    Router = 1.0 * Xl
-    Rinner = Rratio * Xl
-
+    X = scaling_map['X']
+    Router = 1.0 * X
+    Rinner = Rratio * X
     r2 = lambda x: x[0]**2 + x[1]**2
     r = lambda x, sqrt: sqrt(r2(x))
     dr = (Router - Rinner) / Nradial
@@ -134,9 +143,10 @@ def darcy_convection_rayleigh_benard_annulus(
             "outer": lambda x: r2(x) - Router**2,
         },
     )
+    # constants
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
-
+    # initial and boundary conditions
     radial_noise = lambda x: c_eps * np.sin(c_freq * np.pi * (r(x, np.sqrt) - Rinner) / (Router - Rinner))
     c_ics = SpatialPerturbation(
         lambda x: np.log(Router / r(x, np.sqrt)) / np.log(Router / Rinner),
@@ -148,6 +158,7 @@ def darcy_convection_rayleigh_benard_annulus(
         ("dirichlet", dOmega['inner'], 1.0),
         ("dirichlet", dOmega['outer'], 0.0),  
     ) 
+    # constitutive
     dispersion = lambda phi: Di * phi
     density = lambda c: -Bu * c
     x = SpatialCoordinate(Omega)
@@ -178,7 +189,7 @@ def darcy_convection_rayleigh_benard_annulus(
     store_delta=1,
     write_delta=None,
 )
-def darcy_convection_rayleigh_benard_semicircle(
+def darcy_rayleigh_benard_semicircle(
     Nradial: int = 100,
     cell: str = CellType.TRIANGLE,
     scaling: str = 'advective',
@@ -199,11 +210,11 @@ def darcy_convection_rayleigh_benard_semicircle(
     `𝒰` as convective speed and `𝒯` constructed from `ℒ` and `𝒰`.
     """
     scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
-    X = scaling_map['Xl']
+    X = scaling_map['X']
 
     r2 = lambda x: x[0]**2 + x[1]**2
     r = lambda x, sqrt=np.sqrt: sqrt(r2(x))
-    radius = 1.0 * Xl 
+    radius = 1.0 * X 
     dr = radius / Nradial
     Omega = circle_sector_mesh(dr, cell, 'semicircle')(radius, 180)
     dOmega = mesh_boundary(

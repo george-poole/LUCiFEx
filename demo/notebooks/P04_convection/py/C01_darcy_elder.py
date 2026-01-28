@@ -33,9 +33,9 @@ def darcy_convection_elder_rectangle(
     diagnostic: bool = False,
 ):
     scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
 
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(

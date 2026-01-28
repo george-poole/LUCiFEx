@@ -14,7 +14,7 @@ from ...P04_convection.py.C01_darcy_convection_generic import darcy_convection_g
 
 
 DARCY_FINGERING_SCALINGS = ScalingOptions(
-    ('Ad', 'Di', 'In', 'Xl'),
+    ('Ad', 'Di', 'In', 'X'),
     lambda Pe: {
         'advective': (1, 1/Pe, 1, 1),
         'diffusive': (1, 1, Pe, 1),
@@ -67,9 +67,9 @@ def darcy_fingering_rectangle(
     `𝐮 = -(1 / μ(c)) · (∇p + In μ(c)𝐞ˣ)`
     """
     scaling_map = DARCY_FINGERING_SCALINGS[scaling](Pe)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
 
     Omega = rectangle_mesh(
         (-0.5 * Lx, 0.5 * Lx), 

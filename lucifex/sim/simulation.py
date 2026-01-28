@@ -271,6 +271,7 @@ def configure_simulation(
     dir_prefix: str | None = None,
     dir_suffix: str | None = None,
     dir_timestamp: bool = False,
+    dir_seps: tuple[str, str] = ('|', '__'),
 ):
     if petsc is None:
         petsc = OptionsPETSc.default()
@@ -327,6 +328,7 @@ def configure_simulation(
             dir_prefix: str | None = ...,   
             dir_suffix: str | None = ...,
             dir_timestamp: bool = ...,
+            dir_seps: tuple[str, str] = ...,
         ) -> Callable[P, Simulation]:
             ...
 
@@ -389,6 +391,7 @@ def configure_simulation(
                     dir_prefix=dir_prefix, 
                     dir_suffix=dir_suffix, 
                     dir_timestamp=dir_timestamp, 
+                    dir_seps=dir_seps,
                     write_file=write_file, 
                     parameter_file=parameter_file, 
                     checkpoint_file=checkpoint_file, 

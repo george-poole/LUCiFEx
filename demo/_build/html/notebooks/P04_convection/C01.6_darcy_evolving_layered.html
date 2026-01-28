@@ -476,7 +476,7 @@ document.write(`
 \mathcal{U} = K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}} \\
 \mathcal{T} = \phi_{\text{ref}}\mathcal{L}/\mathcal{U} \\
 \Omega = [0, Ra\mathcal{A}] \times [0, Ra] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards}\\ 
+\textbf{e}_g=-\textbf{e}_y &amp; \text{vertically downward gravity}\\ 
 \phi(y)=\begin{cases}
 1 &amp; y &gt; \tfrac{1}{2}Ra \\
 \varphi &amp; \text{otherwise}
@@ -485,7 +485,7 @@ document.write(`
 \mathsf{K}(\phi) = \phi^2\mathsf{I} \\ 
 \mu = 1 \\
 \rho(c) = c \\
-c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
+c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
 c_{\text{D}}(x,y=Ra)=1 &amp; \text{prescribed concentration on upper and lower boundaries} \\
 c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower, left and right boundaries}\\
 c_{\text{N}}(x=0,y)=0 \\
@@ -499,7 +499,7 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_convection_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
 
 <span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">varphi</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -561,7 +561,7 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
     <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>

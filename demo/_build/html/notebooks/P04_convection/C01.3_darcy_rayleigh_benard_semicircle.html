@@ -478,7 +478,7 @@ document.write(`
 \Omega = \Omega = \{(x, y)~:~0 &lt; x^2 + y^2 &lt; 1^2~,~y&gt;0\} \\
 \partial\Omega_{\text{arc}} = \{(x, y)~:~ x^2 + y^2 = 1^2 \} \\
 \partial\Omega_{\text{lower}} = \{(x, y)~:~ y=0 \} \\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards} \\ 
+\textbf{e}_g=-\textbf{e}_y &amp; \text{vertically downward gravity} \\ 
 \phi = 1 &amp; \text{constitutive relations} \\
 \mathsf{D} = \mathsf{I} \\ 
 \mathsf{K} = \mathsf{I}\\ 
@@ -496,9 +496,9 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{arc}}}=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_convection_rayleigh_benard</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_rayleigh_benard_semicircle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_rayleigh_benard</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_rayleigh_benard_semicircle</span>
 
-<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_rayleigh_benard_semicircle</span><span class="p">(</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_rayleigh_benard_semicircle</span><span class="p">(</span>
     <span class="n">Nradial</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
     <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span> 
@@ -551,7 +551,7 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{arc}}}=0 \\
 <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
 <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
 
-<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">c_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>

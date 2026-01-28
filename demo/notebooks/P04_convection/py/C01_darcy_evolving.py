@@ -5,15 +5,13 @@ from ufl import cos, sin
 
 from lucifex.mesh import mesh_boundary, rectangle_mesh
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
-from lucifex.pde.scaling import DarcyConvectionScaling
 from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import Simulation, configure_simulation
 from lucifex.utils import CellType
-
 from lucifex.pde.constitutive import permeability_cross_bedded
-from .A04_darcy_convection_generic import darcy_convection_generic
 
+from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -27,7 +25,7 @@ def darcy_convection_evolving_rectangle(
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
     # physical
-    scaling: DarcyConvectionScaling = DarcyConvectionScaling.ADVECTIVE_DIFFUSIVE,
+    scaling: str = 'advective',
     Ra: float = 5e2,
     beta: float = 0.0,
     # constitutive relations
@@ -52,11 +50,11 @@ def darcy_convection_evolving_rectangle(
     # optional solvers
     diagnostic: bool = False,
 ) -> Simulation:
-    
-    scaling_map = DarcyConvectionScaling(scaling).create_map(Ra)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
+    # space
+    scaling_map = DARCY_CONVECTION_SCALINGS[scaling](Ra)
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -67,9 +65,11 @@ def darcy_convection_evolving_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
+    # constants
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
-
+    beta = Constant(Omega, np.radians(beta), name='beta')
+    # initial and boundary conditions
     c_ics = SpatialPerturbation(
         lambda x: 1 + sp.erf((x[1] - Ly) / (Ly * erf_eps)),
         cubic_noise(['neumann', ('neumann', 'dirichlet')], [Lx, Ly], c_freq, c_seed),
@@ -80,14 +80,12 @@ def darcy_convection_evolving_rectangle(
         ("dirichlet", dOmega['upper'], 1.0),
         ('neumann', dOmega['lower', 'left', 'right'], 0.0)
     )
-
+    # constitutive relations
     kappa = Constant(Omega, kappa, name='kappa')
     vartheta = Constant(Omega, np.radians(vartheta), name='vartheta')
     permeability = lambda phi: permeability_cross_bedded(phi**2, kappa, vartheta)
     dispersion = lambda phi: Di * phi
     density = lambda c: Bu * c
-
-    beta = Constant(Omega, np.radians(beta), name='beta')
     egx = -sin(beta)
     egy = -cos(beta)
 

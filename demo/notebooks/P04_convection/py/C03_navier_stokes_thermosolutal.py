@@ -19,7 +19,7 @@ from lucifex.pde.scaling import ScalingOptions
 
 
 NAVIER_STOKES_CONVECTION_SCALINGS = ScalingOptions(
-    ('Ad', 'Di', 'Vi', 'Bu', 'Xl'),
+    ('Ad', 'Di', 'Vi', 'Bu', 'X'),
     lambda Ra, Pr: {
         'advective': (1, 1/Ra, Pr/Ra, Pr/Ra, 1),
         'diffusive': (1, 1, Pr, Pr * Ra, 1),
@@ -77,11 +77,11 @@ def navier_stokes_thermosolutal_rectangle(
     `∇·𝐮 = 0` \\
     `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu(c - βθ)𝐞ʸ`
     """
-    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
     # space
+    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -93,7 +93,6 @@ def navier_stokes_thermosolutal_rectangle(
         },
     )
     dim = Omega.geometry.dim
-    u_zero = [0.0] * dim
     # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
@@ -106,6 +105,7 @@ def navier_stokes_thermosolutal_rectangle(
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     beta = Constant(Omega, beta, 'beta')
+    u_zero = [0.0] * dim
     # initial conditions
     c_ics = SpatialPerturbation(
         lambda x: x[1] / Ly,

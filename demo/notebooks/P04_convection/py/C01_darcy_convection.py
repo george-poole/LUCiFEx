@@ -27,7 +27,7 @@ from lucifex.pde.scaling import ScalingOptions
 
 
 DARCY_CONVECTION_SCALINGS = ScalingOptions(
-    ('Ad', 'Di', 'Bu', 'Xl'),
+    ('Ad', 'Di', 'Bu', 'X'),
     lambda Ra: {
         'advective': (1, 1/Ra, 1, 1),
         'diffusive': (1, 1, Ra, 1),
@@ -132,7 +132,6 @@ def darcy_convection_generic(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
     solvers = [psi_solver, u_solver, dt_solver, c_solver]
-    namespace = [phi, ('k', k), ('d', d), rho, mu, *namespace]
     if diagnostic:
         uMinMax = ConstantSeries(Omega, "uMinMax", shape=(2,))
         uRMS = ConstantSeries(Omega, 'uRMS')
@@ -151,5 +150,6 @@ def darcy_convection_generic(
         )
         if isinstance(diagnostic, Iterable):
             solvers.extend(diagnostic)
-        
+            
+    namespace = [phi, ('k', k), ('d', d), rho, mu, *namespace]
     return Simulation(solvers, t, dt, namespace)

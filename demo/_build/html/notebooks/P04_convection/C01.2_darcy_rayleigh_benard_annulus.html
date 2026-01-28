@@ -472,21 +472,17 @@ document.write(`
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\mathcal{L} = \mathcal{L}_\Omega &amp; \text{scaling with annulus size and convective speed} \\
-\mathcal{U} = K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}} \\
-\mathcal{T} = \phi_{\text{ref}}\mathcal{L}/\mathcal{U} \\
-\Omega = \Omega = \{(x, y)~:~R_{\text{inner}}^2 &lt; x^2 + y^2 &lt; R_{\text{outer}}^2\} &amp; R_{\text{inner}}, R_{\text{outer}}=\mathcal{O}(1) \\
-\partial\Omega_{\text{inner}} = \{(x, y)~:~ x^2 + y^2 = R_{\text{inner}}^2 \} \\
-\partial\Omega_{\text{outer}} = \{(x, y)~:~ x^2 + y^2 = R_{\text{outer}}^2 \} \\
-\textbf{e}_g = -\frac{x}{\sqrt{x^2+y^2}}\textbf{e}_x -\frac{y}{\sqrt{x^2+y^2}}\textbf{e}_y &amp; \text{gravity acting radially towards centre} \\ 
-\phi = 1 &amp; \text{constitutive relations} \\
-\mathsf{D} = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I}\\ 
-\mu = 1 \\
-\rho(c) = -c \\
-c_0(x,y)=\frac{\ln(R_{\text{outer}}/\sqrt{x^2 + y^2})}{\ln(R_{\text{outer}}/R_{\text{inner}})}+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
-c_{\text{D}}\vert_{\partial\Omega_{\text{inner}}}=1 &amp; \text{prescribed temperature on inner and outer boundaries} \\
-c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 \\
+\Omega = \Omega = \{(x, y)~:~(\mathcal{A}X)^2 &lt; x^2 + y^2 &lt; X^2\} &amp; \text{aspect ratio } 0&lt;\mathcal{A}&lt;1 \\
+\partial\Omega_{\text{inner}} = \{(x, y)~:~ x^2 + y^2 = (\mathcal{A}X)^2 \} \\
+\partial\Omega_{\text{outer}} = \{(x, y)~:~ x^2 + y^2 = X^2 \} \\
+\textbf{e}_g = -\frac{x}{\sqrt{x^2+y^2}}\textbf{e}_x -\frac{y}{\sqrt{x^2+y^2}}\textbf{e}_y &amp; \text{radially inward gravity} \\ 
+\mathsf{D} = \mathsf{I} &amp; \text{constant isotropic dispersion}\\ 
+\mathsf{K} = \mathsf{I} &amp; \text{constant isotropic permeability}\\ 
+\mu = 1 &amp; \text{constant viscosity} \\
+\rho(c) = -c &amp; \text{linear density}\\
+c_0(x,y)=\frac{\ln(X/\sqrt{x^2 + y^2})}{\ln(1/\mathcal{A})}+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
+c_{\text{D}}\vert_{\partial\Omega_{\text{inner}}}=1 &amp; \text{`hot' inner boundary} \\ 
+c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 &amp; \text{`cold' outer boundary} \\
 \psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
 \end{cases}
 \end{split}\]</div>
@@ -496,10 +492,10 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_convection_rayleigh_benard</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_rayleigh_benard_annulus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_rayleigh_benard</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_rayleigh_benard_annulus</span>
 
 
-<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_rayleigh_benard_annulus</span><span class="p">(</span>
+<span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_rayleigh_benard_annulus</span><span class="p">(</span>
     <span class="n">Rratio</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
     <span class="n">Nradial</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
     <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
@@ -568,7 +564,7 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 \\
 <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
 
-<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">c_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>

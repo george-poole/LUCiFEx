@@ -472,18 +472,18 @@ document.write(`
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\Omega = [0, \mathcal{A}X] \times [0, X] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
-\textbf{e}_g=-\textbf{e}_y &amp; \text{gravity acting downwards}\\ 
-\phi = 1 &amp; \text{constitutive relations} \\
-\mathsf{D} = \mathsf{I} \\ 
-\mathsf{K} = \mathsf{I}\\ 
-\mu = 1 \\
-\rho(c) = c \\
-c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{diffusive base state plus noise} \\
-c_{\text{D}}(x,y=Ra)=1 &amp; \text{prescribed concentration on upper and lower boundaries} \\
-c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower, left and right boundaries}\\
-c_{\text{N}}(x=0,y)=0 \\
-c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
+\Omega = [0, \mathcal{A}X] \times [0, X] &amp; \text{aspect ratio }\mathcal{A}=\mathcal{O}(1)\\
+\textbf{e}_g=-\textbf{e}_y &amp; \text{vertically downward gravity}\\ 
+\phi = 1 &amp; \text{constant porosity} \\
+\mathsf{D} = \mathsf{I} &amp; \text{constant isotropic dispersion}\\ 
+\mathsf{K} = \mathsf{I} &amp; \text{constant isotropic permeability}\\ 
+\mu = 1 &amp; \text{constant viscosity} \\
+\rho(c) = c &amp; \text{linear density}\\
+c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-X}{\epsilon X}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
+c_{\text{D}}(x,y=X)=1 &amp; \text{`solute-rich' upper boundary} \\
+c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower boundary}\\
+c_{\text{N}}(x=0,y)=0 &amp; \text{no-flux on left boundary}\\
+c_{\text{N}}(x=\mathcal{A}X,y)=0 &amp;\text{no-flux on right boundary}\\
 \psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
 \end{cases}
 \end{split}\]</div>
@@ -492,36 +492,37 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_convection_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
 
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_evolving_rectangle</span><span class="p">(</span>
     <span class="n">aspect</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span> 
-    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective_diffusive&#39;</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="mf">500.0</span><span class="p">,</span> 
     <span class="n">c_eps</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> 
     <span class="n">c_freq</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> 
     <span class="n">c_seed</span><span class="o">=</span><span class="p">(</span><span class="mi">456</span><span class="p">,</span> <span class="mi">987</span><span class="p">),</span> 
-    <span class="n">dt_max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">D_adv</span><span class="o">=</span><span class="n">AB2</span><span class="p">,</span>
     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+    <span class="n">diagnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
 
 <span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
@@ -542,7 +543,7 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
     <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
@@ -550,16 +551,36 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">i_mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">time_indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_mid</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<img alt="../../_images/447b27e3a833fdcb8f1ddf6963cd1c6f2f1bf59014911711607c4ccbf525a02f.png" src="../../_images/447b27e3a833fdcb8f1ddf6963cd1c6f2f1bf59014911711607c4ccbf525a02f.png" />
+<img alt="../../_images/ba320c58ab9ee44ecdb4ef7edf0f825c440a37357d79ca2fe3153a7741b483a6.png" src="../../_images/ba320c58ab9ee44ecdb4ef7edf0f825c440a37357d79ca2fe3153a7741b483a6.png" />
+<img alt="../../_images/c175f9908169904efb6e7d0139a6870c1e30fd5e90a89b239e471265ad9ca207.png" src="../../_images/c175f9908169904efb6e7d0139a6870c1e30fd5e90a89b239e471265ad9ca207.png" />
+<img alt="../../_images/addf0bd5bfa82a001808b964a537e44616d53c52f0c257bd571326fa2edf4a19.png" src="../../_images/addf0bd5bfa82a001808b964a537e44616d53c52f0c257bd571326fa2edf4a19.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uRMS</span><span class="p">,</span> <span class="n">uMinMax</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;uRMS&#39;</span><span class="p">,</span> <span class="s1">&#39;uMinMax&#39;</span><span class="p">]</span>
+<span class="n">uMax</span> <span class="o">=</span> <span class="n">uMinMax</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="ne">NameError</span>: name &#39;simulation&#39; is not defined
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">uRMS</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uRMS</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span>
+    <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$\mathrm</span><span class="si">{rms}</span><span class="s1">(</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{u}</span><span class="s1">)$&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;uRMS(t)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">uMax</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMax</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span>
+    <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$\max_{</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{x}</span><span class="s1">}|</span><span class="se">\\</span><span class="s1">textbf</span><span class="si">{u}</span><span class="s1">|$&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;uMax(t)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/6df5da034ab05211cc112a2bb7816b7135b4dfd2913f110f0508f507c57ed695.png" src="../../_images/6df5da034ab05211cc112a2bb7816b7135b4dfd2913f110f0508f507c57ed695.png" />
+<img alt="../../_images/8bc115d41094ee91d3f2fc86090b21ffca5003e3978760b187c0a0742e9d55db.png" src="../../_images/8bc115d41094ee91d3f2fc86090b21ffca5003e3978760b187c0a0742e9d55db.png" />
 </div>
 </div>
 </section>

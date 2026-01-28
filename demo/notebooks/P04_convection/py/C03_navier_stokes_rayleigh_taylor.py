@@ -53,9 +53,9 @@ def navier_stokes_rayleigh_taylor_rectangle(
     `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu c 𝐞ʸ`
     """
     scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(

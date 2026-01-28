@@ -54,9 +54,9 @@ def navier_stokes_marangoni(
     D_diff_c: FiniteDifference = CN,
 ):
     scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra)
-    X = scaling_map['Xl']
-    Lx = aspect * Xl
-    Ly = 1.0 * Xl
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     h = h_frac * Ly
     eps = eps_frac * Ly
 
