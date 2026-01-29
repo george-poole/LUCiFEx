@@ -102,22 +102,22 @@ parts:
           - file: notebooks/P06_numerical/N01.2_dg_advection_interval_cosine
           - file: notebooks/P06_numerical/N01.3_dg_advection_rectangle_cone
           - file: notebooks/P06_numerical/N01.4_dg_advection_rectangle_vortex
-      - file: notebooks/P06_numerical/N02.0_supg_steady_advection_diffusion
+      - file: notebooks/P06_numerical/N02.0_dg_steady_advection_diffusion
         sections: 
-          - file: notebooks/P06_numerical/N02.1_supg_steady_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N02.2_supg_steady_advection_diffusion_hemker
-          - file: notebooks/P06_numerical/N02.3_supg_steady_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N03.0_dg_steady_advection_diffusion
-        sections: 
-          - file: notebooks/P06_numerical/N03.1_dg_steady_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N03.2_dg_steady_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N04.0_supg_advection_diffusion
-        sections: 
-          - file: notebooks/P06_numerical/N04.1_supg_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N04.2_supg_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N05.0_dg_advection_diffusion
+          - file: notebooks/P06_numerical/N02.1_dg_steady_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N02.2_dg_steady_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N03.0_dg_advection_diffusion
         sections:
-          - file: notebooks/P06_numerical/N05.1_dg_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N05.2_dg_advection_diffusion_rectangle
+          - file: notebooks/P06_numerical/N03.1_dg_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N03.2_dg_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N04.0_supg_steady_advection_diffusion
+        sections: 
+          - file: notebooks/P06_numerical/N04.1_supg_steady_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N04.2_supg_steady_advection_diffusion_hemker
+          - file: notebooks/P06_numerical/N04.3_supg_steady_advection_diffusion_rectangle
+      - file: notebooks/P06_numerical/N05.0_supg_advection_diffusion
+        sections: 
+          - file: notebooks/P06_numerical/N05.1_supg_advection_diffusion_interval
+          - file: notebooks/P06_numerical/N05.2_supg_advection_diffusion_rectangle
       - file: notebooks/P06_numerical/N07_bcs_time_dependent
       - file: notebooks/P06_numerical/N08_bcs_periodic

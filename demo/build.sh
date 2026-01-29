@@ -26,6 +26,6 @@ for i in "${IPYNB[@]}"
 
 jupyter-book build . $BUILD
 
-if $verbose; then
+if $REMOTE; then
     ghp-import -n -p -f ./_build/html
 fi
