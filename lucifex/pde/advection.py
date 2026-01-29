@@ -58,7 +58,7 @@ def advection_reaction(
     ]
 
 
-def advection_dg(
+def dg_advection(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
@@ -71,20 +71,20 @@ def advection_dg(
     """
     `∂u/∂t + 𝐚·∇u = 0`
     """
-    return advection_reaction_dg(
+    return dg_advection_reaction(
         u, dt, a,
         D_adv=D_adv, D_dt=D_dt, bcs=bcs, 
-        adv_dx=dx_opt, dS_opt=dS_opt,
+        dx_opt=dx_opt, dS_opt=dS_opt,
     )
 
 
-def advection_reaction_dg(
+def dg_advection_reaction(
     u: FunctionSeries,
     dt: Constant,
     a: Function | Constant,
-    r,
-    j,
-    D_adv: FiniteDifferenceArgwise = AB1 @ BE,
+    r: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    j: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1 @ BE,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_dt: FiniteDifferenceDerivative = DT,
@@ -101,6 +101,6 @@ def advection_reaction_dg(
     dS = Measure('dS', u.function_space.mesh)
     return [
         derivative_form(v, u, dt, D_dt, dx),
-        *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, dS_opt=dS_opt)
-        *reaction_forms(v, u, r, j, D_reac, D_src, dx)
+        *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, dS_opt=dS_opt),
+        *reaction_forms(v, u, r, j, D_reac, D_src, dx),
     ]

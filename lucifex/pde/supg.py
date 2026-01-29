@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, overload
 from functools import wraps
 
 from ufl import Measure, Form, div, sqrt, conditional, lt, tanh, tr
@@ -7,7 +7,7 @@ from ufl.geometry import GeometricCellQuantity
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    BE, AB1, DT, FiniteDifference, FiniteDifferenceArgwise, Series, 
+    BE, DT, FiniteDifference, FiniteDifferenceArgwise, Series, 
     ConstantSeries, ExplicitDiscretizationError,
 )
 from lucifex.fdm.ufl_operators import inner, grad
@@ -22,6 +22,7 @@ class TauType(StrEnum):
     COTH_APPROX = 'coth_approx'
     UPWIND = 'upwind'
     TRANSIENT = 'transient'
+    NONE = 'none'
 
 
 def supg_form(
@@ -67,6 +68,8 @@ def supg_form(
             tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
         case TauType.UPWIND:
             tau = tau_upwind(h, a_eff)
+        case TauType.NONE:
+            tau = 0
         case _ if callable(tau_func):
             tau = tau_func(h, a_eff, d_eff, r_eff)
         case _:
@@ -192,6 +195,54 @@ def peclet(h, a, d) -> Expr | float:
     return 0.5 * a * h / d
 
 
+@overload
+def peclet_argument(
+    Pe, *, h, a
+):
+    """
+    `D = |𝐚|h / 2Pe`
+    """
+    ...
+
+
+@overload
+def peclet_argument(
+    Pe, *, h, d
+):
+    """
+    |𝐚| = 2Pe D / h`
+    """
+    ...
+
+
+@overload
+def peclet_argument(
+    Pe, *, a, d
+):
+    """
+    h = 2Pe D / |𝐚|`
+    """
+    ...
+
+
+def peclet_argument(
+    Pe,
+    *,
+    h=None,
+    a=None,
+    d=None,
+):
+    match h, a, d:
+        case _, _, None:
+            return 0.5 * a * h / Pe
+        case _, None, _:
+            return 2 * Pe * d / h
+        case None, _, _:
+            return 2 * Pe * d / a
+        case _:
+            raise TypeError('Provide keyword arguments for two of `h, a, d`')
+        
+
 def xi(Pe):
     """
     `ξ(Pe) = coth(Pe) - 1/Pe`
@@ -234,7 +285,12 @@ def effective_velocity(
     if not isinstance(d, Series):
         a_eff -= grad(d)
     else:
-        a_eff -= grad(d) * D_diff.implicit_coeff
+        # FIXME FIXME
+        if isinstance(D_diff, FiniteDifferenceArgwise):
+            D_diff_d, D_diff_u = D_diff
+            a_eff -= grad(D_diff_d(d)) * D_diff_u.implicit_coeff
+        else:
+            a_eff -= grad(D_diff(d)) * D_diff.implicit_coeff
 
     return a_eff
 
@@ -252,10 +308,10 @@ def effective_diffusivity(
             raise ExplicitDiscretizationError(D_diff)
         d_eff = BE(d) * D_diff.implicit_coeff
     else:
-        D_diff_a, D_diff_u = D_diff
+        D_diff_d, D_diff_u = D_diff
         if strict and D_diff_u.is_explicit:
             raise ExplicitDiscretizationError(D_diff)
-        d_eff = D_diff_a(d) * D_diff_u.implicit_coeff
+        d_eff = D_diff_d(d) * D_diff_u.implicit_coeff
 
     return d_eff
 

@@ -91,7 +91,8 @@ def reaction_forms(
     `vRu + vJ`
     """
     forms = []
-    if r is not None:
+    _none = (None, 0) 
+    if not r in _none:
         _expr = lambda r, u: r * u
         if isinstance(D_reac, FiniteDifference):
             expr = D_reac(_expr(r, u), trial=u)
@@ -99,7 +100,7 @@ def reaction_forms(
             expr = D_reac(_expr, r, u, trial=u)
         F_reac = v * expr * dx
         forms.append(F_reac)
-    if j is not None:
+    if not j in _none:
         F_src = v * D_src(j, trial=u) * dx
         forms.append(F_src)
     return forms

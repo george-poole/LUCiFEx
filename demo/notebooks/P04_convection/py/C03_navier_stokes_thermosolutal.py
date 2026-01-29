@@ -158,5 +158,5 @@ def navier_stokes_thermosolutal_rectangle(
         theta, dt[0], u, Di/Le, D_adv_ad, D_diff_ad,
     )
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
-    namespace = [Le, Pr, Ra, beta, rho]
+    namespace = [Le, Pr, Ra, beta, rho, Di, Vi, Bu]
     return solvers, t, dt, namespace

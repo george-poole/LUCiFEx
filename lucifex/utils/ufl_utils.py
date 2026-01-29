@@ -191,7 +191,7 @@ def extract_meshes(
 def extract_integrands(
     form: Form,
 ) -> list[Expr]:
-    return [i.integrand for i in form.integrals()]
+    return [i.integrand() for i in form.integrals()]
 
 
 def extract_integrand(

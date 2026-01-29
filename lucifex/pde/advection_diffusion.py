@@ -20,7 +20,6 @@ from .cg import derivative_form, advection_form, diffusion_forms, reaction_forms
 from .dg import dg_advection_forms, dg_diffusion_forms
 
 
-
 def advection_diffusion(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
@@ -38,14 +37,14 @@ def advection_diffusion(
     """    
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u)`
     """
-    return advection_diffusion_reaction(
+    return dg_advection_diffusion_reaction(
         u, dt, a, d, 
         D_adv=D_adv, D_diff=D_diff, D_dt=D_dt, D_phi=D_phi,
         phi=phi, bcs=bcs, supg=supg, h=h,
     )
 
 
-def advection_diffusion_reaction(
+def dg_advection_diffusion_reaction(
     u: FunctionSeries,
     dt: Constant,
     a: Series | Function | Expr,
@@ -84,7 +83,7 @@ def advection_diffusion_reaction(
         ]
         res = sum(terms)
         F_supg = supg_form(
-            supg, v, res, h, a, d, r, dt, D_adv, D_diff, D_reac, D_dt, phi, dx)
+            supg, v, res, h, a, d, r, dt, D_adv, D_diff, D_reac, D_dt, phi, dx=dx)
         forms.append(F_supg)
 
     return forms
@@ -97,7 +96,7 @@ def steady_advection_diffusion(
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
-    tau: str | Callable | None = None,
+    supg: str | Callable | None = None,
     petrov: str | Callable | None = None,
     h: GeometricCellQuantity | str = 'hdiam',
 ) -> list[Form]:
@@ -112,21 +111,21 @@ def steady_advection_diffusion(
         *diffusion_forms(-v, u_trial, d, bcs=bcs, dx=dx),
         *reaction_forms(-v, u_trial, r, j, dx=dx)
     ]
-    if tau is not None:
+    if supg is not None:
         terms = [
-            advection_form(1, u, a),
-            *diffusion_forms(-1, u, d, divergence=True),
-            *reaction_forms(-v, u, r, j),
+            advection_form(1, u_trial, a),
+            *diffusion_forms(-1, u_trial, d, divergence=True),
+            *reaction_forms(-1, u_trial, r, j),
         ]
         res = sum(terms)
-        F_supg = supg_form(tau, v, res, h, a, d, r, petrov_func=petrov)
+        F_supg = supg_form(supg, v, res, h, a, d, r, petrov_func=petrov, dx=dx)
         forms.append(F_supg)
 
     return forms
 
 
 # TODO debug, debug, debug
-def advection_diffusion_dg(
+def dg_advection_diffusion(
     u: FunctionSeries,
     dt: Constant,
     a: FunctionSeries,
@@ -141,7 +140,7 @@ def advection_diffusion_dg(
     adv_dx: int = 0,
     adv_dS: int= 0,
 ) -> list[Form]:
-    return advection_diffusion_reaction_dg(
+    return dg_advection_diffusion_reaction(
         u, dt, a, d, alpha=alpha, gamma=gamma, 
         D_adv=D_adv, D_diff=D_diff, D_phi=D_phi,
         phi=phi, bcs=bcs,
@@ -149,7 +148,7 @@ def advection_diffusion_dg(
     )
 
 
-def advection_diffusion_reaction_dg(
+def dg_advection_diffusion_reaction(
     u: FunctionSeries,
     dt: Constant,
     a,
@@ -184,7 +183,7 @@ def advection_diffusion_reaction_dg(
     ]
 
 
-def steady_advection_diffusion_dg(
+def dg_steady_advection_diffusion(
     u: Function, 
     a: Function | Constant, 
     d: Function | Constant, 
@@ -233,7 +232,7 @@ def diffusive_flux(
     `Fᴰ = ∫ 𝐧·(-D·∇u) ds`
     """
     n = FacetNormal(u.function_space.mesh)
-    return -inner(n, d * grad(u))
+    return inner(n, -d * grad(u))
 
 
 @mesh_integral

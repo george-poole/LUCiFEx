@@ -534,14 +534,21 @@ def _(
     file_name: str,
     dir_path=None,
     file_ext="mp4",
-    writer= "ffmpeg",
+    writer="ffmpeg",
     fps= None,
     dpi=150,
     bitrate = None,
     **saveanim_kwargs,
 ) -> None:
     file_path = file_path_ext(dir_path, file_name, file_ext)
-    anim.save(file_path, writer, fps, dpi, bitrate=bitrate, **saveanim_kwargs)
+    anim.save(
+        file_path, 
+        writer, 
+        fps, 
+        dpi, 
+        bitrate=bitrate, 
+        **saveanim_kwargs,
+    )
 
 
 @lru_cache

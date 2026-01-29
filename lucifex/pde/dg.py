@@ -9,7 +9,7 @@ from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     FunctionSeries, Series, 
     FiniteDifference, FiniteDifferenceArgwise, 
-    AB1, BE,
+    FE, BE,
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
@@ -23,7 +23,7 @@ def dg_advection_forms(
     a: Series | Function | Constant | Expr,
     n,
     bcs: BoundaryConditions | None,
-    D_adv: FiniteDifferenceArgwise = AB1 @ BE,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
     dx = 1,
     dS = 1,
     dx_opt: int = 0,
@@ -33,9 +33,13 @@ def dg_advection_forms(
     `∫dx v(𝐚·∇u) 
     = - ∫dx (∇v·𝐚)u + ∫dS ... + ∫ds ...`
     """
+    if isinstance(D_adv, FiniteDifference):
+        D_adv = FE @ D_adv
+
+    fs = u.function_space
     D_adv_a, D_adv_u = D_adv
-    a = D_adv_a(a)
-    u = D_adv_u(u)
+    a = D_adv_a(a, trial=u)
+    u = D_adv_u(u, trial=u)
 
     forms = []
 
@@ -66,10 +70,10 @@ def dg_advection_forms(
     forms.append(F_adv_dS)
 
     if bcs is not None:
-        ds, u_dirichlet = bcs.boundary_data(u.function_space, 'dirichlet')
+        ds, u_dirichlet = bcs.boundary_data(fs, 'dirichlet')
         ds_complement = ds(len(u_dirichlet))
-        uI_or_trial = lambda uI: conditional(lt(inner(n, a), 0), uI, u)
-        F_inflow = sum([v * inner(n, a) * uI_or_trial(uI) * ds(i) for i, uI in u_dirichlet])
+        uI_inflow = lambda uI: conditional(lt(inner(n, a), 0), uI, 0)
+        F_inflow = sum([v * inner(n, a) * uI_inflow(uI) * ds(i) for i, uI in u_dirichlet])
         F_outflow = v * inner(n, a) * u * ds_complement
         forms.extend([F_inflow, F_outflow])
 

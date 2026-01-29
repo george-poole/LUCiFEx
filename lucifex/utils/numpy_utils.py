@@ -378,8 +378,8 @@ def as_index(
     arr: np.ndarray | Iterable[float],
     target: int | float,
     fraction: bool = False,
-    ineq: Callable[[float, float], bool] | str | None = None,
-    ineq_msg: str = 'Target inequality cannot be satisfied.',
+    func: Callable[[float, float], bool] | str | None = None,
+    msg: str = 'Validation function cannot be satisfied.',
 ) -> int:
     if isinstance(target, int):
         return target
@@ -389,18 +389,18 @@ def as_index(
     
     arr = np.sort(arr)
     
-    if isinstance(ineq, str):
-        ineq = getattr(ineq, str)
+    if isinstance(func, str):
+        func = getattr(func, str)
 
     arr_diff = np.abs([i - target for i in arr])           
     target_index = np.argmin(arr_diff)
 
-    if ineq is not None:
-        if not ineq(arr[target_index], target):
+    if func is not None:
+        if not func(arr[target_index], target):
             for i in (-1, 1, -2, 2):
-                if ineq(arr[target_index], target):
+                if func(arr[target_index], target):
                     return target_index + i
-            raise ValueError(ineq_msg)
+            raise ValueError(msg)
 
     return target_index
 

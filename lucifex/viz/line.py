@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler
 
 from ..utils import grid, MultipleDispatchTypeError, filter_kwargs
-from .utils import LW, set_legend, optional_ax, optional_fig_ax, set_axes, create_cycler
+from .utils import LW, set_legend, optional_ax, optional_fig_ax, set_axes, create_cycler, optional_fig_axs
 
 
 @optional_fig_ax
@@ -155,3 +155,17 @@ def plot_stacked_lines(
     fig.subplots_adjust(hspace=0)
 
     return fig, list(ax)
+
+
+@optional_fig_axs
+def plot_line_multifigure(
+    fig: Figure,
+    axs_main: list[Axes],
+    axs_cbar: list[Axes | None],
+    u: Iterable[Function | tuple[Iterable[float], Iterable[float]] | Iterable],
+) -> None:
+    for ui, ax_main, ax_cbar in zip(u, axs_main, axs_main):
+        plot_line(
+            fig, ax_main, ui,
+        )
+        # TODO colorbar

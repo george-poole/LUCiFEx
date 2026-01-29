@@ -1,5 +1,15 @@
 GLOB=$1
 BUILD=$2
+REMOTE=false
+
+while [[ "$1" == --* ]]; do
+    case "$1" in
+        --remote)
+        REMOTE=true
+        shift
+        ;;
+    esac
+done
 
 IPYNB=($(find . -name "$GLOB.ipynb" -path "./notebooks/*"))
 for i in "${IPYNB[@]}"
@@ -15,3 +25,7 @@ for i in "${IPYNB[@]}"
     done
 
 jupyter-book build . $BUILD
+
+if $verbose; then
+    ghp-import -n -p -f ./_build/html
+fi
