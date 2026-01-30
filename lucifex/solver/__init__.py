@@ -10,6 +10,7 @@ from .pde import (
     ivp,
     evp,
     projection,
+    rkibvp,
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
 from .eval import (

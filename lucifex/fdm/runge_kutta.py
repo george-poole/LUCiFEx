@@ -1,5 +1,5 @@
 from typing import (
-    Iterable, ParamSpec, Callable,
+    Iterable, ParamSpec, Callable, overload,
     Protocol, Concatenate, TypeAlias,
 )
 
@@ -8,12 +8,22 @@ from ufl.core.expr import Expr
 from dolfinx.fem import Function, Constant
 
 from .series import ConstantSeries, FunctionSeries
+from .finite_difference import FE
 
 
 class RungeKuttaRHS(Protocol):
+
+    @overload
     def __call__(
         self, 
         t: Constant | ConstantSeries,
+        u: Function | FunctionSeries,
+    ) -> Expr:
+        ...
+
+    @overload
+    def __call__(
+        self, 
         u: Function | FunctionSeries,
     ) -> Expr:
         ...
@@ -91,6 +101,7 @@ class RungeKutta:
 
 T: TypeAlias = Constant | ConstantSeries
 U: TypeAlias = Function | FunctionSeries
+V: TypeAlias = Function | FunctionSeries
 P = ParamSpec('P')
 class ExplicitRungeKutta(RungeKutta):
     def __init__(
@@ -111,20 +122,21 @@ class ExplicitRungeKutta(RungeKutta):
 
     def __call__(
         self, 
-        rhs: Callable[Concatenate[T, U, P], Expr] | Callable[Concatenate[U, P], Expr],
-        dt: Constant | ConstantSeries,
-        t: Constant | ConstantSeries | None = None,
-    ) -> Callable[Concatenate[U, P], Expr]:
+        rhs: Callable[Concatenate[T, U, P], Expr],
+        dt,
+        autonomous: bool,
+    ):    
         
         if isinstance(dt, ConstantSeries):
-            dt = dt[0]
-        if isinstance(t, ConstantSeries):
-            t = t[0]
-        if t is None:
-            t = 0
-            rhs = lambda _, u: rhs(u)
-        
-        def _(u, *args: P.args, **kwargs: P.kwargs):
+                dt = dt[0]
+
+
+        def _(
+            t: Constant | ConstantSeries,
+            u: FunctionSeries,
+            *args: P.args, 
+            **kwargs: P.kwargs,
+        ) -> Expr:
             if isinstance(t, ConstantSeries):
                 t = t[0]
 
@@ -134,9 +146,9 @@ class ExplicitRungeKutta(RungeKutta):
                 a_row_sum = sum(a * _k for a, _k in zip(a_row[:i], k))
                 k[i] = rhs(
                     t + self.c[i] * dt, 
-                    u[0] + dt * a_row_sum
-                    *args,
-                    **kwargs,
+                    u[0] + dt * a_row_sum,
+                    *[FE(i) for i in args],
+                    **{n: FE(v) for n, v in kwargs.items()}
                 )
             assert k.count(None) == 0
 

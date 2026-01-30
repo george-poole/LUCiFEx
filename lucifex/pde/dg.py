@@ -112,17 +112,15 @@ def dg_advection_forms(
 
 def dg_diffusion_forms(
     v,
-    u,
+    u: Function | FunctionSeries,
     d,
     n,
     h,
-    alpha: Constant | tuple[Constant, Constant],
+    alpha: Constant | float | tuple[Constant | float, Constant | float],
     bcs: BoundaryConditions | tuple | None = None,
     D_diff: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
     dx = 1,
     dS = 1,
-    dx_opt: int = 0,
-    dS_opt: int = 0,
 ) -> list[Form]:
     """
     `∫dx v ∇·(D·∇u)
@@ -134,6 +132,10 @@ def dg_diffusion_forms(
     if not isinstance(alpha, tuple):
         alpha = (alpha, alpha)
     alphaI, alphaB = alpha
+    if isinstance(alphaI, (float, int)):
+        alphaI = Constant(u.function_space.mesh, alphaI)
+    if isinstance(alphaB, (float, int)):
+        alphaB = Constant(u.function_space.mesh, alphaB)
 
     fs = u
     D_diff_d, D_diff_u = D_diff
@@ -160,52 +162,3 @@ def dg_diffusion_forms(
         forms.append(F_ds)
 
     return forms
-            
-
-
-
-
-
-
-# from steady
-
-# outflow = conditional(gt(inner(n, a), 0), 1, 0)
-# inflow = 1 - outflow
-
-# match adv_dx:
-#     case 0:
-#         F_adv_dx = -inner(grad(v), a) * u_trial * dx
-#     case 1:
-#         F_adv_dx = -div(v * a) * u_trial * dx
-        
-# match adv_dS:
-#     case 0:
-#         F_adv_dS = jump(v) * jump(0.5 * (inner(n, a) + abs(inner(n, a))) * u_trial) * dS
-#     case 1:
-#         F_adv_dS =  2 * jump(v) * avg (inner(n, a) * u_trial) * dS
-#     case 2:
-#         F_adv_dS = jump(v) * inner(n, a)('+') * conditional(inner(n, a)('+') > 0, u_trial('+'), u_trial('-')) * dS
-
-# F_adv_ds = outflow * v * inner(n, a) * u_trial * ds
-# F_adv_ds += sum([inflow * v * inner(n, a) * uD * ds(i) for i, uD in u_dirichlet])
-# F_adv = F_adv_dx + F_adv_dS + F_adv_ds
-
-# F_diff_dx = inner(grad(v), d * grad(u_trial)) * dx
-# F_diff_dS = -inner(jump(v, n), avg(d * grad(u_trial))) * dS
-# F_diff_dS -= inner(avg(d * grad(u_trial)), jump(u_trial, n)) * dS
-# F_diff_dS += (alpha / avg(h)) * inner(jump(v, n), jump(u_trial, n)) * dS
-# F_diff_ds = sum([-inner(d * grad(v), (u_trial - uD) * n) * ds(i) for i, uD in u_dirichlet])
-# F_diff_ds += sum([(gamma / h) * v * (u_trial - uD) * ds(i) for i, uD in u_dirichlet])
-# F_diff_ds += sum([-v * uN * ds(i) for i, uN in u_neumann])
-# F_diff = F_diff_dx + F_diff_dS + F_diff_ds
-
-# forms = [F_adv, F_diff]
-
-# if r is not None:
-#     F_reac = -v * r * u_trial * dx
-#     forms.append(F_reac)
-# if j is not None:
-#     F_src = -v * j * dx 
-#     forms.append(F_src)
-
-# return forms

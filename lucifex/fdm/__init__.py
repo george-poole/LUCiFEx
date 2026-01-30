@@ -11,3 +11,4 @@ from .timestep import (
     cfld_timestep, cfldr_timestep, diffusive_reactive_timestep,
     peclet, peclet_argument, courant_number,
 )
+from .runge_kutta import RK4, ExplicitRungeKutta

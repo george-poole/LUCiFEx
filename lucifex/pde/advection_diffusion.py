@@ -221,7 +221,7 @@ def dg_steady_advection_diffusion(
 
     return [
         *dg_advection_forms(v, u_trial, a, n, bcs_adv, dx=dx, dS=dS, dx_opt=dx_opt, ds_opt=ds_opt, dS_opt=dS_opt),
-        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dX=dx, dS=dS),
+        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dx, dS),
         *reaction_forms(-v, u_trial, r, j, dx=dx),
     ]
 

@@ -2,6 +2,8 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
+    TypeVar,
+    Concatenate,
     Any,
 )
 from collections.abc import Iterable
@@ -23,7 +25,7 @@ from ..utils import (
     replicate_callable, 
     create_fem_space, SpatialMarkerAlias
 )
-from ..fdm import FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
+from ..fdm import DT, ExplicitRungeKutta, FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
 from ..fdm.ufl_operators import inner
 from ..fem import Function, Constant, Perturbation, is_unsolved
 from .bcs import BoundaryConditions, Value, SubspaceIndex
@@ -264,10 +266,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         ) -> Self:
             nonlocal solution
             if solution is None:
-                if args:
-                    solution = args[0]
-                else:
-                    solution = list(kwargs.values())[0]
+                solution = _deduce_from_args(0, args, kwargs)
             return cls(
                 solution, 
                 forms_func(*args, **kwargs), 
@@ -553,10 +552,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         ) -> Self:
             nonlocal solution
             if solution is None:
-                if args:
-                    solution = args[0]
-                else:
-                    solution = list(kwargs.values())[0]
+                _deduce_from_args(0, args, kwargs)
             forms = forms_func(*args, **kwargs)
 
             def _init(arg):
@@ -617,7 +613,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
 
     def __init__(
         self,
-        uxt: FunctionSeries,
+        solution: FunctionSeries,
         forms: Iterable[Form | tuple[Constant | float, Form]],
         forms_init : tuple[int, Iterable[Form | tuple[Constant | float, Form]]] | None = None,
         ics: Function | Constant | Perturbation | Callable | float | Iterable[float] | None = None,
@@ -634,7 +630,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
     ) -> None:
         bcs = None
         super().__init__(
-            uxt,
+            solution,
             forms, 
             forms_init, 
             ics, 
@@ -820,10 +816,7 @@ class EigenvalueProblem:
         ) -> Self:
             nonlocal solutions
             if solutions is None:
-                if args:
-                    solutions = args[0]
-                else:
-                    solutions = list(kwargs.values())[0]
+                _deduce_from_args(0, args, kwargs)
                 if isinstance(solutions, (Function, FunctionSeries)):
                     solutions = solutions.function_space
             return cls(
@@ -942,10 +935,9 @@ class Projection(BoundaryValueProblem):
         future: bool = False,
         overwrite: bool = False,
     ):
-
         v = TestFunction(solution.function_space)
         u = TrialFunction(solution.function_space)
-        dx = Measure('dx')
+        dx = Measure('dx', solution.function_space.mesh)
         F_lhs = inner(v, u) * dx
         F_rhs = inner(v, expression) * dx
         forms = [F_lhs, -F_rhs]
@@ -1001,6 +993,82 @@ class Projection(BoundaryValueProblem):
         return _create
 
 
+P = ParamSpec("P")
+V = TypeVar('V')
+class RungeKuttaProblem(InitialBoundaryValueProblem):
+
+    def __init__(
+        self,
+        solution: FunctionSeries,
+        rhs: Expr,
+        ics: Function | Constant | Perturbation | None = None,
+        bcs: BoundaryConditions | None = None,
+        petsc: OptionsPETSc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
+        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
+        assemble_termwise: tuple[bool, bool] = (False, False),
+        future: bool = True,
+        overwrite: bool = False,
+    ) -> Self:
+        
+        v = TestFunction(solution.function_space)
+        u = TrialFunction(solution.function_space)
+        dx = Measure('dx', solution.function_space.mesh)
+
+        F_lhs = v * DT(u, dt) * dx
+        F_rhs = rhs * dx
+        forms = [F_lhs, -F_rhs]
+
+        super().__init__(
+            solution,
+            forms,
+            ics=ics,
+            bcs=bcs,
+        )
+
+    @classmethod
+    def from_rhs_func(
+        cls,
+        rhs_func: Callable[Concatenate[V, P], Any],
+        rk: ExplicitRungeKutta,
+        dt,
+        ics,
+        bcs,
+        autonomous: bool = True,
+        solution: Function | FunctionSeries | None = None, 
+    ):
+        def _create(
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> Self:
+            nonlocal solution
+            if solution is None:
+                _deduce_from_args(1 if autonomous else 2, args, kwargs)
+    
+            v = TestFunction(solution.function_space)
+            dx = Measure('dx', solution.function_space.mesh)
+            F_lhs = v * DT(solution, dt) * dx
+            F_rhs = rk(rhs_func, dt, autonomous)(v, *args, **kwargs) * dx
+
+            rk(rhs_func, dt, autonomous)()
+
+            forms = [F_lhs, -F_rhs]
+
+            return cls(
+                solution,
+                forms,
+                ics=ics,
+                bcs=bcs,
+            )
+
+        return _create
+
+
+
 @replicate_callable(BoundaryValueProblem.from_forms_func)
 def bvp():
     pass
@@ -1020,3 +1088,21 @@ def evp():
 @replicate_callable(Projection.from_expr_func)
 def projection():
     pass
+
+@replicate_callable(RungeKuttaProblem.from_rhs_func)
+def rkibvp():
+    pass
+
+
+def _deduce_from_args(
+    index: int | str,
+    args: tuple[Any, ...],
+    kwargs: dict[str, Any],
+):
+    if args and isinstance(index, int):
+        return args[index]
+    if not args and isinstance(index, int):
+        return list(kwargs.values())[index]
+    if isinstance(index, str):
+        return kwargs[str]
+    raise TypeError
