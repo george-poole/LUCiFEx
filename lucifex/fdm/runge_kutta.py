@@ -109,6 +109,7 @@ class ExplicitRungeKutta(RungeKutta):
         a_triangular: Iterable[Iterable[float]],
         b: Iterable[float],
         c: Iterable[float],
+        name: str | None = None,
     ):
         n_stages = len(b)
         a_dense = np.zeros((n_stages, n_stages))
@@ -118,7 +119,7 @@ class ExplicitRungeKutta(RungeKutta):
         if len(c) == len(b) - 1:
             c = (0, *c)
 
-        super().__init__(a_dense, b, c)
+        super().__init__(a_dense, b, c, name)
 
     def __call__(
         self, 
