@@ -13,6 +13,7 @@ from .pde import (
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
 from .eval import (
+    Solver,
     Evaluation,
     Interpolation,
     Integration,
@@ -44,9 +45,5 @@ EVP = EigenvalueProblem
 """Alias to `EigenvalueProblem`"""
 
 from typing import TypeAlias
-
 PDE: TypeAlias = BVP | IBVP | IVP | EVP
 """Alias to `BVP | IBVP | IVP`"""
-
-Solver: TypeAlias = PDE | Evaluation
-"""Alias to `PDE | EvaluationProblem`"""

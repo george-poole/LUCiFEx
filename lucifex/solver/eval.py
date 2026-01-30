@@ -18,7 +18,10 @@ from .options import OptionsFFCX, OptionsJIT
 
 T = TypeVar('T', Function, Constant)
 TS = TypeVar('TS', FunctionSeries, ConstantSeries)
-class GenericSolver(ABC, Generic[T, TS]):
+class Solver(ABC, Generic[T, TS]):
+    """
+    Generic abstract base class
+    """
 
     def __init__(
         self,
@@ -115,7 +118,7 @@ class GenericSolver(ABC, Generic[T, TS]):
 
 
 P = ParamSpec("P")
-class Evaluation(GenericSolver[T, TS]):
+class Evaluation(Solver[T, TS]):
     
     def __init__(
         self,

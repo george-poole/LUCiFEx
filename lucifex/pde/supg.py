@@ -8,7 +8,7 @@ from ufl.geometry import GeometricCellQuantity
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     BE, DT, FiniteDifference, FiniteDifferenceArgwise, Series, 
-    ConstantSeries, ExplicitDiscretizationError,
+    ConstantSeries, ExplicitDiscretizationError, peclet,
 )
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.utils import is_tensor, is_vector, extract_mesh, cell_size_quantity
@@ -186,61 +186,6 @@ def tau_upwind(h, a) -> Expr:
     `⟹ 𝜏 = h / 2|𝐚|`
     """
     return (0.5 * h / a) 
-
-
-def peclet(h, a, d) -> Expr | float:
-    """
-    `Pe = |𝐚|h / 2D`
-    """
-    return 0.5 * a * h / d
-
-
-@overload
-def peclet_argument(
-    Pe, *, h, a
-):
-    """
-    `D = |𝐚|h / 2Pe`
-    """
-    ...
-
-
-@overload
-def peclet_argument(
-    Pe, *, h, d
-):
-    """
-    |𝐚| = 2Pe D / h`
-    """
-    ...
-
-
-@overload
-def peclet_argument(
-    Pe, *, a, d
-):
-    """
-    h = 2Pe D / |𝐚|`
-    """
-    ...
-
-
-def peclet_argument(
-    Pe,
-    *,
-    h=None,
-    a=None,
-    d=None,
-):
-    match h, a, d:
-        case _, _, None:
-            return 0.5 * a * h / Pe
-        case _, None, _:
-            return 2 * Pe * d / h
-        case None, _, _:
-            return 2 * Pe * d / a
-        case _:
-            raise TypeError('Provide keyword arguments for two of `h, a, d`')
         
 
 def xi(Pe):

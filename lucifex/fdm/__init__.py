@@ -6,4 +6,8 @@ from .finite_difference import (
 )
 from .series import FunctionSeries, ConstantSeries, Series, ExprSeries
 from .numpy_series import GridSeries, NumericSeries, TriangulationSeries
-from .timestep import cfl_timestep, reactive_timestep, diffusive_timestep, cflr_timestep, cfld_timestep
+from .timestep import (
+    cfl_timestep, reactive_timestep, diffusive_timestep, cflr_timestep, 
+    cfld_timestep, cfldr_timestep, diffusive_reactive_timestep,
+    peclet, peclet_argument, courant_number,
+)

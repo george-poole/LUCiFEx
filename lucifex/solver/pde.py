@@ -43,11 +43,11 @@ from .petsc import (
     PETScMat,
     PETScVec,
 )
-from .eval import GenericSolver
+from .eval import Solver
 
 
 P = ParamSpec("P")
-class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
+class BoundaryValueProblem(Solver[Function, FunctionSeries]):
 
     petsc_default = OptionsPETSc.default()
     jit_default = OptionsJIT.default()
@@ -410,11 +410,11 @@ class BoundaryValueProblem(GenericSolver[Function, FunctionSeries]):
     def mpc(self) -> MultiPointConstraint | None:
         return self._mpc
     
-    def print_forms(
+    def str_forms(
         self, 
-        func: Callable[[Form], str | Any] = str,
-    ) -> list[str | Any]:
-        return [func(i) for i in self._forms]
+        format: Callable[[Form], str] = str,
+    ) -> list[str]:
+        return [format(i) for i in self._forms]
     
     @property
     def forms(self) -> list[Form]:

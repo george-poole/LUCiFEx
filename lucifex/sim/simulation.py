@@ -30,7 +30,7 @@ T = TypeVar('T', int | None, str | None, float | None)
 class Simulation:
     def __init__(
         self,
-        solvers: Iterable[Solver],
+        solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
         namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr | ExprSeries]] = (),
@@ -44,6 +44,8 @@ class Simulation:
         checkpoint_file: str | None = None,
         timing_file: str | None = None,
     ):
+        if isinstance(solvers, Solver):
+            solvers = [solvers]
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt

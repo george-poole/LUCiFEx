@@ -22,11 +22,12 @@ def dg_advection_forms(
     u: FunctionSeries,
     a: Series | Function | Constant | Expr,
     n,
-    bcs: BoundaryConditions | None,
+    bcs: BoundaryConditions | tuple | None,
     D_adv: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
     dx = 1,
     dS = 1,
     dx_opt: int = 0,
+    ds_opt: int = 0,
     dS_opt: int = 0,
 ) -> list[Form]:
     """
@@ -45,59 +46,120 @@ def dg_advection_forms(
 
     match dx_opt:
         case 0:
-            F_adv_dx = -inner(grad(v), a) * u * dx
+            F_dx = -inner(grad(v), a) * u * dx
         case 1:
-            F_adv_dx = -div(v * a) * u * dx
+            F_dx = -div(v * a) * u * dx
         case _:
             raise OptionError(dx_opt)
-        
-    forms.append(F_adv_dx)
+    forms.append(F_dx)
 
-    an_pos = 0.5 * (inner(n, a) + abs(inner(n, a)))
-    # NOTE equivalent to `an_pos = conditional(gt(inner(n, a), 0), inner(n, a), 0)`` 
+    lmbda = conditional(gt(inner(n, a), 0), 1, 0)
+    """
+    λ = 
+    1 if 𝐧·𝐚 > 1 (outflow)
+    0 otherwise
+    """ 
+
+    na_out = 0.5 * (inner(n, a) + abs(inner(n, a)))
+    """
+    (𝐧·𝐚)⁺ = 
+    if 𝐧·𝐚 > 1 (outflow)
+    0 otherwise
+
+    NOTE equivalent to `conditional(gt(inner(n, a), 0), inner(n, a), 0)`
+    """
+
     match dS_opt:
         case 0:
-            F_adv_dS = jump(v) * jump(an_pos * u) * dS
+            F_dS = jump(v) * jump(na_out * u) * dS
         case 1:
-            F_adv_dS = jump(v) * (an_pos('+') * u('+') - an_pos('-') * u('-')) * dS
+            F_dS = jump(v) * (na_out('+') * u('+') - na_out('-') * u('-')) * dS
         case 2:
-            F_adv_dS = jump(v) * inner(n, a)('+') * conditional(gt(inner(n, a)('+'),  0), u('+'), u('-')) * dS
+            F_dS = jump(v) * inner(n, a)('+') * conditional(gt(inner(n, a)('+'),  0), u('+'), u('-')) * dS
         case 3:
-            F_adv_dS = 2 * jump(v) * avg(an_pos * u) * dS
+            F_dS = 2 * jump(v) * avg(na_out * u) * dS
+        case 4:
+            F_dS = 2 * inner(jump(v, n), avg(lmbda * a * u)) * dS
         case _:
             raise OptionError(dS_opt)
-
-    forms.append(F_adv_dS)
+    forms.append(F_dS)
 
     if bcs is not None:
-        ds, u_dirichlet = bcs.boundary_data(fs, 'dirichlet')
-        ds_complement = ds(len(u_dirichlet))
-        uI_inflow = lambda uI: conditional(lt(inner(n, a), 0), uI, 0)
-        F_inflow = sum([v * inner(n, a) * uI_inflow(uI) * ds(i) for i, uI in u_dirichlet])
-        F_outflow = v * inner(n, a) * u * ds_complement
-        forms.extend([F_inflow, F_outflow])
-
+        ds, u_dirichlet, u_neumann = (
+            bcs.boundary_data(fs, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            else bcs
+        )
+        match ds_opt:
+            case 0:
+                ds_complement = ds(len(u_dirichlet) + len(u_neumann))
+                ds_not_inflow = ds_complement
+                if u_neumann:
+                    ds_neumann = sum([ds(i) for i, _ in u_neumann[1:]], start=ds(u_neumann[0][0]))
+                    ds_not_inflow += ds_neumann
+                uI_inflow = lambda uI: conditional(lt(inner(n, a), 0), uI, 0)
+                F_inflow = sum([v * inner(n, a) * uI_inflow(uI) * ds(i) for i, uI in u_dirichlet])
+                F_outflow = v * inner(n, a) * u * ds_not_inflow
+                F_ds = F_inflow + F_outflow
+            case 1:
+                F_ds = v * lmbda * inner(n, a) * u * ds
+                F_ds += sum([v * (1 - lmbda) * inner(n, a) * uD * ds(i) for i, uD in u_dirichlet])
+            case _:
+                raise OptionError(ds_opt)
+        forms.append(F_ds)
+    
     return forms
         
 
 def dg_diffusion_forms(
     v,
-    n,
-    a,
-    d,
     u,
-    opt: int = 0,
+    d,
+    n,
+    h,
+    alpha: Constant | tuple[Constant, Constant],
+    bcs: BoundaryConditions | tuple | None = None,
+    D_diff: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
+    dx = 1,
+    dS = 1,
+    dx_opt: int = 0,
+    dS_opt: int = 0,
 ) -> list[Form]:
-    ...
-    # F_diff_dx = inner(grad(v / phi), d * grad(D_diff(u))) * dx
-    # F_diff_dS = -inner(jump(v / phi, n), avg(d * grad(D_diff(u)))) * dS
-    # F_diff_dS += -inner(avg(d * grad(v / phi)), jump(D_diff(u), n)) * dS
-    # F_diff_dS += (alpha / avg(h)) * inner(jump(v / phi, n), jump(D_diff(u), n)) * dS
-    # F_diff_ds = sum([-inner(d * grad(v / phi), (D_diff(u) - uD) * n) * ds(i) for i, uD in u_dirichlet])
-    # F_diff_ds += sum([-inner(v * n / phi, d * grad(D_diff(u))) * ds(i) for i, uD in u_dirichlet])
-    # F_diff_ds += sum([(gamma / h) * v * (D_diff(u) - uD) * ds(i) for i, uD in u_dirichlet])
-    # F_diff_ds += sum([-(v / phi) * uN * ds(i) for i, uN in u_neumann])
-    # F_diff = F_diff_dx + F_diff_dS + F_diff_ds
+    """
+    `∫dx v ∇·(D·∇u)
+    = -∫dx ... + ∫dS ... + ∫ds ...`
+    """
+    if isinstance(D_diff, FiniteDifference):
+        D_diff = FE @ D_diff
+
+    if not isinstance(alpha, tuple):
+        alpha = (alpha, alpha)
+    alphaI, alphaB = alpha
+
+    fs = u
+    D_diff_d, D_diff_u = D_diff
+    d = D_diff_d(d, trial=u)
+    u = D_diff_u(u, trial=u)
+
+    F_dx = -inner(grad(v), d * grad(u)) * dx
+
+    F_dS = inner(jump(v, n), avg(d * grad(u))) * dS
+    F_dS += inner(avg(d * grad(v)), jump(u, n)) * dS
+    F_dS += -(alphaI / avg(h)) * inner(jump(v, n), jump(u, n)) * dS
+
+    forms = [F_dx, F_dS]
+
+    if bcs is not None:
+        ds, u_dirichlet, u_neumann = (
+            bcs.boundary_data(fs, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            else bcs
+        )
+        F_ds = sum([inner(v * n, d * grad(u)) * ds(i) for i, _ in u_dirichlet])
+        F_ds += sum([inner(d * grad(v), (u - uD) * n) * ds(i) for i, uD in u_dirichlet])
+        F_ds += sum([-(alphaB / h) * v * (u - uD) * ds(i) for i, uD in u_dirichlet])
+        F_ds += sum([-v * uN * ds(i) for i, uN in u_neumann])
+        forms.append(F_ds)
+
+    return forms
             
 
 

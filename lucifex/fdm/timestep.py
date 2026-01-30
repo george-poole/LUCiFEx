@@ -373,3 +373,81 @@ def _bounded_timestep(
     if np.isclose(dt_min, dt_max):
         return dt_min
     return min(dt_max, max(dt_min, courant * _lambda()))
+
+
+@overload
+def peclet(h: float, a: float, d: float) -> Expr | float:
+    """
+    Peclet number `Pe = |𝐚|h / 2D`
+    """
+    ...
+
+
+@overload
+def peclet(h: Expr | float, a: Expr | float, d: Expr | float) -> Expr:
+    """
+    Local Peclet number `Pe(x) = |𝐚(x)|h(x) / 2D(x)`
+    """
+    ...
+
+
+def peclet(h, a, d):
+    return 0.5 * a * h / d
+
+
+@overload
+def peclet_argument(
+    Pe, *, h, a
+):
+    """
+    `D = |𝐚|h / 2Pe`
+    """
+    ...
+
+
+@overload
+def peclet_argument(
+    Pe, *, h, d
+):
+    """
+    |𝐚| = 2Pe D / h`
+    """
+    ...
+
+
+@overload
+def peclet_argument(
+    Pe, *, a, d
+):
+    """
+    h = 2Pe D / |𝐚|`
+    """
+    ...
+
+
+def peclet_argument(
+    Pe,
+    *,
+    h=None,
+    a=None,
+    d=None,
+):
+    match h, a, d:
+        case _, _, None:
+            return 0.5 * a * h / Pe
+        case _, None, _:
+            return 2 * Pe * d / h
+        case None, _, _:
+            return 2 * Pe * d / a
+        case _:
+            raise TypeError('Provide keyword arguments for two of `h, a, d`')
+
+
+def courant_number(
+    dt: float, 
+    dtCFL: float,
+) -> float:
+    """
+    `c = ∆t / ∆tCFL`
+    """
+    return dt / dtCFL

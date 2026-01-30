@@ -9,7 +9,7 @@ from ufl import (Measure, Form, inner, TestFunction, TrialFunction,
 from lucifex.fdm import DT, FiniteDifference, FiniteDifferenceArgwise, FiniteDifferenceDerivative
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, 
+    DT, FE, BE, FiniteDifference, FunctionSeries, ConstantSeries, 
     Series, FiniteDifferenceArgwise)
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
@@ -27,7 +27,7 @@ def advection_diffusion(
     d: Series | Function | Expr,
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_diff: FiniteDifference | FiniteDifferenceArgwise,
-    D_phi: FiniteDifference = AB1,
+    D_phi: FiniteDifference = FE,
     D_dt: FiniteDifferenceDerivative = DT,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
@@ -37,25 +37,25 @@ def advection_diffusion(
     """    
     `∂u/∂t + (1/ϕ)𝐚·∇u = (1/ϕ)∇·(D·∇u)`
     """
-    return dg_advection_diffusion_reaction(
+    return advection_diffusion_reaction(
         u, dt, a, d, 
         D_adv=D_adv, D_diff=D_diff, D_dt=D_dt, D_phi=D_phi,
         phi=phi, bcs=bcs, supg=supg, h=h,
     )
 
 
-def dg_advection_diffusion_reaction(
+def advection_diffusion_reaction(
     u: FunctionSeries,
     dt: Constant,
     a: Series | Function | Expr,
     d: Series | Function | Expr,
     r: Function | Expr | Series | tuple[Callable, tuple] | None = None,
     j: Function | Expr | Series | tuple[Callable, tuple] | None = None,
-    D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_diff: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_phi: FiniteDifference = AB1,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_diff: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_src: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_phi: FiniteDifference = FE,
     D_dt: FiniteDifferenceDerivative = DT,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
@@ -128,44 +128,48 @@ def steady_advection_diffusion(
 def dg_advection_diffusion(
     u: FunctionSeries,
     dt: Constant,
+    alpha: Constant | tuple[Constant, Constant],
     a: FunctionSeries,
     d: Function | Expr | Series, 
-    alpha: Constant | float,
-    gamma: Constant | float,
     D_adv: FiniteDifferenceArgwise,
     D_diff: FiniteDifference,
-    D_phi: FiniteDifference = AB1,
+    D_phi: FiniteDifference = FE,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    adv_dx: int = 0,
-    adv_dS: int= 0,
+    dx_opt: int = 0,
+    dS_opt: int= 0,
 ) -> list[Form]:
     return dg_advection_diffusion_reaction(
-        u, dt, a, d, alpha=alpha, gamma=gamma, 
-        D_adv=D_adv, D_diff=D_diff, D_phi=D_phi,
-        phi=phi, bcs=bcs,
-        adv_dx=adv_dx, adv_dS=adv_dS,
+        u, dt, alpha, a, d,
+        D_adv=D_adv, 
+        D_diff=D_diff, 
+        D_phi=D_phi,
+        phi=phi, 
+        bcs=bcs,
+        dx_opt=dx_opt, 
+        dS_opt=dS_opt,
     )
 
 
 def dg_advection_diffusion_reaction(
     u: FunctionSeries,
     dt: Constant,
+    alpha: Constant | tuple[Constant, Constant],
     a,
     d,
-    r,
-    j,
-    alpha: float,
-    gamma: float,
-    D_adv: FiniteDifferenceArgwise,
-    D_diff: FiniteDifference,
-    D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
-    D_phi: FiniteDifference = AB1,
+    r: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    j: Function | Expr | Series | tuple[Callable, tuple] | None = None,
+    D_adv: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
+    D_diff: FiniteDifference | FiniteDifferenceArgwise = FE @ BE,
+    D_reac: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_src: FiniteDifference | FiniteDifferenceArgwise = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
+    D_phi: FiniteDifference = FE,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    adv_dx: int = 0,
-    adv_dS: int= 0,
+    dx_opt: int = 0,
+    ds_opt: int = 0,
+    dS_opt: int= 0,
 ) -> list[Form]:
     
     phi = D_phi(phi)
@@ -174,26 +178,29 @@ def dg_advection_diffusion_reaction(
     n = FacetNormal(u.function_space.mesh)
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
+    if bcs is not None:
+        bcs = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
+        bcs
 
     return [
-        derivative_form(),
-        *dg_advection_forms(),
-        *dg_diffusion_forms(),
-        *reaction_forms(),
+        derivative_form(v, u, dt, D_dt, dx),
+        *dg_advection_forms(v/phi, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, ds_opt=ds_opt, dS_opt=dS_opt),
+        *dg_diffusion_forms(-v/phi, u, d, n, h, alpha, bcs, D_diff, dx, dS),
+        *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx),
     ]
 
 
 def dg_steady_advection_diffusion(
     u: Function, 
+    alpha: Constant | tuple[Constant, Constant],
     a: Function | Constant, 
-    d: Function | Constant, 
-    alpha: float | Constant,
-    gamma: float | Constant,
+    d: Function | Constant,
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
-    adv_dx: int = 0,
-    adv_dS: int= 0,
+    dx_opt: int = 0,
+    ds_opt: int = 0,
+    dS_opt: int= 0,
 ) -> list[Form]:
     """
     `𝐚·∇u = ∇·(D·∇u) + Ru + J`
@@ -202,12 +209,20 @@ def dg_steady_advection_diffusion(
     u_trial = TrialFunction(u.function_space)
     h = CellDiameter(u.function_space.mesh)
     n = FacetNormal(u.function_space.mesh)
-    ds, u_dirichlet, u_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
+    dx = Measure('dx', u.function_space.mesh)
+    dS = Measure('dS', u.function_space.mesh)
+    if bcs is not None:
+        ds, u_dirichlet, u_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
+        bcs_adv = (ds, u_dirichlet)
+        bcs_diff = (ds, u_dirichlet, u_neumann)
+    else:
+        bcs_adv = None
+        bcs_diff = None
 
     return [
-        *dg_advection_forms(),
-        *dg_diffusion_forms(),
-        *reaction_forms(),
+        *dg_advection_forms(v, u_trial, a, n, bcs_adv, dx=dx, dS=dS, dx_opt=dx_opt, ds_opt=ds_opt, dS_opt=dS_opt),
+        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dX=dx, dS=dS),
+        *reaction_forms(-v, u_trial, r, j, dx=dx),
     ]
 
 
