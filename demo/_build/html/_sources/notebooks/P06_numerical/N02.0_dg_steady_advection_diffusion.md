@@ -1,1 +1,0 @@
-# DG formulation of the steady advection-diffusion-reaction equation

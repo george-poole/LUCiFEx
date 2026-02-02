@@ -2,12 +2,14 @@ format: jb-book
 root: home
 
 parts:
-  - caption: Tutorial
+  - caption: User Guide
     chapters:
-      - file: notebooks/P01_tutorial/T00_introduction
-      - file: notebooks/P01_tutorial/T01_timeseries
-      - file: notebooks/P01_tutorial/T02_finite_differences
-      - file: notebooks/P01_tutorial/T03_perturbation
+      - file: notebooks/P01_user_guide/U00_introduction
+      - file: notebooks/P01_user_guide/U01_time_dependence
+      - file: notebooks/P01_user_guide/U02_finite_differences
+      - file: notebooks/P01_user_guide/U03_initial_conditions
+      - file: notebooks/P01_user_guide/Uxx_bcs_time_dependent
+      - file: notebooks/P01_user_guide/Uxx_bcs_periodic
 
   - caption: Introductory
     chapters:
@@ -55,69 +57,67 @@ parts:
         sections: 
           - file: notebooks/P03_fluids/F04.1_darcy_brinkman_lens
 
+  - caption: Transport
+    chapters:
+      - file: notebooks/P04_transport/T01.0_dg_advection
+        sections: 
+          - file: notebooks/P04_transport/T01.1_dg_advection_interval_step
+          - file: notebooks/P04_transport/T01.2_dg_advection_interval_cosine
+          - file: notebooks/P04_transport/T01.3_dg_advection_rectangle_cone
+          - file: notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex
+      - file: notebooks/P04_transport/T02.0_dg_steady_advection_diffusion
+        sections: 
+          - file: notebooks/P04_transport/T02.1_dg_steady_advection_diffusion_interval
+          - file: notebooks/P04_transport/T02.2_dg_steady_advection_diffusion_rectangle
+      - file: notebooks/P04_transport/T03.0_dg_advection_diffusion
+        sections:
+          - file: notebooks/P04_transport/T03.1_dg_advection_diffusion_interval
+          - file: notebooks/P04_transport/T03.2_dg_advection_diffusion_rectangle
+      - file: notebooks/P04_transport/T04.0_supg_steady_advection_diffusion
+        sections: 
+          - file: notebooks/P04_transport/T04.1_supg_steady_advection_diffusion_interval
+          - file: notebooks/P04_transport/T04.2_supg_steady_advection_diffusion_hemker
+          - file: notebooks/P04_transport/T04.3_supg_steady_advection_diffusion_rectangle
+      - file: notebooks/P04_transport/T05.0_supg_advection_diffusion
+        sections: 
+          - file: notebooks/P04_transport/T05.1_supg_advection_diffusion_interval
+          - file: notebooks/P04_transport/T05.2_supg_advection_diffusion_rectangle
+
   - caption: Convection 
     chapters:
-      - file: notebooks/P04_convection/C01.0_darcy_convection_equations
+      - file: notebooks/P05_convection/C01.0_darcy_convection_equations
         sections: 
-          - file: notebooks/P04_convection/C01.1_darcy_rayleigh_benard_rectangle
-          - file: notebooks/P04_convection/C01.2_darcy_rayleigh_benard_annulus
-          - file: notebooks/P04_convection/C01.3_darcy_rayleigh_benard_semicircle
-          - file: notebooks/P04_convection/C01.4_darcy_evolving_isotropic
-          - file: notebooks/P04_convection/C01.5_darcy_evolving_crossbedded
-          - file: notebooks/P04_convection/C01.6_darcy_evolving_layered
-          - file: notebooks/P04_convection/C01.7_darcy_evolving_inclined
-          - file: notebooks/P04_convection/C01.8_darcy_elder
-      - file: notebooks/P04_convection/C02.0_stokes_convection_equations
+          - file: notebooks/P05_convection/C01.1_darcy_rayleigh_benard_rectangle
+          - file: notebooks/P05_convection/C01.2_darcy_rayleigh_benard_annulus
+          - file: notebooks/P05_convection/C01.3_darcy_rayleigh_benard_semicircle
+          - file: notebooks/P05_convection/C01.4_darcy_evolving_isotropic
+          - file: notebooks/P05_convection/C01.5_darcy_evolving_crossbedded
+          - file: notebooks/P05_convection/C01.6_darcy_evolving_layered
+          - file: notebooks/P05_convection/C01.7_darcy_evolving_inclined
+          - file: notebooks/P05_convection/C01.8_darcy_elder
+      - file: notebooks/P05_convection/C02.0_stokes_convection_equations
         sections: 
-          - file: notebooks/P04_convection/C02.1_stokes_viscosity
-      - file: notebooks/P04_convection/C03.0_navier_stokes_convection_equations
+          - file: notebooks/P05_convection/C02.1_stokes_viscosity
+      - file: notebooks/P05_convection/C03.0_navier_stokes_convection_equations
         sections: 
-          - file: notebooks/P04_convection/C03.1_navier_stokes_thermosolutal
-          - file: notebooks/P04_convection/C03.2_navier_stokes_rayleigh_taylor
-          - file: notebooks/P04_convection/C03.3_navier_stokes_marangoni
-      - file: notebooks/P04_convection/C04.0_darcy_brinkman_convection_equations
+          - file: notebooks/P05_convection/C03.1_navier_stokes_thermosolutal
+          - file: notebooks/P05_convection/C03.2_navier_stokes_rayleigh_taylor
+          - file: notebooks/P05_convection/C03.3_navier_stokes_marangoni
+      - file: notebooks/P05_convection/C04.0_darcy_brinkman_convection_equations
         sections:
-          - file: notebooks/P04_convection/C04.1_darcy_brinkman_rayleigh_taylor
-          - file: notebooks/P04_convection/C04.2_darcy_brinkman_rayleigh_benard
+          - file: notebooks/P05_convection/C04.1_darcy_brinkman_rayleigh_taylor
+          - file: notebooks/P05_convection/C04.2_darcy_brinkman_rayleigh_benard
 
   - caption: Advanced 
     chapters:
-      - file: notebooks/P05_advanced/A01.0_darcy_fingering_equations
+      - file: notebooks/P06_advanced/A01.0_darcy_fingering_equations
         sections:
-          - file: notebooks/P05_advanced/A01.1_darcy_fingering_dirichlet
-          - file: notebooks/P05_advanced/A01.2_darcy_fingering_periodic
-      - file: notebooks/P05_advanced/A02.0_darcy_abc_reaction_equations
+          - file: notebooks/P06_advanced/A01.1_darcy_fingering_dirichlet
+          - file: notebooks/P06_advanced/A01.2_darcy_fingering_periodic
+      - file: notebooks/P06_advanced/A02.0_darcy_abc_reaction_equations
         sections:
-          - file: notebooks/P05_advanced/A02.1_darcy_abc_reaction_density
-          - file: notebooks/P05_advanced/A02.2_darcy_abc_reaction_viscosity
-      - file: notebooks/P05_advanced/A03.0_darcy_porosity_evolution_equations
+          - file: notebooks/P06_advanced/A02.1_darcy_abc_reaction_density
+          - file: notebooks/P06_advanced/A02.2_darcy_abc_reaction_viscosity
+      - file: notebooks/P06_advanced/A03.0_darcy_porosity_evolution_equations
         sections: 
-          - file: notebooks/P05_advanced/A03.1_darcy_porosity_evolution_injection
-
-  - caption: Numerical
-    chapters:
-      - file: notebooks/P06_numerical/N01.0_dg_advection
-        sections: 
-          - file: notebooks/P06_numerical/N01.1_dg_advection_interval_step
-          - file: notebooks/P06_numerical/N01.2_dg_advection_interval_cosine
-          - file: notebooks/P06_numerical/N01.3_dg_advection_rectangle_cone
-          - file: notebooks/P06_numerical/N01.4_dg_advection_rectangle_vortex
-      - file: notebooks/P06_numerical/N02.0_dg_steady_advection_diffusion
-        sections: 
-          - file: notebooks/P06_numerical/N02.1_dg_steady_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N02.2_dg_steady_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N03.0_dg_advection_diffusion
-        sections:
-          - file: notebooks/P06_numerical/N03.1_dg_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N03.2_dg_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N04.0_supg_steady_advection_diffusion
-        sections: 
-          - file: notebooks/P06_numerical/N04.1_supg_steady_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N04.2_supg_steady_advection_diffusion_hemker
-          - file: notebooks/P06_numerical/N04.3_supg_steady_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N05.0_supg_advection_diffusion
-        sections: 
-          - file: notebooks/P06_numerical/N05.1_supg_advection_diffusion_interval
-          - file: notebooks/P06_numerical/N05.2_supg_advection_diffusion_rectangle
-      - file: notebooks/P06_numerical/N07_bcs_time_dependent
-      - file: notebooks/P06_numerical/N08_bcs_periodic
+          - file: notebooks/P06_advanced/A03.1_darcy_porosity_evolution_injection
