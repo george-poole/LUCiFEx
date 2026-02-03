@@ -6,7 +6,7 @@ from lucifex.fem import Function, Constant
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, AB1,
-    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, cfl_timestep,
+    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, 
@@ -125,7 +125,7 @@ def darcy_plume_dissolution_rectangle(
     up_solver = bvp(darcy_incompressible, u_bcs, petsc=up_petsc)(
         up, Bu * rho[0], k[0], 1, egx, egy,
     )
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
 

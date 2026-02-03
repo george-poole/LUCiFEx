@@ -4,7 +4,7 @@ import numpy as np
 from ufl import as_vector, Dx
 
 from lucifex.fdm import (
-    BE, FE, CN, FiniteDifference, FiniteDifferenceArgwise, cfl_timestep, 
+    BE, FE, CN, FiniteDifference, FiniteDifferenceArgwise, advective_timestep, 
     FunctionSeries, ConstantSeries, ExprSeries, finite_difference_order,
 )
 from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
@@ -108,7 +108,7 @@ def navier_stokes_marangoni(
     rho = ExprSeries(-Ra * c, 'rho')
     f = rho * as_vector([0, -1])
     # solvers
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(

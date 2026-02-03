@@ -1,12 +1,12 @@
 from lucifex.fdm import (
-    FiniteDifference, cfl_timestep, 
+    FiniteDifference, advective_timestep, 
     FunctionSeries, ConstantSeries, finite_difference_order,
 )
 from lucifex.fem import Constant
 from lucifex.solver import (
     BoundaryConditions, evaluation,
 )
-from lucifex.mesh import ellipse_obstacle_mesh, mesh_boundary
+from lucifex.mesh import rectangle_minus_ellipse_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.navier_stokes import ipcs_solvers, chorin_solvers
@@ -37,7 +37,7 @@ def navier_stokes_circle_obstacle(
     D_visc: FiniteDifference,
 ):
     # space
-    Omega = ellipse_obstacle_mesh(dx, 'triangle')(
+    Omega = rectangle_minus_ellipse_mesh(dx, 'triangle')(
         (-Lx/2, Lx/2), (-Ly/2, Ly/2), r, (0.0, 0.0),
     )
     dOmega = mesh_boundary(
@@ -79,7 +79,7 @@ def navier_stokes_circle_obstacle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
 
     # solvers
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     if ns_scheme == 'ipcs':

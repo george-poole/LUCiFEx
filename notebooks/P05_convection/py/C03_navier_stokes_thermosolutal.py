@@ -5,7 +5,7 @@ from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference,
-    FiniteDifferenceArgwise, ExprSeries, finite_difference_order, cfl_timestep,
+    FiniteDifferenceArgwise, ExprSeries, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
@@ -145,7 +145,7 @@ def navier_stokes_thermosolutal_rectangle(
     eg = as_vector([0, -1])
     f = Bu * rho * eg
     # solvers
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
