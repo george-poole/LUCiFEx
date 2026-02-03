@@ -552,7 +552,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         ) -> Self:
             nonlocal solution
             if solution is None:
-                _deduce_from_args(0, args, kwargs)
+                solution = _deduce_from_args(0, args, kwargs)
             forms = forms_func(*args, **kwargs)
 
             def _init(arg):
@@ -816,7 +816,7 @@ class EigenvalueProblem:
         ) -> Self:
             nonlocal solutions
             if solutions is None:
-                _deduce_from_args(0, args, kwargs)
+                solutions = _deduce_from_args(0, args, kwargs)
                 if isinstance(solutions, (Function, FunctionSeries)):
                     solutions = solutions.function_space
             return cls(
@@ -997,38 +997,38 @@ P = ParamSpec("P")
 V = TypeVar('V')
 class RungeKuttaProblem(InitialBoundaryValueProblem):
 
-    def __init__(
-        self,
-        solution: FunctionSeries,
-        rhs: Expr,
-        ics: Function | Constant | Perturbation | None = None,
-        bcs: BoundaryConditions | None = None,
-        petsc: OptionsPETSc | dict | None = None,
-        jit: OptionsJIT | dict | None = None,
-        ffcx: OptionsFFCX | dict | None = None,
-        corrector: Callable[[np.ndarray], None] 
-        | tuple[str, Callable[[np.ndarray], None]] 
-        | None = None,
-        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
-        assemble_termwise: tuple[bool, bool] = (False, False),
-        future: bool = True,
-        overwrite: bool = False,
-    ) -> Self:
+    # def __init__(
+    #     self,
+    #     solution: FunctionSeries,
+    #     rhs: Expr,
+    #     ics: Function | Constant | Perturbation | None = None,
+    #     bcs: BoundaryConditions | None = None,
+    #     petsc: OptionsPETSc | dict | None = None,
+    #     jit: OptionsJIT | dict | None = None,
+    #     ffcx: OptionsFFCX | dict | None = None,
+    #     corrector: Callable[[np.ndarray], None] 
+    #     | tuple[str, Callable[[np.ndarray], None]] 
+    #     | None = None,
+    #     cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
+    #     assemble_termwise: tuple[bool, bool] = (False, False),
+    #     future: bool = True,
+    #     overwrite: bool = False,
+    # ) -> Self:
         
-        v = TestFunction(solution.function_space)
-        u = TrialFunction(solution.function_space)
-        dx = Measure('dx', solution.function_space.mesh)
+    #     v = TestFunction(solution.function_space)
+    #     u = TrialFunction(solution.function_space)
+    #     dx = Measure('dx', solution.function_space.mesh)
 
-        F_lhs = v * DT(u, dt) * dx
-        F_rhs = rhs * dx
-        forms = [F_lhs, -F_rhs]
+    #     F_lhs = v * DT(u, dt) * dx
+    #     F_rhs = rhs * dx
+    #     forms = [F_lhs, -F_rhs]
 
-        super().__init__(
-            solution,
-            forms,
-            ics=ics,
-            bcs=bcs,
-        )
+    #     super().__init__(
+    #         solution,
+    #         forms,
+    #         ics=ics,
+    #         bcs=bcs,
+    #     )
 
     @classmethod
     def from_rhs_func(
@@ -1047,7 +1047,7 @@ class RungeKuttaProblem(InitialBoundaryValueProblem):
         ) -> Self:
             nonlocal solution
             if solution is None:
-                _deduce_from_args(1 if autonomous else 2, args, kwargs)
+                solution = _deduce_from_args(1 if autonomous else 2, args, kwargs)
     
             v = TestFunction(solution.function_space)
             dx = Measure('dx', solution.function_space.mesh)

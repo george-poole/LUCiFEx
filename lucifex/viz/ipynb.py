@@ -47,10 +47,12 @@ def _save_figure(
         prefix_ipynb: bool = True,
         get_path: bool = False,
         mkdirs: bool = True,
+        thumbnail: bool = False,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
+        ipynb_name = get_ipynb_file_name()
         if prefix_ipynb:
-            file_name = f'{get_ipynb_file_name()}_{file_name}'
+            file_name = '_'.join((ipynb_name, file_name))
         if dir_path is not None:
             file_name = os.path.join(dir_path, file_name)
         if mkdirs:
@@ -66,6 +68,8 @@ def _save_figure(
                 )
                 kwargs.update(_kwargs)
             write(obj, file_name, **kwargs)
+            if thumbnail:
+                write(obj, os.path.join(dir_path, ipynb_name), **kwargs)
             if get_path:
                 return file_name
         return __

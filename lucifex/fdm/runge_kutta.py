@@ -158,22 +158,23 @@ class ExplicitRungeKutta(RungeKutta):
         return _
 
 
-RK4 = ExplicitRungeKutta(
-    [(0.5, ), (0.0, 0.5), (0.0, 0.0, 1.0)],
-    (1/6, 1/3, 1/3, 1/6),
-    (0.5, 0.5, 1.0),
-    'RK4',
-)
-"""
-Explicit RK4 method
-"""
-
-MID = ExplicitRungeKutta(
-    [(0.5, )],
-    (0.0, 1.0),
-    (0.5, ),
-    'MID'
-)
-"""
-Explicit midpoint method
-"""
+RK4 = None 
+# ExplicitRungeKutta(
+#     [(0.5, ), (0.0, 0.5), (0.0, 0.0, 1.0)],
+#     (1/6, 1/3, 1/3, 1/6),
+#     (0.5, 0.5, 1.0),
+#     'RK4',
+# )
+# """
+# Explicit RK4 method
+# """
+MID = None
+# MID = ExplicitRungeKutta(
+#     [(0.5, )],
+#     (0.0, 1.0),
+#     (0.5, ),
+#     'MID'
+# )
+# """
+# Explicit midpoint method
+# """
