@@ -163,7 +163,7 @@ def set_legend(
     loc="upper left",
     bbox_to_anchor=(1, 1),
     frameon=False,
-    legend_fontsizes: float = (14.0, 12.0),
+    legend_fontsizes: float | tuple[float, float] = (14.0, 12.0),
 ) -> None:    
     legend_labels = [str(i) for i in legend_labels]
     if handles is None:

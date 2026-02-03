@@ -3,7 +3,7 @@ import scipy.special as sp
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, AB1, ConstantSeries, 
-    finite_difference_order, ExprSeries, cfl_timestep,
+    finite_difference_order, ExprSeries, advective_timestep,
 )
 from lucifex.fem import Constant,  SpatialPerturbation, cubic_noise
 from lucifex.solver import(
@@ -118,7 +118,7 @@ def darcy_abc_convection_rectangle(
         psi, 1, 1, fy=-rho[0],
     )
     u_solver = interpolation(u, streamfunction_velocity)(psi[0])
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
 

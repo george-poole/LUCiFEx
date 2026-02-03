@@ -5,7 +5,7 @@ from lucifex.fem import Function, Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, FiniteDifferenceArgwise,
-    ExprSeries, finite_difference_order, cfl_timestep,
+    ExprSeries, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
@@ -113,7 +113,7 @@ def brinkman_convection_rayleigh_benard_rectangle(
     f = D_buoy_ns(rho * eg) - D_darcy_ns(u) * chi * sqrt(Pr / Ra) / Da
 
     # solvers
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(

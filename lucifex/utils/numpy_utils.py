@@ -407,7 +407,7 @@ def as_index(
 
 def as_indices(
     arr: np.ndarray | Iterable[float],
-    targets: range | list[int | float] | int | StrSlice,
+    targets: range | Iterable[int | float] | int | StrSlice,
     fraction: bool = False,
     tol: float | None = None,
     window: bool = False,

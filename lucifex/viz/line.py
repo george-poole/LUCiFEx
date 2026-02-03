@@ -41,7 +41,8 @@ def plot_line(
             ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
             cbar = fig.colorbar(mappable, ax_cbar, shrink=0.5)
             if legend_title:
-                cbar.set_label(legend_title, rotation=360, ha='left')
+                fontsize = kwargs.get('legend_fontsizes', 14)
+                cbar.set_label(legend_title, rotation=360, ha='left', fontsize=fontsize)
 
         cyc = create_cycler(cyc, len(f))
         _kwargs = dict(x_lims=None)

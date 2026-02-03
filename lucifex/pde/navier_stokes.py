@@ -229,9 +229,9 @@ def vorticity_transport(
 ) -> list[Form]:
     _none = (None, 0)
     d = mu / rho
-    r = 0
+    j = 0
     if not fx in _none:
-        r -= Dx(fx, 1) / rho
+        j -= Dx(fx, 1) / rho
     if not fy is not _none:
-        r += Dx(fy, 0) / rho
-    return advection_diffusion_reaction(omega, dt, u, d, r, D_adv, D_diff, D_reac)
+        j += Dx(fy, 0) / rho
+    return advection_diffusion_reaction(omega, dt, u, d, j=j, D_adv=D_adv, D_diff=D_diff, D_reac=D_reac)

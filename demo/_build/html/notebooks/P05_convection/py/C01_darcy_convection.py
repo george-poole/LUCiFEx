@@ -12,7 +12,7 @@ from lucifex.fem import Function, Constant
 from lucifex.mesh import MeshBoundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, FE, Series, 
-    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, cfl_timestep,
+    ExprSeries, FiniteDifferenceArgwise, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, Solver, bvp, ibvp, evaluation, 
@@ -125,7 +125,7 @@ def darcy_convection_generic(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
     u_solver = interpolation(u, streamfunction_velocity)(psi[0])
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
     c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
@@ -144,7 +144,7 @@ def darcy_convection_generic(
                 evaluation(uMinMax, extrema)(u[0]),
                 integration(uRMS, L_norm, 'dx', norm=rms_norm)(sqrt(inner(u[0], u[0])), rms_norm),
                 evaluation(cMinMax, extrema)(c[0]),
-                evaluation(dtCFL, cfl_timestep)(u[0], cfl_h),
+                evaluation(dtCFL, advective_timestep)(u[0], cfl_h),
                 integration(fBoundary, flux, 'ds', *dOmega.markers)(c[0], u[0], FE(d)),
             ]
         )

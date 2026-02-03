@@ -193,22 +193,30 @@ plot_colormap = optional_fig_ax(_plot_colormap)
 @optional_ax
 def plot_contours(
     ax: Axes,
-    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
+    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray] | Expr,
     levels: Iterable[float] | int | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
+    mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
     """Plots contours of a scalar-valued function"""
-    return _plot_contours(ax, f, levels, use_cache, **kwargs)
+    return _plot_contours(ax, f, levels, use_cache, mesh, **kwargs)
 
 
 def _plot_contours(
     ax: Axes,
-    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
+    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray] | Expr,
     levels: Iterable[float] | int | None,
     use_cache: bool | tuple[bool, bool],
+    mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
+    
+    if isinstance(f, Expr) and not isinstance(f, Function):
+        if mesh is None:
+            mesh = extract_mesh(f)
+        f = create_fem_function((mesh, 'P', 1), f)
+
     if isinstance(f, tuple):
         triang_available = len(f) == 2
         

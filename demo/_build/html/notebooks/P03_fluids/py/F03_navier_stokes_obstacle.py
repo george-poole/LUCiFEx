@@ -1,5 +1,5 @@
 from lucifex.fdm import (
-    FiniteDifference, cfl_timestep, 
+    FiniteDifference, advective_timestep, 
     FunctionSeries, ConstantSeries, finite_difference_order,
 )
 from lucifex.fem import Constant
@@ -79,7 +79,7 @@ def navier_stokes_circle_obstacle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
 
     # solvers
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
     if ns_scheme == 'ipcs':

@@ -1,26 +1,37 @@
 from typing import Callable
 
 import numpy as np
+from ufl.core.expr import Expr
+from dolfinx.mesh import Mesh
 from dolfinx.fem import Function
 from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ..utils import is_vector, grid, create_fem_function, get_component_fem_functions, is_cartesian, filter_kwargs
+from ..utils import (
+    is_vector, grid, create_fem_function, extract_mesh,
+    get_component_fem_functions, is_cartesian, filter_kwargs,
+)
 from .utils import set_axes, optional_ax
 
 
 @optional_ax
 def plot_quiver(
     ax: Axes,
-    f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | Expr,
     n_arrow: tuple[int, int] = (30, 30),
     use_cache: tuple[bool, bool] = (True, False),
+    mesh: Mesh | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
     """
     Plots quiver arrows of a vector-valued function (2D)
     """
+    if isinstance(f, Expr) and not isinstance(f, Function):
+        if mesh is None:
+            mesh = extract_mesh(f)
+        f = create_fem_function((mesh, 'P', 1, 2), f)
+
     if isinstance(f, tuple) and len(f) == 4:
         return _plot_quiver(ax, f, n_arrow, **kwargs)
     
@@ -70,15 +81,21 @@ def _plot_quiver(
 @optional_ax
 def plot_streamlines(
     ax: Axes,
-    f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | Expr,
     density: float = 1.0,
     color: str | tuple[str, Callable]= 'black',
     use_cache: tuple[bool, bool] = (True, False),
+    mesh: Mesh | None = None,
     **kwargs,
 ):
     """
     Plots streamlines plot of a vector-valued function (2D)
     """
+    if isinstance(f, Expr) and not isinstance(f, Function):
+        if mesh is None:
+            mesh = extract_mesh(f)
+        f = create_fem_function((mesh, 'P', 1, 2), f)
+
     if isinstance(f, tuple) and len(f) == 4:
         return _plot_streamlines(ax, f, density, color, **kwargs)
     

@@ -13,7 +13,6 @@ from ..utils import (
     triangulation,
     grid, 
     filter_kwargs, 
-    ToDoError,
 )
 from .utils import optional_ax, set_axes
 
@@ -40,9 +39,38 @@ def plot_mesh(
 def _plot_interval_mesh(
     ax: Axes, 
     mesh: Mesh,
+    use_cache: bool,
+    *,
+    y_axis: bool = False,
     **plt_kwargs,
-) -> tuple[Figure, Axes]:
-    raise ToDoError
+) -> None:
+    x = grid(use_cache=use_cache)(mesh)[0]
+
+    _axs_kwargs = dict(x_label="$x$", aspect='equal')
+    _plt_kwargs = dict(
+        color='black', 
+        linewidth=0.75, 
+        marker="o",
+        markersize=5,
+        markerfacecolor="black",
+        markeredgecolor="black",
+    )
+    _kwargs = _plt_kwargs | _axs_kwargs
+    _kwargs.update(**plt_kwargs)
+
+    _axs_kwargs = dict(x_label="$x$")
+    filter_kwargs(set_axes)(
+        ax,
+        x_lims=x,
+        **_kwargs,
+    )
+    filter_kwargs(ax.plot, Line2D)(x, [0.0] * len(x), **_kwargs)
+    if not y_axis:
+        ax.yaxis.set_visible(False)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.spines["bottom"].set_position(("data", 0))
 
 
 def _plot_rectangle_mesh(
@@ -70,10 +98,10 @@ def _plot_triangulation(
     mesh: Mesh,
     use_cache: bool,
     **kwargs,
-) -> tuple[Figure, Axes]:
+) -> None:
     """Suitable for Cartesian and unstructured meshes"""
 
-    _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
+    _axs_kwargs = dict(x_label="$x$", y_label="$y$", aspect='equal')
     _plt_kwargs = dict(color='black', linewidth=0.75)
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
@@ -93,7 +121,7 @@ def _plot_quadrangulation(
     mesh: Mesh,
     use_cache: bool,
     **kwargs,
-) -> tuple[Figure, Axes]:
+) -> None:
     """Suitable for Cartesian and unstructured meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
@@ -124,7 +152,7 @@ def _plot_grid(
     mesh: Mesh,
     use_cache: bool,
     **kwargs,
-) -> tuple[Figure, Axes]:
+) -> None:
     """Suitable only for Cartesian meshes"""
 
     _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')

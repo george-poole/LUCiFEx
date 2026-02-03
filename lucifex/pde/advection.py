@@ -103,5 +103,5 @@ def dg_advection_reaction(
     return [
         derivative_form(v, u, dt, D_dt, dx),
         *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, dS_opt=dS_opt),
-        *reaction_forms(v, u, r, j, D_reac, D_src, dx),
+        *reaction_forms(-v, u, r, j, D_reac, D_src, dx),
     ]

@@ -10,5 +10,5 @@ FILES=("${PDFS[@]}" "${PNGS[@]}" "${MP4S[@]}")
 for i in "${FILES[@]}"
     do 
         echo Cleaning up $i 
-        # rm $i
+        rm $i
     done

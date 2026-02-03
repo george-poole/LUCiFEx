@@ -3,7 +3,7 @@ import numpy as np
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries, FiniteDifference, FiniteDifferenceArgwise,
-    AB1, CN, finite_difference_order, cfl_timestep,
+    AB1, CN, finite_difference_order, advective_timestep,
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import bvp, ibvp, interpolation, evaluation, BoundaryConditions
@@ -65,7 +65,7 @@ def streamfunction_vorticity_2d(
 
     u_solver = interpolation(u, streamfunction_velocity)(psi[0])
 
-    dt_solver = evaluation(dt, cfl_timestep)(
+    dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
 

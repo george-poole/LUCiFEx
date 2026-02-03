@@ -2,9 +2,10 @@ import gmsh
 
 from ..utils.py_utils import replicate_callable
 from .gmsh_utils import create_gmsh_mesh_factory
+from ..utils import ToDoError
 
 
-def ellipse_obstacle_model(
+def rectangle_minus_ellipse_model(
     Lx: float | tuple[float, float],
     Ly: float | tuple[float, float],
     radius: float | tuple[float, float],
@@ -31,19 +32,19 @@ def ellipse_obstacle_model(
     
 
 @replicate_callable(
-    create_gmsh_mesh_factory(ellipse_obstacle_model, 2, 'ellipse_obstacle')
+    create_gmsh_mesh_factory(rectangle_minus_ellipse_model, 2, 'rectangle_minus_ellipse')
 )
-def ellipse_obstacle_mesh():
+def rectangle_minus_ellipse_mesh():
     pass
 
 
-def anticline_model(
+def rectangle_minus_rectangle_model(
 ) -> gmsh.model :
-    ...
+    raise ToDoError
 
 
 @replicate_callable(
-    create_gmsh_mesh_factory(anticline_model, 2, 'anticline')
+    create_gmsh_mesh_factory(rectangle_minus_rectangle_model, 2, 'rectangle_minus_rectangle')
 )
-def anticline_mesh():
+def rectangle_minus_rectangle_mesh():
     pass

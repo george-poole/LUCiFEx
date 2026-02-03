@@ -157,7 +157,7 @@ def ellipse_mesh():
 
 def ellipsoid_model(
 ) -> gmsh.model:
-    raise NotImplementedError
+    raise ToDoError
 
 
 @replicate_callable(

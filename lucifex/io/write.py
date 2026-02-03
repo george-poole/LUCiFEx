@@ -166,7 +166,7 @@ def write(
     interpolation to a `P₁` or `DP₀` function space.
 
     `Constant` objects are written by typecasting
-    to a `DP₀` function on an interval mesh.
+    to a `DP₀` function in an interval mesh.
 
     `mode='a'` to append \\
     `mode='w'` to write \\
