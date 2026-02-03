@@ -74,6 +74,7 @@ def build_gallery(
     notebook_parts: list[tuple[str, str]],
     figures_dir_name: str,
     figures_ext: str,
+    exclude: str | None = None
 ):
     markdown_string = heading(topheading, 1)
 
@@ -82,6 +83,8 @@ def build_gallery(
         notebook_paths = natsort.natsorted(
             glob.glob(f'{notebooks_dir_path}/{dir_name}/*.ipynb')
         )
+        if exclude is not None:
+            notebook_paths = [nb for nb in notebook_paths if not exclude in nb]
         tds = []
         for ipynb_path in notebook_paths:
             fig_dir_path = os.path.join(os.path.dirname(ipynb_path), figures_dir_name)
@@ -94,12 +97,13 @@ def build_gallery(
             td = table_data(caption_path, fig_dir_path, ipynb_name, ipynb_heading, figures_ext)
             tds.append(td)
         Ntr = 3
-        tds_divided = [tds[i * Ntr: min(Ntr * (i + 1), len(tds) - 1)] for i in range(ceil(len(tds) / Ntr))]
-        trs = [table_row(_tds) for _tds in tds_divided if _tds]
+        tds_divided = [tds[i * Ntr: Ntr * (i + 1)] for i in range(ceil(len(tds) / Ntr))]
+        trs = [table_row(tdsd) for tdsd in tds_divided if tdsd]
         markdown_string = '\n'.join((markdown_string, table(trs)))
         
     with open(gallery_file, "w") as f:
         f.write(markdown_string)
+
 
 if __name__ == "__main__":
 
@@ -108,6 +112,7 @@ if __name__ == "__main__":
     NOTEBOOKS_DIR_PATH = "./notebooks"
     FIGURES_DIR_NAME = "figures"
     FIGURES_EXT = 'png'
+    EXCLUDE = 'xx.'
     NOTEBOOK_PARTS = [
         ('Introductory', 'P02_introductory'),
         ('Fluids', 'P03_fluids'),
@@ -126,4 +131,5 @@ if __name__ == "__main__":
             NOTEBOOK_PARTS, 
             FIGURES_DIR_NAME, 
             FIGURES_EXT,
+            EXCLUDE,
         )

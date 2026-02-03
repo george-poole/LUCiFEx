@@ -20,7 +20,7 @@
 <tr>
     <td>
     <img src="./notebooks/P02_introductory/figures/I02.1_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P02_introductory/I02.1_diffusion_interval.html">Diffusion of a Gaussian on an interval</a> 
+    <a href="./notebooks/P02_introductory/I02.1_diffusion_interval.html">Diffusion of a Gaussian in an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P02_introductory/figures/I02.2_diffusion_rectangle.png" width="400"/>
@@ -28,13 +28,13 @@
     </td>
 <td>
     <img src="./notebooks/P02_introductory/figures/I03.1_advection_interval.png" width="400"/>
-    <a href="./notebooks/P02_introductory/I03.1_advection_interval.html">Advection of a Gaussian on an interval</a> 
+    <a href="./notebooks/P02_introductory/I03.1_advection_interval.html">Advection of a Gaussian in an interval</a> 
     </td>
     </tr>
 <tr>
     <td>
     <img src="./notebooks/P02_introductory/figures/I04.1_advection_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P02_introductory/I04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian on an interval</a> 
+    <a href="./notebooks/P02_introductory/I04.1_advection_diffusion_interval.html">Advection-diffusion of a Gaussian in an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P02_introductory/figures/I05.1_helmholtz_evp.png" width="400"/>
@@ -43,6 +43,12 @@
 <td>
     <img src="./notebooks/P02_introductory/figures/I05.2_helmholtz_bvp.png" width="400"/>
     <a href="./notebooks/P02_introductory/I05.2_helmholtz_bvp.html">Helmholtz boundary value problem in a rectangle</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./notebooks/P02_introductory/figures/I06.1_mathieu_evp.png" width="400"/>
+    <a href="./notebooks/P02_introductory/I06.1_mathieu_evp.html">Mathieu eigenvalue problem in an interval</a> 
     </td>
     </tr>
     </table>
@@ -96,7 +102,7 @@
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T01.2_dg_advection_interval_cosine.png" width="400"/>
-    <a href="./notebooks/P04_transport/T01.2_dg_advection_interval_cosine.html">DG advection of a cosine on an interval</a> 
+    <a href="./notebooks/P04_transport/T01.2_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T01.3_dg_advection_rectangle_cone.png" width="400"/>
@@ -106,11 +112,11 @@
 <tr>
     <td>
     <img src="./notebooks/P04_transport/figures/T01.4_dg_advection_rectangle_vortex.png" width="400"/>
-    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection of a vortex in a rectangle</a> 
+    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T02.1_dg_steady_advection_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P04_transport/T02.1_dg_steady_advection_diffusion_interval.html">DG steady advection-diffusion on an interval</a> 
+    <a href="./notebooks/P04_transport/T02.1_dg_steady_advection_diffusion_interval.html">DG steady advection-diffusion in an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T02.2_dg_steady_advection_diffusion_rectangle.png" width="400"/>
@@ -128,7 +134,7 @@
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T04.1_supg_steady_advection_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P04_transport/T04.1_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion on an interval</a> 
+    <a href="./notebooks/P04_transport/T04.1_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion in an interval</a> 
     </td>
     </tr>
 <tr>
@@ -142,7 +148,13 @@
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T05.1_supg_advection_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P04_transport/T05.1_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian on an interval</a> 
+    <a href="./notebooks/P04_transport/T05.1_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian in an interval</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./notebooks/P04_transport/figures/T05.2_supg_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./notebooks/P04_transport/T05.2_supg_advection_diffusion_rectangle.html">SUPG advection-diffusion of a rotating pulse in a rectangle</a> 
     </td>
     </tr>
     </table>
@@ -188,12 +200,16 @@
     <a href="./notebooks/P05_convection/C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a> 
     </td>
 <td>
-    <img src="./notebooks/P05_convection/figures/C02.1_stokes_viscosity.png" width="400"/>
-    <a href="./notebooks/P05_convection/C02.1_stokes_viscosity.html">Rayleigh-Bénard convection of a Stokes fluid with a destabilising viscosity</a> 
+    <img src="./notebooks/P05_convection/figures/C02.1_stokes_rayleigh_benard_isoviscous.png" width="400"/>
+    <a href="./notebooks/P05_convection/C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a> 
     </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P05_convection/figures/C02.2_stokes_rayleigh_benard_nonisoviscous.png" width="400"/>
+    <a href="./notebooks/P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a> 
+    </td>
+<td>
     <img src="./notebooks/P05_convection/figures/C03.1_navier_stokes_thermosolutal.png" width="400"/>
     <a href="./notebooks/P05_convection/C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a> 
     </td>
@@ -201,15 +217,19 @@
     <img src="./notebooks/P05_convection/figures/C03.2_navier_stokes_rayleigh_taylor.png" width="400"/>
     <a href="./notebooks/P05_convection/C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a> 
     </td>
-<td>
-    <img src="./notebooks/P05_convection/figures/C03.3_navier_stokes_marangoni.png" width="400"/>
-    <a href="./notebooks/P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P05_convection/figures/C03.3_navier_stokes_marangoni.png" width="400"/>
+    <a href="./notebooks/P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
+    </td>
+<td>
     <img src="./notebooks/P05_convection/figures/C04.1_darcy_brinkman_rayleigh_taylor.png" width="400"/>
     <a href="./notebooks/P05_convection/C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    </td>
+<td>
+    <img src="./notebooks/P05_convection/figures/C04.2_darcy_brinkman_rayleigh_benard.png" width="400"/>
+    <a href="./notebooks/P05_convection/C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
     </td>
     </tr>
     </table>

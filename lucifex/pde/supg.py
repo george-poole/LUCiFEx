@@ -23,6 +23,7 @@ class TauType(StrEnum):
     UPWIND = 'upwind'
     TRANSIENT = 'transient'
     NONE = 'none'
+    UNSTABILIZED = 'unstabilized'
 
 
 def supg_form(
@@ -68,7 +69,7 @@ def supg_form(
             tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
         case TauType.UPWIND:
             tau = tau_upwind(h, a_eff)
-        case TauType.NONE:
+        case TauType.NONE | TauType.UNSTABILIZED:
             tau = 0
         case _ if callable(tau_func):
             tau = tau_func(h, a_eff, d_eff, r_eff)

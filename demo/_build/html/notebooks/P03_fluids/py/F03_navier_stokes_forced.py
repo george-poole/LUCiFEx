@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 
 from lucifex.mesh import rectangle_mesh, mesh_boundary
@@ -8,9 +10,7 @@ from lucifex.fdm import (
 from lucifex.fem import Function, Constant
 from lucifex.solver import bvp, ibvp, interpolation, evaluation, BoundaryConditions
 from lucifex.utils import CellType
-from lucifex.sim import configure_simulation, run
-from lucifex.viz import plot_colormap, plot_contours
-from lucifex.io import write
+from lucifex.sim import configure_simulation
 from lucifex.pde.streamfunction import streamfunction_velocity
 from lucifex.pde.navier_stokes import vorticity_poisson, vorticity_transport
 
@@ -20,12 +20,14 @@ from lucifex.pde.navier_stokes import vorticity_poisson, vorticity_transport
     store_delta=1,
     write_delta=None,
 )
-def streamfunction_vorticity_2d(
+def navier_stokes_forced(
     Lx: float = 1.0,
     Ly: float = 1.0,
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
+    fx: Callable[[np.ndarray], np.ndarray] | None = None,
+    fy: Callable[[np.ndarray], np.ndarray] | None = None,
     dt_max: float = 0.1,
     dt_min: float = 0.0,
     cfl_courant: float = 0.75,
@@ -53,12 +55,10 @@ def streamfunction_vorticity_2d(
     rho = Constant(mesh, 1.0, name='rho')
     mu = Constant(mesh, 1.0, name='mu')
 
-    fx = None
-    fy = Function(
-        (mesh, 'P', 1), 
-        lambda x: 5 * x[1] * np.sin(6 * np.pi * x[0] / Lx),
-        name='fy',
-    )
+    if fx is not None:
+        fx = Function((mesh, 'P', 1), fx, name='fx')
+    if fy is not None:
+        fy = Function((mesh, 'P', 1), fy, name='fy')
 
     psi_bcs = BoundaryConditions(("dirichlet", boundary.union, 0.0))
     psi_solver = bvp(vorticity_poisson, psi_bcs)(psi, omega[0])

@@ -108,5 +108,5 @@ def darcy_convection_evolving_rectangle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        namespace=(Ra, Di, Bu, beta, kappa, vartheta, ),
+        namespace=[Ra, Di, Bu, beta, kappa, vartheta],
     )

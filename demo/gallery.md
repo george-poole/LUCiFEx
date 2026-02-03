@@ -112,7 +112,7 @@
 <tr>
     <td>
     <img src="./notebooks/P04_transport/figures/T01.4_dg_advection_rectangle_vortex.png" width="400"/>
-    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection of a vortex in a rectangle</a> 
+    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T02.1_dg_steady_advection_diffusion_interval.png" width="400"/>
@@ -200,12 +200,16 @@
     <a href="./notebooks/P05_convection/C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a> 
     </td>
 <td>
-    <img src="./notebooks/P05_convection/figures/C02.1_stokes_viscosity.png" width="400"/>
-    <a href="./notebooks/P05_convection/C02.1_stokes_viscosity.html">Rayleigh-Bénard convection of a Stokes fluid with a destabilising viscosity</a> 
+    <img src="./notebooks/P05_convection/figures/C02.1_stokes_rayleigh_benard_isoviscous.png" width="400"/>
+    <a href="./notebooks/P05_convection/C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a> 
     </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P05_convection/figures/C02.2_stokes_rayleigh_benard_nonisoviscous.png" width="400"/>
+    <a href="./notebooks/P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a> 
+    </td>
+<td>
     <img src="./notebooks/P05_convection/figures/C03.1_navier_stokes_thermosolutal.png" width="400"/>
     <a href="./notebooks/P05_convection/C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a> 
     </td>
@@ -213,13 +217,13 @@
     <img src="./notebooks/P05_convection/figures/C03.2_navier_stokes_rayleigh_taylor.png" width="400"/>
     <a href="./notebooks/P05_convection/C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a> 
     </td>
-<td>
-    <img src="./notebooks/P05_convection/figures/C03.3_navier_stokes_marangoni.png" width="400"/>
-    <a href="./notebooks/P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P05_convection/figures/C03.3_navier_stokes_marangoni.png" width="400"/>
+    <a href="./notebooks/P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
+    </td>
+<td>
     <img src="./notebooks/P05_convection/figures/C04.1_darcy_brinkman_rayleigh_taylor.png" width="400"/>
     <a href="./notebooks/P05_convection/C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
     </td>
