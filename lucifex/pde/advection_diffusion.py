@@ -179,7 +179,7 @@ def dg_advection_diffusion_reaction(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        bcs = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
+        bcs = bcs.boundary_data(u, 'dirichlet', 'neumann')
         bcs
 
     return [
@@ -212,7 +212,7 @@ def dg_steady_advection_diffusion(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        ds, u_dirichlet, u_neumann = bcs.boundary_data(u.function_space, 'dirichlet', 'neumann')
+        ds, u_dirichlet, u_neumann = bcs.boundary_data(u, 'dirichlet', 'neumann')
         bcs_adv = (ds, u_dirichlet)
         bcs_diff = (ds, u_dirichlet, u_neumann)
     else:

@@ -80,7 +80,7 @@ def darcy_incompressible(
         forms.append(F_buoyancy)
 
     if bcs is not None:
-        ds, p_natural = bcs.boundary_data(up.function_space, 'natural')
+        ds, p_natural = bcs.boundary_data(up, 'natural')
         F_bcs = sum([inner(v, n) * pN * ds(i) for i, pN in p_natural])
         forms.append(F_bcs)
 

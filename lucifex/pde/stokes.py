@@ -36,7 +36,7 @@ def stokes_incompressible(
     forms = [F_incomp, F_pressure, F_stress, F_force]
 
     if bcs is not None:
-        ds, natural =  bcs.boundary_data(up.function_space, 'natural')
+        ds, natural =  bcs.boundary_data(up, 'natural')
         F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in natural])
         forms.append(F_bcs)
 

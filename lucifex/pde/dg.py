@@ -86,7 +86,7 @@ def dg_advection_forms(
 
     if bcs is not None:
         ds, u_dirichlet, u_neumann = (
-            bcs.boundary_data(fs, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_data(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         match ds_opt:
@@ -152,7 +152,7 @@ def dg_diffusion_forms(
 
     if bcs is not None:
         ds, u_dirichlet, u_neumann = (
-            bcs.boundary_data(fs, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_data(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         F_ds = sum([inner(v * n, d * grad(u)) * ds(i) for i, _ in u_dirichlet])

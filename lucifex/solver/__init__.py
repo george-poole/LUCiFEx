@@ -1,4 +1,4 @@
-from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure, robin
+from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure, create_robin
 from .pde import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,
@@ -10,7 +10,6 @@ from .pde import (
     ivp,
     evp,
     projection,
-    rkibvp,
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
 from .eval import (

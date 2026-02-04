@@ -11,7 +11,7 @@ from lucifex.fdm import (
 )
 from lucifex.fdm.ufl_operators import inner, grad, div
 from lucifex.fem import Function, Constant
-from lucifex.solver import BoundaryConditions, robin
+from lucifex.solver import BoundaryConditions, create_robin
 
 
 def derivative_form(
@@ -71,12 +71,12 @@ def diffusion_forms(
     forms = [F_diff]
 
     if bcs is not None:
-        ds, u_neumann, u_robin = bcs.boundary_data(u.function_space, 'neumann', 'robin')
+        ds, u_neumann, u_robin = bcs.boundary_data(u, 'neumann', 'robin')
         if u_neumann:
             F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
             forms.append(F_neumann)
         if u_robin:
-            F_robin = sum([v * robin(uR, u) * ds(i) for i, uR in u_robin])
+            F_robin = sum([v * uR * ds(i) for i, uR in u_robin])
             forms.append(F_robin)
 
     return forms

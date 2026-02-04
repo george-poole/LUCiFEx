@@ -1,4 +1,4 @@
-from typing import TypeAlias, Callable, overload
+from typing import TypeAlias, Callable
 from collections.abc import Iterable
 from typing_extensions import Unpack
 
@@ -37,8 +37,8 @@ Value: TypeAlias = (
 
 class BoundaryConditions:
     """
-    A boundary condition of type `'natural'`, `'neumann'` or '`robin`' with 
-    boundary value `uN` will add to the variational forms a term `+∫ v·uN ds`, 
+    A weakly-enforced boundary condition (e.g. `'natural'`, `'neumann'` or `'robin'`) with 
+    boundary value `uW` will add to the variational forms a term `+∫ v·uW ds`, 
     where `v` is the test function.
 
     Weakly-enforced boundary conditions that cannnot be expressed by 
@@ -153,28 +153,28 @@ class BoundaryConditions:
 
     def create_weak_bcs(
         self,
-        fs: FunctionSpace,
+        solution: Function | FunctionSeries | FunctionSpace,
     ) -> list[Form]:
         """
         Weakly enforced boundary condition by a term `+∫ v·uW ds` with 
-        test function `v` and prescribed value `uW` in the variational form `F(v,u)=0`.
+        test function `v` and prescribed value `uW` in the variational form `F(u,v)=0`.
         """
-        
+        fs = solution.function_space
         v = TestFunction(fs)
         boundary_types = (
             BoundaryType.NEUMANN, BoundaryType.ROBIN, 
             BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
         )
-        ds, *boundary_data = self.boundary_data(fs, *boundary_types)
+        ds, *boundary_data = self.boundary_data(solution, *boundary_types)
 
         forms = []
         
         for bd in boundary_data:
-            for i, uN in bd:
-                if is_scalar(uN):
-                    forms.append(v * uN * ds(i))
-                elif is_vector(uN):
-                    forms.append(inner(v, uN) * ds(i))
+            for i, uW in bd:
+                if is_scalar(uW):
+                    forms.append(v * uW * ds(i))
+                elif is_vector(uW):
+                    forms.append(inner(v, uW) * ds(i))
                 else:
                     raise NotImplementedError
 
@@ -183,7 +183,7 @@ class BoundaryConditions:
 
     def boundary_data(
         self,
-        fs: FunctionSpace,
+        solution: Function | FunctionSeries | FunctionSpace,
         *boundary_types: BoundaryType,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
@@ -198,9 +198,12 @@ class BoundaryConditions:
         Given `n_total` boundary conditions, `ds(n_total)` is the measure for the subset of the boundary 
         where no boundary conditions are applied.
         """
-        
+        if not isinstance(solution, FunctionSpace):
+            fs = solution.function_space
+        else:
+            fs = solution
+            
         boundary_types = [BoundaryType(i) for i in boundary_types]
-
         tag = 0
         tags = {b: [] for b in boundary_types}
         exprs = {b: [] for b in boundary_types}
@@ -210,6 +213,8 @@ class BoundaryConditions:
             self._btypes, self._markers, self._values, self._subindices, 
             strict=True,
         ):
+            if b == BoundaryType.ROBIN and not isinstance(solution, FunctionSpace):
+                g = create_robin(g, solution)
             if b in boundary_types:
                 if isinstance(g, (Function, Expr, Constant)):
                     pass 
@@ -236,28 +241,18 @@ class BoundaryConditions:
         return ds, *tags_exprs
 
 
-@overload
-def robin(
-    f: Expr,
-    u: Function,
+def create_robin(
+    expr: Expr,
+    solution: Function | FunctionSeries,
+    future: bool = True,
 ) -> Expr:
-    ...
-
-
-@overload
-def robin(
-    f: Series,
-    u: FunctionSeries,
-) -> Expr:
-    ...
-
-
-def robin(
-    f: Expr,
-    u: Function | FunctionSeries,
-) -> Expr:
-    if isinstance(u, Function):
-        return replace(f, {u: TrialFunction(u.function_space)})
+    fs = solution.function_space
+    if isinstance(solution, Function):
+        return replace(expr, {solution: TrialFunction(fs)})
     else:
-        return replace(f, {u[u.FUTURE_INDEX]: TrialFunction(u.function_space)})
+        if future:
+            index = solution.FUTURE_INDEX
+        else:
+            index = solution.FUTURE_INDEX - 1
+        return replace(expr, {solution[index]: TrialFunction(fs)})
     

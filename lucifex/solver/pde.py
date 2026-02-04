@@ -2,8 +2,6 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
-    TypeAlias,
-    Concatenate,
     Any,
 )
 from collections.abc import Iterable
@@ -26,8 +24,8 @@ from ..utils import (
     create_fem_space, SpatialMarkerAlias
 )
 from ..fdm import (
-    DT, ExplicitRungeKutta, FiniteDifference, FiniteDifferenceArgwise, 
-    FunctionSeries, ConstantSeries, finite_difference_order,
+    FiniteDifference, FiniteDifferenceArgwise, 
+    FunctionSeries, finite_difference_order,
 )
 from ..fdm.ufl_operators import inner
 from ..fem import Function, Constant, Perturbation, is_unsolved
@@ -49,6 +47,7 @@ from .petsc import (
     PETScVec,
 )
 from .eval import Solver
+from .utils import BilinearFormError, LinearFormError, EigenvalueFormError, UnsolvedFormError
 
 
 P = ParamSpec("P")
@@ -118,7 +117,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         elif isinstance(bcs, tuple):
             self._bcs, self._mpc = bcs
         else:
-            forms_weak_bcs = bcs.create_weak_bcs(solution.function_space)
+            forms_weak_bcs = bcs.create_weak_bcs(solution)
             forms = (*forms, *forms_weak_bcs)
             self._bcs = bcs.create_strong_bcs(solution.function_space)        
             self._mpc = bcs.create_periodic_bcs(solution.function_space)
@@ -136,7 +135,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             [i * j for i, j in zip(self._scalings, self._a_forms, strict=True) if j is not None]
         )
         if self._a_form_termwise == 0 or self._a_form_nontermwise == 0:
-            raise RuntimeError(f'{self.__class__.__name__} requires a bilinear form `a(u,v)` with test and trial functions `v, u`.')
+            raise BilinearFormError(self.__class__, solution.name)
         # linear forms
         self._l_forms = [rhs(i) if not rhs(i).empty() else None for i in self._forms]
         self._l_form_termwise: Form = sum([i for i in self._l_forms if i is not None])
@@ -144,7 +143,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
         if self._l_form_termwise == 0 or self._l_form_nontermwise == 0:
-            raise RuntimeError(f'{self.__class__.__name__} requires a linear form `l(v)` with test function `v`.')
+            raise LinearFormError(self.__class__, solution.name)
         # setters
         self._create_form = partial(
             meta_form,
@@ -296,9 +295,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         """Mutates the data structures `self.solution` and `self.series` containing the solution"""
         if assert_solved:
             if not all(not is_unsolved(i) for i in self.forms):
-                raise RuntimeError(
-                    f"Cannot solve for '{self.solution.name}' because forms contain an unsolved quantity. Check finite difference discretizations or solvers sequence's order."
-                )
+                raise UnsolvedFormError(self.__class__, self.solution.name)
         if cache_matrix is None:
             cache_matrix = self._cache_matrix
         if assemble_termwise is None:
@@ -759,8 +756,7 @@ class EigenvalueProblem:
         elif isinstance(bcs, tuple):
             self._bcs, self._mpc = bcs
         else:
-            if bcs.create_weak_bcs(fs):
-                raise RuntimeError(f'{self.__class__.__name__} cannot have a linear form `l(v)` with test function `v`.')
+            forms_weak_bcs = bcs.create_weak_bcs(fs)
             self._bcs = bcs.create_strong_bcs(fs)        
             self._mpc = bcs.create_periodic_bcs(fs)
 
@@ -774,11 +770,14 @@ class EigenvalueProblem:
         )
         _create_matrix = partial(create_matrix, mpc=self._mpc)
 
-        for f in forms:
-            if not rhs(f).empty():
-                raise RuntimeError(f'{self.__class__.__name__} cannot have a linear form `l(v)` with test function `v`.')
-
         form_lhs, form_rhs = forms
+        if forms_weak_bcs:
+            form_lhs += sum(forms_weak_bcs)
+
+        for f in (form_lhs, form_rhs):
+            if not rhs(f).empty():
+                raise EigenvalueFormError(self.__class__, eigenfunctions[0].name)
+
         self._forms = form_lhs, form_rhs
         self._metaform_lhs = _create_form(form_lhs)
         self._metaform_rhs = _create_form(form_rhs)
@@ -995,97 +994,6 @@ class Projection(BoundaryValueProblem):
         return _create
 
 
-V: TypeAlias = Function | FunctionSeries
-P = ParamSpec('P')
-class RungeKuttaProblem(InitialBoundaryValueProblem):
-
-    def __init__(
-        self, 
-        solution: FunctionSeries,
-        dt: Constant | ConstantSeries,
-        F_rhs: Form,
-        ics: Function | Constant | Perturbation | Callable | float | Iterable[float] | None = None,
-        bcs: BoundaryConditions | None = None,
-        petsc: OptionsPETSc | dict | None = None,
-        jit: OptionsJIT | dict | None = None,
-        ffcx: OptionsFFCX | dict | None = None,
-        corrector: Callable[[np.ndarray], None] 
-        | tuple[str, Callable[[np.ndarray], None]] 
-        | None = None,
-        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
-        assemble_termwise: tuple[bool, bool] = (False, False),
-        future: bool = True,
-        overwrite: bool = False,
-    ):
-        v = TestFunction(solution.function_space)
-        dx = Measure('dx', solution.function_space.mesh)
-        F_lhs = v * DT(solution, dt) * dx
-        forms = [F_lhs, -F_rhs]
-
-        super().__init__(
-            solution,
-            forms,
-            ics=ics,
-            bcs=bcs,
-            petsc=petsc,
-            jit=jit,
-            ffcx=ffcx,
-            corrector=corrector,
-            cache_matrix=cache_matrix,
-            assemble_termwise=assemble_termwise,
-            future=future,
-            overwrite=overwrite,
-        )
-
-    @classmethod
-    def from_rhs_func(
-        cls,
-        rhs_func: Callable[Concatenate[P], Form],
-        rk: ExplicitRungeKutta,
-        dt: Constant | ConstantSeries,
-        autonomous: bool,
-        ics: Function | Constant | Perturbation | None = None,
-        bcs: BoundaryConditions | None = None,
-        petsc: OptionsPETSc | dict | None = None,
-        jit: OptionsJIT | dict | None = None,
-        ffcx: OptionsFFCX | dict | None = None,
-        corrector: Callable[[np.ndarray], None] 
-        | tuple[str, Callable[[np.ndarray], None]] 
-        | None = None,
-        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
-        assemble_termwise: tuple[bool, bool] = (False, False),
-        future: bool = True,
-        overwrite: bool = False,
-        solution: FunctionSeries | None = None,
-    ):
-        def _create(
-            *args: P.args,
-            **kwargs: P.kwargs,
-        ) -> Self:
-            nonlocal solution
-            if solution is None:
-                solution = _deduce_from_args(0 if autonomous else 1, args, kwargs)
-
-            return cls(
-                solution,
-                dt,
-                rk(rhs_func, dt, autonomous=autonomous)(*args, **kwargs),
-                ics,
-                bcs,
-                petsc,
-                jit,
-                ffcx,
-                corrector,
-                cache_matrix,
-                assemble_termwise,
-                future,
-                overwrite,
-            )
-
-        return _create
-
-
-
 @replicate_callable(BoundaryValueProblem.from_forms_func)
 def bvp():
     pass
@@ -1104,10 +1012,6 @@ def evp():
 
 @replicate_callable(Projection.from_expr_func)
 def projection():
-    pass
-
-@replicate_callable(RungeKuttaProblem.from_rhs_func)
-def rkibvp():
     pass
 
 
