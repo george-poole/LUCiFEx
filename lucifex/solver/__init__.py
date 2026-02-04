@@ -1,4 +1,4 @@
-from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure
+from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure, robin
 from .pde import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,

@@ -8,7 +8,7 @@ from ufl.geometry import GeometricCellQuantity
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.fem import Function, Constant
-from lucifex.solver import BoundaryConditions
+from lucifex.solver import BoundaryConditions, robin
 
 
 def poisson(
@@ -30,9 +30,13 @@ def poisson(
     F_rhs = -inner(v, f) * dx
     forms = [F_lhs, F_rhs]
     if bcs is not None:
-        ds, u_neumann = bcs.boundary_data(u.function_space, 'neumann')
-        F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
-        forms.append(F_neumann)
+        ds, u_neumann, u_robin = bcs.boundary_data(u.function_space, 'neumann', 'robin')
+        if u_neumann:
+            F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
+            forms.append(F_neumann)
+        if u_robin:
+            F_robin = sum([v * robin(uR, u) * ds(i) for i, uR in u_robin])
+            forms.append(F_robin)
     return forms
 
 

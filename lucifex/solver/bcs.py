@@ -1,9 +1,9 @@
-from typing import TypeAlias, Callable
+from typing import TypeAlias, Callable, overload
 from collections.abc import Iterable
 from typing_extensions import Unpack
 
 import numpy as np
-from ufl import Measure, Form, TestFunction, inner
+from ufl import Measure, Form, TestFunction, inner, replace, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx_mpc import MultiPointConstraint
 from dolfinx.fem import (
@@ -12,6 +12,7 @@ from dolfinx.fem import (
     dirichletbc,
 )
 
+from ..fdm import Series, FunctionSeries
 from ..fem import Function, Constant
 from ..utils.fem_utils import is_scalar, is_vector, create_fem_function, create_fem_constant
 from ..utils.mesh_utils import BoundaryType, create_tagged_measure
@@ -155,8 +156,8 @@ class BoundaryConditions:
         fs: FunctionSpace,
     ) -> list[Form]:
         """
-        Weakly enforced boundary condition by a term `+∫ v·uN ds` with 
-        test function `v` and prescribed value `uN` in the variational form `F(v,u)=0`.
+        Weakly enforced boundary condition by a term `+∫ v·uW ds` with 
+        test function `v` and prescribed value `uW` in the variational form `F(v,u)=0`.
         """
         
         v = TestFunction(fs)
@@ -234,3 +235,29 @@ class BoundaryConditions:
 
         return ds, *tags_exprs
 
+
+@overload
+def robin(
+    f: Expr,
+    u: Function,
+) -> Expr:
+    ...
+
+
+@overload
+def robin(
+    f: Series,
+    u: FunctionSeries,
+) -> Expr:
+    ...
+
+
+def robin(
+    f: Expr,
+    u: Function | FunctionSeries,
+) -> Expr:
+    if isinstance(u, Function):
+        return replace(f, {u: TrialFunction(u.function_space)})
+    else:
+        return replace(f, {u[u.FUTURE_INDEX]: TrialFunction(u.function_space)})
+    

@@ -1,5 +1,3 @@
-from typing import Callable
-
 import numpy as np
 from ufl import as_vector, Dx
 
@@ -19,7 +17,7 @@ from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
 
-from .A11_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
+from .C03_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(

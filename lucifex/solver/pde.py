@@ -2,7 +2,7 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
-    TypeVar,
+    TypeAlias,
     Concatenate,
     Any,
 )
@@ -25,7 +25,10 @@ from ..utils import (
     replicate_callable, 
     create_fem_space, SpatialMarkerAlias
 )
-from ..fdm import DT, ExplicitRungeKutta, FiniteDifference, FiniteDifferenceArgwise, FunctionSeries, finite_difference_order
+from ..fdm import (
+    DT, ExplicitRungeKutta, FiniteDifference, FiniteDifferenceArgwise, 
+    FunctionSeries, ConstantSeries, finite_difference_order,
+)
 from ..fdm.ufl_operators import inner
 from ..fem import Function, Constant, Perturbation, is_unsolved
 from .bcs import BoundaryConditions, Value, SubspaceIndex
@@ -540,7 +543,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
         overwrite: bool = False,
-        solution: Function | FunctionSeries | None = None, 
+        solution: FunctionSeries | None = None, 
     ):
         """
         If the `solution` argument is not provided, it will be inferred
@@ -660,7 +663,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         assemble_termwise: tuple[bool, bool] = (False, False),
         future: bool = True,
         overwrite: bool = False,
-        solution: Function | FunctionSeries | None = None, 
+        solution: FunctionSeries | None = None, 
     ):
         bcs = None
         return InitialBoundaryValueProblem.from_forms_func(
@@ -974,7 +977,6 @@ class Projection(BoundaryValueProblem):
         future: bool = False,
         overwrite: bool = False,
     ):
-        """from function"""
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
@@ -993,53 +995,68 @@ class Projection(BoundaryValueProblem):
         return _create
 
 
-P = ParamSpec("P")
-V = TypeVar('V')
+V: TypeAlias = Function | FunctionSeries
+P = ParamSpec('P')
 class RungeKuttaProblem(InitialBoundaryValueProblem):
 
-    # def __init__(
-    #     self,
-    #     solution: FunctionSeries,
-    #     rhs: Expr,
-    #     ics: Function | Constant | Perturbation | None = None,
-    #     bcs: BoundaryConditions | None = None,
-    #     petsc: OptionsPETSc | dict | None = None,
-    #     jit: OptionsJIT | dict | None = None,
-    #     ffcx: OptionsFFCX | dict | None = None,
-    #     corrector: Callable[[np.ndarray], None] 
-    #     | tuple[str, Callable[[np.ndarray], None]] 
-    #     | None = None,
-    #     cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
-    #     assemble_termwise: tuple[bool, bool] = (False, False),
-    #     future: bool = True,
-    #     overwrite: bool = False,
-    # ) -> Self:
-        
-    #     v = TestFunction(solution.function_space)
-    #     u = TrialFunction(solution.function_space)
-    #     dx = Measure('dx', solution.function_space.mesh)
+    def __init__(
+        self, 
+        solution: FunctionSeries,
+        dt: Constant | ConstantSeries,
+        F_rhs: Form,
+        ics: Function | Constant | Perturbation | Callable | float | Iterable[float] | None = None,
+        bcs: BoundaryConditions | None = None,
+        petsc: OptionsPETSc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
+        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
+        assemble_termwise: tuple[bool, bool] = (False, False),
+        future: bool = True,
+        overwrite: bool = False,
+    ):
+        v = TestFunction(solution.function_space)
+        dx = Measure('dx', solution.function_space.mesh)
+        F_lhs = v * DT(solution, dt) * dx
+        forms = [F_lhs, -F_rhs]
 
-    #     F_lhs = v * DT(u, dt) * dx
-    #     F_rhs = rhs * dx
-    #     forms = [F_lhs, -F_rhs]
-
-    #     super().__init__(
-    #         solution,
-    #         forms,
-    #         ics=ics,
-    #         bcs=bcs,
-    #     )
+        super().__init__(
+            solution,
+            forms,
+            ics=ics,
+            bcs=bcs,
+            petsc=petsc,
+            jit=jit,
+            ffcx=ffcx,
+            corrector=corrector,
+            cache_matrix=cache_matrix,
+            assemble_termwise=assemble_termwise,
+            future=future,
+            overwrite=overwrite,
+        )
 
     @classmethod
     def from_rhs_func(
         cls,
-        rhs_func: Callable[Concatenate[V, P], Any],
+        rhs_func: Callable[Concatenate[P], Form],
         rk: ExplicitRungeKutta,
-        dt,
-        ics,
-        bcs,
-        autonomous: bool = True,
-        solution: Function | FunctionSeries | None = None, 
+        dt: Constant | ConstantSeries,
+        autonomous: bool,
+        ics: Function | Constant | Perturbation | None = None,
+        bcs: BoundaryConditions | None = None,
+        petsc: OptionsPETSc | dict | None = None,
+        jit: OptionsJIT | dict | None = None,
+        ffcx: OptionsFFCX | dict | None = None,
+        corrector: Callable[[np.ndarray], None] 
+        | tuple[str, Callable[[np.ndarray], None]] 
+        | None = None,
+        cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
+        assemble_termwise: tuple[bool, bool] = (False, False),
+        future: bool = True,
+        overwrite: bool = False,
+        solution: FunctionSeries | None = None,
     ):
         def _create(
             *args: P.args,
@@ -1047,22 +1064,22 @@ class RungeKuttaProblem(InitialBoundaryValueProblem):
         ) -> Self:
             nonlocal solution
             if solution is None:
-                solution = _deduce_from_args(1 if autonomous else 2, args, kwargs)
-    
-            v = TestFunction(solution.function_space)
-            dx = Measure('dx', solution.function_space.mesh)
-            F_lhs = v * DT(solution, dt) * dx
-            F_rhs = rk(rhs_func, dt, autonomous)(v, *args, **kwargs) * dx
-
-            rk(rhs_func, dt, autonomous)()
-
-            forms = [F_lhs, -F_rhs]
+                solution = _deduce_from_args(0 if autonomous else 1, args, kwargs)
 
             return cls(
                 solution,
-                forms,
-                ics=ics,
-                bcs=bcs,
+                dt,
+                rk(rhs_func, dt, autonomous=autonomous)(*args, **kwargs),
+                ics,
+                bcs,
+                petsc,
+                jit,
+                ffcx,
+                corrector,
+                cache_matrix,
+                assemble_termwise,
+                future,
+                overwrite,
             )
 
         return _create
