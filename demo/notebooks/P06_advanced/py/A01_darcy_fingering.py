@@ -143,6 +143,6 @@ def darcy_fingering_rectangle(
         cfl_courant=cfl_courant,
         D_adv=D_adv,
         D_diff=D_diff,
-        namespace=[Pe, Lmbda, Di, In],
+        exprs_consts=[Pe, Lmbda, Di, In],
     )
     return simulation

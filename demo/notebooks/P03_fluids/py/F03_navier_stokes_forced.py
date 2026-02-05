@@ -74,6 +74,6 @@ def navier_stokes_forced(
         omega, dt[0], u, rho, mu, D_adv, D_diff, fx, fy)
     
     solvers = [psi_solver, u_solver, dt_solver, omega_solver]
-    namespace = [rho, mu, fy]
+    exprs_consts = [rho, mu, fy]
 
-    return solvers, t, dt, namespace
+    return solvers, t, dt, exprs_consts

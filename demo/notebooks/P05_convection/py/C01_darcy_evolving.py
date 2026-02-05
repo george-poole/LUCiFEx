@@ -33,10 +33,10 @@ def darcy_convection_evolving_rectangle(
     kappa: float = 1.0,
     vartheta: float = 0.0,
     # initial conditions
-    erf_eps: float = 1e-2,
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (1234, 5678),
+    c_eps: float = 1e-2,
     # time step
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
@@ -71,10 +71,10 @@ def darcy_convection_evolving_rectangle(
     beta = Constant(Omega, np.radians(beta), name='beta')
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
-        lambda x: 1 + sp.erf((x[1] - Ly) / (Ly * erf_eps)),
+        lambda x: 1 + sp.erf((x[1] - Ly) / (Ly * c_eps)),
         cubic_noise(['neumann', ('neumann', 'dirichlet')], [Lx, Ly], c_freq, c_seed),
         [Lx, Ly],
-        c_eps,
+        c_ampl,
     ) 
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['upper'], 1.0),
@@ -108,5 +108,5 @@ def darcy_convection_evolving_rectangle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        namespace=[Ra, Di, Bu, beta, kappa, vartheta],
+        exprs_consts=[Ra, Di, Bu, beta, kappa, vartheta],
     )

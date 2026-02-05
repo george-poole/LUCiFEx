@@ -116,6 +116,6 @@ def navier_stokes_marangoni(
         c, dt[0], u, 1, D_adv_c, D_diff_c,
     )
     solvers = [dt_solver, *ns_solvers, c_solver]
-    namespace = [Pr, Ra, Ma, rho]
-    return solvers, t, dt, namespace 
+    exprs_consts = [Pr, Ra, Ma, rho]
+    return solvers, t, dt, exprs_consts 
     

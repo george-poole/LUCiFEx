@@ -133,5 +133,5 @@ def darcy_abc_convection_rectangle(
     )
 
     solvers = [psi_solver, u_solver, dt_solver, a_solver, b_solver, c_solver]
-    namespace = [Lmbda, beta, gamma, delta_b, delta_c]
-    return solvers, t, dt, namespace
+    exprs_consts = [Lmbda, beta, gamma, delta_b, delta_c]
+    return solvers, t, dt, exprs_consts

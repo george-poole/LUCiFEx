@@ -112,6 +112,6 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    namespace = [Pr, Ra, Di, Vi, Bu, rho]
-    return solvers, t, dt, namespace
+    exprs_consts = [Pr, Ra, Di, Vi, Bu, rho]
+    return solvers, t, dt, exprs_consts
 
