@@ -6,6 +6,9 @@ from .ufl_utils import (
     is_continuous_lagrange, is_discontinuous_lagrange, 
     is_same_element, is_family_alias, extract_integrands,
     extract_integrand,
+    VectorError,
+    ScalarError,
+    ShapeError,
 )
 from .dofs_utils import (
     SpatialMarkerAlias,
@@ -23,7 +26,8 @@ from .numpy_utils import (
     where_on_grid,
     cross_section,
     spacetime_grid,
-    UnstructuredQuadError,
+    NonCartesianQuadMeshError,
+    NonCartesianMeshError,
 )
 from .mesh_utils import(
     CellType,

@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from ..utils import (
-    is_vector, grid, create_fem_function, extract_mesh,
+    is_vector, grid, create_fem_function, extract_mesh, ShapeError, NonCartesianMeshError,
     get_component_fem_functions, is_cartesian, filter_kwargs,
 )
 from .utils import set_axes, optional_ax
@@ -37,15 +37,14 @@ def plot_quiver(
     
     if isinstance(f, Function):
         if not is_vector(f, dim=2):
-            raise ValueError(
-                "Quiver plots must be of 2D vector-valued quantities."
-            )
+            raise ShapeError(f, (2, ))
+            
         fx, fy = get_component_fem_functions(('P', 1), f)
     else:
         fx, fy = (create_fem_function(('P', 1), i) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
-        raise ValueError("Quiver plots on unstructured meshes are not supported.")
+        raise NonCartesianMeshError('Quiver plotting')
     
     use_mesh_cache = use_func_cache = use_cache
     x, y = grid(use_cache=use_mesh_cache)(fx.function_space.mesh)
@@ -101,15 +100,14 @@ def plot_streamlines(
     
     if isinstance(f, Function):
         if not is_vector(f, dim=2):
-            raise ValueError(
-                "Streamline plots must be of 2D vector-valued quantities."
-            )
+            raise ShapeError(f, (2, ))
+        
         fx, fy = get_component_fem_functions(('P', 1), f)
     else:
         fx, fy = (create_fem_function(('P', 1), i, try_identity=True) for i in f)
 
     if not is_cartesian(fx.function_space.mesh):
-        raise ValueError("Streamline plots on unstructured meshes are not supported.")
+        raise NonCartesianMeshError('Streamline plotting')
 
     use_mesh_cache = use_func_cache = use_cache
     x, y = grid(use_cache=use_mesh_cache)(fx.function_space.mesh)

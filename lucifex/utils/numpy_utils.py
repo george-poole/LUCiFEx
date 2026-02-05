@@ -566,9 +566,17 @@ def spacetime_grid(
     return np.array(_cross_sections).T
 
 
-class UnstructuredQuadError(NotImplementedError):
-    def __init__(self):
-        msg = 'Converting data defined on an ' \
-        'unstructured quadrilateral mesh to a format compatible ' \
-        'with `numpy` and/or `matplotlib` is not supported.'
-        super().__init__(msg)
+class NonCartesianMeshError(NotImplementedError):
+    def __init__(
+        self, 
+        unsupported: str,
+    ):
+        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh.')
+
+
+class NonCartesianQuadMeshError(NotImplementedError):
+    def __init__(
+        self, 
+        unsupported: str,
+    ):
+        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh of quadrilateral cell.')

@@ -14,7 +14,7 @@ from matplotlib.cm import ScalarMappable
 
 from ..mesh.cartesian import CellType
 from ..utils import (is_scalar, grid, triangulation, create_fem_function, is_cartesian, 
-                     filter_kwargs, MultipleDispatchTypeError, UnstructuredQuadError, extract_mesh)
+                     filter_kwargs, MultipleDispatchTypeError, NonCartesianQuadMeshError, extract_mesh)
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_fig_axs
 
@@ -109,7 +109,7 @@ def _(
             f_grid = grid(use_cache=use_func_cache)(f)
             xyz = (x, y, f_grid)
         case CellType.QUADRILATERAL, False:
-            raise UnstructuredQuadError
+            raise NonCartesianQuadMeshError('Colormap plotting')
         case _:
             raise ValueError(f'Unexpected cell type {cell_type}')
 
