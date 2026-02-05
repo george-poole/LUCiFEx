@@ -30,12 +30,14 @@ if $DRY; then
     exit
 fi
 
+echo Beginning excution "$(date)"
 for i in "${IPYNB[@]}"
     do 
         echo Executing notebook $i 
         export IPYNB_FILE_NAME="${i}"
         jupyter nbconvert --execute --to notebook --inplace "${i}" --allow-errors  
     done
+echo Finished excution "$(date)"
 
 echo Building gallery ...
 python build_gallery.py

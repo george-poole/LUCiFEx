@@ -184,6 +184,10 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         # defaults
         self._assemble_termwise = assemble_termwise
         self._cache_matrix = cache_matrix
+        # low-level options
+        self._petsc = petsc
+        self._jit = jit
+        self._ffcx = ffcx
 
     def _create_matrix_termwise(self) -> None:
         if self._init_matrix_termwise:
@@ -440,6 +444,18 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         and matrix is reassembled if any argument value has changed.
         """
         return self._cache_matrix
+    
+    @property
+    def petsc(self):
+        return self._petsc
+    
+    @property
+    def jit(self):
+        return self._jit
+    
+    @property
+    def ffcx(self):
+        return self._ffcx
     
     @cache_matrix.setter
     def cache_matrix(self, value):
@@ -799,6 +815,10 @@ class EigenvalueProblem:
         self._future = future
         self._overwrite = overwrite
 
+        self._slepcs = slepc
+        self._jit = jit
+        self._ffcx = ffcx
+
     @classmethod
     def from_forms_func(
         cls,
@@ -914,6 +934,18 @@ class EigenvalueProblem:
     @property
     def eigenseries(self) -> list[FunctionSeries]:
         return self._eigenseries
+    
+    @property
+    def slepc(self):
+        return self._slepc
+    
+    @property
+    def jit(self):
+        return self._jit
+    
+    @property
+    def ffcx(self):
+        return self._ffcx
         
 
 P = ParamSpec("P")

@@ -89,7 +89,7 @@ class FiniteDifference:
             return self._name
         
     def __repr__(self):
-        return self.name
+        return f'{self.__class__.__name__}({self.coefficients}, {self.name}, {self._index})'
     
     def __str__(self):
         if self._index is not None:
@@ -492,7 +492,7 @@ class FiniteDifferenceArgwise:
             return self._name
     
     def __repr__(self):
-        return self.name
+        return f'{self.__class__.__name__}({self._fd_args}, {self.name})'
     
     def __str__(self):
         if self._name is None:

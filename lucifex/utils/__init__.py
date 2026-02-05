@@ -13,6 +13,7 @@ from .dofs_utils import (
     dofs_indices,
     dofs,
     as_spatial_marker,
+    limits_corrector,
 )
 from .numpy_utils import (
     grid,
@@ -56,6 +57,6 @@ from .fem_utils import (
     get_fem_subspaces,
 )
 from .numpy_utils import triangulation, quadrangulation, grid, as_index, as_indices
-from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict,
+from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict, frozen_dict,
                        optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
 from .str_utils import str_indexed

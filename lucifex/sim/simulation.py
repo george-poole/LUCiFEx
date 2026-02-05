@@ -7,6 +7,7 @@ from typing import (
     ParamSpec,
     TypeAlias,
     overload,
+    Any,
 )
 from typing_extensions import Self
 from types import EllipsisType
@@ -33,7 +34,7 @@ class Simulation:
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        namespace: Iterable[ExprSeries | Function | Constant | tuple[str, Expr | ExprSeries]] = (),
+        exprs_consts: Iterable[ExprSeries | Expr | tuple[str, Any]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
@@ -49,7 +50,7 @@ class Simulation:
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
-        self._namespace_append = list(namespace)
+        self._exprs_consts = list(exprs_consts)
         self.stoppers = list(stoppers)
         self.dir_path = dir_path
         self.parameter_file = parameter_file
@@ -87,9 +88,10 @@ class Simulation:
         else:
             raise TypeError
         
-    def __iter__(self):
-        for i in (self.solvers, self.t, self.dt, self._namespace_append):
-            yield i
+    # def __iter__(self):
+    #     series = (i.series for i in self.solvers)
+    #     for i in (*series, self.t, self.dt, self._exprs_consts):
+    #         yield i
 
     def _map_to_solver_series(
         self,
@@ -133,9 +135,13 @@ class Simulation:
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.name: s for s in self.series})
-        d.update({f.name: f for f in self._namespace_append if not isinstance(f, tuple)})
-        d.update({f[0]: f[1] for f in self._namespace_append if isinstance(f, tuple)})
+        d.update({f.name: f for f in self._exprs_consts if not isinstance(f, tuple)})
+        d.update({f[0]: f[1] for f in self._exprs_consts if isinstance(f, tuple)})
         return d
+    
+    @property
+    def exprs_consts(self):
+        return self._exprs_consts
     
     @property
     def store_delta(self) -> dict[str, int | float | None]:
@@ -351,7 +357,7 @@ def configure_simulation(
                         Interpolation,
                     )
                     [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
-                    simulation_func_return = simulation_func(*sim_func_args, **sim_func_kwargs)
+                    sim_obj = simulation_func(*sim_func_args, **sim_func_kwargs)
                     [cls.set_defaults() for cls in classes]
     
                     sim_parameters = {
@@ -362,7 +368,16 @@ def configure_simulation(
                     sim_parameters.update({k: v for k, v in zip(simulation_func_params, sim_func_args)})
                     sim_parameters.update(sim_func_kwargs)
                     dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
-                    simulation = filter_kwargs(Simulation)(*simulation_func_return, dir_path=dir_path, **kwargs_complete)
+                    if isinstance(sim_obj, Simulation):
+                        simulation_args = (
+                            sim_obj.solvers, 
+                            sim_obj.t, 
+                            sim_obj.dt,
+                            sim_obj.exprs_consts,
+                        )
+                    else:
+                        simulation_args = sim_obj
+                    simulation = filter_kwargs(Simulation)(*simulation_args, dir_path=dir_path, **kwargs_complete)
                     
                     if simulation.writers:
                         write(

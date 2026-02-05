@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import defaultdict
+from types import MappingProxyType
 from typing import (
     Callable,
     ParamSpec,
@@ -336,6 +337,12 @@ def nested_dict(
         return defaultdict(dict)
     assert depth > 2
     return nested_dict(nested_dict(depth=depth - 1))
+
+
+def frozen_dict(
+    **kwargs: Any,
+) -> MappingProxyType:
+    return MappingProxyType(dict(**kwargs))
 
 
 def arity(

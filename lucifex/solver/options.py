@@ -59,9 +59,9 @@ class OptionsPETSc(Options):
         self, 
         ksp_type: str = "gmres",
         pc_type: str = "ilu",
-        ksp_rtol: float = 1e-05,
+        ksp_rtol: float = 1e-06,
         ksp_atol: float = 1e-10,
-        ksp_divtol: float = 1e5,
+        ksp_divtol: float = 1e4,
         ksp_max_it: int = 10000,
         **kwargs: Any,
     ):

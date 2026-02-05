@@ -2,6 +2,7 @@
 objects to `numpy.ndarray` objects for postprocessing """
 
 from functools import singledispatch
+import operator
 from typing import overload, Literal, Callable, Iterable
 
 from dolfinx.fem import Function
@@ -378,8 +379,8 @@ def as_index(
     arr: np.ndarray | Iterable[float],
     target: int | float,
     fraction: bool = False,
-    func: Callable[[float, float], bool] | str | None = None,
-    msg: str = 'Validation function cannot be satisfied.',
+    condition: Callable[[float, float], bool] | str | None = None,
+    msg: str = 'Target validation condition not satisfied',
 ) -> int:
     if isinstance(target, int):
         return target
@@ -389,18 +390,19 @@ def as_index(
     
     arr = np.sort(arr)
     
-    if isinstance(func, str):
-        func = getattr(func, str)
+    if isinstance(condition, str):
+        condition = getattr(operator, condition)
 
     arr_diff = np.abs([i - target for i in arr])           
     target_index = np.argmin(arr_diff)
 
-    if func is not None:
-        if not func(arr[target_index], target):
+    if condition is not None:
+        approx = arr[target_index]
+        if not condition(approx, target):
             for i in (-1, 1, -2, 2):
-                if func(arr[target_index], target):
+                if condition(approx, target):
                     return target_index + i
-            raise ValueError(msg)
+            raise ValueError(f'{msg}. target={target}, approx={approx}')
 
     return target_index
 
@@ -409,7 +411,7 @@ def as_indices(
     arr: np.ndarray | Iterable[float],
     targets: range | Iterable[int | float] | int | StrSlice,
     fraction: bool = False,
-    tol: float | None = None,
+    condition: Callable[[float, float], bool] | str | None = None,
     window: bool = False,
 ) -> Iterable[int]:
     if isinstance(targets, range):
@@ -422,7 +424,7 @@ def as_indices(
         step = stop // targets
         indices = range(0, stop, step)
     else:
-        indices = [as_index(arr, i, fraction, tol) for i in targets]
+        indices = [as_index(arr, i, fraction, condition) for i in targets]
         if window:
             if indices[0] < targets[0]:
                 indices[0] += 1

@@ -115,19 +115,16 @@ class Series(ABC, Generic[T]):
     def __setitem__(self, _):
         raise RuntimeError("Not permitted")
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         seq = [i if not is_unsolved(i) else Unsolved for i in self.sequence]
         seq_str = [str(s) for s in seq]
         previous = ', '.join(seq_str[:-2])
         present, future = seq_str[-2:]
         if previous:
-            seq_repr = f"{previous}; {present}; {future}"
+            seq_repr = f"{previous}, {present}, {future}"
         else:
-            seq_repr = f"{present}; {future}"
-        return f"{self.__class__.__name__}({seq_repr})"
-
-    def __str__(self) -> str:
-        return self.name
+            seq_repr = f"{present}, {future}"
+        return f"[{seq_repr}]"
 
     def __iter__(self):
         return iter(self.sequence)

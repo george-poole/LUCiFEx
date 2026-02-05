@@ -86,6 +86,7 @@ class BoundaryConditions:
     def create_strong_bcs(
         self,
         fs: FunctionSpace,
+        strong_types: Iterable[BoundaryType] = (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL),
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uD` on `∂Ω`
@@ -96,7 +97,7 @@ class BoundaryConditions:
             self._values, self._btypes, self._markers, self._subindices, self._dofs_method,
             strict=True,
         ):
-            if b in (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL):
+            if b in strong_types:
                 dofs = dofs_indices(fs, m, i, d)
                 if isinstance(uD, Constant):
                     if i is None:
@@ -150,10 +151,13 @@ class BoundaryConditions:
                 mpc.finalize()
             return mpc
 
-
     def create_weak_bcs(
         self,
         solution: Function | FunctionSeries | FunctionSpace,
+        weak_types: Iterable[BoundaryType] = (
+            BoundaryType.NEUMANN, BoundaryType.ROBIN, 
+            BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
+        )
     ) -> list[Form]:
         """
         Weakly enforced boundary condition by a term `+∫ v·uW ds` with 
@@ -161,11 +165,7 @@ class BoundaryConditions:
         """
         fs = solution.function_space
         v = TestFunction(fs)
-        boundary_types = (
-            BoundaryType.NEUMANN, BoundaryType.ROBIN, 
-            BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
-        )
-        ds, *boundary_data = self.boundary_data(solution, *boundary_types)
+        ds, *boundary_data = self.boundary_data(solution, *weak_types)
 
         forms = []
         
@@ -180,7 +180,6 @@ class BoundaryConditions:
 
         return forms
     
-
     def boundary_data(
         self,
         solution: Function | FunctionSeries | FunctionSpace,
