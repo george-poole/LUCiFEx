@@ -10,8 +10,8 @@ Development has primarily been motivated by the numerical study of convection in
 
 The complete gallery of examples can be viewed [here](https://george-poole.github.io/LUCiFEx/gallery.html). See `./demo/notebooks/` to browse their source code.  Examples from fluid dynamics include:
 * Darcy equations formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$
-* Navier-Stokes equations formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$
 * Stokes equations formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction $\psi$
+* Navier-Stokes equations formulated in terms of either velocity and pressure $\textbf{u}$, $p$ or the streamfunction and vorticity $\psi$, $\omega$
 * advection-diffusion-reaction equations for the transport of solute and/or heat coupled to fluid flow
 * classic instabilities such as Rayleigh-Bénard and Rayleigh-Taylor
 <!-- * discontinuous Galerkin and stabilization methods for advection-dominated transport equations -->

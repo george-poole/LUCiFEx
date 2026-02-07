@@ -3,14 +3,14 @@ from functools import singledispatch
 from collections.abc import Iterable
 
 import numpy as np
-from ufl import max_value, sqrt, inner
+from ufl import max_value, sqrt, inner, tr
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function
 from ufl.geometry import GeometricCellQuantity
 
 from ..fem import Constant
-from ..utils import dofs, cell_size_quantity, MultipleDispatchTypeError, extract_mesh
+from ..utils import dofs, cell_size_quantity, MultipleDispatchTypeError, extract_mesh, is_tensor
 
 
 @overload
@@ -23,7 +23,7 @@ def advective_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tA = cA minₓ(h(x) / |𝐚(x)|)` where `cA` is the advective Courant number.
+    `∆tA = cA minₓ(h(𝐱) / |𝐚(𝐱)|)` where `cA` is the advective Courant number.
     """
     ...
 
@@ -39,7 +39,7 @@ def advective_timestep(
     mesh: Mesh | None = None,
 )-> float:
     """
-    `∆tA = cA h / maxₓ|𝐚(x)|)` where `cA` is the advective Courant number.
+    `∆tA = cA h / maxₓ|𝐚(𝐱)|)` where `cA` is the advective Courant number.
     """
     ...
 
@@ -69,7 +69,7 @@ def advective_timestep(
     tol: float = 1e-10,
 ) -> float:
     """
-    `∆tA = cA minₓ(h(x)) / u` where `cA` is the advective Courant number.
+    `∆tA = cA minₓ(h(𝐱)) / u` where `cA` is the advective Courant number.
     """
     ...
 
@@ -94,7 +94,9 @@ def _(velocity, h, tol, mesh):
             mesh = extract_mesh(velocity)
     if isinstance(h, str):
         h = cell_size_quantity(mesh, h)
-    return lambda: np.min(dofs(h / max_value(sqrt(inner(velocity, velocity)), tol), (mesh, 'DP', 0), use_cache=True))
+    return lambda: np.min(
+        dofs(h / max_value(sqrt(inner(velocity, velocity)), tol), (mesh, 'DP', 0), use_cache=True),
+    )
 
 
 @_advective_dt_evaluation.register(Constant)
@@ -125,6 +127,68 @@ def _(velocity: Iterable[float], h, tol, _):
     return _advective_dt_evaluation(norm, h, tol)
 
 
+def diffusive_timestep(
+    d: Function | Expr | Constant | float,
+    h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"] | float,
+    courant: float = 1.0,
+    dt_max: float = np.inf,
+    dt_min: float = 0.0,
+    tol: float = 1e-10,
+    mesh: Mesh | None = None,
+):
+    """
+    `∆tD = cD minₓ(h²(𝐱) / |D(𝐱)|)` where `cD` is the diffusive Courant number.
+
+    If `D` is a tensor, then `|D| = tr(D) / dim(D)`.
+    """
+    _lambda = _diffusive_dt_evaluation(d, h, tol, mesh)
+    return _bounded_timestep(_lambda, dt_max, dt_min, courant)
+
+
+@singledispatch
+def _diffusive_dt_evaluation(diffusion, *_, **__) -> Callable[[], float]:
+    raise MultipleDispatchTypeError(diffusion, _diffusive_dt_evaluation)
+
+
+@_diffusive_dt_evaluation.register(Function)
+@_diffusive_dt_evaluation.register(Expr)
+def _(diffusion, h, tol, mesh):
+    if mesh is None:
+        if isinstance(diffusion, Function):
+            mesh = diffusion.function_space.mesh
+        else:
+            mesh = extract_mesh(diffusion)
+        if isinstance(h, str):
+            h = cell_size_quantity(mesh, h)
+    if is_tensor(diffusion):
+        diffusion = tr(diffusion) / mesh.geometry.dim
+    return lambda: np.min(
+        dofs(h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True),
+    )
+
+
+@_diffusive_dt_evaluation.register(Constant)
+def _(diffusion: Constant, h, tol, mesh):
+    if mesh is None:
+        mesh = diffusion.mesh
+    if isinstance(h, str):
+        h = cell_size_quantity(mesh, h)
+    if isinstance(h, GeometricCellQuantity):
+        h = np.min(dofs(h, (mesh, 'DP', 0), use_cache=True))
+    if diffusion.ufl_shape == ():
+        return lambda: h**2 / max(diffusion.value, tol)
+    else:
+        return lambda: h**2 / max(np.max(diffusion.value), tol)
+
+
+@_diffusive_dt_evaluation.register(float)
+@_diffusive_dt_evaluation.register(int)
+def _(d, h, tol):
+    if not isinstance(h, (float, int)):
+        raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
+    return lambda: h**2 / max(d, tol)
+
+
 @overload
 def reactive_timestep(
     r: Function | Expr | Constant | float,
@@ -134,7 +198,7 @@ def reactive_timestep(
     tol: float = 1e-10,
 ): 
     """
-    `∆tR = cR / maxₓR(x)` where `cR` is the reactive Courant number.
+    `∆tR = cR / maxₓR(𝐱)` where `cR` is the reactive Courant number.
     """
     ...
 
@@ -170,7 +234,9 @@ def _(reaction, tol, mesh):
             mesh = reaction.function_space.mesh
         else:
             mesh = extract_mesh(reaction)
-    return lambda: np.min(dofs(1.0 / max_value(reaction, tol), (mesh, 'DP', 0), use_cache=True))
+    return lambda: np.min(
+        dofs(1.0 / max_value(reaction, tol), (mesh, 'DP', 0), use_cache=True),
+    )
 
 
 @_reactive_dt_evaluation.register(Constant)
@@ -185,62 +251,6 @@ def _(reaction: Constant, tol, _):
 @_reactive_dt_evaluation.register(int)
 def _(reaction, tol, _):
     return lambda: 1.0 / max(reaction, tol)
-
-
-def diffusive_timestep(
-    d: Function | Expr | Constant | float,
-    h:  GeometricCellQuantity | Literal["hmin", "hmax", "hdiam"] | float,
-    courant: float = 1.0,
-    dt_max: float = np.inf,
-    dt_min: float = 0.0,
-    tol: float = 1e-10,
-    mesh: Mesh | None = None,
-):
-    """
-    `∆tD = cD minₓ(h²(x) / D(x))` where `cD` is the diffusive Courant number.
-    """
-    _lambda = _diffusive_dt_evaluation(d, h, tol, mesh)
-    return _bounded_timestep(_lambda, dt_max, dt_min, courant)
-
-
-@singledispatch
-def _diffusive_dt_evaluation(diffusion, *_, **__) -> Callable[[], float]:
-    raise MultipleDispatchTypeError(diffusion, _diffusive_dt_evaluation)
-
-
-@_diffusive_dt_evaluation.register(Function)
-@_diffusive_dt_evaluation.register(Expr)
-def _(diffusion, h, tol, mesh):
-    if mesh is None:
-        if isinstance(diffusion, Function):
-            mesh = diffusion.function_space.mesh
-        else:
-            mesh = extract_mesh(diffusion)
-        if isinstance(h, str):
-            h = cell_size_quantity(mesh, h)
-    return lambda: np.min(dofs(h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True))
-
-
-@_diffusive_dt_evaluation.register(Constant)
-def _(diffusion: Constant, h, tol, mesh):
-    if mesh is None:
-        mesh = diffusion.mesh
-    if isinstance(h, str):
-        h = cell_size_quantity(mesh, h)
-    if isinstance(h, GeometricCellQuantity):
-        h = np.min(dofs(h, (mesh, 'DP', 0), use_cache=True))
-    if diffusion.ufl_shape == ():
-        return lambda: h**2 / max(diffusion.value, tol)
-    else:
-        return lambda: h**2 / max(np.max(diffusion.value), tol)
-
-
-@_diffusive_dt_evaluation.register(float)
-@_diffusive_dt_evaluation.register(int)
-def _(d, h, tol):
-    if not isinstance(h, (float, int)):
-        raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
-    return lambda: h**2 / max(d, tol)
 
 
 def diffusive_reactive_timestep(
@@ -270,42 +280,11 @@ def diffusive_reactive_timestep(
     return _bounded_timestep(_lambda_dr, dt_max, dt_min, 1.0)
 
 
-def advective_reactive_timestep(
-    a: Function | Expr | Constant | float,
-    r: Function | Expr | Constant | float,
-    h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
-    cfl_courant: float | None = 1.0,
-    r_courant: float | None = 1.0,
-    dt_max: float = np.inf,
-    dt_min: float = 0.0,
-    tol: float = 1e-10,
-    mesh: Mesh | None = None,
-):
-    """
-    Calculates a timestep combining advective and reactive constraints.
-
-    `∆tAR = min{cA minₓ(h(x) / |𝐚(x)|), cR minₓ(1 / R(x))}` 
-    """
-    if cfl_courant is None and r_courant is not None:
-        return reactive_timestep(r, r_courant, dt_max, dt_min, tol, mesh)
-    if r_courant is None and cfl_courant is not None:
-        return advective_timestep(a, h, cfl_courant, dt_max, dt_min, tol, mesh)
-    if cfl_courant is None and r_courant is None:
-        return dt_max
-
-    _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
-    _lambda_cflr = lambda: min(
-        r_courant * _lambda_r(), cfl_courant * _lambda_cfl()
-    )
-    return _bounded_timestep(_lambda_cflr, dt_max, dt_min, 1.0)
-
-
 def advective_diffusive_timestep(
     a: Function | Expr | Constant | float,
     d: Function | Expr | Constant | float,
     h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
-    cfl_courant: float | None = 1.0,
+    a_courant: float | None = 1.0,
     d_courant: float | None = 1.0,
     dt_max: float = np.inf,
     dt_min: float = 0.0,
@@ -315,22 +294,53 @@ def advective_diffusive_timestep(
     """
     Calculates a timestep combining advective and diffusive constraints.
 
-    `∆tAD = min{cA minₓ(h(x) / |𝐚(x)|), cD minₓ(h²(x) / D(x))}` 
+    `∆tAD = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cD minₓ(h²(𝐱) / |D(𝐱)|)}` 
     """
-    if cfl_courant is None and d_courant is not None:
+    if a_courant is None and d_courant is not None:
         return diffusive_timestep(d, h, d_courant, dt_max, dt_min, tol, mesh)
-    if d_courant is None and cfl_courant is not None:
-        return advective_timestep(a, h, cfl_courant, dt_max, dt_min, tol, mesh)
-    if cfl_courant is None and d_courant is None:
+    if d_courant is None and a_courant is not None:
+        return advective_timestep(a, h, a_courant, dt_max, dt_min, tol, mesh)
+    if a_courant is None and d_courant is None:
         return dt_max
 
     _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
     _lambda_d = _diffusive_dt_evaluation(h, d, tol, mesh)
     _lambda_cfld = lambda: min(
-        cfl_courant * _lambda_cfl(),
+        a_courant * _lambda_cfl(),
         d_courant * _lambda_d(), 
     )
     return _bounded_timestep(_lambda_cfld, dt_max, dt_min, 1.0)
+
+
+def advective_reactive_timestep(
+    a: Function | Expr | Constant | float,
+    r: Function | Expr | Constant | float,
+    h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
+    a_courant: float | None = 1.0,
+    r_courant: float | None = 1.0,
+    dt_max: float = np.inf,
+    dt_min: float = 0.0,
+    tol: float = 1e-10,
+    mesh: Mesh | None = None,
+):
+    """
+    Calculates a timestep combining advective and reactive constraints.
+
+    `∆tAR = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cR minₓ(1 / R(𝐱))}` 
+    """
+    if a_courant is None and r_courant is not None:
+        return reactive_timestep(r, r_courant, dt_max, dt_min, tol, mesh)
+    if r_courant is None and a_courant is not None:
+        return advective_timestep(a, h, a_courant, dt_max, dt_min, tol, mesh)
+    if a_courant is None and r_courant is None:
+        return dt_max
+
+    _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
+    _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
+    _lambda_cflr = lambda: min(
+        r_courant * _lambda_r(), a_courant * _lambda_cfl()
+    )
+    return _bounded_timestep(_lambda_cflr, dt_max, dt_min, 1.0)
 
 
 def adr_timestep(
@@ -338,7 +348,7 @@ def adr_timestep(
     d: Function | Expr | Constant | float,
     r: Function | Expr | Constant | float,
     h:  float | Literal["hmin", "hmax", "hdiam"] | GeometricCellQuantity,
-    cfl_courant: float | None = 1.0,
+    a_courant: float | None = 1.0,
     d_courant: float | None = 1.0,
     r_courant: float | None = 1.0,
     dt_max: float = np.inf,
@@ -349,17 +359,17 @@ def adr_timestep(
     """
     Calculates a timestep combining advective, diffusive and reactive constraints.
 
-    `∆tADR = min{cA minₓ(h(x) / |𝐚(x)|), cD minₓ(h²(x) / D(x)), cR minₓ(1 / R(x))}` 
+    `∆tADR = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cD minₓ(h²(𝐱) / D(𝐱)), cR minₓ(1 / R(𝐱))}` 
     """
-    match cfl_courant, d_courant, r_courant:
+    match a_courant, d_courant, r_courant:
         case None, None, None:
             return dt_max
         case _, None, None:
-            return advective_timestep(a, h, cfl_courant, dt_max, dt_min, tol, mesh)
+            return advective_timestep(a, h, a_courant, dt_max, dt_min, tol, mesh)
         case _, _, None:
-            return advective_diffusive_timestep(a, d, h, cfl_courant, d_courant, dt_max, dt_min, tol, mesh)
+            return advective_diffusive_timestep(a, d, h, a_courant, d_courant, dt_max, dt_min, tol, mesh)
         case _, None, _:
-            return advective_reactive_timestep(a, r, h, cfl_courant, r_courant, dt_max, dt_min, tol, mesh)
+            return advective_reactive_timestep(a, r, h, a_courant, r_courant, dt_max, dt_min, tol, mesh)
         case None, _, _:
             return diffusive_reactive_timestep(d, r, h, d_courant, r_courant, dt_max, dt_min, tol, mesh)
         
@@ -367,7 +377,7 @@ def adr_timestep(
     _lambda_d = _diffusive_dt_evaluation(h, d, tol, mesh)
     _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
     _lambda_cfldr = lambda: min(
-        cfl_courant * _lambda_a(),
+        a_courant * _lambda_a(),
         d_courant * _lambda_d(), 
         r_courant * _lambda_r(), 
     )

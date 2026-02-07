@@ -16,7 +16,7 @@ def l_norm(
     """
     `‖u‖ℓₚ = ( Σᵢ|Uᵢ|ᵖ )¹ᐟᵖ`
 
-    where {Uᵢ} are the degrees of freedom.
+    where `{Uᵢ}` are the degrees of freedom.
     """
     if p == "inf":
         p = np.inf

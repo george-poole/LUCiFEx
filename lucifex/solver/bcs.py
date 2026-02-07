@@ -23,6 +23,7 @@ from ..utils.dofs_utils import (
     SpatialMarker,
     SubspaceIndex,
     DofsMethodType,
+    ScalarVectorError,
 )
 
 Value: TypeAlias = (
@@ -51,12 +52,14 @@ class BoundaryConditions:
         | tuple[SpatialMarker | SpatialMarkerAlias, Value]
         | tuple[SpatialMarker | SpatialMarkerAlias, Value, SubspaceIndex],
         dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
+        rescale_weak: int | float | None = None, 
     ):
         self._markers: list[SpatialMarker | SpatialMarkerAlias] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
-        
+        self._rescale_weak = rescale_weak
+
         if isinstance(dofs_method, str):
             dofs_method = [dofs_method] * len(bcs)
         assert len(dofs_method) == len(bcs)
@@ -86,7 +89,9 @@ class BoundaryConditions:
     def create_strong_bcs(
         self,
         fs: FunctionSpace,
-        strong_types: Iterable[BoundaryType] = (BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL),
+        strong_types: Iterable[BoundaryType] = (
+            BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL, BoundaryType.STRONG,
+        ),
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uD` on `∂Ω`
@@ -156,7 +161,7 @@ class BoundaryConditions:
         solution: Function | FunctionSeries | FunctionSpace,
         weak_types: Iterable[BoundaryType] = (
             BoundaryType.NEUMANN, BoundaryType.ROBIN, 
-            BoundaryType.NATURAL, BoundaryType.WEAK_DIRICHLET,
+            BoundaryType.NATURAL, BoundaryType.WEAK,
         )
     ) -> list[Form]:
         """
@@ -165,18 +170,22 @@ class BoundaryConditions:
         """
         fs = solution.function_space
         v = TestFunction(fs)
-        ds, *boundary_data = self.boundary_data(solution, *weak_types)
+        if self._rescale_weak is not None:
+            scale = Constant(fs.mesh, self._rescale_weak)
+        else:
+            scale = 1
 
+        ds, *boundary_data = self.boundary_data(solution, *weak_types)
         forms = []
         
         for bd in boundary_data:
             for i, uW in bd:
                 if is_scalar(uW):
-                    forms.append(v * uW * ds(i))
+                    forms.append(scale * v * uW * ds(i))
                 elif is_vector(uW):
-                    forms.append(inner(v, uW) * ds(i))
+                    forms.append(scale * inner(v, uW) * ds(i))
                 else:
-                    raise NotImplementedError
+                    raise ScalarVectorError(uW)
 
         return forms
     

@@ -130,14 +130,12 @@ class DofsPerturbation:
 
 class SpatialPerturbation:
     """
-    Combines a base function `b(𝐱)` with a noise function `N(𝐱)` to produce 
+    Combines a scalar-valued base function `b(𝐱)` with a noise function `N(𝐱)` to produce 
     a perturbation 
     
     `b(𝐱) + ϵN(𝐱)`
 
     of amplitude `ϵ`.
-    
-    NOTE for scalar-valued functions only
     """
     def __init__(
         self,

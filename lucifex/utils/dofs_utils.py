@@ -156,7 +156,7 @@ def limits_corrector(
     conservation: Callable[[np.ndarray], np.ndarray] | None = None,
 ) -> Callable[[np.ndarray], None]:
     """
-    NOTE intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
+    Intended for use on DoFs that are pointwise evaluations (e.g. Lagrange elements)
     """
     def _(u: np.ndarray) -> None:
         if conservation:

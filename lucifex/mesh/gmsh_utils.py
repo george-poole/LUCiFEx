@@ -21,14 +21,16 @@ def create_gmsh_mesh_factory(
     default_name: str,
 ):  
     if dim == 2:
-        default_cell = CellType.TRIANGLE
+        DEFAULT_CELL = CellType.TRIANGLE
     if dim == 3:
-        default_cell = CellType.TETRAHEDRON
+        DEFAULT_CELL = CellType.TETRAHEDRON
+
+    DEFAULT_NAME = default_name
 
     def _inner(
         h: float | tuple[float, float],
-        cell: CellType = default_cell,
-        name: str = default_name,
+        cell: CellType = DEFAULT_CELL,
+        name: str = DEFAULT_NAME,
         comm = MPI.COMM_WORLD,
         rank: int = 0,
         markers: Iterable[tuple[str, int, Callable[[gmsh.model], tuple]]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),

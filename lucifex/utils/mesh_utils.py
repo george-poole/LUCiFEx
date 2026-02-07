@@ -60,7 +60,8 @@ class BoundaryType(StrEnum):
     NATURAL = "natural"
     PERIODIC = "periodic"
     ANTIPERIODIC = "antiperiodic"
-    WEAK_DIRICHLET = "weak_dirichlet"
+    WEAK = "weak"
+    STRONG = 'strong'
 
 
 def create_tagged_measure(
