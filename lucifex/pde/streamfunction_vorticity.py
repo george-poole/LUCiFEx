@@ -1,0 +1,66 @@
+from ufl.core.expr import Expr
+from ufl import Form, as_matrix, as_vector, grad, curl, Dx
+
+from lucifex.fem import Function
+from lucifex.solver import BoundaryConditions
+from lucifex.utils import get_component_fem_functions
+from .poisson import poisson
+
+
+def velocity_from_streamfunction(
+    psi: Function,
+    neg: bool = False,
+) -> Expr:
+    """
+    `𝐮 = ((0, ±1), (∓1, 0))·∇ψ` depending on sign convention 
+    for an incompressible flow `∇·𝐮 = 0`.
+    """
+    if neg:
+        mat = ([0, -1], [1, 0])
+    else:
+        mat = ([0, 1], [-1, 0])
+    return as_matrix(mat) * grad(psi)
+
+
+def vorticity_from_velocity(
+    u: Function | Expr | tuple[Function | Expr, ...],
+    d2: bool = False,
+) -> Expr:
+    """
+    `𝝎 = ∇ × 𝐮` or `ω = ∂uʸ/∂x - ∂uˣ/∂y` 
+    """
+    if d2:
+        if isinstance(u, tuple):
+            ux, uy = u
+        else:
+            ux, uy = get_component_fem_functions(('P', 1), u)
+        return Dx(uy, 0) - Dx(ux, 1)
+    else:
+        if isinstance(u, tuple):
+            u = as_vector(u)
+        return curl(u)
+    
+
+def streamfunction_from_vorticity(
+    psi: Function,
+    omega: Function,
+    bcs: BoundaryConditions | None = None
+) -> list[Form]:
+    """
+    `∇²ψ = ±ω` depending on sign convention
+    for an incompressible flow `∇·𝐮 = 0`.
+    """
+    return poisson(psi, omega, bcs)
+
+
+def streamfunction_from_velocity(
+    psi: Function,
+    u: Function,
+    bcs: BoundaryConditions | None = None
+) -> list[Form]:
+    """
+    `∇²ψ = ±(∂uʸ/∂x - ∂uˣ/∂y)` depending on sign convention
+    for an incompressible flow `∇·𝐮 = 0`.
+    """
+    omega = vorticity_from_velocity(u, d2=True)
+    return poisson(psi, omega, bcs)

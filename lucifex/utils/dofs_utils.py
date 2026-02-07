@@ -3,7 +3,7 @@ from types import EllipsisType
 from collections.abc import Callable, Iterable
 
 import numpy as np
-from dolfinx.mesh import locate_entities, Mesh
+from dolfinx.mesh import Mesh, locate_entities, locate_entities_boundary
 from dolfinx.fem import (
     Constant,
     Function,
@@ -49,17 +49,24 @@ class DofsMethodType(StrEnum):
     TOPOLOGICAL = 'topological'
 
 
+class FacetMethodType(StrEnum):
+    ANY = 'any'
+    BOUNDARY = 'BOUNDARY'
+
+
 def dofs_indices(
     fs: FunctionSpace,
     dofs_marker: SpatialMarker | SpatialMarkerAlias,
     subspace_index: int | None = None,
-    method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
+    dofs_method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
+    facet_method: FacetMethodType = FacetMethodType.ANY, 
 ) -> np.ndarray | list[np.ndarray]:
     
-    method = DofsMethodType(method)
+    dofs_method = DofsMethodType(dofs_method)
+    facet_method = FacetMethodType(facet_method)
     _dofs_marker = as_spatial_marker(dofs_marker)
 
-    if method == DofsMethodType.GEOMETRICAL:
+    if dofs_method == DofsMethodType.GEOMETRICAL:
         if subspace_index is None:
             return locate_dofs_geometrical(fs, _dofs_marker)
         else:
@@ -69,12 +76,17 @@ def dofs_indices(
                 _dofs_marker,
             )
         
-    if method == DofsMethodType.TOPOLOGICAL:
+    if dofs_method == DofsMethodType.TOPOLOGICAL:
         tdim = fs.mesh.topology.dim
         edim = tdim - 1
-        facets = locate_entities(
-            fs.mesh, edim, _dofs_marker
-        )
+        if facet_method == FacetMethodType.ANY:
+            facets = locate_entities(
+                fs.mesh, edim, _dofs_marker
+            )
+        else:
+            facets = locate_entities_boundary(
+                fs.mesh, edim, _dofs_marker,
+            )
         if subspace_index is None:
             return locate_dofs_topological(fs, edim, facets)
         else:
@@ -87,7 +99,7 @@ def dofs_indices(
             assert len(dofs) == 2
             return dofs
         
-    raise ValueError(f'{method} not recognised')
+    raise ValueError(f'{dofs_method} not recognised')
 
         
 def dofs(

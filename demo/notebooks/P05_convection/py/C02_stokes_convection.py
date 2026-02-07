@@ -21,7 +21,7 @@ from lucifex.solver import (
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
-from lucifex.pde.streamfunction import streamfunction_velocity
+from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.stokes import stokes_incompressible
 from lucifex.pde.scaling import ScalingOptions

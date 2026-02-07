@@ -17,7 +17,6 @@ from lucifex.solver import (
     bvp, ibvp,
 )
 
-from .poisson import poisson
 from .advection_diffusion import advection_diffusion_reaction
 from .constitutive import strain
 
@@ -208,14 +207,7 @@ def chorin_solvers(
     return chorin1_solver, chorin2_solver, chorin3_solver
 
 
-def vorticity_poisson(
-    psi: Function,
-    omega: Function,
-) -> tuple[Form, Form]:
-    return poisson(psi, omega)
-
-
-def vorticity_transport(
+def navier_stokes_vorticity(
     omega: FunctionSeries,
     dt: Constant,
     u: FunctionSeries,
@@ -234,4 +226,10 @@ def vorticity_transport(
         j -= Dx(fx, 1) / rho
     if not fy is not _none:
         j += Dx(fy, 0) / rho
-    return advection_diffusion_reaction(omega, dt, u, d, j=j, D_adv=D_adv, D_diff=D_diff, D_reac=D_reac)
+    return advection_diffusion_reaction(
+        omega, dt, u, d, 
+        j=j, 
+        D_adv=D_adv, 
+        D_diff=D_diff, 
+        D_reac=D_reac,
+    )

@@ -94,7 +94,7 @@ class BoundaryConditions:
         ),
     ) -> list[DirichletBCMetaClass]: 
         """
-        Strongly enforced boundary condition `u = uD` on `∂Ω`
+        Strongly enforced boundary condition `u = uE` on `∂Ω`
         """
         dirichlet = []
 

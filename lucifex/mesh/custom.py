@@ -11,7 +11,9 @@ from .gmsh_utils import create_gmsh_mesh_factory
 
 def mesh_from_splines_model(
     *ccw_splines: Iterable[tuple[float, float]],
+    method: str = 'addSpline'
 ):
+    add_spline = getattr(gmsh.model.geo, method)
     cached_point_func = lru_cache(maxsize=None)(
         lambda x, y: gmsh.model.geo.addPoint(x, y, 0.0)
     )
@@ -22,7 +24,7 @@ def mesh_from_splines_model(
         for x, y in spln:
             p = cached_point_func(x, y)
             points.append(p)
-        spline = gmsh.model.geo.addSpline(points)
+        spline = add_spline(points)
         splines.append(spline)
 
     loop = gmsh.model.geo.addCurveLoop(splines)
@@ -42,11 +44,12 @@ def mesh_from_boundaries_model(
     x_bbox: np.ndarray,
     y_bbox: np.ndarray,
     *ccw_boundaries: SpatialMarkerAlias,
+    method: str = 'addSpline',
     rtol: float = 1e-5,
     atol: float = 1e-8 ,    
 ):
     """
-    Boundaries must be ordered so as to form a closed counter-clockwise loop.
+    Creates a 2D mesh from its boundaries, which must be ordered so as to form a closed counter-clockwise loop.
     """
     X_bbox, Y_bbox = np.meshgrid(x_bbox, y_bbox, indexing="ij")
 
@@ -78,23 +81,15 @@ def mesh_from_boundaries_model(
         else:
             return x2 > x1
         
-    def _bbox_array(
+    def _index_sequence(
         arr: np.ndarray,
         increasing: bool | None,
-    ):
+    ) -> list[int]:
+        indices = range(0, len(arr))
         if increasing:
-            return arr[:]
+            return list(indices)
         else:
-            return arr[::-1]
-        
-    def _index_iterable(
-        arr: np.ndarray,
-        increasing: bool | None,
-    ):
-        if increasing:
-            return range(len(arr))
-        else:
-            return reversed(range(len(arr)))
+            return list(reversed(indices))
 
     def _is_in_bounds(
         x: float,
@@ -109,86 +104,30 @@ def mesh_from_boundaries_model(
         else:
             return x <= x1 and x >= x2   
 
-
     ccw_splines = []
     for n in range(n_boundaries):
-        bdry = boundaries[n]
+        msk = masks[n]
         xi_next, yi_next = intersections[n]
         xi_prev, yi_prev = intersections[(n - 1) % n_boundaries]
 
         x_increasing = _is_increasing(xi_prev, xi_next)
         y_increasing = _is_increasing(yi_prev, yi_next)
 
-        x_array = _bbox_array(x_bbox, x_increasing)
-        y_array = _bbox_array(y_bbox, y_increasing)
-
-        do_append = lambda x, y: (
-            bdry((x, y)) 
-            and _is_in_bounds(x, xi_prev, xi_next, x_increasing)
-            and _is_in_bounds(y, yi_prev, yi_next, y_increasing)
-        )
-
-        ccw_points = []
-        for x in x_array:
-            for y in y_array:
-                if do_append(x, y):
-                    ccw_points.append((x, y))
-        
-        ccw_splines.append(ccw_points)
-
-    for p in ccw_points:
-        print(p)
-
-    ###
-    ccw_splines = []
-    for n in range(n_boundaries):
-        xi_next, yi_next = intersections[n]
-        xi_prev, yi_prev = intersections[(n - 1) % n_boundaries]
-
-        x_increasing = _is_increasing(xi_prev, xi_next)
-        y_increasing = _is_increasing(yi_prev, yi_next)
-
-        i_iter = _index_iterable(x_bbox, x_increasing)
-        j_iter= _index_iterable(y_bbox, y_increasing)
+        i_sqn = _index_sequence(x_bbox, x_increasing)
+        j_sqn= _index_sequence(y_bbox, y_increasing)
         
         ccw_points = []
-        for i in i_iter:
+        for i in i_sqn:
             if not _is_in_bounds(x_bbox[i], xi_prev, xi_next, x_increasing):
                 continue
-            for j in j_iter:
+            for j in j_sqn:
                 if not _is_in_bounds(y_bbox[j], yi_prev, yi_next, y_increasing):
                     continue
                 if msk[i, j]:
                     ccw_points.append((x_bbox[i], y_bbox[j]))
         ccw_splines.append(ccw_points)
 
-    for p in ccw_points:
-        print(p)
-    ####
-
-    return mesh_from_splines_model(*ccw_splines)
-
-
-    ####
-    # boundaries = [lru_cache(maxsize=None)(as_spatial_marker(i)) for i in ccw_boundaries]
-    # n_boundaries = len(boundaries)
-
-    # intersections = []
-    # for i in range(n_boundaries):
-    #     bdry = boundaries[i]
-    #     bdry_next = boundaries[(i + 1) % n_boundaries]
-    #     iscn = None
-    #     for x in x_bbox:
-    #         for y in y_bbox:
-    #             if bdry((x, y)) and bdry_next((x, y)):
-    #                 iscn = (x, y)
-    #                 break
-    #         if iscn is not None:
-    #             break
-    #     if iscn is None:
-    #         raise RuntimeError(f'No intersection between boundaries {i} and {i + 1} found.')
-    #     intersections.append(iscn)
-
+    return mesh_from_splines_model(*ccw_splines, method=method)
 
 
 @replicate_callable(

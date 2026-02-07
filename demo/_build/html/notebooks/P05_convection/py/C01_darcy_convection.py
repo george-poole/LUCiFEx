@@ -20,7 +20,7 @@ from lucifex.solver import (
 )
 from lucifex.sim import Simulation
 
-from lucifex.pde.streamfunction import streamfunction_velocity
+from lucifex.pde.streamfunction_vorticity import streamfunction_from_velocity
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
 from lucifex.pde.scaling import ScalingOptions
@@ -124,7 +124,7 @@ def darcy_convection_generic(
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
-    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    u_solver = interpolation(u, streamfunction_from_velocity)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 

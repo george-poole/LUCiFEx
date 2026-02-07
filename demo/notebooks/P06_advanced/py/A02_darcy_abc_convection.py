@@ -14,7 +14,7 @@ from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
 from lucifex.pde.advection_diffusion import advection_diffusion_reaction
-from lucifex.pde.darcy import darcy_streamfunction, streamfunction_velocity
+from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
 
 
 @configure_simulation(
@@ -117,7 +117,7 @@ def darcy_abc_convection_rectangle(
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, 1, 1, fy=-rho[0],
     )
-    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 

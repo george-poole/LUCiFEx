@@ -11,8 +11,8 @@ from lucifex.fem import Function, Constant
 from lucifex.solver import bvp, ibvp, interpolation, evaluation, BoundaryConditions
 from lucifex.utils import CellType
 from lucifex.sim import configure_simulation
-from lucifex.pde.streamfunction import streamfunction_velocity
-from lucifex.pde.navier_stokes import vorticity_poisson, vorticity_transport
+from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction, streamfunction_from_vorticity
+from lucifex.pde.navier_stokes import navier_stokes_vorticity
 
 
 
@@ -61,16 +61,16 @@ def navier_stokes_forced(
         fy = Function((mesh, 'P', 1), fy, name='fy')
 
     psi_bcs = BoundaryConditions(("dirichlet", boundary.union, 0.0))
-    psi_solver = bvp(vorticity_poisson, psi_bcs)(psi, omega[0])
+    psi_solver = bvp(streamfunction_from_vorticity, psi_bcs)(psi, omega[0])
 
-    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
 
     dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
     )
 
     omega_bcs = BoundaryConditions(("dirichlet", boundary.union, 0.0))
-    omega_solver = ibvp(vorticity_transport, bcs=omega_bcs)(
+    omega_solver = ibvp(navier_stokes_vorticity, bcs=omega_bcs)(
         omega, dt[0], u, rho, mu, D_adv, D_diff, fx, fy)
     
     solvers = [psi_solver, u_solver, dt_solver, omega_solver]
