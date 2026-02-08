@@ -8,7 +8,7 @@ from ufl.geometry import GeometricCellQuantity
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.fem import Function, Constant
-from lucifex.solver import BoundaryConditions, create_robin
+from lucifex.solver import BoundaryConditions
 
 
 def poisson(
@@ -23,7 +23,7 @@ def poisson(
         fs = u
     else:
         fs = u.function_space
-    dx = Measure('dx', u.function_space.mesh)
+    dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     F_lhs = -inner(grad(v), grad(u_trial)) * dx
