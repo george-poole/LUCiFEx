@@ -281,35 +281,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C03.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C04.0_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A01.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A02.0_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.1_darcy_abc_reaction_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.2_darcy_abc_reaction_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A03.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A03.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -549,13 +529,13 @@ u_{\text{I}}(x=0) = 1 \\
 
 <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">dt_opts</span><span class="p">:</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">/</span> <span class="n">Nx</span>
-    <span class="n">dt_courant_init</span> <span class="o">=</span> <span class="n">advective_timestep</span><span class="p">(</span><span class="n">velocity</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">eps</span><span class="p">),</span> <span class="n">h</span><span class="p">)</span>
-    <span class="n">courant_init</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">dt_courant_init</span>
+    <span class="n">dt_advective</span> <span class="o">=</span> <span class="n">advective_timestep</span><span class="p">(</span><span class="n">velocity</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">eps</span><span class="p">),</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">courant</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">dt_advective</span>
     <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">dt</span><span class="p">][</span><span class="n">D_adv</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
         <span class="n">legend_labels</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]))</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">D_adv</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;◦&#39;</span><span class="p">,</span> <span class="s1">&#39;\circ &#39;</span><span class="p">)</span>
-        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{\\</span><span class="s2">mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=</span><span class="se">\\</span><span class="s2">mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">tex</span><span class="si">}</span><span class="se">}}</span><span class="s2">$</span><span class="se">\n</span><span class="s2"> $C_</span><span class="se">{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}</span><span class="s2">(0)</span><span class="se">}}</span><span class="s2">=</span><span class="si">{</span><span class="n">courant_init</span><span class="si">}</span><span class="s2">$&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">tex</span><span class="si">}</span><span class="se">}}</span><span class="s2">$</span><span class="se">\n</span><span class="s2"> $C_</span><span class="se">{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}}}</span><span class="s2">=</span><span class="si">{</span><span class="n">courant</span><span class="si">}</span><span class="s2">$&quot;</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
             <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> 
             <span class="n">legend_labels</span><span class="p">,</span> <span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
@@ -569,15 +549,24 @@ u_{\text{I}}(x=0) = 1 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/0c6e7e4296fb8048c4013b4cc4b3fa67cdee041359929c2c9aa637a0cd411fe5.png" src="../../_images/0c6e7e4296fb8048c4013b4cc4b3fa67cdee041359929c2c9aa637a0cd411fe5.png" />
-<img alt="../../_images/a414301e246895e2e901611876cf70691a8d11e448ceb10ac852c933adde73f4.png" src="../../_images/a414301e246895e2e901611876cf70691a8d11e448ceb10ac852c933adde73f4.png" />
-<img alt="../../_images/e287d871f7c009f8be581e694e0976c6ea3c492ee2b864089b19af9f071bd3fb.png" src="../../_images/e287d871f7c009f8be581e694e0976c6ea3c492ee2b864089b19af9f071bd3fb.png" />
-<img alt="../../_images/115f564ef1bfe0460d92bb8f5aa7e4989697b413fa906d953b7f799f4b3dde69.png" src="../../_images/115f564ef1bfe0460d92bb8f5aa7e4989697b413fa906d953b7f799f4b3dde69.png" />
-<img alt="../../_images/441663e2a5680422579acca1c25f79e2bb66ebab9b9b453e8b403fac76e153fc.png" src="../../_images/441663e2a5680422579acca1c25f79e2bb66ebab9b9b453e8b403fac76e153fc.png" />
-<img alt="../../_images/b12bf9e66bd470965b1f23e44c74a6fe7b2463baae3a830cdf562780da1650f1.png" src="../../_images/b12bf9e66bd470965b1f23e44c74a6fe7b2463baae3a830cdf562780da1650f1.png" />
-<img alt="../../_images/59bb10d5c96d06b475d5946d312b46440b64802468ec78aaff7c49d8f5158742.png" src="../../_images/59bb10d5c96d06b475d5946d312b46440b64802468ec78aaff7c49d8f5158742.png" />
-<img alt="../../_images/cc71c8a2822bdf91c1ff6cd5ace09018ce2240363fe14a9723a08e2a22799396.png" src="../../_images/cc71c8a2822bdf91c1ff6cd5ace09018ce2240363fe14a9723a08e2a22799396.png" />
+<img alt="../../_images/77a535ecf457a02f7807e0be905bd0811f5eaaa5b5c3e952e225d675f3064de5.png" src="../../_images/77a535ecf457a02f7807e0be905bd0811f5eaaa5b5c3e952e225d675f3064de5.png" />
+<img alt="../../_images/09c95e8e8b9666a2a9bdbaa68e991206c556e09ee2afecd5c9c81c4cfbe7530a.png" src="../../_images/09c95e8e8b9666a2a9bdbaa68e991206c556e09ee2afecd5c9c81c4cfbe7530a.png" />
+<img alt="../../_images/9ecd0e754266d654a67bdb672c043a0c472a1a09fff0869ca0b56bee8e52640e.png" src="../../_images/9ecd0e754266d654a67bdb672c043a0c472a1a09fff0869ca0b56bee8e52640e.png" />
+<img alt="../../_images/5c9923d7245bedcb6e460f050a5cfaef225c18a276171d0b27dcf8e275e83d24.png" src="../../_images/5c9923d7245bedcb6e460f050a5cfaef225c18a276171d0b27dcf8e275e83d24.png" />
+<img alt="../../_images/27212b31384b891b9d9b81f976bec2e39d40fa8f66d5299cc9e4ca0161627eb6.png" src="../../_images/27212b31384b891b9d9b81f976bec2e39d40fa8f66d5299cc9e4ca0161627eb6.png" />
+<img alt="../../_images/9db0a25b8879990cbc2eabcd1374fbd1dd34c7f44238b15b6b06f6f9e1efe49f.png" src="../../_images/9db0a25b8879990cbc2eabcd1374fbd1dd34c7f44238b15b6b06f6f9e1efe49f.png" />
+<img alt="../../_images/52be9a3b50a9c0941205d941a57ce3267146d65b28a44bae357da619ef9e0b3a.png" src="../../_images/52be9a3b50a9c0941205d941a57ce3267146d65b28a44bae357da619ef9e0b3a.png" />
+<img alt="../../_images/5d89ebceef3ac64ca45943e264423e6a3a14e45a36d66add178b93cb7a00898a.png" src="../../_images/5d89ebceef3ac64ca45943e264423e6a3a14e45a36d66add178b93cb7a00898a.png" />
 <img alt="../../_images/89615b15b7dbd035cf2e0b50693a42eb2ff7f2e38b967be3287a07485b3ef110.png" src="../../_images/89615b15b7dbd035cf2e0b50693a42eb2ff7f2e38b967be3287a07485b3ef110.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
 </div>
 </div>
 </section>

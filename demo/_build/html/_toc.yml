@@ -54,9 +54,9 @@ parts:
         sections: 
           - file: notebooks/P03_fluids/F03.1_navier_stokes_obstacle
           - file: notebooks/P03_fluids/F03.2_navier_stokes_forced
-      - file: notebooks/P03_fluids/F04.0_darcy_brinkman_equations
-        sections: 
-          - file: notebooks/P03_fluids/F04.1_darcy_brinkman_lens
+      # - file: notebooks/P03_fluids/F04.0_darcy_brinkman_equations
+      #   sections: 
+      #     - file: notebooks/P03_fluids/F04.1_darcy_brinkman_lens
 
   - caption: Transport
     chapters:
@@ -98,27 +98,28 @@ parts:
           - file: notebooks/P05_convection/C01.8_darcy_elder
       - file: notebooks/P05_convection/C02.0_stokes_convection_equations
         sections: 
-          - file: notebooks/P05_convection/C02.1_stokes_viscosity
+          - file: notebooks/P05_convection/C02.1_stokes_rayleigh_benard_isoviscous
+          - file: notebooks/P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous
       - file: notebooks/P05_convection/C03.0_navier_stokes_convection_equations
         sections: 
           - file: notebooks/P05_convection/C03.1_navier_stokes_thermosolutal
           - file: notebooks/P05_convection/C03.2_navier_stokes_rayleigh_taylor
           - file: notebooks/P05_convection/C03.3_navier_stokes_marangoni
-      - file: notebooks/P05_convection/C04.0_darcy_brinkman_convection_equations
-        sections:
-          - file: notebooks/P05_convection/C04.1_darcy_brinkman_rayleigh_taylor
-          - file: notebooks/P05_convection/C04.2_darcy_brinkman_rayleigh_benard
+      # - file: notebooks/P05_convection/C04.0_darcy_brinkman_convection_equations
+      #   sections:
+      #     - file: notebooks/P05_convection/C04.1_darcy_brinkman_rayleigh_taylor
+      #     - file: notebooks/P05_convection/C04.2_darcy_brinkman_rayleigh_benard
 
-  - caption: Advanced 
-    chapters:
-      - file: notebooks/P06_advanced/A01.0_darcy_fingering_equations
-        sections:
-          - file: notebooks/P06_advanced/A01.1_darcy_fingering_dirichlet
-          - file: notebooks/P06_advanced/A01.2_darcy_fingering_periodic
-      - file: notebooks/P06_advanced/A02.0_darcy_abc_reaction_equations
-        sections:
-          - file: notebooks/P06_advanced/A02.1_darcy_abc_reaction_density
-          - file: notebooks/P06_advanced/A02.2_darcy_abc_reaction_viscosity
-      - file: notebooks/P06_advanced/A03.0_darcy_porosity_evolution_equations
-        sections: 
-          - file: notebooks/P06_advanced/A03.1_darcy_porosity_evolution_injection
+  # - caption: Advanced 
+  #   chapters:
+  #     - file: notebooks/P06_advanced/A01.0_darcy_fingering_equations
+  #       sections:
+  #         - file: notebooks/P06_advanced/A01.1_darcy_fingering_dirichlet
+  #         - file: notebooks/P06_advanced/A01.2_darcy_fingering_periodic
+  #     - file: notebooks/P06_advanced/A02.0_darcy_abc_reaction_equations
+  #       sections:
+  #         - file: notebooks/P06_advanced/A02.1_darcy_abc_reaction_density
+  #         - file: notebooks/P06_advanced/A02.2_darcy_abc_reaction_viscosity
+  #     - file: notebooks/P06_advanced/A03.0_darcy_porosity_evolution_equations
+  #       sections: 
+  #         - file: notebooks/P06_advanced/A03.1_darcy_porosity_evolution_injection

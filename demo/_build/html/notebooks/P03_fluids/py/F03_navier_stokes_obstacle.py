@@ -4,13 +4,14 @@ from lucifex.fdm import (
 )
 from lucifex.fem import Constant
 from lucifex.solver import (
-    BoundaryConditions, evaluation,
+    BoundaryConditions, evaluation, bvp,
 )
 from lucifex.mesh import rectangle_minus_ellipse_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.navier_stokes import ipcs_solvers, chorin_solvers
 from lucifex.pde.constitutive import newtonian_stress
+from lucifex.pde.streamfunction_vorticity import streamfunction_from_velocity
 
 
 @configure_simulation(
@@ -35,6 +36,8 @@ def navier_stokes_circle_obstacle(
     # time discretization
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
+    # optional
+    streamfunction: bool = False,
 ):
     # space
     Omega = rectangle_minus_ellipse_mesh(dx, 'triangle')(
@@ -94,5 +97,14 @@ def navier_stokes_circle_obstacle(
         raise ValueError(f"Navier-Stokes scheme '{ns_scheme}' not implemented.")
     
     solvers = [dt_solver, *ns_solvers]
+
+    if streamfunction:
+        psi = FunctionSeries((Omega, 'P', 1), name="psi")
+        psi_bcs =BoundaryConditions(
+            ('dirichlet', dOmega['upper', 'lower', 'obstacle'], 0.0),
+        )
+        psi_solver = bvp(streamfunction_from_velocity, psi_bcs)(psi, u[0])
+        solvers.append(psi_solver)
+    
     exprs_consts = [rho, mu]
     return solvers, t, dt, exprs_consts
