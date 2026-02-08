@@ -94,5 +94,5 @@ def navier_stokes_circle_obstacle(
         raise ValueError(f"Navier-Stokes scheme '{ns_scheme}' not implemented.")
     
     solvers = [dt_solver, *ns_solvers]
-    namespace = [rho, mu]
-    return solvers, t, dt, namespace
+    exprs_consts = [rho, mu]
+    return solvers, t, dt, exprs_consts

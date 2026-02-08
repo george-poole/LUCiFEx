@@ -5,7 +5,7 @@ from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
-from .C01_darcy_convection_generic import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
+from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -20,7 +20,7 @@ def darcy_convection_elder_rectangle(
     cell: str = CellType.QUADRILATERAL,
     scaling: str = 'advective',
     Ra: float = 5e2,
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (1234, 5678),
     dt_max: float = 0.5,
@@ -59,7 +59,7 @@ def darcy_convection_elder_rectangle(
         0.0,
         cubic_noise(['neumann', 'dirichlet'], [Lx, Ly], c_freq, c_seed),
         [Lx, Ly],
-        c_eps,
+        c_ampl,
         ) 
     dispersion = lambda phi: Di * phi
     density = lambda c: Bu * c

@@ -46,9 +46,10 @@ parts:
           - file: notebooks/P03_fluids/F01.2_darcy_anticline
       - file: notebooks/P03_fluids/F02.0_stokes_equations
         sections: 
-          - file: notebooks/P03_fluids/F02.1_stokes_poiseuille
+          - file: notebooks/P03_fluids/F02.1_stokes_channel
           - file: notebooks/P03_fluids/F02.2_stokes_cavity
           - file: notebooks/P03_fluids/F02.3_stokes_forced
+          - file: notebooks/P03_fluids/F02.4_stokes_corrugated
       - file: notebooks/P03_fluids/F03.0_navier_stokes_equations
         sections: 
           - file: notebooks/P03_fluids/F03.1_navier_stokes_obstacle

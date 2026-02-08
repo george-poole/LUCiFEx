@@ -20,7 +20,7 @@ from lucifex.solver import (
 )
 from lucifex.sim import Simulation
 
-from lucifex.pde.streamfunction_vorticity import streamfunction_from_velocity
+from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
 from lucifex.pde.scaling import ScalingOptions
@@ -89,7 +89,7 @@ def darcy_convection_generic(
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
     # optional postprocessing
     diagnostic: bool | Iterable[Solver] = False,    
-    namespace: Iterable = (),
+    exprs_consts: Iterable = (),
 ) -> Simulation:
     """
     `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
@@ -124,7 +124,7 @@ def darcy_convection_generic(
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
-    u_solver = interpolation(u, streamfunction_from_velocity)(psi[0])
+    u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
             u[0], cfl_h, cfl_courant, dt_max, dt_min,
         ) 
@@ -151,5 +151,5 @@ def darcy_convection_generic(
         if isinstance(diagnostic, Iterable):
             solvers.extend(diagnostic)
             
-    namespace = [phi, ('k', k), ('d', d), rho, mu, *namespace]
-    return Simulation(solvers, t, dt, namespace)
+    exprs_consts = [phi, ('k', k), ('d', d), rho, mu, *exprs_consts]
+    return Simulation(solvers, t, dt, exprs_consts)

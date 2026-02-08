@@ -11,7 +11,7 @@ from lucifex.utils import is_tensor
 
 
 def darcy_streamfunction(
-    psi: FunctionSeries,
+    psi: Function | FunctionSeries,
     k: Expr | Function | Constant | float,
     mu: Expr | Function | Constant | float,
     fx: Expr | Function | Constant | float | None = None,

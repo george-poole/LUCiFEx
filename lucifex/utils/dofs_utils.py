@@ -51,7 +51,7 @@ class DofsMethodType(StrEnum):
 
 class FacetMethodType(StrEnum):
     ANY = 'any'
-    BOUNDARY = 'BOUNDARY'
+    BOUNDARY = 'boundary'
 
 
 def dofs_indices(
@@ -141,7 +141,9 @@ def dofs(
     
 
 def as_spatial_marker(
-    m: SpatialMarker | SpatialMarkerAlias
+    m: SpatialMarker | SpatialMarkerAlias,
+    rtol: float = 1e-5,
+    atol: float = 1e-8,
 ) -> SpatialMarker:
     """
     Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)`, 
@@ -154,7 +156,7 @@ def as_spatial_marker(
         if isinstance(m(x_test), (bool, np.bool_)):
             return m
         else:
-            return lambda x: np.isclose(m(x), 0.0)
+            return lambda x: np.isclose(m(x), 0.0, rtol, atol)
 
     if not isinstance(m, Iterable):
         return _as_marker(m)

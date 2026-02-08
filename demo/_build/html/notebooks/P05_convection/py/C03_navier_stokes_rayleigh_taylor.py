@@ -15,7 +15,7 @@ from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
 
-from .A11_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
+from .C03_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(
@@ -69,19 +69,16 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
-
     # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
-
     # constants
     Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')  
-
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
         lambda x: 1.0 * (x[1] > Ly / 2) + 0.0,
@@ -95,7 +92,6 @@ def navier_stokes_rayleigh_taylor_rectangle(
     u_bcs = BoundaryConditions(
         ('dirichlet', dOmega.union, u_zero),
     )
-
     # flow and transport
     u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
@@ -104,7 +100,6 @@ def navier_stokes_rayleigh_taylor_rectangle(
     deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
     rho = ExprSeries(c, 'rho')
     f = Bu * rho * as_vector([0, -1]) 
-
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', cfl_courant, dt_max, dt_min,
@@ -117,6 +112,6 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    namespace = [Pr, Ra, rho]
-    return solvers, t, dt, namespace
+    exprs_consts = [Pr, Ra, Di, Vi, Bu, rho]
+    return solvers, t, dt, exprs_consts
 

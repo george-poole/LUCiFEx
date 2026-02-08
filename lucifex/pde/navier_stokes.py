@@ -115,7 +115,7 @@ def ipcs_solvers(
     ipcs2_solver = bvp(ipcs_2, bcs=p_bcs, future=True)(
         p, u, dt, p_scale,
     )
-    ipcs3_solver = bvp(ipcs_3, future=True, overwrite=True)(
+    ipcs3_solver = bvp(ipcs_3, bcs=u_bcs, future=True, overwrite=True)(
         u, p, dt, p_scale,
     )
     return ipcs1_solver, ipcs2_solver, ipcs3_solver
@@ -201,7 +201,7 @@ def chorin_solvers(
     chorin2_solver = bvp(chorin_2, bcs=p_bcs, future=True)(
         p, u, dt, p_scale,
     )
-    chorin3_solver = bvp(chorin_3, future=True, overwrite=True)(
+    chorin3_solver = bvp(chorin_3, bcs=u_bcs, future=True, overwrite=True)(
         u, p, dt, p_scale,
     )
     return chorin1_solver, chorin2_solver, chorin3_solver

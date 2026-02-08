@@ -14,7 +14,7 @@
     </td>
 <td>
     <img src="./notebooks/P02_introductory/figures/I01.3_poisson_vector.png" width="400"/>
-    <a href="./notebooks/P02_introductory/I01.3_poisson_vector.ipynb">Vector-valued Poisson equation</a> 
+    <a href="./notebooks/P02_introductory/I01.3_poisson_vector.ipynb">Vector Poisson equation in a rectangle</a> 
     </td>
     </tr>
 <tr>
@@ -66,8 +66,8 @@
     <a href="./notebooks/P03_fluids/F01.2_darcy_anticline.ipynb">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a> 
     </td>
 <td>
-    <img src="./notebooks/P03_fluids/figures/F02.1_stokes_poiseuille.png" width="400"/>
-    <a href="./notebooks/P03_fluids/F02.1_stokes_poiseuille.ipynb">Flow of a Stokes fluid in a Poiseuille channel</a> 
+    <img src="./notebooks/P03_fluids/figures/F02.1_stokes_channel.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F02.1_stokes_channel.ipynb">Flow of a Stokes fluid in a pressure-driven channel</a> 
     </td>
     </tr>
 <tr>
@@ -80,12 +80,16 @@
     <a href="./notebooks/P03_fluids/F02.3_stokes_forced.ipynb">Flow of a Stokes fluid with vertical forcing</a> 
     </td>
 <td>
-    <img src="./notebooks/P03_fluids/figures/F03.1_navier_stokes_obstacle.png" width="400"/>
-    <a href="./notebooks/P03_fluids/F03.1_navier_stokes_obstacle.ipynb">Flow of Navier-Stokes fluid past a circular obstacle</a> 
+    <img src="./notebooks/P03_fluids/figures/F02.4_stokes_corrugated.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F02.4_stokes_corrugated.ipynb">Flow of a Stokes fluid in a corrugated channel</a> 
     </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P03_fluids/figures/F03.1_navier_stokes_obstacle.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F03.1_navier_stokes_obstacle.ipynb">Flow of Navier-Stokes fluid past a circular obstacle</a> 
+    </td>
+<td>
     <img src="./notebooks/P03_fluids/figures/F03.2_navier_stokes_forced.png" width="400"/>
     <a href="./notebooks/P03_fluids/F03.2_navier_stokes_forced.ipynb">Flow of a Navier-Stokes fluid with vertical forcing</a> 
     </td>
@@ -126,7 +130,7 @@
 <tr>
     <td>
     <img src="./notebooks/P04_transport/figures/T03.1_dg_advection_diffusion_interval.png" width="400"/>
-    <a href="./notebooks/P04_transport/T03.1_dg_advection_diffusion_interval.ipynb">DG advection-diffusion of a tophat in an interval</a> 
+    <a href="./notebooks/P04_transport/T03.1_dg_advection_diffusion_interval.ipynb">DG advection-diffusion of a tophat on an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T03.2_dg_advection_diffusion_rectangle.png" width="400"/>

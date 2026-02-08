@@ -1,5 +1,5 @@
 from ufl.core.expr import Expr
-from ufl import Form, as_matrix, as_vector, grad, curl, Dx
+from ufl import Form, as_matrix, as_vector, grad, curl, Dx, split
 
 from lucifex.fem import Function
 from lucifex.solver import BoundaryConditions
@@ -33,7 +33,7 @@ def vorticity_from_velocity(
         if isinstance(u, tuple):
             ux, uy = u
         else:
-            ux, uy = get_component_fem_functions(('P', 1), u)
+            ux, uy = split(u) #get_component_fem_functions(('P', 1), u)
         return Dx(uy, 0) - Dx(ux, 1)
     else:
         if isinstance(u, tuple):

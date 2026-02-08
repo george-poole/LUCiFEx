@@ -124,9 +124,9 @@ def brinkman_convection_rayleigh_benard_rectangle(
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    namespace = [Pr, Ra, Da, chi, rho]
+    exprs_consts = [Pr, Ra, Da, chi, rho]
 
-    return solvers, t, dt, namespace
+    return solvers, t, dt, exprs_consts
 
 
 @configure_simulation(

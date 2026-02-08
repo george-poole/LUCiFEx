@@ -12,7 +12,7 @@ from dolfinx.fem import (
     dirichletbc,
 )
 
-from ..fdm import Series, FunctionSeries
+from ..fdm import FunctionSeries
 from ..fem import Function, Constant
 from ..utils.fem_utils import is_scalar, is_vector, create_fem_function, create_fem_constant
 from ..utils.mesh_utils import BoundaryType, create_tagged_measure
@@ -23,6 +23,7 @@ from ..utils.dofs_utils import (
     SpatialMarker,
     SubspaceIndex,
     DofsMethodType,
+    FacetMethodType,
     ScalarVectorError,
 )
 
@@ -54,7 +55,7 @@ class BoundaryConditions:
         dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
         rescale_weak: int | float | None = None, 
     ):
-        self._markers: list[SpatialMarker | SpatialMarkerAlias] = []
+        self._markers: list[SpatialMarker] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
@@ -81,7 +82,7 @@ class BoundaryConditions:
                     btype, marker, value, subindex = bc
                 case _:
                     raise ValueError(f"{bc} not a valid boundary condition")
-            self._markers.append(marker)
+            self._markers.append(as_spatial_marker(marker))
             self._values.append(value)
             self._btypes.append(BoundaryType(btype))
             self._subindices.append(subindex)
@@ -92,6 +93,7 @@ class BoundaryConditions:
         strong_types: Iterable[BoundaryType] = (
             BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL, BoundaryType.STRONG,
         ),
+        facet_method: FacetMethodType = FacetMethodType.BOUNDARY,
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uE` on `∂Ω`
@@ -103,7 +105,7 @@ class BoundaryConditions:
             strict=True,
         ):
             if b in strong_types:
-                dofs = dofs_indices(fs, m, i, d)
+                dofs = dofs_indices(fs, m, i, d, facet_method=facet_method)
                 if isinstance(uD, Constant):
                     if i is None:
                         dbc = dirichletbc(uD, dofs, fs)
@@ -142,7 +144,7 @@ class BoundaryConditions:
                 scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
                 mpc.create_periodic_constraint_geometrical(
                     fs, 
-                    as_spatial_marker(m),
+                    m,
                     reln,
                     bcs=bcs,
                     scale=scale,

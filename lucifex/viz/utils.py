@@ -164,6 +164,7 @@ def set_legend(
     bbox_to_anchor=(1, 1),
     frameon=False,
     legend_fontsizes: float | tuple[float, float] = (14.0, 12.0),
+    legend_title_alignment: str | None = None,
 ) -> None:    
     legend_labels = [str(i) for i in legend_labels]
     if handles is None:
@@ -176,7 +177,7 @@ def set_legend(
 
     title_fontsize, label_fontsize = legend_fontsizes
 
-    ax.legend(
+    lgnd = ax.legend(
         *args,
         title=legend_title,
         loc=loc,
@@ -185,6 +186,8 @@ def set_legend(
         title_fontsize=title_fontsize,
         fontsize=label_fontsize,
     )
+    if legend_title_alignment is None:
+        lgnd.get_title().set_multialignment("center")
 
 
 def create_multifigure(

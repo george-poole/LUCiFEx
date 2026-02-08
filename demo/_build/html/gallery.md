@@ -14,7 +14,7 @@
     </td>
 <td>
     <img src="./notebooks/P02_introductory/figures/I01.3_poisson_vector.png" width="400"/>
-    <a href="./notebooks/P02_introductory/I01.3_poisson_vector.html">Vector-valued Poisson equation</a> 
+    <a href="./notebooks/P02_introductory/I01.3_poisson_vector.html">Vector Poisson equation in a rectangle</a> 
     </td>
     </tr>
 <tr>
@@ -66,8 +66,8 @@
     <a href="./notebooks/P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a> 
     </td>
 <td>
-    <img src="./notebooks/P03_fluids/figures/F02.1_stokes_poiseuille.png" width="400"/>
-    <a href="./notebooks/P03_fluids/F02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a> 
+    <img src="./notebooks/P03_fluids/figures/F02.1_stokes_channel.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F02.1_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a> 
     </td>
     </tr>
 <tr>
@@ -80,12 +80,16 @@
     <a href="./notebooks/P03_fluids/F02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a> 
     </td>
 <td>
-    <img src="./notebooks/P03_fluids/figures/F03.1_navier_stokes_obstacle.png" width="400"/>
-    <a href="./notebooks/P03_fluids/F03.1_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a> 
+    <img src="./notebooks/P03_fluids/figures/F02.4_stokes_corrugated.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F02.4_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a> 
     </td>
     </tr>
 <tr>
     <td>
+    <img src="./notebooks/P03_fluids/figures/F03.1_navier_stokes_obstacle.png" width="400"/>
+    <a href="./notebooks/P03_fluids/F03.1_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a> 
+    </td>
+<td>
     <img src="./notebooks/P03_fluids/figures/F03.2_navier_stokes_forced.png" width="400"/>
     <a href="./notebooks/P03_fluids/F03.2_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a> 
     </td>
@@ -98,7 +102,7 @@
     <tr>
     <td>
     <img src="./notebooks/P04_transport/figures/T01.1_dg_advection_interval_step.png" width="400"/>
-    <a href="./notebooks/P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step on an interval</a> 
+    <a href="./notebooks/P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step in an interval</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T01.2_dg_advection_interval_cosine.png" width="400"/>
@@ -112,7 +116,7 @@
 <tr>
     <td>
     <img src="./notebooks/P04_transport/figures/T01.4_dg_advection_rectangle_vortex.png" width="400"/>
-    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a> 
+    <a href="./notebooks/P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a> 
     </td>
 <td>
     <img src="./notebooks/P04_transport/figures/T02.1_dg_steady_advection_diffusion_interval.png" width="400"/>

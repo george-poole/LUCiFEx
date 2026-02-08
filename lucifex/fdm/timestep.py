@@ -122,9 +122,9 @@ def _(velocity, h, tol, _):
 
 
 @_advective_dt_evaluation.register(Iterable)
-def _(velocity: Iterable[float], h, tol, _):
+def _(velocity: Iterable[float], h, tol, mesh):
     norm = np.linalg.norm(velocity, 2)
-    return _advective_dt_evaluation(norm, h, tol)
+    return _advective_dt_evaluation(norm, h, tol, mesh)
 
 
 def diffusive_timestep(
@@ -183,7 +183,7 @@ def _(diffusion: Constant, h, tol, mesh):
 
 @_diffusive_dt_evaluation.register(float)
 @_diffusive_dt_evaluation.register(int)
-def _(d, h, tol):
+def _(d, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
     return lambda: h**2 / max(d, tol)
