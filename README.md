@@ -4,7 +4,7 @@ Welcome to the *&nbsp;**L**inearized **U**nderground **C**onvection **i**n **FE*
 
 LUCiFEx is a flexible and user-friendly package for the applied mathematician to solve time-dependent PDEs numerically by the finite element method using [FEniCSx](https://github.com/FEniCS/dolfinx). To get started with LUCiFEx, refer to the [user guide](https://george-poole.github.io/LUCiFEx/notebooks/P01_user_guide/U00_introduction.html).
 
-Development has primarily been motivated by the numerical study of convection in 2D porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
+Development has primarily been motivated by the numerical study of two-dimensional convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cam.ac.uk`.
 
 ## Demo
 

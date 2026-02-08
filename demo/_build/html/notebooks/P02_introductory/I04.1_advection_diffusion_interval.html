@@ -222,6 +222,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -532,6 +533,7 @@ u_{\text{D}}(x=L_x)=0 \\
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">texstr</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">D</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">D</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;◦&#39;</span><span class="p">,</span> <span class="s1">&#39;\circ &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;₁&#39;</span><span class="p">,</span> <span class="s1">&#39;_1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;₂&#39;</span><span class="p">,</span> <span class="s1">&#39;_2&#39;</span><span class="p">)</span>
+<span class="n">minmax_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;$\min(u)$&#39;</span><span class="p">,</span> <span class="s1">&#39;$\max(u)$&#39;</span><span class="p">)</span>
 <span class="n">D_adv_tex</span> <span class="o">=</span> <span class="n">texstr</span><span class="p">(</span><span class="n">D_adv</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">D_diff</span> <span class="ow">in</span> <span class="n">D_diff_opts</span><span class="p">:</span>
@@ -546,62 +548,37 @@ u_{\text{D}}(x=L_x)=0 \\
     <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">title_texts</span><span class="p">)</span>
     <span class="n">legend_labels</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">slc</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">slc</span><span class="p">]))</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">slc</span><span class="p">],</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">D_diff</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">D_diff</span> <span class="ow">is</span> <span class="n">CN</span><span class="p">))(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;u(x,t)_</span><span class="si">{</span><span class="n">D_diff</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">D_diff</span> <span class="ow">is</span> <span class="n">CN</span><span class="p">))(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">uMinMax</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">D_diff</span><span class="p">][</span><span class="s1">&#39;uMinMax&#39;</span><span class="p">]</span>
+    <span class="n">uMin</span><span class="p">,</span> <span class="n">uMax</span> <span class="o">=</span> <span class="n">uMinMax</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">uMinMax</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_twin_lines</span><span class="p">(</span>
+        <span class="n">uMinMax</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">uMin</span><span class="o">.</span><span class="n">value_series</span><span class="p">,</span> <span class="n">uMax</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span>
+        <span class="n">minmax_labels</span><span class="p">,</span>
+        <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;uMinMax(t)_</span><span class="si">{</span><span class="n">D_diff</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_twinned&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">plot_stacked_lines</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">uMin</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMin</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span> <span class="p">(</span><span class="n">uMax</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMax</span><span class="o">.</span><span class="n">value_series</span><span class="p">)],</span>
+        <span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
+        <span class="n">minmax_labels</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;uMinMax(t)_</span><span class="si">{</span><span class="n">D_diff</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_stacked&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <img alt="../../_images/1204ca8ba472761957f775bfe3241393efd52d30f1b130b2e2222985c2f627e5.png" src="../../_images/1204ca8ba472761957f775bfe3241393efd52d30f1b130b2e2222985c2f627e5.png" />
+<img alt="../../_images/052f5ef9b395029ee99c2ec9239dfbf75afd4bfe644d53b4835caea231673f00.png" src="../../_images/052f5ef9b395029ee99c2ec9239dfbf75afd4bfe644d53b4835caea231673f00.png" />
+<img alt="../../_images/d3a5d8f6718223d5d781bb5f6b3c7db1deb0dee8ac6d4e71c97fd870b5d3b3e6.png" src="../../_images/d3a5d8f6718223d5d781bb5f6b3c7db1deb0dee8ac6d4e71c97fd870b5d3b3e6.png" />
 <img alt="../../_images/dc23113995ae92d81b15cd60e3c594a384e91ebb9d93fd840b1dc260a65513d1.png" src="../../_images/dc23113995ae92d81b15cd60e3c594a384e91ebb9d93fd840b1dc260a65513d1.png" />
+<img alt="../../_images/ac95ad0e565bb204e1b01865f82f67e9d67132969c87be4f3a6a27fa4e759fca.png" src="../../_images/ac95ad0e565bb204e1b01865f82f67e9d67132969c87be4f3a6a27fa4e759fca.png" />
+<img alt="../../_images/552f4c605fea06f52d1def01a8c8852fcf3edae748cb3e83843816d5d31003a5.png" src="../../_images/552f4c605fea06f52d1def01a8c8852fcf3edae748cb3e83843816d5d31003a5.png" />
 <img alt="../../_images/b988e42e568d2802026a51dcb129f10202465857398e79559a17346b7f94a484.png" src="../../_images/b988e42e568d2802026a51dcb129f10202465857398e79559a17346b7f94a484.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;$\min(u)$&#39;</span><span class="p">,</span> <span class="s1">&#39;$\max(u)$&#39;</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">D_diff</span> <span class="ow">in</span> <span class="n">D_diff_opts</span><span class="p">:</span>
-    <span class="n">uMinMax</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">D_diff</span><span class="p">][</span><span class="s1">&#39;uMinMax&#39;</span><span class="p">]</span>
-    <span class="n">uMin</span><span class="p">,</span> <span class="n">uMax</span> <span class="o">=</span> <span class="n">uMinMax</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">uMinMax</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">plot_twin_lines</span><span class="p">(</span>
-        <span class="n">uMinMax</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span>
-        <span class="p">(</span><span class="n">uMin</span><span class="o">.</span><span class="n">value_series</span><span class="p">,</span> <span class="n">uMax</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span>
-        <span class="n">y_labels</span><span class="p">,</span>
-        <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plot_stacked_lines</span><span class="p">(</span>
-        <span class="p">[(</span><span class="n">uMin</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMin</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span> <span class="p">(</span><span class="n">uMax</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uMax</span><span class="o">.</span><span class="n">value_series</span><span class="p">)],</span>
-        <span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
-        <span class="n">y_labels</span><span class="p">,</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../../_images/5f4ab2d97175426cf806e24019601282619a5bff9282a29bc6a05b6f640a2e79.png" src="../../_images/5f4ab2d97175426cf806e24019601282619a5bff9282a29bc6a05b6f640a2e79.png" />
-<img alt="../../_images/d62685b87ef96d3dcf6ec81826239c4792528e7560283a4ff1ea51156c376cab.png" src="../../_images/d62685b87ef96d3dcf6ec81826239c4792528e7560283a4ff1ea51156c376cab.png" />
-<img alt="../../_images/a7ae3ffc7b5649e2ecfd9a1db235cd3a445f26c9d07c2c0f936497c300bca2d5.png" src="../../_images/a7ae3ffc7b5649e2ecfd9a1db235cd3a445f26c9d07c2c0f936497c300bca2d5.png" />
-<img alt="../../_images/f1c2ac5982791a44ed51ca6999dd16cab8f8f05f7da782dd2beb7d3c56ce5886.png" src="../../_images/f1c2ac5982791a44ed51ca6999dd16cab8f8f05f7da782dd2beb7d3c56ce5886.png" />
-<img alt="../../_images/d436b0dbf9ceed53375ba4f8875c5a502808c468b0772f7835f03b75322ea8a3.png" src="../../_images/d436b0dbf9ceed53375ba4f8875c5a502808c468b0772f7835f03b75322ea8a3.png" />
-<img alt="../../_images/86702bb30d4891b7baa5e1337baf54e566203c97014435aa17b55e61155639ef.png" src="../../_images/86702bb30d4891b7baa5e1337baf54e566203c97014435aa17b55e61155639ef.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
+<img alt="../../_images/a2b3a2d0d9d619b623e52964ec84ee524ee3a88477a1fc3f09b52239f1e93aa5.png" src="../../_images/a2b3a2d0d9d619b623e52964ec84ee524ee3a88477a1fc3f09b52239f1e93aa5.png" />
+<img alt="../../_images/b864f0d1988c62aef78e5e0d31e84a1bfb38121e5fd57bad61fbccc9d14fbb1e.png" src="../../_images/b864f0d1988c62aef78e5e0d31e84a1bfb38121e5fd57bad61fbccc9d14fbb1e.png" />
 </div>
 </div>
 </section>

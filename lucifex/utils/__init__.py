@@ -26,8 +26,6 @@ from .numpy_utils import (
     where_on_grid,
     cross_section,
     spacetime_grid,
-    NonCartesianQuadMeshError,
-    NonCartesianMeshError,
 )
 from .mesh_utils import(
     CellType,
@@ -47,6 +45,9 @@ from .mesh_utils import(
     number_of_entities,
     is_cartesian,
     is_uniform_cartesian,
+    is_simplicial,
+    NonCartesianQuadMeshError,
+    NonCartesianMeshError,
 )
 from .fem_utils import (
     create_fem_constant, 

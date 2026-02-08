@@ -13,22 +13,32 @@ from lucifex.solver import BoundaryConditions
 
 def poisson(
     u: Function | FunctionSpace,
-    f: Function | Constant | Expr,
+    f: Function | Constant | Expr | None = None,
+    w: Function | Constant | Expr | None = None,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
-    `∇²u = f`
+    `∇²u = f` or `∇·(w·∇u) = f`
     """
+    if w is None:
+        w = 1
+
     if isinstance(u, FunctionSpace):
         fs = u
     else:
         fs = u.function_space
+
     dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
-    F_lhs = -inner(grad(v), grad(u_trial)) * dx
-    F_rhs = -inner(v, f) * dx
-    forms = [F_lhs, F_rhs]
+    
+    F_lhs = -inner(grad(v), w * grad(u_trial)) * dx
+    forms = [F_lhs]
+
+    if f is not None:
+        F_rhs = -inner(v, f) * dx
+        forms.append(F_rhs)
+
     if bcs is not None:
         ds, u_neumann, u_robin = bcs.boundary_data(u, 'neumann', 'robin')
         if u_neumann:
@@ -37,10 +47,15 @@ def poisson(
         if u_robin:
             F_robin = sum([v * uR * ds(i) for i, uR in u_robin])
             forms.append(F_robin)
+
+    if f is None and bcs is None:
+        F_zero = v * Constant(fs.mesh, 0.0) * dx
+        forms.append(F_zero)
+
     return forms
 
 
-def poisson_weak(
+def nitsche_poisson(
     u: Function | FunctionSpace,
     f: Function | Constant | Expr,
     h: str | GeometricCellQuantity, 
@@ -48,7 +63,7 @@ def poisson_weak(
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
-    `∇²u = f`
+    `∇²u = f` with boundary conditions imposed by the Nitsche method.
     """
     forms = poisson(u, f, bcs=None)  
 

@@ -50,7 +50,7 @@ def streamfunction_from_vorticity(
     `∇²ψ = ±ω` depending on sign convention
     for an incompressible flow `∇·𝐮 = 0`.
     """
-    return poisson(psi, omega, bcs)
+    return poisson(psi, omega, bcs=bcs)
 
 
 def streamfunction_from_velocity(
@@ -63,4 +63,4 @@ def streamfunction_from_velocity(
     for an incompressible flow `∇·𝐮 = 0`.
     """
     omega = vorticity_from_velocity(u, d2=True)
-    return poisson(psi, omega, bcs)
+    return poisson(psi, omega, bcs=bcs)

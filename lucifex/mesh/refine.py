@@ -2,7 +2,7 @@ from typing import Callable, Iterable
 
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
-from ..utils import as_spatial_marker, SpatialMarker, SpatialMarkerAlias
+from ..utils import as_spatial_marker, is_simplicial, SpatialMarker, SpatialMarkerAlias
 from .cartesian import CellType
 
 
@@ -17,7 +17,7 @@ def refine(
     """
     For simplex meshes only.
     """
-    if not is_simplex_mesh(mesh):
+    if not is_simplicial(mesh):
         raise ValueError('Only implemented for simplex meshes.')
     
     marker = as_spatial_marker(marker)
@@ -38,19 +38,6 @@ def refine(
         mesh_refined.name = name
 
     return mesh_refined
-
-
-def is_simplex_mesh(mesh: Mesh) -> bool:
-    dim = mesh.geometry.dim
-    cell_name = mesh.topology.cell_name()
-
-    match dim:
-        case 1:
-            return True
-        case 2:
-            return cell_name == CellType.TRIANGLE
-        case 3:
-            return cell_name == CellType.TETRAHEDRON
 
 
 def copy_mesh(

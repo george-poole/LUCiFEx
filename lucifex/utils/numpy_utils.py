@@ -15,7 +15,7 @@ import numpy as np
 
 from .dofs_utils import dofs
 from .py_utils import optional_lru_cache, MultipleDispatchTypeError, StrSlice, as_slice
-from .mesh_utils import CellType, mesh_vertices, mesh_coordinates, mesh_axes
+from .mesh_utils import CellType, mesh_vertices, mesh_coordinates, mesh_axes, is_simplicial
 from .ufl_utils import is_scalar, ScalarError
 
 
@@ -43,8 +43,8 @@ def _(mesh: Mesh):
         Triangulation only valid in 2D, not 
         dimension {mesh.geometry.dim} """
         )
-
-    if not mesh.topology.cell_name() == CellType.TRIANGLE:
+    
+    if not is_simplicial(mesh):
         raise ValueError(
             f""" 
         Triangulation only valid for triangle cells, not 
@@ -87,7 +87,7 @@ def quadrangulation(
         dimension {mesh.geometry.dim} """
         )
 
-    if not mesh.topology.cell_name() == CellType.QUADRILATERAL:
+    if is_simplicial(mesh):
         raise ValueError(
             f""" 
         Quadrangulation only valid with quadrilateral cells, not 
@@ -564,19 +564,3 @@ def spacetime_grid(
         _cross_sections.append(_csec)
 
     return np.array(_cross_sections).T
-
-
-class NonCartesianMeshError(NotImplementedError):
-    def __init__(
-        self, 
-        unsupported: str,
-    ):
-        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh.')
-
-
-class NonCartesianQuadMeshError(NotImplementedError):
-    def __init__(
-        self, 
-        unsupported: str,
-    ):
-        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh of quadrilateral cell.')

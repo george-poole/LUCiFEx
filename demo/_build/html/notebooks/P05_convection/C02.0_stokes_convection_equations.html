@@ -222,6 +222,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -471,8 +472,8 @@ document.write(`
 &amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\begin{cases}
-\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\textbf{u})\cdot\nabla c) &amp; \\
-\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}(\textbf{u})\cdot\nabla\theta) &amp; \\
+\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}\cdot\nabla c) &amp; \\
+\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}\cdot\nabla\theta) &amp; \\
 \nabla\cdot\textbf{u} = 0 &amp; \\
 \textbf{0}=-\nabla p + \nabla\cdot\tau - \rho g\,\textbf{e}_g &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 c(\textbf{x},t=0)=c_0 &amp; \forall\textbf{x}\in\Omega \\

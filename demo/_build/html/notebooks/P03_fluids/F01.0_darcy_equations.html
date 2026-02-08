@@ -222,6 +222,7 @@
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Darcy equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -447,9 +448,14 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-dimensional-cartesian-definition">Two-dimensional Cartesian definition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Weak form</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pressure-formulation">Pressure formulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Weak form</a></li>
 </ul>
 </li>
 </ul>
@@ -473,7 +479,7 @@ document.write(`
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{and}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\mathbb{BVP}\begin{cases}
+&amp;\mathbb{BVP}_{\textbf{u},p}\begin{cases}
 \nabla\cdot\textbf{u} = 0 &amp; \\
 \textbf{u} = -\frac{\mathsf{K}}{\mu}\cdot(\nabla p - \textbf{f}\,) &amp; \forall\textbf{x}\in\Omega \\
 \textbf{n}\cdot\textbf{u} = u_{\text{E}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
@@ -481,7 +487,7 @@ p = p_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Om
 \int_{\partial\Omega}\text{d}\Gamma~u_{\text{E}}=0 &amp; \text{if}~\partial\Omega_{\text{N}}=\varnothing\iff\partial\Omega_{\text{E}}=\partial\Omega \\
 \end{cases} \\
 &amp;\text{given} \\
-&amp;\mathbb{S}\begin{cases}
+&amp;\mathbb{S}_{\textbf{u},p}\begin{cases}
 \Omega\subset\mathbb{R}^d  &amp; \text{domain}\\
 \mathsf{K}(\textbf{x}) &amp; \text{permeability}\\
 \mu(\textbf{x}) &amp; \text{viscosity} \\
@@ -518,8 +524,8 @@ F(\textbf{u}, p, \textbf{v}, q) &amp;= \int_\Omega\text{d}\Omega~q(\nabla\cdot\t
 \end{align*}
 \end{split}\]</div>
 </section>
-<section id="d-cartesian-definition">
-<h3>2D Cartesian definition<a class="headerlink" href="#d-cartesian-definition" title="Link to this heading">#</a></h3>
+<section id="two-dimensional-cartesian-definition">
+<h3>Two-dimensional Cartesian definition<a class="headerlink" href="#two-dimensional-cartesian-definition" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{align*}
@@ -534,17 +540,56 @@ F(\textbf{u}, p, \textbf{v}, q) &amp;= \int_\Omega\text{d}\Omega~q(\nabla\cdot\t
 \[\begin{split}
 \begin{align*}
 &amp;\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&amp;\mathbb{BVP}\begin{cases}
+&amp;\mathbb{BVP}_\psi\begin{cases}
 \nabla\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right)=-\frac{\partial(f_y)}{\partial x} + \frac{\partial(f_x)}{\partial y} &amp; \forall\textbf{x}\in\Omega \\
 \psi=\psi_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 \textbf{n}\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right) = \psi_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
-\end{cases}~.
+\end{cases} \\
+&amp;\text{given} \\
+&amp;\mathbb{S}_{\psi}\begin{cases}
+\Omega\subset\mathbb{R}^2  &amp; \text{domain}\\
+\mathsf{K}(\textbf{x}) &amp; \text{permeability}\\
+\mu(\textbf{x}) &amp; \text{viscosity} \\
+f_x(\textbf{x}), f_y(\textbf{x}) &amp; \text{body force components} \\
+\psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} &amp; \text{Dirichlet boundary condition} \\
+\psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} &amp; \text{Neumann boundary condition} \\
+\end{cases}
 \end{align*}
 \end{split}\]</div>
 </section>
 <section id="id2">
 <h3>Weak form<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
-<p>…</p>
+<p>See Poisson equation.</p>
+</section>
+</section>
+<section id="pressure-formulation">
+<h2>Pressure formulation<a class="headerlink" href="#pressure-formulation" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h3>Strong form<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align*}
+&amp;\text{Find}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
+&amp;\mathbb{BVP}_p\begin{cases}
+\nabla\cdot\left(\frac{\mathsf{K}}{\mu}\cdot\nabla p\right)=\nabla\cdot\left(\frac{\mathsf{K}}{\mu}\cdot\textbf{f}\right) &amp; \forall\textbf{x}\in\Omega \\
+p=p_{\text{D}} &amp; \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
+\textbf{n}\cdot\left(\frac{\mathsf{K}}{\mu}\cdot\nabla p\right) = p_{\text{N}} &amp; \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{D}}
+\end{cases} \\
+&amp;\text{given} \\
+&amp;\mathbb{S}_{p}\begin{cases}
+\Omega\subset\mathbb{R}^d  &amp; \text{domain}\\
+\mathsf{K}(\textbf{x}) &amp; \text{permeability}\\
+\mu(\textbf{x}) &amp; \text{viscosity} \\
+\textbf{f}(\textbf{x}) &amp; \text{body force} \\
+p_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} &amp; \text{Dirichlet boundary condition} \\
+p_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} &amp; \text{Neumann boundary condition} \\
+\end{cases}
+\end{align*}
+\end{split}\]</div>
+</section>
+<section id="id4">
+<h3>Weak form<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>See Poisson equation.</p>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -622,9 +667,14 @@ F(\textbf{u}, p, \textbf{v}, q) &amp;= \int_\Omega\text{d}\Omega~q(\nabla\cdot\t
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamfunction-formulation">Streamfunction formulation</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-definition">General definition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#d-cartesian-definition">2D Cartesian definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two-dimensional-cartesian-definition">Two-dimensional Cartesian definition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Strong form</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Weak form</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pressure-formulation">Pressure formulation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Weak form</a></li>
 </ul>
 </li>
 </ul>

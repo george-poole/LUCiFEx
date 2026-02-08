@@ -222,6 +222,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -702,7 +703,7 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
 &amp;c^{n+1}\in V_c \\
 &amp;\theta^{n+1}\in V_\theta \\
 &amp;\text{such that} \\
-&amp;\mathbb{F} 
+&amp;\mathbb{F}_{\textbf{u},p} 
 \begin{cases}
 F_{\textbf{u},p}(\textbf{u}^n, p^n, \textbf{v}, q)=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p\\
 F_c(c^{n+1}, v) = 0\quad\forall v\in V_c \\ 
@@ -722,7 +723,7 @@ F_\theta(\theta^{n+1}, v) = 0\quad\forall v\in V_\theta \\
 &amp;c^{n+1}\in V_c \\
 &amp;\theta^{n+1}\in V_\theta \\
 &amp;\text{such that} \\
-&amp;\mathbb{F} 
+&amp;\mathbb{F}_\psi 
 \begin{cases}
 F_\psi(\psi^n, v) = 0\quad\forall v\in V_\psi \\
 F_{\textbf{u}}(\textbf{u}^n, \textbf{v}) = 0\quad\forall \textbf{v}\in V_{\textbf{u}} \\ 

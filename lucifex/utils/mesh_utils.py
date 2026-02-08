@@ -230,7 +230,7 @@ def mesh_axes(
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
     if strict and not is_cartesian(mesh):
-        raise CartesianMeshError()
+        raise NonCartesianMeshError('Axes')
     return tuple(np.sort(np.unique(i)) for i in mesh_coordinates(mesh))
 
 
@@ -242,7 +242,7 @@ def mesh_vertices_tensor(
     Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
     if strict and not is_cartesian(mesh):
-        raise CartesianMeshError()
+        raise NonCartesianMeshError('Vertices tensor')
     mesh_axes = mesh_axes(mesh)
     if len(mesh_axes) == 2:
         x, y = mesh_axes
@@ -260,7 +260,7 @@ def mesh_axes_spacing(
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
     if strict and not is_cartesian(mesh):
-        raise CartesianMeshError()
+        raise NonCartesianMeshError('Axes spacing')
     return tuple(np.diff(i) for i in mesh_axes(mesh))
 
 
@@ -283,6 +283,23 @@ def is_uniform_cartesian(
         return False
     return all(all(np.isclose(dx[0], dx)) for dx in mesh_axes_spacing(mesh))
 
+
+@optional_lru_cache
+def is_simplicial(
+    mesh: Mesh,
+) -> bool:
+    dim = mesh.geometry.dim
+    cell = mesh.topology.cell_name()
+
+    if dim == 1:
+        return True
+    if dim == 2 and cell == CellType.TRIANGLE:
+        return True
+    elif dim == 3 and cell == CellType.HEXAHEDRON:
+        return True
+    else:
+        return False
+    
 
 def number_of_entities(
     mesh: Mesh,
@@ -352,5 +369,17 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
         raise ValueError(f'Invalid cell size quantity {h}.')
     
 
-def CartesianMeshError():
-    return ValueError("Mesh vertices must form a Cartesian grid.")
+class NonCartesianMeshError(NotImplementedError):
+    def __init__(
+        self, 
+        unsupported: str,
+    ):
+        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh.')
+
+
+class NonCartesianQuadMeshError(NotImplementedError):
+    def __init__(
+        self, 
+        unsupported: str,
+    ):
+        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh of quadrilateral cell.')

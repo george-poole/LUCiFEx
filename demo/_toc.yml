@@ -44,6 +44,7 @@ parts:
         sections: 
           - file: notebooks/P03_fluids/F01.1_darcy_lens
           - file: notebooks/P03_fluids/F01.2_darcy_anticline
+          - file: notebooks/P03_fluids/F01.3_darcy_annulus
       - file: notebooks/P03_fluids/F02.0_stokes_equations
         sections: 
           - file: notebooks/P03_fluids/F02.1_stokes_channel

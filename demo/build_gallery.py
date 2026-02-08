@@ -114,10 +114,10 @@ if __name__ == "__main__":
     FIGURES_EXT = 'png'
     EXCLUDE = 'xx.'
     NOTEBOOK_PARTS = [
-        ('Introductory', 'P02_introductory'),
+        ('Convection', 'P05_convection'),
         ('Fluids', 'P03_fluids'),
         ('Transport', 'P04_transport'),
-        ('Convection', 'P05_convection'),
+        ('Introductory', 'P02_introductory'),
     ]
 
     outputs = [('gallery.md', True), ('gallery_local.md', False)]
