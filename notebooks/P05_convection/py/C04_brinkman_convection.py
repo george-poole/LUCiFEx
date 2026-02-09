@@ -22,7 +22,7 @@ from lucifex.pde.advection_diffusion import advection_diffusion
     store_delta=1,
     write_delta=None,
 )
-def brinkman_convection_rayleigh_benard_rectangle(    
+def darcy_brinkman_rayleigh_benard_rectangle(    
     # domain
     Lx: float,
     Ly: float,
@@ -40,7 +40,7 @@ def brinkman_convection_rayleigh_benard_rectangle(
     # time step
     dt_max: float = 0.5,
     dt_min: float = 0.0,
-    cfl_courant: float = 0.5,
+    dt_courant: float = 0.5,
     # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
@@ -114,7 +114,7 @@ def brinkman_convection_rayleigh_benard_rectangle(
 
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', cfl_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], 1, sqrt(Pr/ Ra), newtonian_stress, D_adv_ns, D_visc_ns, f=f, u_bcs=u_bcs, 
@@ -124,16 +124,16 @@ def brinkman_convection_rayleigh_benard_rectangle(
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    namespace = [Pr, Ra, Da, chi, rho]
+    exprs_consts = [Pr, Ra, Da, chi, rho]
 
-    return solvers, t, dt, namespace
+    return solvers, t, dt, exprs_consts
 
 
 @configure_simulation(
     store_delta=1,
     write_delta=None,
 )
-def brinkman_convection_rayleigh_taylor_rectangle(    
+def darcy_brinkman_rayleigh_taylor_rectangle(    
     # domain
     Lx: float,
     Ly: float,

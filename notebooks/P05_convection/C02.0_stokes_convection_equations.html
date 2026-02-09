@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/P05_convection/C02.0_stokes_convection_equations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Navier-Stokes convection equations" href="C03.0_navier_stokes_convection_equations.html" />
+    <link rel="next" title="Rayleigh-Bénard convection of an isoviscous Stokes fluid" href="C02.1_stokes_rayleigh_benard_isoviscous.html" />
     <link rel="prev" title="Elder convection of a Darcy fluid in a porous rectangle" href="C01.8_darcy_elder.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -190,7 +190,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.1_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector Poisson equation in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -222,12 +222,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.4_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -239,10 +241,10 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Transport</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.2_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.3_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T02.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -280,35 +282,15 @@
 <li class="toctree-l2"><a class="reference internal" href="C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Stokes convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Stokes convection equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="C03.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="C04.0_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A01.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A02.0_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.1_darcy_abc_reaction_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.2_darcy_abc_reaction_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A03.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A03.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -460,8 +442,16 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-choice">Scaling choice</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-time-discretized-equations">Non-dimensional time-discretized equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms">Weak forms</a></li>
 </ul>
 </li>
 </ul>
@@ -477,7 +467,7 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="stokes-convection-equations">
 <h1>Stokes convection equations<a class="headerlink" href="#stokes-convection-equations" title="Link to this heading">#</a></h1>
-<p>Governing equations for thermosolutal convection terms coupled to Stokes flow.</p>
+<p>Governing equations for thermosolutal convection coupled to Stokes flow.</p>
 <section id="dimensional-equations">
 <h2>Dimensional equations<a class="headerlink" href="#dimensional-equations" title="Link to this heading">#</a></h2>
 <div class="math notranslate nohighlight">
@@ -490,10 +480,10 @@ document.write(`
 &amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\begin{cases}
-\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\textbf{u})\cdot\nabla c) &amp; \\
-\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}(\textbf{u})\cdot\nabla\theta) &amp; \\
+\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}\cdot\nabla c) &amp; \\
+\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}\cdot\nabla\theta) &amp; \\
 \nabla\cdot\textbf{u} = 0 &amp; \\
-\textbf{0}=-\nabla p + \nabla\cdot\tau - \rho g\,\textbf{e}_g &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+\textbf{0}=-\nabla p + \nabla\cdot\tau + \rho g\,\textbf{e}_g &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 c(\textbf{x},t=0)=c_0 &amp; \forall\textbf{x}\in\Omega \\
 \theta(\textbf{x},t=0)=\theta_0 &amp; \forall\textbf{x}\in\Omega \\
 c=c_{\text{D}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty] \\
@@ -525,6 +515,117 @@ c_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N},c} &amp; \text{concentrat
 \end{align*}
 \end{split}\]</div>
 </section>
+<section id="non-dimensionalization">
+<h2>Non-dimensionalization<a class="headerlink" href="#non-dimensionalization" title="Link to this heading">#</a></h2>
+<section id="scalings">
+<h3>Scalings<a class="headerlink" href="#scalings" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Quantity</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\textbf{x}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\textbf{u}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(t\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(c\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\rho g\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(p\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Scaling</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{T}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta c\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta\theta\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(g \Delta\rho\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu_{\text{ref}}\,\mathcal{U}/\mathcal{L}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(\mu\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\tau\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}\vert\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{G}\vert\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mu_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu_{\text{ref}}\,\mathcal{U}/\mathcal{L}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(G_{\text{ref}}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="abstract-dimensionless-numbers">
+<h3>Abstract dimensionless numbers<a class="headerlink" href="#abstract-dimensionless-numbers" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[
+Ad=\frac{\mathcal{U}\mathcal{T}}{\mathcal{L}}~,~
+Di=\frac{D_{\text{ref}}\mathcal{T}}{\mathcal{L}^2}~,~
+Bu=\frac{\mathcal{L}^2g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}}~,~
+X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}
+\]</div>
+</section>
+<section id="physical-dimensionless-numbers">
+<h3>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Definition</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Physical interpretation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}\)</span></p></td>
+<td><p>Rayleigh</p></td>
+<td><p>Ratio of convective to diffusive speeds, defined with respect to the transport of <span class="math notranslate nohighlight">\(c\)</span> and domain length scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}\)</span></p></td>
+<td><p>Lewis</p></td>
+<td><p>Ratio of thermal to solutal diffusivities.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="scaling-choice">
+<h3>Scaling choice<a class="headerlink" href="#scaling-choice" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\( \mathcal{T}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\{Ad, Di, Bu, X\}\)</span></p></th>
+<th class="head"><p>Examples</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>advective</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{1, 1/Ra, 1, 1\}\)</span></p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-odd"><td><p>diffusive</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}/\mathcal{L}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{1, 1, Ra, 1\}\)</span></p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
 <section id="non-dimensional-time-discretized-equations">
 <h2>Non-dimensional time-discretized equations<a class="headerlink" href="#non-dimensional-time-discretized-equations" title="Link to this heading">#</a></h2>
 <section id="strong-form">
@@ -537,7 +638,7 @@ c_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N},c} &amp; \text{concentrat
 \frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=Di\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) \\
 \frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=\frac{Di}{Le}\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) \\
 \nabla\cdot\textbf{u}^{n}=0 \\
-\textbf{0}= Vi\,\nabla\cdot(-p^n\mathsf{I}+\tau^n) + Bu\,\rho^n\,\textbf{e}_g \\
+\textbf{0}= \nabla\cdot(-p^n\mathsf{I}+\tau^n) + Bu\,\rho^n\,\textbf{e}_g \\
 c^0=c_0 \\
 \theta^0=\theta_0  \\
 c^n\vert_{\partial\Omega_{\text{D}, c}}=c^n_{\text{D}} \\
@@ -550,6 +651,10 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
 \end{cases}
 \end{align*}
 \end{split}\]</div>
+</section>
+<section id="weak-forms">
+<h3>Weak forms<a class="headerlink" href="#weak-forms" title="Link to this heading">#</a></h3>
+<p>…</p>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -596,11 +701,11 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
       </div>
     </a>
     <a class="right-next"
-       href="C03.0_navier_stokes_convection_equations.html"
+       href="C02.1_stokes_rayleigh_benard_isoviscous.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Navier-Stokes convection equations</p>
+        <p class="prev-next-title">Rayleigh-Bénard convection of an isoviscous Stokes fluid</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -621,8 +726,16 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dimensional-equations">Dimensional equations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensionalization">Non-dimensionalization</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#abstract-dimensionless-numbers">Abstract dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-choice">Scaling choice</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-time-discretized-equations">Non-dimensional time-discretized equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms">Weak forms</a></li>
 </ul>
 </li>
 </ul>

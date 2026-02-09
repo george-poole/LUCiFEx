@@ -190,7 +190,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.1_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector Poisson equation in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -222,12 +222,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.4_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -239,10 +241,10 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Transport</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.2_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.3_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T02.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -280,35 +282,15 @@
 <li class="toctree-l2"><a class="reference internal" href="C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="C03.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="C04.0_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A01.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A02.0_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.1_darcy_abc_reaction_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.2_darcy_abc_reaction_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A03.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A03.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -467,43 +449,42 @@ document.write(`
 \[\begin{split}
 \mathbb{S}
 \begin{cases}
-\mathcal{L} = D_{\text{ref}}/\mathcal{U} &amp; \text{scaling with diffusive length and convective speed} \\
-\mathcal{U} = K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}} \\
-\mathcal{T} = \phi_{\text{ref}}\mathcal{L}/\mathcal{U} \\
-\Omega = [0, Ra\mathcal{A}] \times [0, Ra] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
+\Omega = [0, \mathcal{A}X] \times [0, X] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
 e_g^x=-\sin\beta &amp; \text{gravity acting at an angle $\beta$ to the vertical coordinate} \\
 e_g^y=-\cos\beta \\
+c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
+c_{\text{D}}(x,y=Ra)=1 &amp; \text{prescribed concentration on upper and lower boundaries} \\
+c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower, left and right boundaries}\\
+c_{\text{N}}(x=0,y)=0 \\
+c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
+\psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary} \\
 \phi = 1 &amp; \text{constitutive relations} \\
 \mathsf{D} = \mathsf{I} \\ 
 \mathsf{K} = \mathsf{I}\\ 
 \mu = 1 \\
 \rho(c) = c \\
-c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
-c_{\text{D}}(x,y=Ra)=1 &amp; \text{prescribed concentration on upper and lower boundaries} \\
-c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower, left and right boundaries}\\
-c_{\text{N}}(x=0,y)=0 \\
-c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
-\psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary}
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">FancyArrowPatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
 
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">20.0</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_evolving_rectangle</span><span class="p">(</span>
-    <span class="n">aspect</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">aspect</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span> 
-    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective_diffusive&#39;</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span> 
-    <span class="n">kappa</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">beta</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
-    <span class="n">c_eps</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> 
+    <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+    <span class="n">c_ampl</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> 
     <span class="n">c_freq</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> 
     <span class="n">c_seed</span><span class="o">=</span><span class="p">(</span><span class="mi">456</span><span class="p">,</span> <span class="mi">987</span><span class="p">),</span> 
     <span class="n">D_adv</span><span class="o">=</span><span class="n">AB2</span><span class="p">,</span>
@@ -514,33 +495,15 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span>
-<span class="ne">----&gt; </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write</span><span class="p">,</span> <span class="n">get_ipynb_file_name</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">from</span><span class="w"> </span><span class="nn">py.darcy_convection_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_evolving_rectangle</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="n">aspect</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">11</span>     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span>     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="p">)</span>
 
-<span class="ne">ImportError</span>: cannot import name &#39;get_ipynb_file_name&#39; from &#39;lucifex.io&#39; (/Users/George/Desktop/LUCiFEx/lucifex/io/__init__.py)
+<span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
 
 <span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
@@ -556,24 +519,30 @@ c_{\text{N}}(x=Ra\mathcal{A},y)=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_len</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">arrow_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+<span class="n">arrow_end</span> <span class="o">=</span> <span class="n">arrow_start</span> <span class="o">-</span> <span class="n">arrow_len</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">beta</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">beta</span><span class="p">))))</span>
+
+<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">arrow</span> <span class="o">=</span> <span class="n">FancyArrowPatch</span><span class="p">(</span>
+        <span class="n">arrow_start</span><span class="p">,</span>
+        <span class="n">arrow_end</span><span class="p">,</span>
+        <span class="n">arrowstyle</span><span class="o">=</span><span class="s1">&#39;-|&gt;&#39;</span><span class="p">,</span>
+        <span class="n">mutation_scale</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">arrow</span><span class="p">)</span>
     <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">i_mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">))</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">time_indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i_mid</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="ne">NameError</span>: name &#39;simulation&#39; is not defined
-</pre></div>
-</div>
+<img alt="../../_images/593f4c6c9c83f85fd89ffadd4a122d1bdd977695cdec629790d42c66d54ff34e.png" src="../../_images/593f4c6c9c83f85fd89ffadd4a122d1bdd977695cdec629790d42c66d54ff34e.png" />
+<img alt="../../_images/8a0a64bbc05591b48d4ca45f76068b2735045c551c5e10421c06a9f1c3c2a618.png" src="../../_images/8a0a64bbc05591b48d4ca45f76068b2735045c551c5e10421c06a9f1c3c2a618.png" />
+<img alt="../../_images/6b15e3dcd0156c46063c13cfde77e3b8923867838d88cef457c2a069bfebb505.png" src="../../_images/6b15e3dcd0156c46063c13cfde77e3b8923867838d88cef457c2a069bfebb505.png" />
 </div>
 </div>
 </section>

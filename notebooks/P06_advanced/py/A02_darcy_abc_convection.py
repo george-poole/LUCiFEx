@@ -14,7 +14,7 @@ from lucifex.sim import configure_simulation
 from lucifex.utils import CellType
 
 from lucifex.pde.advection_diffusion import advection_diffusion_reaction
-from lucifex.pde.darcy import darcy_streamfunction, streamfunction_velocity
+from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
 
 
 @configure_simulation(
@@ -44,14 +44,14 @@ def darcy_abc_convection_rectangle(
     # time step
     dt_min: float = 0.0,
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float | None = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
     D_reac: FiniteDifference = AB1,
     # linear algebra
-    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
+    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'hypre'),
     abc_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
 ):
     # space
@@ -117,9 +117,9 @@ def darcy_abc_convection_rectangle(
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, 1, 1, fy=-rho[0],
     )
-    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
-            u[0], cfl_h, cfl_courant, dt_max, dt_min,
+            u[0], dt_h, dt_courant, dt_max, dt_min,
         ) 
 
     a_solver = ibvp(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc)(
@@ -133,5 +133,5 @@ def darcy_abc_convection_rectangle(
     )
 
     solvers = [psi_solver, u_solver, dt_solver, a_solver, b_solver, c_solver]
-    namespace = [Lmbda, beta, gamma, delta_b, delta_c]
-    return solvers, t, dt, namespace
+    exprs_consts = [Lmbda, beta, gamma, delta_b, delta_c]
+    return solvers, t, dt, exprs_consts

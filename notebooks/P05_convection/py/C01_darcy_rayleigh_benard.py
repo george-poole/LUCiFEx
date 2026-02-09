@@ -24,13 +24,13 @@ def darcy_rayleigh_benard_rectangle(
     # physical
     scaling: str = 'advective',
     Ra: float = 1e2,
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (1234, 5678),
     # time step
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -70,7 +70,7 @@ def darcy_rayleigh_benard_rectangle(
         lambda x: 1 - x[1] / Ly,
         cubic_noise(['neumann', 'dirichlet'], [Lx, Ly], c_freq, c_seed),
         [Lx, Ly],
-        c_eps,
+        c_ampl,
     )   
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['lower'], 1.0),
@@ -88,14 +88,14 @@ def darcy_rayleigh_benard_rectangle(
         dispersion=dispersion,
         density=density, 
         dt_max=dt_max, 
-        cfl_h=cfl_h, 
-        cfl_courant=cfl_courant,
+        dt_h=dt_h, 
+        dt_courant=dt_courant,
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        namespace=(Ra, Di, Bu),
+        exprs_consts=(Ra, Di, Bu),
     )
 
 
@@ -112,12 +112,12 @@ def darcy_rayleigh_benard_annulus(
     scaling: str = 'advective',
     Ra: float = 5e2,
     # initial conditions
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: int = 8,
     # time step
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -147,12 +147,12 @@ def darcy_rayleigh_benard_annulus(
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     # initial and boundary conditions
-    radial_noise = lambda x: c_eps * np.sin(c_freq * np.pi * (r(x, np.sqrt) - Rinner) / (Router - Rinner))
+    radial_noise = lambda x: c_ampl * np.sin(c_freq * np.pi * (r(x, np.sqrt) - Rinner) / (Router - Rinner))
     c_ics = SpatialPerturbation(
         lambda x: np.log(Router / r(x, np.sqrt)) / np.log(Router / Rinner),
         radial_noise,
         Omega.geometry.x,
-        c_eps,
+        c_ampl,
         )  
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['inner'], 1.0),
@@ -174,14 +174,14 @@ def darcy_rayleigh_benard_annulus(
         dispersion=dispersion,
         density=density, 
         dt_max=dt_max, 
-        cfl_h=cfl_h, 
-        cfl_courant=cfl_courant,
+        dt_h=dt_h, 
+        dt_courant=dt_courant,
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        namespace=(Ra, Di, Bu),
+        exprs_consts=(Ra, Di, Bu),
     )
 
 
@@ -194,11 +194,11 @@ def darcy_rayleigh_benard_semicircle(
     cell: str = CellType.TRIANGLE,
     scaling: str = 'advective',
     Ra: float = 5e2,
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: int = 8,
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float = 0.75,
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     psi_petsc: OptionsPETSc | None = None,
@@ -227,12 +227,12 @@ def darcy_rayleigh_benard_semicircle(
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
 
-    radial_noise = lambda x: c_eps * np.sin(c_freq * np.pi * (r(x, np.sqrt)) / radius)
+    radial_noise = lambda x: c_ampl * np.sin(c_freq * np.pi * (r(x, np.sqrt)) / radius)
     c_ics = SpatialPerturbation(
         0.0,
         radial_noise,
         Omega.geometry.x,
-        c_eps,
+        c_ampl,
         ) 
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['lower'], 1.0),
@@ -248,12 +248,12 @@ def darcy_rayleigh_benard_semicircle(
         dispersion=dispersion,
         density=density, 
         dt_max=dt_max, 
-        cfl_h=cfl_h, 
-        cfl_courant=cfl_courant,
+        dt_h=dt_h, 
+        dt_courant=dt_courant,
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        namespace=(Ra, Di, Bu),
+        exprs_consts=(Ra, Di, Bu),
     )

@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="DG advection of a rotating cone in a rectangle" href="T01.3_dg_advection_rectangle_cone.html" />
-    <link rel="prev" title="DG advection of a step on an interval" href="T01.1_dg_advection_interval_step.html" />
+    <link rel="prev" title="DG advection of a step in an interval" href="T01.1_dg_advection_interval_step.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -190,7 +190,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.1_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector Poisson equation in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -222,12 +222,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.1_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P03_fluids/F02.4_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P03_fluids/F03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -239,10 +241,10 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Transport</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="T01.0_dg_advection.html">DG formulation of the advection equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="T01.1_dg_advection_interval_step.html">DG advection of a step on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="T01.1_dg_advection_interval_step.html">DG advection of a step in an interval</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">DG advection of a cosine in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="T01.3_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="T02.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -280,35 +282,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C03.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C04.0_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A01.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A02.0_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.1_darcy_abc_reaction_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.2_darcy_abc_reaction_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A03.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A03.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -469,13 +451,122 @@ document.write(`
 \mathbb{S}
 \begin{cases}
 \Omega = [0, L_x] \\
+u_0(x)=\begin{cases}
+\frac{1}{2}(1+\cos(\pi(x-x_0)/\sigma)) &amp; \text{if}~|x-x_0|\leq\tfrac{\sigma}{2} \\
+0 &amp; \text{otherwise}
+\end{cases} \\
+u_{\text{I}}(x=0) = 0 \\
 \textbf{a}=a\,\textbf{e}_x \\
-s = 0 \\
-u_0(x)=\frac{1}{2}(1+\cos(\pi(x-x_0)/\sigma))~\text{if}~|x-x_0|\leq\sigma \\
-u_0(x)=0~\text{if}~|x-x_0|&gt;\sigma \\
-u_{\text{I}} = 0 \\
 \end{cases}
 \end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span>
+    <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span>
+    <span class="n">advective_timestep</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span><span class="p">,</span> <span class="n">is_continuous_lagrange</span><span class="p">,</span> <span class="n">as_index</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">dg_advection</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_simulation</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>    
+    <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">D_adv</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Simulation</span><span class="p">:</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ConstantSeries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="o">*</span><span class="n">element</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">+</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">x0</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="p">)</span> 
+    <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_continuous_lagrange</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="p">):</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">dg_advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">u_solver</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+
+<span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">Lx</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">courant</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">advective_timestep</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">courant</span><span class="p">)</span>
+
+<span class="n">elem_opts</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">D_adv_opts</span> <span class="o">=</span> <span class="p">(</span><span class="n">FE</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">CN</span><span class="p">)</span>
+<span class="n">simulations</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">((</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_simulation</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">],</span> <span class="n">n_stop</span><span class="p">)</span> 
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">t_target</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="mi">20</span>
+
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="n">fam</span><span class="p">,</span> <span class="n">deg</span> <span class="o">=</span> <span class="n">elem</span>
+    <span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">legend_title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fam</span><span class="si">}</span><span class="s1">$_</span><span class="si">{</span><span class="n">deg</span><span class="si">}</span><span class="s1">$</span><span class="se">\n</span><span class="s1">$C_</span><span class="se">{{</span><span class="s1">\mathbf</span><span class="se">{{</span><span class="s1">a</span><span class="se">}}}}</span><span class="s1">=</span><span class="se">{{</span><span class="si">{</span><span class="n">courant</span><span class="si">}</span><span class="se">}}</span><span class="s1">$</span><span class="se">\n\n</span><span class="s1">$\mathcal</span><span class="se">{{</span><span class="s1">D</span><span class="se">}}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">\mathbf</span><span class="se">{{</span><span class="s1">a</span><span class="se">}}</span><span class="s1">, u</span><span class="se">}}</span><span class="s1">$&#39;</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+        <span class="n">time_index</span> <span class="o">=</span> <span class="n">as_index</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">t_target</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">])</span>
+        <span class="n">legend_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">D_adv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">legend_title</span><span class="p">,</span> <span class="n">x_lims</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$u(x,t=</span><span class="si">{</span><span class="n">t_target</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;u(x,t=</span><span class="si">{</span><span class="n">t_target</span><span class="si">}</span><span class="s1">)_</span><span class="si">{</span><span class="n">fam</span><span class="si">}{</span><span class="n">deg</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">elem</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/f3a73b02447bed2a2a171ea92fb09a51f118f1b7834c9d2ba4c62309c77b8484.png" src="../../_images/f3a73b02447bed2a2a171ea92fb09a51f118f1b7834c9d2ba4c62309c77b8484.png" />
+<img alt="../../_images/12b250dc416945374dee7f9f387d1c48bc2c07368f614833cad24b07bbcf5b1d.png" src="../../_images/12b250dc416945374dee7f9f387d1c48bc2c07368f614833cad24b07bbcf5b1d.png" />
+<img alt="../../_images/de17368e4ab8371f1a0364e762d9b1da525f1362b014bc4f7a51ad478a7ec9dc.png" src="../../_images/de17368e4ab8371f1a0364e762d9b1da525f1362b014bc4f7a51ad478a7ec9dc.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 
     <script type="text/x-thebe-config">
@@ -514,7 +605,7 @@ u_{\text{I}} = 0 \\
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">DG advection of a step on an interval</p>
+        <p class="prev-next-title">DG advection of a step in an interval</p>
       </div>
     </a>
     <a class="right-next"

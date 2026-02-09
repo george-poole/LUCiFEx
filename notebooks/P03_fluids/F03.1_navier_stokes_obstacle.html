@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -190,7 +190,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I01.0_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.1_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.2_poisson_annulus.html">Poisson equation on an annulus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector-valued Poisson equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P02_introductory/I01.3_poisson_vector.html">Vector Poisson equation in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P02_introductory/I02.0_diffusion_equation.html">Diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -222,12 +222,14 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="F01.0_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="F01.1_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F01.2_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F01.3_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="F02.0_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="F02.1_stokes_poiseuille.html">Flow of a Stokes fluid in a Poiseuille channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F02.1_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F02.2_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F02.3_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F02.4_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="F03.0_navier_stokes_equations.html">Navier-Stokes equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -239,10 +241,10 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Transport</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T01.0_dg_advection.html">DG formulation of the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.1_dg_advection_interval_step.html">DG advection of a step in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.2_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.3_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection in a vortex in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P04_transport/T01.4_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P04_transport/T02.0_dg_steady_advection_diffusion.html">DG formulation of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -280,35 +282,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C01.8_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C02.0_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.1_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C02.2_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C03.0_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.1_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.2_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P05_convection/C03.3_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P05_convection/C04.0_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.1_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P05_convection/C04.2_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-</ul>
-</details></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A01.0_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.1_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A01.2_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A02.0_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.1_darcy_abc_reaction_density.html">ABC convection with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A02.2_darcy_abc_reaction_viscosity.html">ABC convection with a stabilising reaction and destabilising viscosity</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../P06_advanced/A03.0_darcy_porosity_evolution_equations.html">Darcy porosity evolution-dissolution equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P06_advanced/A03.1_darcy_porosity_evolution_injection.html">Porosity evolution-dissolution from an injected Darcy fluid in a rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -473,7 +455,7 @@ document.write(`
 \partial\Omega_{\text{right}} = \{(x,y)~:~x=\tfrac{1}{2}L_x\} \\
 \partial\Omega_{\text{lower}} = \{(x,y)~:~y=-\tfrac{1}{2}L_y\} \\
 \partial\Omega_{\text{upper}} = \{(x,y)~:~y=\tfrac{1}{2}L_y\} \\
-\textbf{u}_{\text{E}}\vert_{\partial\Omega_{\text{lower}}\cup\partial\Omega_{\text{upper}}\cup\Omega_{\text{obstable}}}=\textbf{0} &amp; \text{no-slip and no-penetration} \\
+\textbf{u}_{\text{E}}\vert_{\partial\Omega_{\text{lower}}\cup\partial\Omega_{\text{upper}}\cup\Omega_{\text{obstable}}}=\textbf{0} &amp; \text{no-flow} \\
 \boldsymbol{\tau}_{\text{N}}\vert_{\partial\Omega_{\text{left}}} = p_\text{in}\textbf{e}_x &amp; \text{pressure driven flow from left to right} \\
 \boldsymbol{\tau}_{\text{N}}\vert_{\partial\Omega_{\text{left}}} = \textbf{0} \\
 \end{cases}
@@ -482,7 +464,7 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">FE</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_contours</span><span class="p">,</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">get_component_fem_functions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.F03_navier_stokes_obstacle</span><span class="w"> </span><span class="kn">import</span> <span class="n">navier_stokes_circle_obstacle</span>
 
@@ -499,10 +481,11 @@ document.write(`
     <span class="n">p_in</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
     <span class="n">dt_max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">dt_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">cfl_courant</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">dt_courant</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">ns_scheme</span><span class="o">=</span><span class="s1">&#39;ipcs&#39;</span><span class="p">,</span>
     <span class="n">D_adv</span><span class="o">=</span><span class="n">FE</span><span class="p">,</span>
     <span class="n">D_visc</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+    <span class="n">streamfunction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">20</span>
@@ -583,14 +566,15 @@ $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + \rho
 
 $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1}$$ --><div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;psi&#39;</span><span class="p">]</span>
 <span class="n">mesh</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
 
 <span class="n">time_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<span class="n">un</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
-<span class="n">pn</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
+<span class="n">u_n</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
+<span class="n">p_n</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
+<span class="n">psi_n</span> <span class="o">=</span> <span class="n">psi</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
 
-<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">un</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
+<span class="n">ux_n</span><span class="p">,</span> <span class="n">uy_n</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u_n</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -598,35 +582,32 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">pn_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">pn</span><span class="p">)</span>
-<span class="n">ux_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
-<span class="n">uy_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">uy</span><span class="p">)</span>
+<span class="n">p_n_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">p_n</span><span class="p">)</span>
+<span class="n">psi_n_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">psi_n</span><span class="p">)</span>
+<span class="n">ux_n_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">ux_n</span><span class="p">)</span>
+<span class="n">uy_n_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">uy_n</span><span class="p">)</span>
 
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">pn_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">p_n_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">)</span>
 <span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;p(x,y)_mesh&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">ux_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_x$&#39;</span><span class="p">)</span>
-<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;ux(x,y)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">p_n_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">)</span>
+<span class="n">plot_contours</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">psi_n</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;p(x,y)_streamlines&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">uy_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_y$&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">ux_n_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_x$&#39;</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;ux(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">uy_n_tri</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_y$&#39;</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;uy(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/5e0daf6a928cfb113f2e655f3fb27886e021eaf8d78cb0c86a227fed1a529dbb.png" src="../../_images/5e0daf6a928cfb113f2e655f3fb27886e021eaf8d78cb0c86a227fed1a529dbb.png" />
-<img alt="../../_images/f0044da538d0a3ee2f58dcf2bf7334b9035f887b418c226a304ddee40c7284ff.png" src="../../_images/f0044da538d0a3ee2f58dcf2bf7334b9035f887b418c226a304ddee40c7284ff.png" />
-<img alt="../../_images/2b0e858b058a8564b79b750255a5c86545b2ff9f79a734e494461dd67902f0f7.png" src="../../_images/2b0e858b058a8564b79b750255a5c86545b2ff9f79a734e494461dd67902f0f7.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
+<img alt="../../_images/d7d4205b960bc7919681cda81938ca07164beef6b6048b1d65498aa8727fcbf0.png" src="../../_images/d7d4205b960bc7919681cda81938ca07164beef6b6048b1d65498aa8727fcbf0.png" />
+<img alt="../../_images/71b9b653c5cf1ded1290fc365b9517e502ce28ee48e3957bdd006200f64041c3.png" src="../../_images/71b9b653c5cf1ded1290fc365b9517e502ce28ee48e3957bdd006200f64041c3.png" />
+<img alt="../../_images/d0f630e00c0573d3c5a189feae8453a90a5e48374dcad33e61e760122a2d2c8c.png" src="../../_images/d0f630e00c0573d3c5a189feae8453a90a5e48374dcad33e61e760122a2d2c8c.png" />
+<img alt="../../_images/76cced797b629efecdf735055986f3b77d51c893820231cfdd85512a078bbafa.png" src="../../_images/76cced797b629efecdf735055986f3b77d51c893820231cfdd85512a078bbafa.png" />
 </div>
 </div>
 <!-- # Navier-Stokes flow
@@ -697,7 +678,23 @@ $$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\tex
 
 $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + \rho q\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} $$
 
-$$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1}$$ --></section>
+$$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} + \textbf{v}\cdot\nabla p^{n+1}$$ --><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span>
+
+<span class="n">fig</span> <span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span>
+    <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$\Delta t$&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/487d094238f0ef2c4dcae9ddd7d836978f9d4162d4a2f2254cd9a3e2c1a44286.png" src="../../_images/487d094238f0ef2c4dcae9ddd7d836978f9d4162d4a2f2254cd9a3e2c1a44286.png" />
+</div>
+</div>
+</section>
 
     <script type="text/x-thebe-config">
     {

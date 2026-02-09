@@ -19,8 +19,9 @@ from lucifex.solver import (
     integration, interpolation, extrema, L_norm,
 )
 from lucifex.sim import Simulation
+from lucifex.utils.py_utils import arity
 
-from lucifex.pde.streamfunction import streamfunction_velocity
+from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
 from lucifex.pde.scaling import ScalingOptions
@@ -76,8 +77,8 @@ def darcy_convection_generic(
     # time step
     dt_min: float = 0.0,
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float | None = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = FE,
     D_diff: FiniteDifference = FE,
@@ -85,11 +86,11 @@ def darcy_convection_generic(
     # c_stabilization: str | None = None,
     # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
-    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
+    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'hypre'),
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
     # optional postprocessing
     diagnostic: bool | Iterable[Solver] = False,    
-    namespace: Iterable = (),
+    exprs_consts: Iterable = (),
 ) -> Simulation:
     """
     `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
@@ -114,9 +115,9 @@ def darcy_convection_generic(
     # constitutive
     phi = Function((Omega, 'P', 1), porosity, 'phi')
     k: Expr = permeability(phi)
-    try:
+    if arity(dispersion) == 2:
         d = ExprSeries(dispersion(phi, u), 'd')
-    except TypeError:
+    else:
         d: Expr = dispersion(phi)
     rho = ExprSeries(density(c), 'rho')
     mu = ExprSeries(viscosity(c), 'mu')
@@ -124,9 +125,9 @@ def darcy_convection_generic(
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
         psi, k, mu[0], egx * rho[0], egy * rho[0],
     )
-    u_solver = interpolation(u, streamfunction_velocity)(psi[0])
+    u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
-            u[0], cfl_h, cfl_courant, dt_max, dt_min,
+            u[0], dt_h, dt_courant, dt_max, dt_min,
         ) 
     c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
         c, dt, u, d, D_adv, D_diff, phi=phi,
@@ -144,12 +145,12 @@ def darcy_convection_generic(
                 evaluation(uMinMax, extrema)(u[0]),
                 integration(uRMS, L_norm, 'dx', norm=rms_norm)(sqrt(inner(u[0], u[0])), rms_norm),
                 evaluation(cMinMax, extrema)(c[0]),
-                evaluation(dtCFL, advective_timestep)(u[0], cfl_h),
+                evaluation(dtCFL, advective_timestep)(u[0], dt_h),
                 integration(fBoundary, flux, 'ds', *dOmega.markers)(c[0], u[0], FE(d)),
             ]
         )
         if isinstance(diagnostic, Iterable):
             solvers.extend(diagnostic)
             
-    namespace = [phi, ('k', k), ('d', d), rho, mu, *namespace]
-    return Simulation(solvers, t, dt, namespace)
+    exprs_consts = [phi, ('k', k), ('d', d), rho, mu, *exprs_consts]
+    return Simulation(solvers, t, dt, exprs_consts)
