@@ -71,12 +71,13 @@ class Function(DOLFINxFunction):
         self._index = index
 
     def copy(self, name: str | None = None) -> Self:
-        f = super().copy()
         if name is None:
-            f.name = self.name
-        else:
-            f.name = name
-        return f
+            name = self.name
+        return Function(
+            self.function_space,
+            type(self.x)(self.x),
+            name=name,
+        )
     
     @property
     def index(self) -> int | None:

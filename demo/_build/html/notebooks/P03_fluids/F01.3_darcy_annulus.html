@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -514,131 +514,30 @@ p_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">get_component_fem_functions</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="n">fx</span><span class="p">,</span> <span class="n">fy</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">)</span>
-
-<span class="n">trigl</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">xtri</span> <span class="o">=</span> <span class="n">trigl</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">trigl</span><span class="o">.</span><span class="n">triangles</span><span class="p">]</span>
-<span class="n">ytri</span> <span class="o">=</span> <span class="n">trigl</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">trigl</span><span class="o">.</span><span class="n">triangles</span><span class="p">]</span>
-
-<span class="n">fx_np</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fx</span><span class="p">)</span>
-<span class="n">fy_np</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fy</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="c1"># ax.quiver(</span>
-<span class="c1">#     xtri,</span>
-<span class="c1">#     ytri,</span>
-<span class="c1">#     fx_np,</span>
-<span class="c1">#     fy_np,</span>
-<span class="c1"># )</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../../_images/99a0a8c5e0966050beb091633b1f2f74454393641cd9b7d87e40be14ab130c16.png" src="../../_images/99a0a8c5e0966050beb091633b1f2f74454393641cd9b7d87e40be14ab130c16.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">xtri</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fx_np</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ytri</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">fy_np</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(8149, 3)
-(4190,)
-(8149, 3)
-(4190,)
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$K$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
 <span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="c1"># save_figure(&#39;K(x,y)_mesh&#39;)(fig)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;K(x,y)_mesh&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$p$&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$y$&#39;</span><span class="p">)</span>
 <span class="n">plot_contours</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.tri</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tri</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;p(x,y)_streamlines&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
-<span class="c1"># --- Triangular mesh ---</span>
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">triang</span> <span class="o">=</span> <span class="n">tri</span><span class="o">.</span><span class="n">Triangulation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-<span class="c1"># --- Triangle centroids ---</span>
-<span class="n">tris</span> <span class="o">=</span> <span class="n">triang</span><span class="o">.</span><span class="n">triangles</span>
-
-<span class="c1">###</span>
-<span class="c1"># x = triang.x</span>
-<span class="c1"># y = triang.y</span>
-<span class="c1">###</span>
-<span class="n">xc</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tris</span><span class="p">]</span><span class="c1">#.mean(axis=1)</span>
-<span class="n">yc</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">tris</span><span class="p">]</span><span class="c1">#.mean(axis=1)</span>
-
-<span class="c1"># --- Example per-triangle vector field ---</span>
-<span class="c1"># (replace with your real data)</span>
-<span class="n">uuu</span> <span class="o">=</span> <span class="n">xc</span> <span class="o">-</span> <span class="mf">0.5</span>
-<span class="n">vvv</span> <span class="o">=</span> <span class="n">yc</span> <span class="o">-</span> <span class="mf">0.5</span>
-
-<span class="c1"># Vector magnitude at centroids</span>
-<span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">uuu</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vvv</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="c1"># --- Plot ---</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">triplot</span><span class="p">(</span><span class="n">triang</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="n">q</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span>
-    <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span>
-    <span class="n">uuu</span><span class="p">,</span> <span class="n">vvv</span><span class="p">,</span>               <span class="c1"># raw vectors → arrow length ∝ magnitude</span>
-    <span class="n">mag</span><span class="p">,</span>                <span class="c1"># color by magnitude (optional but useful)</span>
-    <span class="n">angles</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
-    <span class="n">scale_units</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>          <span class="c1"># lower = longer arrows</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.004</span>
-<span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|v|&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Vector field at triangle centroids&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_quiver</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;$\mathbf</span><span class="si">{u}</span><span class="s2">=(u_x, u_y)$&quot;</span><span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,y)_quiver&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/5ef58dc93e7bf920d82db3fa927dde71390db57e876cec92b172f3b87e486a07.png" src="../../_images/5ef58dc93e7bf920d82db3fa927dde71390db57e876cec92b172f3b87e486a07.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">xc</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">yc</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">uuu</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vvv</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(187, 3)
-(187, 3)
-(187, 3)
-(187, 3)
+<img alt="../../_images/8a584cfc9b9149d8b32cbe3cbafc69e27b9d0e5dc11578c8037a16826c4c6562.png" src="../../_images/8a584cfc9b9149d8b32cbe3cbafc69e27b9d0e5dc11578c8037a16826c4c6562.png" />
+<img alt="../../_images/384b06f98ea0a71ed52a58f7f9d3068d6d51644ec92c16e019dd56d20b8607d5.png" src="../../_images/384b06f98ea0a71ed52a58f7f9d3068d6d51644ec92c16e019dd56d20b8607d5.png" />
+<img alt="../../_images/2c83ab1386d4cfd608a2684677e2a6c6cf24d38ac5c9235cc71ff6f8052fa125.png" src="../../_images/2c83ab1386d4cfd608a2684677e2a6c6cf24d38ac5c9235cc71ff6f8052fa125.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
 </pre></div>
 </div>
 </div>

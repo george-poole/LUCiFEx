@@ -30,7 +30,7 @@ def navier_stokes_forced(
     fy: Callable[[np.ndarray], np.ndarray] | None = None,
     dt_max: float = 0.1,
     dt_min: float = 0.0,
-    cfl_courant: float = 0.75,
+    dt_courant: float = 0.75,
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = CN,
 ):
@@ -66,7 +66,7 @@ def navier_stokes_forced(
     u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
 
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', cfl_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
 
     omega_bcs = BoundaryConditions(("dirichlet", boundary.union, 0.0))

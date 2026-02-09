@@ -1,6 +1,6 @@
 from typing import Callable
 
-from ufl import (Form, FacetNormal, CellDiameter,
+from ufl import (Form, Argument, FacetNormal, CellDiameter,
     TestFunction, TrialFunction, TestFunctions, TrialFunctions,
     inner, grad, div, avg, jump, Dx, Measure
 )
@@ -12,7 +12,7 @@ from lucifex.fem import Function, Constant
 
 def stokes_incompressible(
     up: Function,
-    deviatoric_stress: Callable[[Function], Expr],
+    deviatoric_stress: Callable[[Function | Argument], Expr],
     f: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None
 ) -> list[Form]:
@@ -43,12 +43,12 @@ def stokes_incompressible(
     return forms
 
 
-
 def stokes_streamfunction(
     psi: Function,
     alpha: Constant,
     fx: Function | None = None,
     fy: Function | None = None,
+    # bcs: BoundaryConditions | None = None # TODO
 ) -> list[Form]:
     """
     `∇⁴ψ = ∂fʸ/∂x - ∂fˣ/∂y`

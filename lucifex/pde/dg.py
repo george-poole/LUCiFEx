@@ -37,7 +37,7 @@ def dg_advection_forms(
     if isinstance(D_adv, FiniteDifference):
         D_adv = FE @ D_adv
 
-    fs = u.function_space
+    solution = u
     D_adv_a, D_adv_u = D_adv
     a = D_adv_a(a, trial=u)
     u = D_adv_u(u, trial=u)
@@ -86,7 +86,7 @@ def dg_advection_forms(
 
     if bcs is not None:
         ds, u_dirichlet, u_neumann = (
-            bcs.boundary_data(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_data(solution, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         match ds_opt:

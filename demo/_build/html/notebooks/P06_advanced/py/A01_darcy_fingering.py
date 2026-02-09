@@ -50,12 +50,12 @@ def darcy_fingering_rectangle(
     Lmbda: float = 1e1,
     bc_type: BoundaryType = BoundaryType.DIRICHLET,
     erf_eps: float = 1e-2,
-    c_eps: float = 1e-6,
+    c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     # time step
     dt_max: float = 0.25,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float = 0.25,
+    dt_h: str | float = "hmin",
+    dt_courant: float = 0.25,
    # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -98,7 +98,7 @@ def darcy_fingering_rectangle(
         lambda x: 0.5 * (1.0 + sp.erf(-x[0] / (Lx * erf_eps))),
         sinusoid_noise([bc_type, 'neumann'], [Lx, Ly], c_freq),
         [Lx, Ly],
-        c_eps,
+        c_ampl,
     ) 
     if bc_type == BoundaryType.DIRICHLET:
         psi_bcs = BoundaryConditions(
@@ -139,8 +139,8 @@ def darcy_fingering_rectangle(
         c_bcs=c_bcs, 
         psi_bcs=psi_bcs,
         dt_max=dt_max, 
-        cfl_h=cfl_h, 
-        cfl_courant=cfl_courant,
+        dt_h=dt_h, 
+        dt_courant=dt_courant,
         D_adv=D_adv,
         D_diff=D_diff,
         exprs_consts=[Pe, Lmbda, Di, In],

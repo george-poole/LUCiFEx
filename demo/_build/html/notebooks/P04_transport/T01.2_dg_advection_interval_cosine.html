@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -451,13 +451,122 @@ document.write(`
 \mathbb{S}
 \begin{cases}
 \Omega = [0, L_x] \\
+u_0(x)=\begin{cases}
+\frac{1}{2}(1+\cos(\pi(x-x_0)/\sigma)) &amp; \text{if}~|x-x_0|\leq\tfrac{\sigma}{2} \\
+0 &amp; \text{otherwise}
+\end{cases} \\
+u_{\text{I}}(x=0) = 0 \\
 \textbf{a}=a\,\textbf{e}_x \\
-s = 0 \\
-u_0(x)=\frac{1}{2}(1+\cos(\pi(x-x_0)/\sigma))~\text{if}~|x-x_0|\leq\sigma \\
-u_0(x)=0~\text{if}~|x-x_0|&gt;\sigma \\
-u_{\text{I}} = 0 \\
 \end{cases}
 \end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CN</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FE</span><span class="p">,</span>
+    <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">ConstantSeries</span><span class="p">,</span>
+    <span class="n">advective_timestep</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span><span class="p">,</span> <span class="n">is_continuous_lagrange</span><span class="p">,</span> <span class="n">as_index</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">dg_advection</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_simulation</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>    
+    <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">D_adv</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Simulation</span><span class="p">:</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ConstantSeries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="o">*</span><span class="n">element</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">+</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">x0</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="p">)</span> 
+    <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_continuous_lagrange</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">function_space</span><span class="p">):</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">dg_advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">u_solver</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+
+<span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span> <span class="o">/</span> <span class="n">Nx</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">Lx</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">courant</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">advective_timestep</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">courant</span><span class="p">)</span>
+
+<span class="n">elem_opts</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">D_adv_opts</span> <span class="o">=</span> <span class="p">(</span><span class="n">FE</span><span class="p">,</span> <span class="n">BE</span><span class="p">,</span> <span class="n">CN</span><span class="p">)</span>
+<span class="n">simulations</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">((</span><span class="n">FiniteDifference</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">Simulation</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_simulation</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">],</span> <span class="n">n_stop</span><span class="p">)</span> 
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">t_target</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="mi">20</span>
+
+<span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elem_opts</span><span class="p">:</span>
+    <span class="n">fam</span><span class="p">,</span> <span class="n">deg</span> <span class="o">=</span> <span class="n">elem</span>
+    <span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">legend_title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fam</span><span class="si">}</span><span class="s1">$_</span><span class="si">{</span><span class="n">deg</span><span class="si">}</span><span class="s1">$</span><span class="se">\n</span><span class="s1">$C_</span><span class="se">{{</span><span class="s1">\mathbf</span><span class="se">{{</span><span class="s1">a</span><span class="se">}}}}</span><span class="s1">=</span><span class="se">{{</span><span class="si">{</span><span class="n">courant</span><span class="si">}</span><span class="se">}}</span><span class="s1">$</span><span class="se">\n\n</span><span class="s1">$\mathcal</span><span class="se">{{</span><span class="s1">D</span><span class="se">}}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">\mathbf</span><span class="se">{{</span><span class="s1">a</span><span class="se">}}</span><span class="s1">, u</span><span class="se">}}</span><span class="s1">$&#39;</span>
+    <span class="k">for</span> <span class="n">D_adv</span> <span class="ow">in</span> <span class="n">D_adv_opts</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">elem</span><span class="p">][</span><span class="n">D_adv</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+        <span class="n">time_index</span> <span class="o">=</span> <span class="n">as_index</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">t_target</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">])</span>
+        <span class="n">legend_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">D_adv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">legend_title</span><span class="p">,</span> <span class="n">x_lims</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$u(x,t=</span><span class="si">{</span><span class="n">t_target</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;u(x,t=</span><span class="si">{</span><span class="n">t_target</span><span class="si">}</span><span class="s1">)_</span><span class="si">{</span><span class="n">fam</span><span class="si">}{</span><span class="n">deg</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">elem</span> <span class="o">==</span> <span class="p">(</span><span class="s1">&#39;DP&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/f3a73b02447bed2a2a171ea92fb09a51f118f1b7834c9d2ba4c62309c77b8484.png" src="../../_images/f3a73b02447bed2a2a171ea92fb09a51f118f1b7834c9d2ba4c62309c77b8484.png" />
+<img alt="../../_images/12b250dc416945374dee7f9f387d1c48bc2c07368f614833cad24b07bbcf5b1d.png" src="../../_images/12b250dc416945374dee7f9f387d1c48bc2c07368f614833cad24b07bbcf5b1d.png" />
+<img alt="../../_images/de17368e4ab8371f1a0364e762d9b1da525f1362b014bc4f7a51ad478a7ec9dc.png" src="../../_images/de17368e4ab8371f1a0364e762d9b1da525f1362b014bc4f7a51ad478a7ec9dc.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 
     <script type="text/x-thebe-config">

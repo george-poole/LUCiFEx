@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from typing_extensions import Unpack
 
 import numpy as np
-from ufl import Measure, Form, TestFunction, inner, replace, TrialFunction
+from ufl import Measure, Form, Argument, TestFunction, inner, replace, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx_mpc import MultiPointConstraint
 from dolfinx.fem import (
@@ -193,7 +193,7 @@ class BoundaryConditions:
     
     def boundary_data(
         self,
-        solution: Function | FunctionSeries | FunctionSpace,
+        solution: Function | FunctionSeries | FunctionSpace | Argument,
         *boundary_types: BoundaryType,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
@@ -208,8 +208,10 @@ class BoundaryConditions:
         Given `n_total` boundary conditions, `ds(n_total)` is the measure for the subset of the boundary 
         where no boundary conditions are applied.
         """
-        if not isinstance(solution, FunctionSpace):
+        if isinstance(solution, (Function, FunctionSeries)):
             fs = solution.function_space
+        elif isinstance(solution, Argument):
+            fs = solution.ufl_function_space()
         else:
             fs = solution
             
@@ -223,7 +225,7 @@ class BoundaryConditions:
             self._btypes, self._markers, self._values, self._subindices, 
             strict=True,
         ):
-            if b == BoundaryType.ROBIN and not isinstance(solution, FunctionSpace):
+            if b == BoundaryType.ROBIN and isinstance(solution, (Function, FunctionSeries)):
                 g = create_robin(g, solution)
             if b in boundary_types:
                 if isinstance(g, (Function, Expr, Constant)):

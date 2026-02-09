@@ -31,33 +31,32 @@ def navier_stokes_marangoni(
     Ny: int,
     cell: str = CellType.QUADRILATERAL,
     # physical
-    scaling: str = 'advective',
-    Ra: float = 1.0,
+    scaling: str = 'diffusive',
     Pr: float = 1.0,
+    Ra: float = 1.0,
     Ma: float = 1.0,
     # initial perturbation
-    h_frac: float = 0.8,
-    eps_frac: float = 0.01,
-    noise_eps: float = 1e-6,
-    noise_freq: tuple[int, int] = (8, 8),
+    zeta0: float = 0.8,
+    zeta_eps: float = 0.01,
+    c_ampl: float = 1e-6,
+    c_freq: tuple[int, int] = (8, 8),
     # time step
     dt_max: float = 0.1,
     dt_min: float = 0.0,
-    cfl_courant: float = 0.75,
+    dt_courant: float = 0.75,
     # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
-    D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE, BE),
+    D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE @ BE),
     D_diff_c: FiniteDifference = CN,
 ):
-    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra)
+    scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
     X = scaling_map['X']
     Lx = aspect * X
     Ly = 1.0 * X
-    h = h_frac * Ly
-    eps = eps_frac * Ly
-
+    Lzeta = zeta0 * Ly
+    Lzeta_eps = zeta_eps * Ly
     # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
@@ -78,16 +77,26 @@ def navier_stokes_marangoni(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
+    Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     Ma = Constant(Omega, Ma, 'Ma')
-    # initial and boundary conditions
+    # flow
+    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
+    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
+    # transport
     c_ics = SpatialPerturbation(
-        lambda x: np.exp(-(x[1] - h)**2 / eps),
-        sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], noise_freq),
+        lambda x: np.exp(-(x[1] - Lzeta)**2 / Lzeta_eps),
+        sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], c_freq),
         [Lx, Ly],
-        noise_eps,
+        c_ampl,
     ) 
+    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
+    # constitutive
+    deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
+    rho = ExprSeries(c, 'rho')
+    f = Bu * rho * as_vector([0, -1])
+    # boundary conditions
     c_bcs = BoundaryConditions(
         ('neumann', dOmega.union, 0.0)
     )
@@ -98,24 +107,17 @@ def navier_stokes_marangoni(
     sigma_bcs = BoundaryConditions(
         ('natural', dOmega['upper'], as_vector([-Ma * Dx(c[0], 0), 0.0])),
     )
-    # flow
-    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
-    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
-    # transport
-    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
-    rho = ExprSeries(-Ra * c, 'rho')
-    f = rho * as_vector([0, -1])
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', cfl_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], 1/Pr, 1, newtonian_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, sigma_bcs=sigma_bcs,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, sigma_bcs=sigma_bcs, p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
-        c, dt[0], u, 1, D_adv_c, D_diff_c,
+        c, dt[0], u, Di, D_adv_c, D_diff_c,
     )
     solvers = [dt_solver, *ns_solvers, c_solver]
-    exprs_consts = [Pr, Ra, Ma, rho]
+    exprs_consts = [Pr, Ra, Di, Vi, Bu, rho]
     return solvers, t, dt, exprs_consts 
     

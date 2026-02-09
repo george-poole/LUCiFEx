@@ -48,7 +48,7 @@ def darcy_plume_dissolution_rectangle(
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     cfl_h: str | float = "hmin",
-    cfl_courant: float | None = 0.75,
+    dt_courant: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
@@ -126,7 +126,7 @@ def darcy_plume_dissolution_rectangle(
         up, Bu * rho[0], k[0], 1, egx, egy,
     )
     dt_solver = evaluation(dt, advective_timestep)(
-            u[0], cfl_h, cfl_courant, dt_max, dt_min,
+            u[0], cfl_h, dt_courant, dt_max, dt_min,
         ) 
 
     c_solver = ibvp(advection_diffusion_reaction, bcs=c_bcs, petsc=c_petsc)(

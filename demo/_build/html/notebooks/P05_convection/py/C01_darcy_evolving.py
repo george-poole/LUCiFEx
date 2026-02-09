@@ -39,8 +39,8 @@ def darcy_convection_evolving_rectangle(
     c_eps: float = 1e-2,
     # time step
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -68,6 +68,8 @@ def darcy_convection_evolving_rectangle(
     # constants
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
+    kappa = Constant(Omega, kappa, name='kappa')
+    vartheta = Constant(Omega, np.radians(vartheta), name='vartheta')
     beta = Constant(Omega, np.radians(beta), name='beta')
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
@@ -81,14 +83,11 @@ def darcy_convection_evolving_rectangle(
         ('neumann', dOmega['lower', 'left', 'right'], 0.0)
     )
     # constitutive relations
-    kappa = Constant(Omega, kappa, name='kappa')
-    vartheta = Constant(Omega, np.radians(vartheta), name='vartheta')
     permeability = lambda phi: permeability_cross_bedded(phi**2, kappa, vartheta)
     dispersion = lambda phi: Di * phi
     density = lambda c: Bu * c
     egx = -sin(beta)
     egy = -cos(beta)
-
     return darcy_convection_generic(
         Omega=Omega, 
         dOmega=dOmega, 
@@ -101,12 +100,12 @@ def darcy_convection_evolving_rectangle(
         dispersion=dispersion,
         density=density, 
         dt_max=dt_max, 
-        cfl_h=cfl_h, 
-        cfl_courant=cfl_courant,
+        dt_h=dt_h, 
+        dt_courant=dt_courant,
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        exprs_consts=[Ra, Di, Bu, beta, kappa, vartheta],
+        exprs_consts=(Ra, Di, Bu, beta, kappa, vartheta),
     )

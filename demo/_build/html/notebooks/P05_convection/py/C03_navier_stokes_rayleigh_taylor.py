@@ -33,19 +33,19 @@ def navier_stokes_rayleigh_taylor_rectangle(
     Pr = 1.0,
     Ra = 1e3,
     # initial perturbation
-    noise_eps: float = 1e-6,
-    noise_freq: tuple[int, int] = (8, 8),
-    noise_seed: tuple[int, int] = (12, 34),
+    c_ampl: float = 1e-6,
+    c_freq: tuple[int, int] = (8, 8),
+    c_seed: tuple[int, int] = (12, 34),
     # time step
     dt_max: float = 0.5,
     dt_min: float = 0.0,
-    cfl_courant: float = 0.75,
+    dt_courant: float = 0.75,
     # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
     D_buoy_ns: FiniteDifference = FE,
-    D_adv_ad: FiniteDifference | FiniteDifferenceArgwise = (BE @ BE),
-    D_diff_ad: FiniteDifference = CN,
+    D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE @ BE),
+    D_diff_c: FiniteDifference = CN,
 ):
     """
     `∂c/∂t + 𝐮·∇c = Di∇²c` \\
@@ -71,7 +71,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     u_zero = [0.0] * dim
     # time
     order = finite_difference_order(
-        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_ad, D_diff_ad,
+        D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_c, D_diff_c,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
@@ -82,9 +82,9 @@ def navier_stokes_rayleigh_taylor_rectangle(
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
         lambda x: 1.0 * (x[1] > Ly / 2) + 0.0,
-        cubic_noise(['neumann', 'neumann'], [Lx, Ly], noise_freq, noise_seed),
+        cubic_noise(['neumann', 'neumann'], [Lx, Ly], c_freq, c_seed),
         [Lx, Ly],
-        noise_eps,
+        c_ampl,
     )   
     c_bcs = BoundaryConditions(
         ('neumann', dOmega.union, 0.0)
@@ -102,15 +102,14 @@ def navier_stokes_rayleigh_taylor_rectangle(
     f = Bu * rho * as_vector([0, -1]) 
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', cfl_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
-        c, dt[0], u, Di, D_adv_ad, D_diff_ad,
+        c, dt[0], u, Di, D_adv_c, D_diff_c,
     )
-
     solvers = [dt_solver, *ns_solvers, c_solver]
     exprs_consts = [Pr, Ra, Di, Vi, Bu, rho]
     return solvers, t, dt, exprs_consts

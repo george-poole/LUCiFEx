@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -453,7 +453,7 @@ document.write(`
 \textbf{e}_g=-\textbf{e}_y &amp; \text{vertically downward gravity}\\ 
 \phi = 1 &amp; \text{constant porosity} \\
 \mathsf{D} = \mathsf{I} &amp; \text{constant isotropic dispersion} \\ 
-\mathsf{K} = \begin{pmatrix} \\
+\mathsf{K} = \begin{pmatrix}
 \cos^2\vartheta +\kappa\sin^2\vartheta &amp; (1 -  \kappa)\cos\vartheta\sin\vartheta \\
 (1 -  \kappa)\cos\vartheta\sin\vartheta &amp; \cos^2\vartheta +\kappa\sin^2\vartheta\\
  \end{pmatrix} &amp; \text{anisotropic permeability} \\ 
@@ -481,38 +481,24 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span> 
-    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;diffusive&#39;</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="mf">500.0</span><span class="p">,</span> 
     <span class="n">kappa</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">vartheta</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span>
-    <span class="n">c_eps</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> 
+    <span class="n">c_ampl</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> 
     <span class="n">c_freq</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> 
     <span class="n">c_seed</span><span class="o">=</span><span class="p">(</span><span class="mi">456</span><span class="p">,</span> <span class="mi">987</span><span class="p">),</span> 
     <span class="n">D_adv</span><span class="o">=</span><span class="n">AB2</span><span class="p">,</span>
     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+    <span class="n">dt_max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">200</span>
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-<span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
 
-<span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
-    <span class="n">plot_colormap</span><span class="p">,</span>
-    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">)(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">)</span>
-<span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t)&#39;</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
-
-<span class="n">display_animation</span><span class="p">(</span><span class="n">anim_path</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -527,10 +513,26 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/447b27e3a833fdcb8f1ddf6963cd1c6f2f1bf59014911711607c4ccbf525a02f.png" src="../../_images/447b27e3a833fdcb8f1ddf6963cd1c6f2f1bf59014911711607c4ccbf525a02f.png" />
-<img alt="../../_images/070b40465c1e9a8f6998672eb0c453469c32abe71a41ccdc11facda06101c79f.png" src="../../_images/070b40465c1e9a8f6998672eb0c453469c32abe71a41ccdc11facda06101c79f.png" />
-<img alt="../../_images/30ae954fe7b7da9ce9e16deca147c37454c007d559ac38f94b0731f8a2344d00.png" src="../../_images/30ae954fe7b7da9ce9e16deca147c37454c007d559ac38f94b0731f8a2344d00.png" />
-<img alt="../../_images/828e07e793da7f8ec7ba0002b2fd61d95f55fda4af93eb11fe83a581d9e6bfc2.png" src="../../_images/828e07e793da7f8ec7ba0002b2fd61d95f55fda4af93eb11fe83a581d9e6bfc2.png" />
+<img alt="../../_images/8d513b59377560e8d209e8ec6faaf0344c8b5bae4affb2a11947313edc478560.png" src="../../_images/8d513b59377560e8d209e8ec6faaf0344c8b5bae4affb2a11947313edc478560.png" />
+<img alt="../../_images/019497b3b7c8d13d0e678c16b827ffe64350eb271c137e4b2f94b8f6ae105f4a.png" src="../../_images/019497b3b7c8d13d0e678c16b827ffe64350eb271c137e4b2f94b8f6ae105f4a.png" />
+<img alt="../../_images/2d9d8850903e9d0ca0d47fda064d21359dc0a5f2ab9c084d0936928bcd28a264.png" src="../../_images/2d9d8850903e9d0ca0d47fda064d21359dc0a5f2ab9c084d0936928bcd28a264.png" />
+<img alt="../../_images/5da834c80138c05486f432cfc91ad69b202e4bdc08d1c754cb5d43bef3525f1e.png" src="../../_images/5da834c80138c05486f432cfc91ad69b202e4bdc08d1c754cb5d43bef3525f1e.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
+
+<span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
+    <span class="n">plot_colormap</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">)</span>
+<span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t)&#39;</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
+
+<span class="n">display_animation</span><span class="p">(</span><span class="n">anim_path</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 </section>

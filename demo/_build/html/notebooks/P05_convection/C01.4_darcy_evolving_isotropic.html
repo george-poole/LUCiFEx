@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -493,15 +493,6 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 &amp;\text{no-flux on right boundary}\\
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
 
 <span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">get_solver</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">petsc</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">get_solver</span><span class="p">(</span><span class="s1">&#39;psi&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">petsc</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;ksp_type&#39;: &#39;gmres&#39;, &#39;pc_type&#39;: &#39;ilu&#39;, &#39;ksp_rtol&#39;: 1e-05, &#39;ksp_atol&#39;: 1e-10, &#39;ksp_divtol&#39;: 100000.0, &#39;ksp_max_it&#39;: 10000}
-{&#39;ksp_type&#39;: &#39;cg&#39;, &#39;pc_type&#39;: &#39;gamg&#39;, &#39;ksp_rtol&#39;: 1e-05, &#39;ksp_atol&#39;: 1e-10, &#39;ksp_divtol&#39;: 100000.0, &#39;ksp_max_it&#39;: 10000}
 </pre></div>
 </div>
 </div>

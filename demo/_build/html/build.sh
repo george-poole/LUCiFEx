@@ -17,7 +17,8 @@ while [[ "$1" == --* ]]; do
 done
 
 GLOB=$1
-BUILD=$2
+NBCONVERT_ARGS=${2:-"--allow-errors"}
+BUILD_ARGS=${3:-""}
 
 IPYNB=($(find . -name "$GLOB.ipynb" -path "./notebooks/*"))
 for i in "${IPYNB[@]}"
@@ -35,15 +36,15 @@ for i in "${IPYNB[@]}"
         echo Executing notebook $i 
         export IPYNB_FILE_NAME="${i}"
         echo Beginning excution "$(date)"
-        jupyter nbconvert --execute --to notebook --inplace "${i}" --allow-errors  
+        jupyter nbconvert --execute --to notebook --inplace "${i}" $NBCONVERT_ARGS
         echo Finished excution "$(date)"
     done
 
-echo Building gallery ...
-python build_gallery.py
-echo Gallery built
+echo Making gallery ...
+python make_gallery.py
+echo Gallery made
 
-jupyter-book build . $BUILD
+jupyter-book build . $BUILD_ARGS
 
 if $REMOTE; then
     ghp-import -n -p -f ./_build/html

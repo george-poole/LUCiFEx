@@ -31,7 +31,7 @@ def navier_stokes_circle_obstacle(
     # time step
     dt_max: float,
     dt_min: float,
-    cfl_courant: float,
+    dt_courant: float,
     ns_scheme: str,
     # time discretization
     D_adv: FiniteDifference,
@@ -83,7 +83,7 @@ def navier_stokes_circle_obstacle(
 
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', cfl_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     if ns_scheme == 'ipcs':
         ns_solvers = ipcs_solvers(

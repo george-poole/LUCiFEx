@@ -21,30 +21,29 @@ from .utils import set_axes, optional_ax
 def plot_quiver(
     ax: Axes,
     f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | Expr,
-    n_arrow: int | tuple[int, int] = 1,
+    arrow_slc: int | tuple[int, int] = 1,
     use_cache: tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
-) -> tuple[Figure, Axes]:
+) -> None:
     """
     Plots quiver arrows of a two-dimensional vector
     """
     if isinstance(f, tuple) and len(f) == 4:
-        return _plot_quiver(ax, f, n_arrow, **kwargs)
+        return _plot_quiver(ax, f, arrow_slc, **kwargs)
 
     fx, fy = _xy_components(f, mesh)
     x, y, fx_np, fy_np = _x_y_fx_fy_arrays(fx, fy, use_cache, 'Quiver plotting')
     
-    return _plot_quiver(ax, (x, y, fx_np, fy_np), n_arrow, **kwargs)
+    return _plot_quiver(ax, (x, y, fx_np, fy_np), arrow_slc, **kwargs)
 
 
 def _plot_quiver(
     ax: Axes,
     f: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-    n_arrow: int | tuple[int, int],
-    arrow_slc,
+    arrow_slc: int | tuple[int, int],
     **kwargs,
-) -> tuple[Figure, Axes]:
+) -> None:
     
     x, y, fx, fy = f
     _kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
@@ -57,21 +56,18 @@ def _plot_quiver(
         tri = False
 
     if tri:
-        n_freq = int(np.ceil(len(x) / n_arrow))
-        x_quiv = x[::n_freq]
-        y_quiv = y[::n_freq]
-        fx_quiv = fx[::n_freq]
-        fy_quiv = fy[::n_freq]
+        x_quiv = x[::arrow_slc]
+        y_quiv = y[::arrow_slc]
+        fx_quiv = fx[::arrow_slc]
+        fy_quiv = fy[::arrow_slc]
     else:
-        if isinstance(n_arrow, int):
-            n_arrow = (n_arrow, n_arrow)
-        nx_arrow, ny_arrow = n_arrow
-        nx_freq = int(np.ceil(len(x) / nx_arrow))
-        ny_freq = int(np.ceil(len(y) / ny_arrow))
-        x_quiv = x[::nx_freq]
-        y_quiv = x[::nx_freq]
-        fx_quiv = fx[::nx_freq, ::ny_freq].T,
-        fy_quiv = fy[::nx_freq, ::ny_freq].T,
+        if isinstance(arrow_slc, int):
+            arrow_slc = (arrow_slc, arrow_slc)
+        x_arrow_slc, y_arrow_slc = arrow_slc
+        x_quiv = x[::x_arrow_slc]
+        y_quiv = y[::y_arrow_slc]
+        fx_quiv = fx[::x_arrow_slc, ::y_arrow_slc].T
+        fy_quiv = fy[::x_arrow_slc, ::y_arrow_slc].T
 
     filter_kwargs(ax.quiver, Quiver)(
         x_quiv,
@@ -91,7 +87,7 @@ def plot_streamlines(
     use_cache: tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
-):
+) -> None:
     """
     Plots streamlines of a two-dimensional vector
     """
@@ -110,7 +106,7 @@ def _plot_streamlines(
     density,
     color: str | tuple[str, Callable],
     **kwargs,
-):
+) -> None:
     x, y, fx, fy = f
 
     if isinstance(color, str):

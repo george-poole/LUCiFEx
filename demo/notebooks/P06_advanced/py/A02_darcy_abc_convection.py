@@ -44,14 +44,14 @@ def darcy_abc_convection_rectangle(
     # time step
     dt_min: float = 0.0,
     dt_max: float = 0.5,
-    cfl_h: str | float = "hmin",
-    cfl_courant: float | None = 0.75,
+    dt_h: str | float = "hmin",
+    dt_courant: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
     D_reac: FiniteDifference = AB1,
     # linear algebra
-    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'gamg'),
+    psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'hypre'),
     abc_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
 ):
     # space
@@ -119,7 +119,7 @@ def darcy_abc_convection_rectangle(
     )
     u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
-            u[0], cfl_h, cfl_courant, dt_max, dt_min,
+            u[0], dt_h, dt_courant, dt_max, dt_min,
         ) 
 
     a_solver = ibvp(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc)(
