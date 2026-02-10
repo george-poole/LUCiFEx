@@ -1,9 +1,8 @@
 import gmsh
 import numpy as np
 
-from ..utils.py_utils import replicate_callable
+from ..utils.py_utils import replicate_callable, ToDoError
 from .gmsh_utils import create_gmsh_mesh_factory
-from ..utils import ToDoError
 
 
 def annulus_model(

@@ -6,8 +6,9 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils import is_cartesian, MultipleDispatchTypeError, CellType, NonCartesianQuadMeshError
-from ..fdm import ConstantSeries, FunctionSeries, GridSeries, NumericSeries, TriangulationSeries
+from ..utils import is_cartesian, CellType, NonCartesianQuadMeshError
+from ..utils.py_utils import MultipleDispatchTypeError
+from ..fdm import ConstantSeries, FunctionSeries, GridSeries, FloatSeries, TriangulationSeries
 from ..io import (
     write, 
     load_mesh, 
@@ -137,7 +138,7 @@ def _(
     if npz_name is None:
         npz_name = (
             NpSeries.__name__,
-            NumericSeries.__name__,
+            FloatSeries.__name__,
         )
     if isinstance(npz_name, str):
         npz_name = (npz_name, npz_name)
@@ -159,7 +160,7 @@ def _(
         shape = i[2:]
         c = load_constant_series(name, dir_path, file_name, mesh, *shape)
         write(
-            NumericSeries.from_series(c), 
+            FloatSeries.from_series(c), 
             file_name=consts_npz_name, 
             dir_path=dir_path,
             mode=mode,

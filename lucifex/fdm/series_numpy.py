@@ -99,7 +99,7 @@ class NumpySeriesABC(ABC, Generic[T]):
         return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
 
 
-class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
+class FloatSeries(NumpySeriesABC[int | float | np.ndarray]):
     @classmethod
     def from_series(
         cls, 
@@ -117,7 +117,7 @@ class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
             raise SubSeriesError
         if name is None:
             name = self._create_subname(index)
-        return NumericSeries([i[index] for i in self.series], self.time_series, name)
+        return FloatSeries([i[index] for i in self.series], self.time_series, name)
     
     def transform(
         self, 
@@ -129,13 +129,13 @@ class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
             transf = getattr(operator, transf)
 
         if other is None:
-            return NumericSeries([transf(i) for i in self.series], self.time_series, name)
+            return FloatSeries([transf(i) for i in self.series], self.time_series, name)
         elif isinstance(other, float):
-            return NumericSeries([transf(i, other) for i in self.series], self.time_series, name)
+            return FloatSeries([transf(i, other) for i in self.series], self.time_series, name)
         else:
             size = min(len(self.time_series), len(other.time_series))
             assert np.allclose(self.time_series[:size], other.time_series[:size])
-            return NumericSeries(
+            return FloatSeries(
                 [transf(i, j) for i, j in zip(self.series[:size], other.series[:size])],
                 self.time_series[:size],
                 name,
@@ -257,7 +257,7 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
         return TriangulationSeries([i[index] for i in self.series], self.time_series, self.triangulation, name)
     
 
-def numpy_series(
+def as_numpy_series(
     u: FunctionSeries,
     use_cache: tuple[bool, bool] = (True, True),
     slc: slice = slice(None, None, None),

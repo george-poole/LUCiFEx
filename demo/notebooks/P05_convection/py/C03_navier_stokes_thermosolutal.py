@@ -15,10 +15,10 @@ from lucifex.sim import configure_simulation
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.constitutive import newtonian_stress
-from lucifex.pde.scaling import ScalingOptions
+from lucifex.pde.scaling import ScalingChoice
 
 
-NAVIER_STOKES_CONVECTION_SCALINGS = ScalingOptions(
+NAVIER_STOKES_CONVECTION_SCALINGS = ScalingChoice(
     ('Ad', 'Di', 'Vi', 'Bu', 'X'),
     lambda Ra, Pr: {
         'advective': (1, 1/Ra, Pr/Ra, Pr/Ra, 1),

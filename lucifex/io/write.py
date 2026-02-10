@@ -13,11 +13,15 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ..utils import (extract_mesh, create_fem_function, create_fem_space, 
-    MultipleDispatchTypeError, set_fem_function, 
-    StrSlice, as_slice,
+from ..utils import (
+    extract_mesh, 
+    create_fem_function, 
+    create_fem_space, 
+    set_fem_function, 
+
 )
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, NumericSeries, TriangulationSeries
+from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
+from ..fdm import FunctionSeries, ConstantSeries, GridSeries, FloatSeries, TriangulationSeries
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim
@@ -90,7 +94,7 @@ def write(
 
 @overload
 def write(
-    u: NumericSeries,
+    u: FloatSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
     slc: StrSlice = slice(0, None),
@@ -357,9 +361,9 @@ def _(
     np.savez(file_path, **d)
 
 
-@_write.register(NumericSeries)
+@_write.register(FloatSeries)
 def _(
-    u: NumericSeries,
+    u: FloatSeries,
     file_name: str,
     dir_path,
     slc = slice(0, None), 
@@ -369,7 +373,7 @@ def _(
     file_path = file_path_ext(dir_path, file_name, 'npz')
 
     slc = as_slice(slc)
-    u = NumericSeries(u.series[slc], u.time_series[slc], u.name)
+    u = FloatSeries(u.series[slc], u.time_series[slc], u.name)
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):

@@ -1,18 +1,23 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Generic, TypeVar
+from collections.abc import Iterable
 
-from ..fdm.series_numpy import TriangulationSeries, GridSeries, numpy_series, NumericSeries
+from ..fdm.series_numpy import NumpySeriesABC, TriangulationSeries, GridSeries, FloatSeries, as_numpy_series
 from ..utils import is_cartesian, is_simplicial
+from ..utils.py_utils import MultiKey
 
 from .simulation import Simulation
         
 
 T = TypeVar('T')
-class NumpySimulationABC(ABC, Generic[T]):
+class NumpySimulationABC(
+    Generic[T],
+    MultiKey[str, T]
+):
 
     def __init__(
         self,
-        series: dict[str, T | NumericSeries],
+        series: Iterable[T | FloatSeries],
         exprs_consts = (),
         timings = None,
     ):
@@ -20,19 +25,19 @@ class NumpySimulationABC(ABC, Generic[T]):
         self._exprs_consts = exprs_consts
         self._timings = timings
 
-    def __getitem__(
+    def _getitem(
         self, 
-        key: str | tuple[str, ...],
+        key,
     ):
-        ...
+        return self.namespace[key]
 
     @property
-    def series(self) -> list[T| NumericSeries]:
-        ...
+    def series(self) -> list[T| FloatSeries]:
+        return list(self._series)
 
     @property
-    def namespace(self) -> dict[str, T | NumericSeries | float]:
-        return self._series # TODO expr and consts too
+    def namespace(self) -> dict[str, T | FloatSeries | float]:
+        return {i.name: i for i in self._series} # TODO expr and consts too
     
 
 class GridSimulation(NumpySimulationABC[GridSeries]):
@@ -46,7 +51,7 @@ class GridSimulation(NumpySimulationABC[GridSeries]):
     ):
         series = {}
         for s in sim.series:
-            s_np = numpy_series(s, use_cache=use_cache, slc=slc)
+            s_np = as_numpy_series(s, use_cache=use_cache, slc=slc)
             series[s.name] = s_np
 
         # exprs_consts = sim.exprs_consts
@@ -55,10 +60,10 @@ class GridSimulation(NumpySimulationABC[GridSeries]):
         return cls(series)
 
 
-
 class TriangulationSimulation(NumpySimulationABC[TriangulationSeries]):
 
     ...
+
 
 
 def numpy_simulation(

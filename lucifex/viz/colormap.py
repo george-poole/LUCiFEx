@@ -12,7 +12,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 from matplotlib.cm import ScalarMappable
 
-from ..mesh.cartesian import CellType
 from ..utils import (
     is_scalar, grid, triangulation, create_fem_function, 
     is_cartesian, NonCartesianQuadMeshError, 

@@ -69,7 +69,7 @@ P = ParamSpec('P')
 R = TypeVar('R')
 def log_timing(
     func: Callable[P, R], 
-    logged: dict[Hashable, list[float]],
+    logged: dict[Hashable, list[float]] | None = None,
     key: Hashable | None = None,
     n: int = 1, 
     overwrite: bool = False,

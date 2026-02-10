@@ -7,53 +7,45 @@ from typing import (
     Generic,
     Any,
 )
-from functools import lru_cache, update_wrapper, wraps
-from inspect import signature
 
 
-T = TypeVar('T')
-class MultiKey(ABC, Generic[T]):
+K = TypeVar('K')
+V = TypeVar('V')
+class MultiKey(ABC, Generic[K, V]):
     """
     Abstract base class for types with multi-key access
     """
     @overload
     def __getitem__(
         self, 
-        key: str,
-    ) -> T:
+        key: K,
+    ) -> V:
         ...
 
     @overload
     def __getitem__(
         self, 
-        keys: tuple[str, ...],
-    ) -> tuple[T, ...]:
+        keys: tuple[K, ...],
+    ) -> tuple[V, ...]:
         ...
 
-    def __getitem__(
-        self, 
-        key: str | tuple[str, ...],
-    ):
-        if isinstance(key, tuple):
+    def __getitem__(self, key):
+        if isinstance(key, tuple) and all(isinstance(i, type(key[0])) for i in key):
             return tuple(self[i] for i in key)
-        elif isinstance(key, str):
-            try:
-                return self._getitem(key)
-            except KeyError:
-                # (f"'{key}' not found in simulation's namespace."
-                raise KeyError
         else:
-            raise TypeError
+            return self._getitem(key)
+        # else:
+        #     raise TypeError
         
     @abstractmethod
     def _getitem(
         self,
-        key: str,
-    ) -> T:
+        key: K,
+    ) -> V:
         ...
 
 
-class FrozenDict(MultiKey[Any]):
+class FrozenDict(MultiKey[str, Any]):
     """
     An immutable dictionary with multi-key access
     """
@@ -73,21 +65,13 @@ class FrozenDict(MultiKey[Any]):
     def __repr__(self) -> str:
         kws = ', '.join([f'{k}={v}' for k, v in self._dict.items()])
         return f'{self.__class__.__name__}({kws})'
+    
+    def keys(self):
+        return self._dict.keys()
+    
+    def values(self):
+        return self._dict.values()
         
-
-def multi_dict(
-    **kwargs: Any,
-) -> MultiKey[Any]:
-    
-    _getitem = lambda k: kwargs[k]
-    
-    cls = type(
-        'MultiDict',
-        (MultiKey, ),
-        {'_getitem', _getitem},
-    )
-
-    return cls()
 
 
 @overload
@@ -145,10 +129,12 @@ def nested_dict(
     if depth is None and _ is not None:
         depth = len(_) - 1
 
-    if depth == 1:
+    if depth <= 0:
+        raise ValueError('Depth must be a non-negative integer.')
+    elif depth == 1:
         return dict()
-    if depth == 2:
+    elif depth == 2:
         return defaultdict(dict)
-    assert depth > 2
-    return nested_dict(nested_dict(depth=depth - 1))
+    else:
+        return defaultdict(lambda: nested_dict(depth=depth - 1))
 

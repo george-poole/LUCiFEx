@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from ..utils import filter_kwargs
+from ..utils.py_utils import filter_kwargs
 from .utils import optional_fig_ax, set_axes
 
 

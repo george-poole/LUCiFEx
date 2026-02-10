@@ -62,8 +62,4 @@ from .fem_utils import (
     get_fem_subspaces,
 )
 from .numpy_utils import triangulation, quadrangulation, grid, as_index, as_indices
-# from .py_utils import (
-#     filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict, FrozenDict,
-#     optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
-
 from . import py_utils

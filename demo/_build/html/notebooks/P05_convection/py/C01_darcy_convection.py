@@ -24,10 +24,10 @@ from lucifex.utils.py_utils import arity
 from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
-from lucifex.pde.scaling import ScalingOptions
+from lucifex.pde.scaling import ScalingChoice
 
 
-DARCY_CONVECTION_SCALINGS = ScalingOptions(
+DARCY_CONVECTION_SCALINGS = ScalingChoice(
     ('Ad', 'Di', 'Bu', 'X'),
     lambda Ra: {
         'advective': (1, 1/Ra, 1, 1),

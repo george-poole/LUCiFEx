@@ -1,37 +1,27 @@
-from typing import overload, Callable, ParamSpec, TypeVar
-
 import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
-from ..utils.dofs_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
+from ..utils.py_utils import MultiKey
+from ..utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
 
 
-class MeshBoundary:
-    def __init__(self, boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias]):
+class MeshBoundary(
+    MultiKey[
+        str | int,
+        SpatialMarker | SpatialMarkerAlias,
+    ]
+):
+    def __init__(
+        self, 
+        boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias],
+    ):
         self._boundaries = boundaries
 
-    @overload
-    def __getitem__(
+    def _getitem(
         self, 
-        tag: str | int,
+        key
     ) -> SpatialMarker | SpatialMarkerAlias:
-        ...
-
-    @overload
-    def __getitem__(
-        self, 
-        tag: tuple[str | int, ...],
-    ) -> list[SpatialMarker | SpatialMarkerAlias]:
-        ...
-
-    def __getitem__(
-        self, 
-        tag: str | int | tuple[str | int, ...],
-    ) -> SpatialMarker | SpatialMarkerAlias:
-        if isinstance(tag, tuple):
-            return [self._boundaries[t] for t in tag]
-        else:
-            return self._boundaries[tag]
+        return self._boundaries[key]
         
     @property
     def markers(self) -> list[SpatialMarker | SpatialMarkerAlias]:

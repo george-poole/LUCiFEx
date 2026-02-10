@@ -2,11 +2,16 @@ from typing import overload, Callable, ParamSpec, Generic
 from typing_extensions import Unpack
 
 from dolfinx.mesh import Mesh
-
 from lucifex.fem import Constant
+from lucifex.utils.py_utils import MultiKey
 
 
-class ScalingMap:
+class ScalingMap(
+    MultiKey[
+        str | tuple[Mesh, str] | tuple[Mesh, Unpack[tuple[str, ...]]], 
+        int | float | Constant
+    ]
+):
 
     def __init__(
         self, 
@@ -27,68 +32,38 @@ class ScalingMap:
     def __repr__(self):
         return f"{self.__class__.__name__}({repr(self.map)}, '{self.name}')"
 
-    @overload
-    def __getitem__(
+    def _getitem(
         self, 
-        name: str, 
-    ) -> int | float:
-        ...
-
-    @overload
-    def __getitem__(
-        self, 
-        name: tuple[Mesh, str], 
-    ) -> Constant:
-        ...
-
-    @overload
-    def __getitem__(
-        self, 
-        name: tuple[Mesh, Unpack[tuple[str, ...]]], 
-    ) -> Constant | tuple[Constant, ...]:
-        ...
-
-    @overload
-    def __getitem__(
-        self, 
-        name: tuple[str, ...], 
-    ) -> tuple[int | float, ...]:
-        ...
-
-    def __getitem__(
-        self, 
-        arg,
+        arg: str | tuple[Mesh, str] | tuple[Mesh, Unpack[tuple[str, ...]]],
     ):
-        if isinstance(arg, tuple):
-            if not any(isinstance(i, Mesh) for i in arg):
-                return tuple(self._d[i] for i in arg)
-            else:
-                mesh = arg[0]
-                if len(arg) == 2:
-                    i = arg[1]
-                    return Constant(mesh, self._d[i], i)
-                else:
-                    return tuple(Constant(mesh, self._d[i], i) for i in arg[1:])
-        else:
+        if isinstance(arg, str):
             return self._d[arg]
+        
+        match arg:
+            case (mesh, name) if isinstance(mesh, Mesh):             
+                return Constant(mesh, self._getitem(name), name)
+            case (mesh, *names) if isinstance(mesh, Mesh):
+                return tuple(self._getitem((mesh, n)) for n in names)
+            case _:
+                raise TypeError
         
 
 P = ParamSpec('P')
-class ScalingOptions(Generic[P]):
+class ScalingChoice(Generic[P]):
     def __init__(
         self,
-        symbols: tuple[str, ...],
-        options: Callable[P, dict[str, tuple[float, ...]]],
+        names: tuple[str, ...],
+        func_choices: Callable[P, dict[str, tuple[float, ...]]],
     ):
-        self._symbols = symbols
-        self._options = options
+        self._symbols = names
+        self._func_choices = func_choices
 
     def __getitem__(
         self, 
         option: str,
     ) -> Callable[P, ScalingMap]:
         def _(*args: P.args, **kwargs: P.kwargs) -> ScalingMap:
-            values = self._options(*args, **kwargs)[option]
+            values = self._func_choices(*args, **kwargs)[option]
             return ScalingMap(dict(zip(self._symbols, values)), option)
         return _
     

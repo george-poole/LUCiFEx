@@ -10,9 +10,9 @@ from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
-from ..utils.py_utils import StrSlice, classproperty, optional_lru_cache
+from ..utils.py_utils import StrSlice, optional_lru_cache
 from ..fdm import (
-    FunctionSeries, ConstantSeries, GridSeries, NumericSeries, 
+    FunctionSeries, ConstantSeries, GridSeries, FloatSeries, 
     TriangulationSeries,
 )
 from .read import read
@@ -68,7 +68,7 @@ class LoadObject(Generic[T], Protocol):
                         pass
             raise KeyError
         
-    @classproperty
+    @classmethod
     def registry(cls):
         return cls._registry
                 
@@ -196,7 +196,7 @@ def load_numeric_series(
     dir_path: str,
     file_name: str,
     sep: str = '__',
-) -> NumericSeries:
+) -> FloatSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
@@ -245,7 +245,7 @@ def load_npz_dict(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
     *,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | NumericSeries | GridSeries | TriangulationSeries]:
+) -> dict[str, float | np.ndarray | FloatSeries | GridSeries | TriangulationSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -273,7 +273,7 @@ def load_npz_dict(
 
     dict_return: dict[
         str, 
-        float | np.ndarray | NumericSeries | GridSeries,
+        float | np.ndarray | FloatSeries | GridSeries,
     ] = {}
 
     for name, value in dict_load.items():
@@ -296,7 +296,7 @@ def load_npz_dict(
                 else:
                     value = GridSeries(series, time_series, tuple(spatial_arrays), name)
             else:
-                value = NumericSeries(series, time_series, name)
+                value = FloatSeries(series, time_series, name)
         dict_return[name] = value
 
     return dict_return

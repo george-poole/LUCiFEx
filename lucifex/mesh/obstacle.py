@@ -1,8 +1,7 @@
 import gmsh
 
-from ..utils.py_utils import replicate_callable
+from ..utils.py_utils import replicate_callable, ToDoError
 from .gmsh_utils import create_gmsh_mesh_factory
-from ..utils import ToDoError
 
 
 def rectangle_minus_ellipse_model(

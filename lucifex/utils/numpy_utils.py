@@ -171,7 +171,9 @@ def _(
         )
 
     if use_mesh_map:
-        mapping = vertex_to_grid_index_map(use_cache=use_mesh_cache)(mesh, strict, jit, use_mesh_cache)
+        mapping = vertex_to_grid_index_map(use_cache=use_mesh_cache)(
+            mesh, strict, jit, use_mesh_cache
+        )
         return _grid_from_map(mapping, vertex_values, axes, mask)
     else:
         if jit:
@@ -187,7 +189,8 @@ def _grid_jit(
     axes: tuple[np.ndarray, ...],
     mask: float,
 ) -> np.ndarray:
-    """Returns the vertex values on a Cartesian grid.
+    """
+    Returns the vertex values on a Cartesian grid.
     See also `_grid_nojit` for a slower, non-compiled version.
     """
 
@@ -233,15 +236,6 @@ def _grid_nojit(
     See also `_grid_jit` for a faster, JIT-compiled version.
     """
     return _grid_jit.__wrapped__(vertex_values, vertices, axes, mask)
-    # dim = len(axes)
-    # nx = tuple(len(i) for i in axes)
-    # f_grid = np.full(nx, mask)
-
-    # for vertex_index, x_vertex in enumerate(vertices):
-    #     x_index = [np.where(axes[i] == x_vertex[i])[0][0] for i in range(dim)]
-    #     f_grid[tuple(x_index)] = vertex_values[vertex_index]
-
-    # return f_grid
 
 
 def _grid_from_map(

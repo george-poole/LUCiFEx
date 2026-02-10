@@ -6,13 +6,8 @@ import numpy as np
 
 from ..fem import Constant, Function, is_unsolved
 from ..fdm import FunctionSeries, ConstantSeries
-from ..utils import (
-    MultipleDispatchTypeError, 
-    is_continuous_lagrange, 
-    is_discontinuous_lagrange, 
-    as_slice,
-    StrSlice,
-)
+from ..utils import is_continuous_lagrange, is_discontinuous_lagrange
+from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
 from .utils import file_path_ext, dofs_array_dim
 
 

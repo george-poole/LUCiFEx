@@ -6,12 +6,18 @@ from collections.abc import Iterable
 
 from natsort import natsorted
 
-from ..fdm import FunctionSeries, GridSeries, ConstantSeries, NumericSeries, TriangulationSeries
+from ..utils.py_utils import MultiKey
+from ..fdm import FunctionSeries, GridSeries, ConstantSeries, FloatSeries, TriangulationSeries
 from .load import load_txt_dict
 from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 
 
-class DataSet:
+class DataSet(
+    MultiKey[
+        str,
+        FunctionSeries |  GridSeries | TriangulationSeries | ConstantSeries | FloatSeries
+    ]
+):
     def __init__(
         self,
         dir_path: str,
@@ -21,7 +27,7 @@ class DataSet:
         self._dir_path = dir_path
         self._loaded: dict[
             str, 
-            FunctionSeries | ConstantSeries | GridSeries | NumericSeries | TriangulationSeries
+            FunctionSeries | ConstantSeries | GridSeries | FloatSeries | TriangulationSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file
@@ -50,34 +56,18 @@ class DataSet:
             raise KeyError(f"No metadata has been included for '{name}'")
         self._loaded[name] = obj
 
-    @overload
-    def __getitem__(
-        self, 
-        key: str,
-    ) -> FunctionSeries |  GridSeries | TriangulationSeries | ConstantSeries | NumericSeries:
-        ...
-
-    @overload
-    def __getitem__(
-        self, 
-        key: tuple[str, ...],
-    ) -> list[FunctionSeries | GridSeries | TriangulationSeries | ConstantSeries | NumericSeries]:
-        ...
-
-    def __getitem__(
+    def _getitem(
         self, 
         key: str | tuple[str, ...],
     ):
-        if isinstance(key, tuple) and all(isinstance(i, (str, tuple)) for i in key):
-            return [self[i] for i in key]
-        else:
-            if not isinstance(key, str):
-                self._proxies[key[0]] = proxy(*key)
-            try:
-                return self._loaded[key]
-            except KeyError:
-                self.load(key)
-                return self[key]    
+        # FIXME
+        # if not isinstance(key, str):
+        #     self._proxies[key[0]] = proxy(*key)
+        try:
+            return self._loaded[key]
+        except KeyError:
+            self.load(key)
+            return self._loaded[key]
             
     def __setitem__(
         self, 

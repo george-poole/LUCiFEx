@@ -19,10 +19,8 @@ from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
 from slepc4py import SLEPc
 
-from ..utils import (
-    replicate_callable, 
-    create_fem_space, SpatialMarkerAlias
-)
+from ..utils import create_fem_space, SpatialMarkerAlias
+from ..utils.py_utils import replicate_callable
 from ..fdm import (
     FiniteDifference, FiniteDifferenceArgwise, 
     FunctionSeries, finite_difference_order,

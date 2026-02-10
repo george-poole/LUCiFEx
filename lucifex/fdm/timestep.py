@@ -10,7 +10,8 @@ from dolfinx.fem import Function
 from ufl.geometry import GeometricCellQuantity
 
 from ..fem import Constant
-from ..utils import dofs, cell_size_quantity, MultipleDispatchTypeError, extract_mesh, is_tensor
+from ..utils import dofs, cell_size_quantity, extract_mesh, is_tensor
+from ..utils.py_utils import MultipleDispatchTypeError
 
 
 @overload

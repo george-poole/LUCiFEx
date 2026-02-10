@@ -15,8 +15,10 @@ from types import EllipsisType
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from ..utils.py_utils import MultiKey, MultipleDispatchTypeError, filter_kwargs
-from ..utils.py_utils.deferred import Writer, Stopper
+from ..utils.py_utils import (
+    MultiKey, MultipleDispatchTypeError, filter_kwargs, 
+    Writer, Stopper,
+)
 from ..fem import Function, Constant
 from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
@@ -29,7 +31,9 @@ from .utils import arg_name_collisions, ArgNameCollisionError
 
 
 T = TypeVar('T', int | None, str | None, float | None)
-class Simulation(MultiKey[FunctionSeries | ConstantSeries | ExprSeries]):
+class Simulation(
+    MultiKey[str, FunctionSeries | ConstantSeries | ExprSeries]
+):
     def __init__(
         self,
         solvers: Iterable[Solver] | Solver,
@@ -107,7 +111,7 @@ class Simulation(MultiKey[FunctionSeries | ConstantSeries | ExprSeries]):
             )
     
     @property
-    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Constant | Function | Expr]:
+    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.name: s for s in self.series})
         d.update({f.name: f for f in self._exprs_consts if not isinstance(f, tuple)})

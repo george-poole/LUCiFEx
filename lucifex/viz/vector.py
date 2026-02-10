@@ -12,8 +12,9 @@ from matplotlib.quiver import Quiver
 from ..utils import (
     is_vector, grid, triangulation, create_fem_function, extract_mesh, ShapeError, 
     NonCartesianQuadMeshError, is_simplicial, get_component_fem_functions, 
-    is_cartesian, filter_kwargs,
+    is_cartesian,
 )
+from ..utils.py_utils import filter_kwargs
 from .utils import set_axes, optional_ax
 
 

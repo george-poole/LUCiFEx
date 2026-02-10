@@ -12,9 +12,7 @@ from ..fem import Constant
 from ..fdm import ConstantSeries
 from ..solver import Solver, IBVP, IVP
 from ..io import write, write_checkpoint, read_checkpoint, reset_directory
-from ..utils import log_timing
-
-from ..utils.py_utils.deferred import Writer, Stopper
+from ..utils.py_utils import Writer, Stopper, log_timing
 from .deferred import (
     CreateStopper, CreateWriter, 
     as_stopper, as_writer, has_simulation_arg,
