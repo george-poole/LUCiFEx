@@ -112,7 +112,11 @@ def navier_stokes_marangoni(
         u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, sigma_bcs=sigma_bcs, p_scale=Vi,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, 
+        f=f, 
+        u_bcs=u_bcs, 
+        sigma_bcs=sigma_bcs, 
+        p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, Di, D_adv_c, D_diff_c,

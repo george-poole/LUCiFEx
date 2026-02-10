@@ -372,14 +372,22 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
 class NonCartesianMeshError(NotImplementedError):
     def __init__(
         self, 
-        unsupported: str,
+        unsupported: str | None = None,
     ):
-        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh.')
+        if unsupported is not None:
+            msg = f'{unsupported} is not supported'
+        else:
+            msg = 'Not supported'
+        super().__init__(f'{msg} on a non-Cartesian mesh.')
 
 
 class NonCartesianQuadMeshError(NotImplementedError):
     def __init__(
         self, 
-        unsupported: str,
+        unsupported: str | None = None,
     ):
-        super().__init__(f'{unsupported} is not supported on a non-Cartesian mesh of quadrilateral cell.')
+        if unsupported is not None:
+            msg = f'{unsupported} is not supported'
+        else:
+            msg = 'Not supported'
+        super().__init__(f'{msg} on a non-Cartesian mesh of quadrilateral cell.')

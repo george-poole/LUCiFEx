@@ -13,6 +13,7 @@ from typing_extensions import Self
 from types import EllipsisType
 
 from ufl.core.expr import Expr
+from dolfinx.mesh import Mesh
 
 from ..utils import MultipleDispatchTypeError, filter_kwargs
 from ..utils.deferred import Writer, Stopper
@@ -59,6 +60,7 @@ class Simulation:
         self.store_delta = store_delta
         self.write_delta = write_delta
         self.write_file = write_file
+        self._timings = None
 
     @overload
     def __getitem__(
@@ -261,6 +263,31 @@ class Simulation:
             self.dt,
         )
     
+    @property
+    def timings(self) -> dict:
+        return self._timings
+    
+    def attach_timings(
+        self,
+        timings: dict,
+        copy: bool = False
+    ):
+        if copy:
+            self._timings = timings.copy()
+        else:
+            self._timings = timings
+
+    @property
+    def meshes(self) -> list[Mesh]:
+        return [i.mesh for i in self.series]
+    
+    @property
+    def mesh(self) -> Mesh | None:
+        if len(set(self.meshes)) == 1:
+            return self.meshes[0]
+        else:
+            return None
+
 
 FunctionSeriesDelta: TypeAlias = int | float | None
 ConstantSeriesDelta: TypeAlias = int | float | None

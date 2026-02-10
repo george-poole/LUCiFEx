@@ -7,7 +7,7 @@ import operator
 import numpy as np
 from matplotlib.tri.triangulation import Triangulation
 
-from ..utils import grid, triangulation
+from ..utils import grid, triangulation, is_cartesian, is_simplicial, NonCartesianQuadMeshError
 from ..utils.ufl_utils import ScalarVectorError
 from ..utils.fem_utils import get_component_fem_functions
 from .series import ConstantSeries, FunctionSeries, SubSeriesError
@@ -104,8 +104,9 @@ class NumericSeries(NumpySeriesABC[int | float | np.ndarray]):
     def from_series(
         cls, 
         u: ConstantSeries,
+        slc: slice = slice(None, None, None),
     ) -> Self:
-        return cls(u.value_series, u.time_series, u.name)
+        return cls(u.value_series[slc], u.time_series[slc], u.name)
     
     def sub(
         self, 
@@ -157,15 +158,13 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
         cls, 
         u: FunctionSeries,
         use_cache: tuple[bool, bool] = (True, True),
+        slc: slice = slice(None, None, None),
         **grid_kwargs,
     ) -> Self:
         use_mesh_cache, use_func_cache = use_cache
 
         match u.shape:
-            case ():
-                series = [grid(use_cache=use_func_cache)(i, **grid_kwargs) for i in u.series]
             case (_, ):
-
                 series = [
                     np.array(
                         [
@@ -173,14 +172,16 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
                             for j in get_component_fem_functions(('P', 1), i, use_cache=Ellipsis)
                         ]
                     ) 
-                    for i in u.series
+                    for i in u.series[slc]
                 ]
+            case ():
+                series = [grid(use_cache=use_func_cache)(i, **grid_kwargs) for i in u.series[slc]]
             case _:
                 raise ScalarVectorError(u)
             
         return cls(
             series,
-            u.time_series,
+            u.time_series[slc],
             grid(use_cache=use_mesh_cache)(u.mesh), 
             u.name,
         )
@@ -219,12 +220,11 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
         cls, 
         u: FunctionSeries,
         use_cache: tuple[bool, bool] = (True, True),
+        slc: slice = slice(None, None, None),
     ) -> Self:
         use_mesh_cache, use_func_cache = use_cache
 
         match u.shape:
-            case ():
-                series = [triangulation(use_func_cache=use_func_cache)(i) for i in u.series]
             case (_, ):
                 series = [
                     np.array(
@@ -233,14 +233,16 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
                             for j in get_component_fem_functions(('P', 1), i, use_cache=(True, True))
                         ]
                     )
-                    for i in u.series
+                    for i in u.series[slc]
                 ]
+            case ():
+                series = [triangulation(use_func_cache=use_func_cache)(i) for i in u.series[slc]]
             case _:
                 raise ScalarVectorError(u)
             
         return cls(
             series,
-            u.time_series,
+            u.time_series[slc],
             triangulation(use_cache=use_mesh_cache)(u.mesh), 
             u.name,
         )
@@ -253,3 +255,22 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
         if name is None:
             name = self._create_subname(index)
         return TriangulationSeries([i[index] for i in self.series], self.time_series, self.triangulation, name)
+    
+
+def numpy_series(
+    u: FunctionSeries,
+    use_cache: tuple[bool, bool] = (True, True),
+    slc: slice = slice(None, None, None),
+) -> GridSeries | TriangulationSeries:
+    
+    simplicial = is_simplicial(use_cache=True)(u.mesh)
+    cartesian = is_cartesian(use_cache=True)(u.mesh)
+
+    match simplicial, cartesian:
+        case True, False:
+            return TriangulationSeries.from_series(u, use_cache, slc)
+        case _, True:
+            return GridSeries.from_series(u, use_cache, slc)
+        case False, False:
+            raise NonCartesianQuadMeshError
+

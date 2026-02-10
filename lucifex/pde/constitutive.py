@@ -37,8 +37,8 @@ def permeability_cross_bedded(
     sn = sin(vartheta)  
     tensor = as_tensor(
         (
-            (cs**2 + kappa*sn**2, (1 - kappa)*cs*sn),
-            ((1 - kappa)*cs*sn, kappa*cs**2 + sn**2), 
+            (cs**2 + kappa * sn**2, (1 - kappa) * cs * sn),
+            ((1 - kappa) * cs * sn, kappa * cs**2 + sn**2), 
         ),
     )
     return k * tensor

@@ -83,20 +83,20 @@ def run(
     if t_stop is not None:
         _time_stoppers.append(Stopper(lambda: not t[0].value < t_stop))
 
-    _timing = {} if timing is True else timing if isinstance(timing, dict) else None
-    if isinstance(_timing, dict):
+    _timings = {} if timing is True else timing if isinstance(timing, dict) else None
+    if isinstance(_timings, dict):
         for s in set((*simulation.solvers, *simulation_init.solvers)):
-            s.solve = log_timing(s.solve, _timing, f'{s.series.name}_{s.solve.__name__}')
+            s.solve = log_timing(s.solve, _timings, f'{s.series.name}_{s.solve.__name__}')
         for w in _writers:
-            w.write = log_timing(w.write, _timing, f'{w.name}_{w.write.__name__}')
-        _timing[run.__name__] = []
+            w.write = log_timing(w.write, _timings, f'{w.name}_{w.write.__name__}')
+        _timings[run.__name__] = []
 
     while all(not s.stop(t[0]) for s in _time_stoppers):
         if _n < n_init:
             _simulation = simulation_init
         else:
             _simulation = simulation
-        if _timing:
+        if _timings:
             t_run_start = time.perf_counter()
         [s.solve() for s in _simulation.pre_solvers]
         t.update(t[0].value + _dt.value, future=True)
@@ -107,14 +107,17 @@ def run(
         [s.forward(t[0]) for s in _simulation.series]
         t.forward(t[0])
         _n += 1
-        if _timing:
+        if _timings:
             t_run_stop = time.perf_counter()
-            _timing[run.__name__].append(t_run_stop - t_run_start)
+            _timings[run.__name__].append(t_run_stop - t_run_start)
+
+    if _timings:
+        simulation.attach_timings(_timings)
 
     if _writers:
         write_checkpoint(series_checkpointed, t, simulation.checkpoint_file, simulation.dir_path)
-        if _timing:
-            write_timing(_timing, simulation.dir_path, simulation.timing_file)
+        if _timings:
+            write_timing(_timings, simulation.dir_path, simulation.timing_file)
 
 
 def run_from_cli(
@@ -125,8 +128,10 @@ def run_from_cli(
     eval_locals: Iterable[object | tuple[str, object]] | None = None,
     description: str = 'Run a simulation from the command line',
 ) -> None:
-    """Note that if single quotations are used to enclose a Python code snippet entered at the
-    command line interface, any strings within that code snippet must be enclosed by double quotations, or vice versa.
+    """
+    Note that if single quotations are used to enclose a Python code snippet entered at the
+    command line interface, any strings within that code snippet must be enclosed by 
+    double quotations, or vice versa.
     
     e.g. `--parameter_name '{1: "one"}'` or `--parameter_name "{1: 'one'}"`
     """

@@ -137,7 +137,7 @@ def diffusive_timestep(
     mesh: Mesh | None = None,
 ):
     """
-    `∆tD = cD minₓ(h²(𝐱) / |D(𝐱)|)` where `cD` is the diffusive Courant number.
+    `∆tD = cD minₓ(h²(𝐱) / 2|D(𝐱)|)` where `cD` is the diffusive Courant number.
 
     If `D` is a tensor, then `|D| = tr(D) / dim(D)`.
     """
@@ -163,7 +163,7 @@ def _(diffusion, h, tol, mesh):
     if is_tensor(diffusion):
         diffusion = tr(diffusion) / mesh.geometry.dim
     return lambda: np.min(
-        dofs(h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True),
+        dofs(0.5 * h**2 / max_value(diffusion, tol), (mesh, 'DP', 0), use_cache=True),
     )
 
 
@@ -176,9 +176,9 @@ def _(diffusion: Constant, h, tol, mesh):
     if isinstance(h, GeometricCellQuantity):
         h = np.min(dofs(h, (mesh, 'DP', 0), use_cache=True))
     if diffusion.ufl_shape == ():
-        return lambda: h**2 / max(diffusion.value, tol)
+        return lambda: 0.5 * h**2 / max(diffusion.value, tol)
     else:
-        return lambda: h**2 / max(np.max(diffusion.value), tol)
+        return lambda: 0.5 * h**2 / max(np.max(diffusion.value), tol)
 
 
 @_diffusive_dt_evaluation.register(float)
@@ -186,7 +186,7 @@ def _(diffusion: Constant, h, tol, mesh):
 def _(d, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
-    return lambda: h**2 / max(d, tol)
+    return lambda: 0.5 * h**2 / max(d, tol)
 
 
 @overload
@@ -271,7 +271,7 @@ def diffusive_reactive_timestep(
     if d_courant is None and r_courant is None:
         return dt_max
     
-    _lambda_d = _diffusive_dt_evaluation(h, d, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
     _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
     _lambda_dr = lambda: min(
         d_courant * _lambda_d(), 
@@ -304,7 +304,7 @@ def advective_diffusive_timestep(
         return dt_max
 
     _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_d = _diffusive_dt_evaluation(h, d, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
     _lambda_cfld = lambda: min(
         a_courant * _lambda_cfl(),
         d_courant * _lambda_d(), 
@@ -374,7 +374,7 @@ def adr_timestep(
             return diffusive_reactive_timestep(d, r, h, d_courant, r_courant, dt_max, dt_min, tol, mesh)
         
     _lambda_a = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_d = _diffusive_dt_evaluation(h, d, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
     _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
     _lambda_cfldr = lambda: min(
         a_courant * _lambda_a(),

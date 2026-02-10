@@ -7,7 +7,7 @@ from ufl import (
 from ufl.core.expr import Expr
 
 from lucifex.fdm import (
-    DT, FE, FiniteDifference, 
+    DT, FE, FiniteDifference, FiniteDifferenceDerivative,
     FunctionSeries, ConstantSeries, Series,
 )
 from lucifex.fdm.ufl_operators import inner, div, nabla_grad, dot, grad
@@ -29,6 +29,7 @@ def ipcs_1(
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
     f: FunctionSeries | Function | Constant| None = None,
     sigma_bcs: BoundaryConditions | None = None,
     adv_scale:  Constant | float = 1,
@@ -39,7 +40,7 @@ def ipcs_1(
     dim = u.shape[0]
     epsilon = strain(v)
 
-    F_dudt = inner(v, DT(u, dt)) * dx
+    F_dt = inner(v, D_dt(u, dt)) * dx
     F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u))), trial=u) * dx
     tau = deviatoric_stress(D_visc(u, trial=u))
     sigma = -p_scale * p[0] * Identity(dim) + tau
@@ -50,7 +51,7 @@ def ipcs_1(
     else:
         dsN, natural = sigma_bcs.boundary_data(u, 'natural')
         F_ds = sum([-inner(v, sigmaN) * dsN(i) for i, sigmaN in natural])
-    forms = [F_dudt, F_adv, F_stress, F_ds]
+    forms = [F_dt, F_adv, F_stress, F_ds]
 
     if f is not None:
         f = D_force(f, trial=u)
@@ -82,9 +83,9 @@ def ipcs_3(
 ) -> tuple[Form, Form]:
     u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
-    F_dudt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
+    F_dt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
     F_grad = p_scale * inner(v, grad(p[1]) - grad(p[0])) * dx
-    return F_dudt, F_grad
+    return F_dt, F_grad
 
 
 def ipcs_solvers(
@@ -95,6 +96,7 @@ def ipcs_solvers(
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
     f: FunctionSeries | Function | Constant| None = None,
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,
@@ -110,7 +112,7 @@ def ipcs_solvers(
     If `p_scale` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
     ipcs1_solver = ibvp(ipcs_1, bcs=u_bcs)(
-        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, f, sigma_bcs, adv_scale, p_scale,
+        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, D_dt, f, sigma_bcs, adv_scale, p_scale,
     )
     ipcs2_solver = bvp(ipcs_2, bcs=p_bcs, future=True)(
         p, u, dt, p_scale,
@@ -128,16 +130,17 @@ def chorin_1(
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
     f: FunctionSeries | Function | Constant| None = None,
     adv_scale: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
-    F_dudt = inner(v, DT(u, dt)) * dx
+    F_dt = inner(v, D_dt(u, dt)) * dx
     F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
     tau = deviatoric_stress(D_visc(u))
     F_visc = inner(grad(v), tau) * dx
     
-    forms = [F_dudt, F_adv, F_visc]
+    forms = [F_dt, F_adv, F_visc]
 
     if f is not None:
         if isinstance(f, Series):
@@ -169,9 +172,9 @@ def chorin_3(
 ) -> tuple[Form, Form]:
     u_trial = TrialFunction(u.function_space)
     v = TestFunction(u.function_space)
-    F_dudt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
+    F_dt = (1 / dt) * inner(v, (u_trial - u[1])) * dx
     F_grad = p_scale * inner(v, grad(p[1])) * dx
-    return F_dudt, F_grad
+    return F_dt, F_grad
 
 
 def chorin_solvers(
@@ -182,6 +185,7 @@ def chorin_solvers(
     D_adv: FiniteDifference,
     D_visc: FiniteDifference,
     D_force: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
     f: FunctionSeries | Function | Constant| None = None,
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,    
@@ -196,7 +200,7 @@ def chorin_solvers(
     If `p_scale` argument specified, then `∇p -> P ∇p` with constant `P`.
     """
     chorin1_solver = ibvp(chorin_1, bcs=u_bcs)(
-        u, dt, deviatoric_stress, D_adv, D_visc, D_force, f, adv_scale,
+        u, dt, deviatoric_stress, D_adv, D_visc, D_force, D_dt, f, adv_scale,
     )
     chorin2_solver = bvp(chorin_2, bcs=p_bcs, future=True)(
         p, u, dt, p_scale,
@@ -216,6 +220,7 @@ def navier_stokes_vorticity(
     D_adv: FiniteDifference,
     D_diff: FiniteDifference,
     D_reac: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
     fx: Function | None = None,
     fy: Function | None = None,
 ) -> list[Form]:
@@ -232,4 +237,5 @@ def navier_stokes_vorticity(
         D_adv=D_adv, 
         D_diff=D_diff, 
         D_reac=D_reac,
+        D_dt=D_dt,
     )

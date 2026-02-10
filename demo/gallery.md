@@ -239,5 +239,9 @@
     <img src="./notebooks/P02_introductory/figures/I06.1_mathieu_evp.png" width="400"/>
     <a href="./notebooks/P02_introductory/I06.1_mathieu_evp.html">Mathieu eigenvalue problem in an interval</a> 
     </td>
+<td>
+    <img src="./notebooks/P02_introductory/figures/Ixx.1_wave_interval.png" width="400"/>
+    <a href="./notebooks/P02_introductory/Ixx.1_wave_interval.html">Wave equation in an interval</a> 
+    </td>
     </tr>
     </table>

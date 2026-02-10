@@ -305,7 +305,6 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         if assemble_termwise is None:
             assemble_termwise = self._assemble_termwise
 
-        #  matrix_termwise, vector_termwise = assemble_termwise
         matrix_termwise, vector_termwise = assemble_termwise
 
         if matrix_termwise:

@@ -73,8 +73,18 @@ def create_animation(
 
         nonlocal clear_func
         if clear_func is None:
+
+            CBAR_ATTR = '_colorbar'
+            def _clear_ax(ax: Axes) -> None:
+                if hasattr(ax, CBAR_ATTR):
+                    cbar = getattr(ax, CBAR_ATTR)
+                    cbar.ax.clear()
+                    cbar.ax.set_axis_off()
+                objs = (*ax.collections, *ax.lines, *ax.images)
+                [i.remove() for i in objs]
+                    
             clear_func = lambda fig: [
-                i.remove() for ax in fig.axes for i in (*ax.collections, *ax.lines, *ax.images)
+                _clear_ax(ax) for ax in fig.axes 
             ]
 
         def _update(n: int):

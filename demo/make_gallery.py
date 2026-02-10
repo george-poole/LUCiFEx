@@ -112,12 +112,13 @@ if __name__ == "__main__":
     NOTEBOOKS_DIR_PATH = "./notebooks"
     FIGURES_DIR_NAME = "figures"
     FIGURES_EXT = 'png'
-    EXCLUDE = 'xx.'
+    EXCLUDE = 'xxx'
     NOTEBOOK_PARTS = [
         ('Convection', 'P05_convection'),
         ('Fluids', 'P03_fluids'),
         ('Transport', 'P04_transport'),
         ('Introductory', 'P02_introductory'),
+        # ('Advanced', 'P06_advanced'),
     ]
 
     outputs = [('gallery.md', True), ('gallery_local.md', False)]

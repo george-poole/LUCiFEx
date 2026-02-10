@@ -64,7 +64,7 @@ def grad_norm(
     mod: bool = True,
 ) -> Expr:
     """
-    `‖u‖gradₚ = ∫ |∇u(𝐱)·∇u(𝐱)|ᵖ dx = ‖∇u·∇u‖ℒₚ`
+    `‖u‖gradₚᵖ = ∫ |∇u(𝐱)·∇u(𝐱)|ᵖ dx = ‖∇u·∇u‖ℒₚ`
 
     Note that raising the evaluated integral to the power of `1/p` 
     is required to recover the usual definition of the divergence norm.
@@ -76,6 +76,9 @@ def extrema(
     u: Function | Expr,
     elem: tuple[str, int] = ('P', 1),
 ) -> tuple[float, float]:
+    """
+    `minₓ(u(𝐱)), maxₓ(u(𝐱))` or `minₓ|𝐮(𝐱)|, maxₓ|𝐮(𝐱)|`
+    """
     _dofs = dofs(u, elem, l2_norm=True, use_cache=True) 
     return np.min(_dofs), np.max(_dofs)
 
@@ -84,6 +87,9 @@ def minimum(
     u: Function | Expr,
     elem: tuple[str, int] = ('P', 1),
 ) -> float:
+    """
+    `minₓ(u(𝐱))` or `minₓ|𝐮(𝐱)|`
+    """
     _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
     return np.min(_dofs)
 
@@ -92,5 +98,8 @@ def maximum(
     u: Function | Expr,
     elem: tuple[str, int] = ('P', 1),
 ) -> float:
+    """
+    `maxₓ(u(𝐱))` or `maxₓ|𝐮(𝐱)|`
+    """
     _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
     return np.max(_dofs)

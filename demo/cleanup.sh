@@ -11,18 +11,20 @@ while [[ "$1" == --* ]]; do
 done
 
 GLOB=$1
-NOTEBOOKS='notebooks'
-FIGURES='figures'
+DIR_NAME=${2:-'notebooks/**'}
 
-PDFS=($(find . -name "$GLOB.pdf" -path "./${NOTEBOOKS}/**/${FIGURES}/*"))
-PNGS=($(find . -name "$GLOB.png" -path "./${NOTEBOOKS}/**/${FIGURES}/*"))
-MP4S=($(find . -name "$GLOB.mp4" -path "./${NOTEBOOKS}/**/${FIGURES}/*"))
+EXTS=("pdf" "png" "mp4" "h5" "xdmf" "npy" "npz" "txt")
+FILES=()
 
-FILES=("${PDFS[@]}" "${PNGS[@]}" "${MP4S[@]}")
-
-for i in "${FILES[@]}"
+for ext in "${EXTS[@]}"
     do 
-        echo Found file to cleanup $i 
+        FOUND=($(find . -name "$GLOB.$ext" -path "./$DIR_NAME"))
+        FILES=("${FILES[@]}" "${FOUND[@]}")
+    done
+
+for file in "${FILES[@]}"
+    do 
+        echo Found file to cleanup $file 
     done
 
 if $DRY; then

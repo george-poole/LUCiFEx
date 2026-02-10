@@ -5,7 +5,7 @@ from .finite_difference import (
     ImplicitDiscretizationError, ExplicitDiscretizationError,
 )
 from .series import FunctionSeries, ConstantSeries, Series, ExprSeries
-from .numpy_series import GridSeries, NumericSeries, TriangulationSeries
+from .series_numpy import GridSeries, NumericSeries, TriangulationSeries, numpy_series
 from .timestep import (
     advective_timestep, reactive_timestep, diffusive_timestep, advective_reactive_timestep, 
     advective_diffusive_timestep, adr_timestep, diffusive_reactive_timestep,
