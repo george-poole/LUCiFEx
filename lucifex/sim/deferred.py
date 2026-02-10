@@ -5,7 +5,7 @@ from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias
 from ..fem import Constant, Function
 from ..fdm import FunctionSeries, ConstantSeries
 from ..io import write
-from ..utils.deferred import Stopper, Writer, defer
+from ..utils.py_utils.deferred import Stopper, Writer, defer
 from .simulation import Simulation
 
 

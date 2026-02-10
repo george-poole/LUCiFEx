@@ -9,8 +9,8 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space, MultipleDispatchTypeError
-from ..utils.deferred import Writer
+from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space
+from ..utils.py_utils import MultipleDispatchTypeError, Writer
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 

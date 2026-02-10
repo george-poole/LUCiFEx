@@ -6,8 +6,7 @@ from ufl.core.expr import Expr
 from ufl import TrialFunction, replace
 from dolfinx.fem import Function, Constant
 
-from ..utils import MultipleDispatchTypeError
-from ..utils.str_utils import str_indexed 
+from ..utils.py_utils import MultipleDispatchTypeError, str_indexed
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 
@@ -246,7 +245,10 @@ DT2 = FiniteDifferenceDerivative(
 
 
 def AB(n: int, initial: FiniteDifference | None = None) -> FiniteDifference:
-    """Adams-Bashforth family of explicit methods"""
+    """
+    Adams-Bashforth family of explicit methods. 
+    `AB(1)` is forward Euler.
+    """
     match n:
         case 1:
             d = FE.coefficients
@@ -286,15 +288,15 @@ def AM(
     n: int, 
     initial: FiniteDifference | None = None,
 ) -> FiniteDifference:
-    """Adams-Moulton family of implicit methods"""
+    """
+    Adams-Moulton family of implicit methods.
+    `AM(1)` is backward Euler and `AM(2)` is Crank-Nicolson.
+    """
     match n:
         case 1:
             d = BE.coefficients
         case 2:
-            d = {
-                Series.FUTURE_INDEX: 0.5,
-                Series.FUTURE_INDEX - 1: 0.5,
-            }
+            d = CN.coefficients
         case 3:
             d = {
                 Series.FUTURE_INDEX: 5 / 12,
@@ -326,7 +328,10 @@ def BDF(
     n: int,
     initial: FiniteDifference | None = None,
 ) -> FiniteDifferenceDerivative:
-    """Backward-differentiation-formulae family for discretizations of `∂u/∂t`"""
+    """
+    Backward-differentiation-formulae family for discretizations of `∂u/∂t`.
+    `BDF(1)` is equivalent to `DT`.
+    """
     match n:
         case 1:
             d = DT.coefficients

@@ -11,9 +11,9 @@ from ..utils import (
     is_cartesian,
     quadrangulation,
     triangulation,
-    grid, 
-    filter_kwargs, 
+    grid,  
 )
+from ..utils.py_utils import filter_kwargs
 from .utils import optional_ax, set_axes
 
 

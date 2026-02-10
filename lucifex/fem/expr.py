@@ -2,7 +2,7 @@ from typing import Any
 
 from ufl.core.expr import Expr as DOLFINxExpr
 
-from ..utils import str_indexed
+from ..utils.py_utils.str_utils import str_indexed
 
 
 class Expr(DOLFINxExpr):

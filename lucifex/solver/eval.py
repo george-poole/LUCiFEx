@@ -10,7 +10,8 @@ from dolfinx.fem import Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils import replicate_callable, SpatialMarkerAlias, MultipleDispatchTypeError
+from ..utils import SpatialMarkerAlias
+from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
 from .options import OptionsFFCX, OptionsJIT

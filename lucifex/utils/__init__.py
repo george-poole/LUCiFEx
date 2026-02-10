@@ -1,4 +1,4 @@
-from .deferred import defer
+from .py_utils.deferred import defer
 from .ufl_utils import (
     is_scalar, 
     is_vector, is_tensor, extract_mesh, extract_meshes,
@@ -62,6 +62,8 @@ from .fem_utils import (
     get_fem_subspaces,
 )
 from .numpy_utils import triangulation, quadrangulation, grid, as_index, as_indices
-from .py_utils import (filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict, frozen_dict,
-                       optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
-from .str_utils import str_indexed
+# from .py_utils import (
+#     filter_kwargs, log_timing, replicate_callable, ToDoError, nested_dict, FrozenDict,
+#     optional_lru_cache, MultipleDispatchTypeError, as_slice, StrSlice)
+
+from . import py_utils

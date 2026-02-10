@@ -15,8 +15,8 @@ from types import EllipsisType
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from ..utils import MultipleDispatchTypeError, filter_kwargs
-from ..utils.deferred import Writer, Stopper
+from ..utils.py_utils import MultiKey, MultipleDispatchTypeError, filter_kwargs
+from ..utils.py_utils.deferred import Writer, Stopper
 from ..fem import Function, Constant
 from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
@@ -29,7 +29,7 @@ from .utils import arg_name_collisions, ArgNameCollisionError
 
 
 T = TypeVar('T', int | None, str | None, float | None)
-class Simulation:
+class Simulation(MultiKey[FunctionSeries | ConstantSeries | ExprSeries]):
     def __init__(
         self,
         solvers: Iterable[Solver] | Solver,
@@ -61,39 +61,12 @@ class Simulation:
         self.write_delta = write_delta
         self.write_file = write_file
         self._timings = None
-
-    @overload
-    def __getitem__(
+    
+    def _getitem(
         self, 
         key: str,
-    ) -> FunctionSeries | ConstantSeries | ExprSeries:
-        ...
-    
-    @overload
-    def __getitem__(
-        self, 
-        key: tuple[str, ...],
-    ) -> tuple[FunctionSeries | ConstantSeries | ExprSeries, ...]:
-        ...
-    
-    def __getitem__(
-        self, 
-        key: str | tuple[str, ...],
     ):
-        if isinstance(key, tuple):
-            return tuple(self[i] for i in key)
-        elif isinstance(key, str):
-            try:
-                return self.namespace[key]
-            except KeyError:
-                raise KeyError(f"'{key}' not found in simulation's namespace.")
-        else:
-            raise TypeError
-        
-    # def __iter__(self):
-    #     series = (i.series for i in self.solvers)
-    #     for i in (*series, self.t, self.dt, self._exprs_consts):
-    #         yield i
+        return self.namespace[key]
 
     def _map_to_solver_series(
         self,

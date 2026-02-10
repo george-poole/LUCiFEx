@@ -5,6 +5,7 @@ from inspect import signature
 import numpy as np
 from dolfinx.fem import Constant
 
+
 P = ParamSpec("P")
 R = TypeVar('R')
 def defer(func: Callable[P, R]) -> Callable[P, Callable[[], R]]:

@@ -15,9 +15,10 @@ from matplotlib.cm import ScalarMappable
 from ..mesh.cartesian import CellType
 from ..utils import (
     is_scalar, grid, triangulation, create_fem_function, 
-    is_cartesian, filter_kwargs, MultipleDispatchTypeError, NonCartesianQuadMeshError, 
+    is_cartesian, NonCartesianQuadMeshError, 
     extract_mesh, is_simplicial,
 )
+from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
 
 from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_fig_axs
 

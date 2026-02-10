@@ -1,6 +1,6 @@
 import pytest
 
-from lucifex.utils.deferred import defer, DeferredCondition
+from lucifex.utils.py_utils.deferred import defer, DeferredCondition
 
 @pytest.mark.parametrize("arg", [1, 'one', (1.23, 4.56)])
 def test_defer(arg):

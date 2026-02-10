@@ -1,7 +1,71 @@
-from typing import Iterable, Literal
-
+from typing import Iterable, Literal, TypeAlias, Any
 import numpy as np
 
+
+StrSlice: TypeAlias = str | slice
+"""
+Type alias for strings representing slices 
+e.g. `"start:stop"` or `"start:stop:step"`
+"""
+
+COLON = ':'
+DOUBLE_COLON = f'{COLON}{COLON}'
+
+
+def as_slice(s: str | slice| Iterable[int]) -> slice:
+    if not is_slice(s):
+        raise ValueError(f'Invalid string {s} representing a slice.')
+
+    if isinstance(s, slice):
+        return s
+    if isinstance(s, str):
+        s = s.replace(' ', '')
+        n_colon = s.count(COLON)
+        if n_colon == 1:
+            start, stop = s.split(COLON)
+            step = ''
+        elif n_colon == 2:
+            if DOUBLE_COLON in s:
+                start, step = s.split(DOUBLE_COLON)
+                stop = ''
+            else:
+                start, stop, step = s.split(COLON)
+        else:
+            raise ValueError(f'Expected 1 or 2 colons in the string representing a slice.')
+        
+        if start == '':
+            start = 0
+        else:
+            start = int(start)
+
+        if stop == '':
+            stop = None
+        else:
+            stop = int(stop)
+
+        if step == '':
+            step = None
+        else:
+            step = int(step)
+
+        return slice(start, stop, step)
+    
+    if isinstance(s, Iterable):
+        return slice(*s)
+    
+    raise MultipleDispatchTypeError(s)
+
+
+def is_slice(s: str | slice | Iterable[int] | Any) -> bool:
+    if isinstance(s, slice):
+        return True
+    elif isinstance(s, str):
+        return s.count(COLON) >= 1 and s.count(COLON) <= 2
+    elif isinstance(s, tuple) and all(isinstance(i, int) for i in s):
+        return len(s) > 0 and len(s) <= 3
+    else:
+        return False
+    
 
 SUPERSCRIPTS = {
     '0': '⁰', 

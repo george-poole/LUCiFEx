@@ -7,7 +7,7 @@ from functools import wraps
 from IPython.display import Video
 
 from ..io.write import write
-from ..utils import replicate_callable
+from ..utils.py_utils import replicate_callable
 
 
 def get_ipynb_file_name(

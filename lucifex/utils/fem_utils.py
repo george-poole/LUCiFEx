@@ -428,30 +428,30 @@ def set_fem_constant(
     """
     Mutates `c` by setting its value array. Does not mutate `value`.
     """
-    return _set_finite_element_constant(value, c)
+    return _set_fem_constant(value, c)
 
 
 @singledispatch
-def _set_finite_element_constant(value, *_, **__):
+def _set_fem_constant(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
-@_set_finite_element_constant.register(Constant)
+@_set_fem_constant.register(Constant)
 def _(value: Constant, const: Constant):
     const.value = value.value.copy()
 
 
-@_set_finite_element_constant.register(float)
-@_set_finite_element_constant.register(int)
+@_set_fem_constant.register(float)
+@_set_fem_constant.register(int)
 def _(value, const: Constant):
     const.value = value
 
-@_set_finite_element_constant.register(np.ndarray)
+@_set_fem_constant.register(np.ndarray)
 def _(value: np.ndarray, const: Constant):
     if not const.value.shape == value.shape:
         raise ShapeError(const, value.shape)
     const.value = value
 
-@_set_finite_element_constant.register(Iterable)
+@_set_fem_constant.register(Iterable)
 def _(value, const: Constant):
-    return _set_finite_element_constant(np.array(value), const)
+    return _set_fem_constant(np.array(value), const)
