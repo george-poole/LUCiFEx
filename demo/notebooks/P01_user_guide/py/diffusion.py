@@ -4,9 +4,8 @@ from ufl import dx, Form, grad, inner, TestFunction
 from lucifex.fem import Constant
 from lucifex.fdm import DT, FiniteDifference, ConstantSeries, FunctionSeries
 from lucifex.mesh import interval_mesh
-from lucifex.solver import BoundaryConditions, ibvp, integration, evaluation
+from lucifex.solver import BoundaryConditions, ibvp, integration, evaluation, maximum
 from lucifex.sim import configure_simulation
-from lucifex.utils import maximum
 
 
 def diffusion(

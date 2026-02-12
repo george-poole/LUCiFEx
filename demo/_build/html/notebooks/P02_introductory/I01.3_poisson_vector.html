@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -464,7 +464,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span><span class="p">,</span> <span class="n">get_component_fem_functions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fe2py</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span><span class="p">,</span> <span class="n">get_component_functions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
 
 
@@ -495,39 +495,21 @@ document.write(`
 <span class="n">u_solver</span> <span class="o">=</span> <span class="n">bvp</span><span class="p">(</span><span class="n">poisson</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 
-<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
+<span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">get_component_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">22</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="n">mesh</span> <span class="o">=</span> <span class="n">rectangle_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span>     <span class="n">mesh</span><span class="p">,</span> 
-<span class="g g-Whitespace">     </span><span class="mi">15</span>     <span class="p">{</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="p">},</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="p">)</span>
-<span class="ne">---&gt; </span><span class="mi">22</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="n">f</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">25</span> <span class="n">bcs</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">26</span>     <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">],</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)),</span>
-<span class="g g-Whitespace">     </span><span class="mi">27</span>     <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">))),</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">30</span>     <span class="p">(</span><span class="s1">&#39;dirichlet&#39;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">],</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">31</span> <span class="p">)</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">6</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_line</span>
+<span class="ne">----&gt; </span><span class="mi">6</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fe2py</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_section</span><span class="p">,</span> <span class="n">get_component_functions</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
 
-<span class="nn">File ~/miniconda3/envs/lucifex/lib/python3.10/site-packages/dolfinx/fem/function.py:481,</span> in <span class="ni">FunctionSpace.__init__</span><span class="nt">(self, mesh, element, cppV, form_compiler_options, jit_options)</span>
-<span class="g g-Whitespace">    </span><span class="mi">479</span>     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">ufl_domain</span><span class="p">(),</span> <span class="n">element</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">480</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">481</span>     <span class="n">e</span> <span class="o">=</span> <span class="n">ElementMetaData</span><span class="p">(</span><span class="o">*</span><span class="n">element</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">482</span>     <span class="n">ufl_element</span> <span class="o">=</span> <span class="n">basix</span><span class="o">.</span><span class="n">ufl_wrapper</span><span class="o">.</span><span class="n">create_element</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">483</span>         <span class="n">e</span><span class="o">.</span><span class="n">family</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">ufl_cell</span><span class="p">()</span><span class="o">.</span><span class="n">cellname</span><span class="p">(),</span> <span class="n">e</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">gdim</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">ufl_cell</span><span class="p">()</span><span class="o">.</span><span class="n">geometric_dimension</span><span class="p">())</span>
-<span class="g g-Whitespace">    </span><span class="mi">484</span>     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">ufl_domain</span><span class="p">(),</span> <span class="n">ufl_element</span><span class="p">)</span>
-
-<span class="ne">TypeError</span>: ElementMetaData.__new__() takes 3 positional arguments but 4 were given
+<span class="ne">ImportError</span>: cannot import name &#39;get_component_functions&#39; from &#39;lucifex.fe2py&#39; (/Users/George/Desktop/LUCiFEx/lucifex/fe2py/__init__.py)
 </pre></div>
 </div>
 </div>

@@ -105,12 +105,15 @@ def navier_stokes_rayleigh_taylor_rectangle(
         u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, f, u_bcs, p_scale=Vi,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, 
+        f=f, 
+        u_bcs=u_bcs, 
+        p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, Di, D_adv_c, D_diff_c,
     )
     solvers = [dt_solver, *ns_solvers, c_solver]
-    exprs_consts = [Pr, Ra, Di, Vi, Bu, rho]
-    return solvers, t, dt, exprs_consts
+    auxiliary = [Pr, Ra, Di, Vi, Bu, rho]
+    return solvers, t, dt, auxiliary
 

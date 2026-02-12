@@ -126,9 +126,9 @@ def darcy_brinkman_rayleigh_benard_rectangle(
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    exprs_consts = [Pr, Ra, Da, chi, rho]
+    auxiliary = [Pr, Ra, Da, chi, rho]
 
-    return solvers, t, dt, exprs_consts
+    return solvers, t, dt, auxiliary
 
 
 @configure_simulation(

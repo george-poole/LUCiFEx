@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -445,6 +445,7 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="supg-steady-advection-diffusion-with-a-skew-velocity">
 <h1>SUPG steady advection-diffusion with a skew velocity<a class="headerlink" href="#supg-steady-advection-diffusion-with-a-skew-velocity" title="Link to this heading">#</a></h1>
+<p>Donea, J. &amp; Huerta, A. (2003). <em>Finite Element Methods for Flow Problems</em>. <span class="math notranslate nohighlight">\(\S 2.6.4\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}
@@ -468,7 +469,7 @@ J=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">peclet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryValueProblem</span><span class="p">,</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">steady_advection_diffusion</span>
 
 

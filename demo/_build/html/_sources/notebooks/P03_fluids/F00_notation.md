@@ -1,6 +1,6 @@
 # Notation
 
-In these notebooks covering applications to fluid dynamics a consistent notation shall be used as far as possible, extending the notation introduced previously.
+In these notebooks covering applications to fluid dynamics a consistent notation shall be used as far as possible, extending the notation introduced [previously](../P02_introductory/I00_notation.md).
 
 | Symbol(s) | Description |
 | -------- | ------- |

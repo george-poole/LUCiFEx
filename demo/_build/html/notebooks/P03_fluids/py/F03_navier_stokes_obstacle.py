@@ -106,5 +106,5 @@ def navier_stokes_circle_obstacle(
         psi_solver = bvp(streamfunction_from_velocity, psi_bcs)(psi, u[0])
         solvers.append(psi_solver)
     
-    exprs_consts = [rho, mu]
-    return solvers, t, dt, exprs_consts
+    auxiliary = [rho, mu]
+    return solvers, t, dt, auxiliary

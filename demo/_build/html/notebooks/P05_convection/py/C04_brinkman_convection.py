@@ -117,16 +117,18 @@ def darcy_brinkman_rayleigh_benard_rectangle(
         u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], 1, sqrt(Pr/ Ra), newtonian_stress, D_adv_ns, D_visc_ns, f=f, u_bcs=u_bcs, 
+        u, p, dt[0], 1, sqrt(Pr/ Ra), newtonian_stress, D_adv_ns, D_visc_ns, 
+        f=f, 
+        u_bcs=u_bcs, 
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, sqrt(Ra * Pr), D_adv_ad, D_diff_ad,
     )
 
     solvers = [dt_solver, *ns_solvers, c_solver]
-    exprs_consts = [Pr, Ra, Da, chi, rho]
+    auxiliary = [Pr, Ra, Da, chi, rho]
 
-    return solvers, t, dt, exprs_consts
+    return solvers, t, dt, auxiliary
 
 
 @configure_simulation(

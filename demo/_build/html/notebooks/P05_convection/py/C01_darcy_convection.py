@@ -90,7 +90,7 @@ def darcy_convection_generic(
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
     # optional postprocessing
     diagnostic: bool | Iterable[Solver] = False,    
-    exprs_consts: Iterable = (),
+    auxiliary: Iterable = (),
 ) -> Simulation:
     """
     `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
@@ -152,5 +152,5 @@ def darcy_convection_generic(
         if isinstance(diagnostic, Iterable):
             solvers.extend(diagnostic)
             
-    exprs_consts = [phi, ('k', k), ('d', d), rho, mu, *exprs_consts]
-    return Simulation(solvers, t, dt, exprs_consts)
+    auxiliary = [phi, ('k', k), ('d', d), rho, mu, *auxiliary]
+    return Simulation(solvers, t, dt, auxiliary)

@@ -140,5 +140,5 @@ def darcy_plume_dissolution_rectangle(
     )
 
     solvers = [up_solver, dt_solver, c_solver, b_solver, s_solver]
-    exprs_consts = [Bu, Ki, Le, epsilon, beta, phi, k, rho, r]
-    return solvers, t, dt, exprs_consts
+    auxiliary = [Bu, Ki, Le, epsilon, beta, phi, k, rho, r]
+    return solvers, t, dt, auxiliary

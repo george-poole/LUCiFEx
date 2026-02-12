@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -469,7 +469,7 @@ u_0(x,y) = U_0x^2(1-x)^4y^2(1-y)^4 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span> <span class="p">,</span> <span class="n">BoundaryConditions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">plot_streamlines</span>        
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span><span class="p">,</span> <span class="n">is_continuous_lagrange</span><span class="p">,</span> <span class="n">as_indices</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span><span class="p">,</span> <span class="n">is_continuous_lagrange</span><span class="p">,</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection</span><span class="p">,</span> <span class="n">dg_advection</span>
 
 
@@ -500,7 +500,7 @@ u_0(x,y) = U_0x^2(1-x)^4y^2(1-y)^4 \\
         <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">dg_advection</span><span class="p">,</span> <span class="n">ics</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D_adv</span><span class="p">,</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">u_solver</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">exprs_consts</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">u_solver</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">auxiliary</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)])</span>
 
 
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>

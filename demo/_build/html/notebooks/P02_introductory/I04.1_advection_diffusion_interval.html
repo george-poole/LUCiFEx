@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -468,7 +468,7 @@ u_{\text{D}}(x=L_x)=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span><span class="p">,</span> <span class="n">evaluation</span><span class="p">,</span> <span class="n">extrema</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span><span class="p">,</span> <span class="n">Simulation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">plot_twin_lines</span><span class="p">,</span> <span class="n">plot_stacked_lines</span><span class="p">,</span> <span class="n">save_figure</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection_diffusion</span>
 
 
@@ -528,6 +528,42 @@ u_{\text{D}}(x=L_x)=0 \\
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">plot_twin_lines</span><span class="p">,</span> <span class="n">plot_stacked_lines</span><span class="p">,</span> <span class="n">save_figure</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_dict</span>
+<span class="ne">---&gt; </span><span class="mi">12</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.advection_diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">advection_diffusion</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_simulation</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span>     <span class="n">Lx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span>     <span class="n">Nx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="n">D_diff</span><span class="p">:</span> <span class="n">FiniteDifference</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Simulation</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span>     <span class="n">order</span> <span class="o">=</span> <span class="n">finite_difference_order</span><span class="p">(</span><span class="n">D_adv</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">LUCiFEx</span><span class="o">/</span><span class="n">lucifex</span><span class="o">/</span><span class="n">pde</span><span class="o">/</span><span class="n">advection_diffusion</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">18</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">BoundaryConditions</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.fenicsx_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh_integral</span>
+<span class="ne">---&gt; </span><span class="mi">18</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.supg</span><span class="w"> </span><span class="kn">import</span> <span class="n">supg_form</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.cg</span><span class="w"> </span><span class="kn">import</span> <span class="n">derivative_form</span><span class="p">,</span> <span class="n">advection_form</span><span class="p">,</span> <span class="n">diffusion_forms</span><span class="p">,</span> <span class="n">reaction_forms</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">from</span><span class="w"> </span><span class="nn">.dg</span><span class="w"> </span><span class="kn">import</span> <span class="n">dg_advection_forms</span><span class="p">,</span> <span class="n">dg_diffusion_forms</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">LUCiFEx</span><span class="o">/</span><span class="n">lucifex</span><span class="o">/</span><span class="n">pde</span><span class="o">/</span><span class="n">supg</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">14</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="n">BE</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">FiniteDifference</span><span class="p">,</span> <span class="n">FiniteDifferenceArgwise</span><span class="p">,</span> <span class="n">Series</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">11</span>     <span class="n">ConstantSeries</span><span class="p">,</span> <span class="n">ExplicitDiscretizationError</span><span class="p">,</span> <span class="n">peclet</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm.ufl_operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">inner</span><span class="p">,</span> <span class="n">grad</span>
+<span class="ne">---&gt; </span><span class="mi">14</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_tensor</span><span class="p">,</span> <span class="n">is_vector</span><span class="p">,</span> <span class="n">extract_mesh</span><span class="p">,</span> <span class="n">cell_size_quantity</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.py_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="k">class</span><span class="w"> </span><span class="nc">TauType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+
+<span class="ne">ImportError</span>: cannot import name &#39;is_tensor&#39; from &#39;lucifex.utils&#39; (/Users/George/Desktop/LUCiFEx/lucifex/utils/__init__.py)
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -540,10 +576,8 @@ u_{\text{D}}(x=L_x)=0 \\
     <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">D_diff</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">texstr</span><span class="p">(</span><span class="n">D_diff</span><span class="p">)</span>
     <span class="n">title_texts</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">D_adv_tex</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">texstr</span><span class="p">(</span><span class="n">D_diff</span><span class="p">)</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">&quot;$C_</span><span class="se">{{{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}}}}}</span><span class="s2">=</span><span class="si">{</span><span class="n">courant_advective</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">&quot;$C_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}}}</span><span class="s2">=</span><span class="si">{</span><span class="n">courant_diffusive</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;$(\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">, \mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">)=(\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">D_adv_tex</span><span class="si">}</span><span class="se">}}</span><span class="s2">, \mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">texstr</span><span class="p">(</span><span class="n">D_diff</span><span class="p">)</span><span class="si">}</span><span class="se">}}</span><span class="s2">)$&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;$(C_</span><span class="se">{{{{</span><span class="s2">\mathbf</span><span class="se">{{</span><span class="s2">a</span><span class="se">}}}}}}</span><span class="s2">, C_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}}}</span><span class="s2">)=(</span><span class="si">{</span><span class="n">courant_advective</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">courant_diffusive</span><span class="si">}</span><span class="s2">)$&quot;</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">title_texts</span><span class="p">)</span>
     <span class="n">legend_labels</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">slc</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">slc</span><span class="p">]))</span>
@@ -570,15 +604,18 @@ u_{\text{D}}(x=L_x)=0 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/1204ca8ba472761957f775bfe3241393efd52d30f1b130b2e2222985c2f627e5.png" src="../../_images/1204ca8ba472761957f775bfe3241393efd52d30f1b130b2e2222985c2f627e5.png" />
-<img alt="../../_images/052f5ef9b395029ee99c2ec9239dfbf75afd4bfe644d53b4835caea231673f00.png" src="../../_images/052f5ef9b395029ee99c2ec9239dfbf75afd4bfe644d53b4835caea231673f00.png" />
-<img alt="../../_images/d3a5d8f6718223d5d781bb5f6b3c7db1deb0dee8ac6d4e71c97fd870b5d3b3e6.png" src="../../_images/d3a5d8f6718223d5d781bb5f6b3c7db1deb0dee8ac6d4e71c97fd870b5d3b3e6.png" />
-<img alt="../../_images/dc23113995ae92d81b15cd60e3c594a384e91ebb9d93fd840b1dc260a65513d1.png" src="../../_images/dc23113995ae92d81b15cd60e3c594a384e91ebb9d93fd840b1dc260a65513d1.png" />
-<img alt="../../_images/ac95ad0e565bb204e1b01865f82f67e9d67132969c87be4f3a6a27fa4e759fca.png" src="../../_images/ac95ad0e565bb204e1b01865f82f67e9d67132969c87be4f3a6a27fa4e759fca.png" />
-<img alt="../../_images/552f4c605fea06f52d1def01a8c8852fcf3edae748cb3e83843816d5d31003a5.png" src="../../_images/552f4c605fea06f52d1def01a8c8852fcf3edae748cb3e83843816d5d31003a5.png" />
-<img alt="../../_images/b988e42e568d2802026a51dcb129f10202465857398e79559a17346b7f94a484.png" src="../../_images/b988e42e568d2802026a51dcb129f10202465857398e79559a17346b7f94a484.png" />
-<img alt="../../_images/a2b3a2d0d9d619b623e52964ec84ee524ee3a88477a1fc3f09b52239f1e93aa5.png" src="../../_images/a2b3a2d0d9d619b623e52964ec84ee524ee3a88477a1fc3f09b52239f1e93aa5.png" />
-<img alt="../../_images/b864f0d1988c62aef78e5e0d31e84a1bfb38121e5fd57bad61fbccc9d14fbb1e.png" src="../../_images/b864f0d1988c62aef78e5e0d31e84a1bfb38121e5fd57bad61fbccc9d14fbb1e.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">texstr</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">D</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">D</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;◦&#39;</span><span class="p">,</span> <span class="s1">&#39;\circ &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;₁&#39;</span><span class="p">,</span> <span class="s1">&#39;_1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;₂&#39;</span><span class="p">,</span> <span class="s1">&#39;_2&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">minmax_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;$\min(u)$&#39;</span><span class="p">,</span> <span class="s1">&#39;$\max(u)$&#39;</span><span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">4</span> <span class="n">D_adv_tex</span> <span class="o">=</span> <span class="n">texstr</span><span class="p">(</span><span class="n">D_adv</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="k">for</span> <span class="n">D_diff</span> <span class="ow">in</span> <span class="n">D_diff_opts</span><span class="p">:</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span>     <span class="n">u</span> <span class="o">=</span> <span class="n">simulations</span><span class="p">[</span><span class="n">D_diff</span><span class="p">][</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+
+<span class="ne">NameError</span>: name &#39;D_adv&#39; is not defined
+</pre></div>
+</div>
 </div>
 </div>
 </section>

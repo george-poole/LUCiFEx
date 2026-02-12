@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -452,7 +452,9 @@ document.write(`
 \Omega = [0, L_x] \\
 \textbf{k}=2\,\textbf{e}_x \\
 u_{\text{D}}\vert_{\partial\Omega}=0 \\
-u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\text{e}, n}=\frac{n^2\pi^2}{L_x^2}
+\hline 
+u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x) \\
+\lambda^{q=0}_{\text{e}, n}=\frac{n^2\pi^2}{L_x^2}
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
@@ -506,6 +508,71 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">46</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="n">k</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="n">q_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">46</span> <span class="n">solvers</span> <span class="o">=</span> <span class="p">[</span><span class="n">create_solver</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nev</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_axis</span><span class="p">]</span>
+
+<span class="nn">Cell In[1], line 46,</span> in <span class="ni">&lt;listcomp&gt;</span><span class="nt">(.0)</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="n">k</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="n">q_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">46</span> <span class="n">solvers</span> <span class="o">=</span> <span class="p">[</span><span class="n">create_solver</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Nx</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nev</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_axis</span><span class="p">]</span>
+
+<span class="nn">Cell In[1], line 32,</span> in <span class="ni">create_solver</span><span class="nt">(Lx, Nx, bcs, q, k, nev)</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span> <span class="n">slepc</span> <span class="o">=</span> <span class="n">OptionsSLEPc</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span>     <span class="n">eps_tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span>     <span class="n">eps_target</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">30</span>     <span class="n">eps_which</span><span class="o">=</span><span class="s1">&#39;smallest_real&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">31</span> <span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">32</span> <span class="n">u_solver</span> <span class="o">=</span> <span class="n">evp</span><span class="p">(</span><span class="n">mathieu</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">slepc</span><span class="p">)(</span><span class="n">fs</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">33</span> <span class="k">return</span> <span class="n">u_solver</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:841,</span> in <span class="ni">EigenvalueProblem.from_forms_factory.&lt;locals&gt;._create</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">839</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">)):</span>
+<span class="g g-Whitespace">    </span><span class="mi">840</span>         <span class="n">solutions</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">function_space</span>
+<span class="ne">--&gt; </span><span class="mi">841</span> <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">842</span>     <span class="n">solutions</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">843</span>     <span class="n">forms_factory</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+<span class="g g-Whitespace">    </span><span class="mi">844</span>     <span class="n">bcs</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">845</span>     <span class="n">slepc</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">846</span>     <span class="n">jit</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">847</span>     <span class="n">ffcx</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">848</span>     <span class="n">cache_matrix</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">849</span>     <span class="n">future</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">850</span>     <span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">851</span> <span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:772,</span> in <span class="ni">EigenvalueProblem.__init__</span><span class="nt">(self, solutions, forms, bcs, slepc, jit, ffcx, cache_matrix, future, overwrite)</span>
+<span class="g g-Whitespace">    </span><span class="mi">770</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">bcs</span>
+<span class="g g-Whitespace">    </span><span class="mi">771</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">772</span>     <span class="n">forms_weak_bcs</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_weak_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">773</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_strong_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>        
+<span class="g g-Whitespace">    </span><span class="mi">774</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_periodic_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/bcs.py:175,</span> in <span class="ni">BoundaryConditions.create_weak_bcs</span><span class="nt">(self, solution, weak_types)</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_weak_bcs</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span>     <span class="bp">self</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">165</span>     <span class="n">solution</span><span class="p">:</span> <span class="n">Function</span> <span class="o">|</span> <span class="n">FunctionSeries</span> <span class="o">|</span> <span class="n">FunctionSpace</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">169</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">170</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Form</span><span class="p">]:</span>
+<span class="g g-Whitespace">    </span><span class="mi">171</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span><span class="sd">     Weakly enforced boundary condition by a term `+∫ v·uW ds` with </span>
+<span class="g g-Whitespace">    </span><span class="mi">173</span><span class="sd">     test function `v` and prescribed value `uW` in the variational form `F(u,v)=0`.</span>
+<span class="g g-Whitespace">    </span><span class="mi">174</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">175</span>     <span class="n">fs</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">function_space</span>
+<span class="g g-Whitespace">    </span><span class="mi">176</span>     <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">177</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rescale_weak</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">AttributeError</span>: &#39;FunctionSpace&#39; object has no attribute &#39;function_space&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -513,6 +580,18 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 <span class="n">eigenvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
 <span class="n">eigenreals</span> <span class="o">=</span> <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lmbdas</span><span class="p">]</span> <span class="k">for</span> <span class="n">lmbdas</span> <span class="ow">in</span> <span class="n">eigenvalues</span><span class="p">]</span>
 <span class="n">eigenreals_q0</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span> <span class="n">Lx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nev</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">eigenvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">eigenreals</span> <span class="o">=</span> <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lmbdas</span><span class="p">]</span> <span class="k">for</span> <span class="n">lmbdas</span> <span class="ow">in</span> <span class="n">eigenvalues</span><span class="p">]</span>
+
+<span class="ne">NameError</span>: name &#39;solvers&#39; is not defined
 </pre></div>
 </div>
 </div>
@@ -538,7 +617,35 @@ u^{q=0}_{\text{e}, n}(x)=\sin(\sqrt{\lambda_{\text{e}, n}}x)~,~\lambda^{q=0}_{\t
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/dd5e28ee78a4574589dd91802ef8e3acd79fda8c8cf990ee3fdb8ef79ec2ab42.png" src="../../_images/dd5e28ee78a4574589dd91802ef8e3acd79fda8c8cf990ee3fdb8ef79ec2ab42.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+<span class="nn">      2     (q_axis, [eigenreals[q_index][n] for q_index</span> in <span class="ni">range(len</span><span class="nt">(q_axis))])</span>
+<span class="nn">      3     for n</span> in <span class="ni">range</span><span class="nt">(nev)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">cyc</span> <span class="o">=</span> <span class="n">create_cycler</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dashed&#39;</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">],</span> <span class="n">ms</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;black&#39;</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="nn">Cell In[3], line 2,</span> in <span class="ni">&lt;listcomp&gt;</span><span class="nt">(.0)</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+<span class="nn">----&gt; 2     (q_axis, [eigenreals[q_index][n] for q_index</span> in <span class="ni">range(len</span><span class="nt">(q_axis))])</span>
+<span class="nn">      3     for n</span> in <span class="ni">range</span><span class="nt">(nev)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">cyc</span> <span class="o">=</span> <span class="n">create_cycler</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dashed&#39;</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">],</span> <span class="n">ms</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;black&#39;</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="nn">Cell In[3], line 2,</span> in <span class="ni">&lt;listcomp&gt;</span><span class="nt">(.0)</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+<span class="nn">----&gt; 2     (q_axis, [eigenreals[q_index][n] for q_index</span> in <span class="ni">range(len</span><span class="nt">(q_axis))])</span>
+<span class="nn">      3     for n</span> in <span class="ni">range</span><span class="nt">(nev)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">cyc</span> <span class="o">=</span> <span class="n">create_cycler</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dashed&#39;</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">],</span> <span class="n">ms</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;black&#39;</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;eigenreals&#39; is not defined
+</pre></div>
+</div>
 </div>
 </div>
 </section>

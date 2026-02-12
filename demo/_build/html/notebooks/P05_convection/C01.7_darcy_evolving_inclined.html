@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -450,8 +450,7 @@ document.write(`
 \mathbb{S}
 \begin{cases}
 \Omega = [0, \mathcal{A}X] \times [0, X] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1)\\
-e_g^x=-\sin\beta &amp; \text{gravity acting at an angle $\beta$ to the vertical coordinate} \\
-e_g^y=-\cos\beta \\
+\textbf{e}_g=-\sin\beta\textbf{e}_x-\cos\beta\textbf{e}_y &amp; \text{gravity acting at an angle $\beta$ to the vertical coordinate} \\
 c_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-Ra}{\epsilon Ra}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed diffusive base state} \\
 c_{\text{D}}(x,y=Ra)=1 &amp; \text{prescribed concentration on upper and lower boundaries} \\
 c_{\text{N}}(x,y=0)=0 &amp; \text{no-flux on lower, left and right boundaries}\\
@@ -471,7 +470,7 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">FancyArrowPatch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.array_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
 
@@ -519,8 +518,9 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_len</span> <span class="o">=</span> <span class="mf">0.3</span>
-<span class="n">arrow_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span>
+<span class="n">arrow_len</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">arrow_start</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">))</span>
 <span class="n">arrow_end</span> <span class="o">=</span> <span class="n">arrow_start</span> <span class="o">-</span> <span class="n">arrow_len</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">beta</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">beta</span><span class="p">))))</span>
 
 <span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

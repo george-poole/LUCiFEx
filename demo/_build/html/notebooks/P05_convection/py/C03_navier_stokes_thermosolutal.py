@@ -149,7 +149,10 @@ def navier_stokes_thermosolutal_rectangle(
         u[0], 'hmin', dt_courant, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
-        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, f, u_bcs, p_scale=Vi,
+        u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns,  D_buoy_ns, 
+        f=f, 
+        u_bcs=u_bcs,
+        p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
         c, dt[0], u, Di, D_adv_ad, D_diff_ad,
@@ -158,5 +161,5 @@ def navier_stokes_thermosolutal_rectangle(
         theta, dt[0], u, Di/Le, D_adv_ad, D_diff_ad,
     )
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
-    exprs_consts = [Le, Pr, Ra, beta, rho, Di, Vi, Bu]
-    return solvers, t, dt, exprs_consts
+    auxiliary = [Le, Pr, Ra, beta, rho, Di, Vi, Bu]
+    return solvers, t, dt, auxiliary

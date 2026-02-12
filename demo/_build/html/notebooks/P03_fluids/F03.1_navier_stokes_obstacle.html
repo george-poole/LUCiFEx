@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -465,7 +465,7 @@ document.write(`
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">FE</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_contours</span><span class="p">,</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">save_figure</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">get_component_fem_functions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span><span class="p">,</span> <span class="n">get_component_functions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.F03_navier_stokes_obstacle</span><span class="w"> </span><span class="kn">import</span> <span class="n">navier_stokes_circle_obstacle</span>
 
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
@@ -532,17 +532,17 @@ $$\Delta t^n = \min(\Delta t_{\text{max}}, \Delta t_{\text{CFL}}(\textbf{u}^n))$
 
 ## Incremental pressure correction scheme (IPCS)
 
-$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n}+\rho  \mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u})=\nabla\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) + \mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n}+\rho  \mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u})=\nabla\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) + \mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$-\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}=\nabla^2 p^n - \nabla^2p^{n+1}$$
 
 $$\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}=\nabla p^n - \nabla p^{n+1}$$
 
-$$\mathcal{D}_{\textbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{CN}~,~\mathcal{D}_{\textbf{f}}=\text{BE}$$
+$$\mathcal{D}_{\mathbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{CN}~,~\mathcal{D}_{\mathbf{f}}=\text{BE}$$
 
-variational formulation $\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p$
+variational formulation $\forall(\textbf{v}, q)\in V_{\mathbf{u}} \times V_p$
 
-$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\rho  \textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho  \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \varepsilon(\textbf{v})\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) -\int_{\partial\Omega}\textbf{v}\cdot(\textbf{n}\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n))$$
+$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\rho  \textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho  \textbf{v}\cdot\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \varepsilon(\textbf{v})\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) -\textbf{v}\cdot\mathcal{D}_{\mathbf{f}}(\textbf{f}) -\int_{\partial\Omega}\textbf{v}\cdot(\textbf{n}\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n))$$
 
 $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} - \nabla q\cdot\nabla p^n + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} $$
 
@@ -550,17 +550,17 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 
 ## Chorin's scheme
 
-$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\rho  \textbf{u}^n}{\Delta t^n}+\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u})= \mu\nabla^2\mathcal{D}_\sigma(\textbf{u}) + \mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\rho  \textbf{u}^n}{\Delta t^n}+\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u})= \mu\nabla^2\mathcal{D}_\sigma(\textbf{u}) + \mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} = \nabla^2p^{n+1}$$
 
 $$\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}= - \nabla p^{n+1}$$
 
-$$\mathcal{D}_{\textbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{FE}~,~\mathcal{D}_{\textbf{f}}=\text{BE}$$
+$$\mathcal{D}_{\mathbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{FE}~,~\mathcal{D}_{\mathbf{f}}=\text{BE}$$
 
-variational formulation $\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p$
+variational formulation $\forall(\textbf{v}, q)\in V_{\mathbf{u}} \times V_p$
 
-$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \mu\nabla\textbf{v}\cdot\nabla\mathcal{D}_{\sigma}(\textbf{u}) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \mu\nabla\textbf{v}\cdot\nabla\mathcal{D}_{\sigma}(\textbf{u}) -\textbf{v}\cdot\mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + \rho q\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} $$
 
@@ -574,7 +574,7 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 <span class="n">p_n</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
 <span class="n">psi_n</span> <span class="o">=</span> <span class="n">psi</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span>
 
-<span class="n">ux_n</span><span class="p">,</span> <span class="n">uy_n</span> <span class="o">=</span> <span class="n">get_component_fem_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u_n</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
+<span class="n">ux_n</span><span class="p">,</span> <span class="n">uy_n</span> <span class="o">=</span> <span class="n">get_component_functions</span><span class="p">((</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">u_n</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ux&#39;</span><span class="p">,</span> <span class="s1">&#39;uy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -646,17 +646,17 @@ $$\Delta t^n = \min(\Delta t_{\text{max}}, \Delta t_{\text{CFL}}(\textbf{u}^n))$
 
 ## Incremental pressure correction scheme (IPCS)
 
-$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n}+\rho  \mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u})=\nabla\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) + \mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n}+\rho  \mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u})=\nabla\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) + \mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$-\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}=\nabla^2 p^n - \nabla^2p^{n+1}$$
 
 $$\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}=\nabla p^n - \nabla p^{n+1}$$
 
-$$\mathcal{D}_{\textbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{CN}~,~\mathcal{D}_{\textbf{f}}=\text{BE}$$
+$$\mathcal{D}_{\mathbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{CN}~,~\mathcal{D}_{\mathbf{f}}=\text{BE}$$
 
-variational formulation $\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p$
+variational formulation $\forall(\textbf{v}, q)\in V_{\mathbf{u}} \times V_p$
 
-$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\rho  \textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho  \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \varepsilon(\textbf{v})\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f}) -\int_{\partial\Omega}\textbf{v}\cdot(\textbf{n}\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n))$$
+$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\rho  \textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \rho  \textbf{v}\cdot\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \varepsilon(\textbf{v})\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n) -\textbf{v}\cdot\mathcal{D}_{\mathbf{f}}(\textbf{f}) -\int_{\partial\Omega}\textbf{v}\cdot(\textbf{n}\cdot\sigma(\mathcal{D}_\sigma(\textbf{u}), p^n))$$
 
 $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} - \nabla q\cdot\nabla p^n + q\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} $$
 
@@ -664,17 +664,17 @@ $$F_3(u^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\rho\frac{
 
 ## Chorin's scheme
 
-$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\rho  \textbf{u}^n}{\Delta t^n}+\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u})= \mu\nabla^2\mathcal{D}_\sigma(\textbf{u}) + \mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$\rho  \frac{\widetilde{\textbf{u}}^{n+1}-\rho  \textbf{u}^n}{\Delta t^n}+\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u})= \mu\nabla^2\mathcal{D}_\sigma(\textbf{u}) + \mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$\rho\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} = \nabla^2p^{n+1}$$
 
 $$\rho\frac{\textbf{u}^{n+1}-\widetilde{\textbf{u}}^{n+1}}{\Delta t^n}= - \nabla p^{n+1}$$
 
-$$\mathcal{D}_{\textbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{FE}~,~\mathcal{D}_{\textbf{f}}=\text{BE}$$
+$$\mathcal{D}_{\mathbf{u}}=\text{FE}~,~\mathcal{D}_{\sigma}=\text{FE}~,~\mathcal{D}_{\mathbf{f}}=\text{BE}$$
 
-variational formulation $\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p$
+variational formulation $\forall(\textbf{v}, q)\in V_{\mathbf{u}} \times V_p$
 
-$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \mu\nabla\textbf{v}\cdot\nabla\mathcal{D}_{\sigma}(\textbf{u}) -\textbf{v}\cdot\mathcal{D}_{\textbf{f}}(\textbf{f})$$
+$$F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) = \int_\Omega\text{d}\Omega~\textbf{v}\cdot\frac{\widetilde{\textbf{u}}^{n+1}-\textbf{u}^n}{\Delta t^n} + \textbf{v}\cdot\mathcal{D}_{\mathbf{u}}(\textbf{u}\cdot\nabla\textbf{u}) + \mu\nabla\textbf{v}\cdot\nabla\mathcal{D}_{\sigma}(\textbf{u}) -\textbf{v}\cdot\mathcal{D}_{\mathbf{f}}(\textbf{f})$$
 
 $$F_2(p^{n+1}, q) = \int_\Omega\text{d}\Omega~\nabla q\cdot\nabla p^{n+1} + \rho q\frac{\nabla\cdot\widetilde{\textbf{u}}^{n+1}}{\Delta t^n} $$
 

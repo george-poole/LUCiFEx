@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -469,13 +469,15 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.array_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">display_animation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_evolving</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_convection_evolving_rectangle</span>
 
 
+<span class="n">vartheta</span> <span class="o">=</span> <span class="mf">45.0</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_convection_evolving_rectangle</span><span class="p">(</span>
     <span class="n">aspect</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
@@ -484,7 +486,7 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
     <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;advective&#39;</span><span class="p">,</span>
     <span class="n">Ra</span><span class="o">=</span><span class="mf">500.0</span><span class="p">,</span> 
     <span class="n">kappa</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">vartheta</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span>
+    <span class="n">vartheta</span><span class="o">=</span><span class="n">vartheta</span><span class="p">,</span>
     <span class="n">c_ampl</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> 
     <span class="n">c_freq</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> 
     <span class="n">c_seed</span><span class="o">=</span><span class="p">(</span><span class="mi">456</span><span class="p">,</span> <span class="mi">987</span><span class="p">),</span> 
@@ -505,18 +507,28 @@ c_{\text{N}}(x=\mathcal{A}X,y)=0 \\
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">line_start</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">line_end</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ly</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">vartheta</span><span class="p">),</span> <span class="n">Ly</span><span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="p">(</span><span class="n">line_start</span><span class="p">,</span> <span class="n">line_end</span><span class="p">)</span>
+
+<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+        <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/8d513b59377560e8d209e8ec6faaf0344c8b5bae4affb2a11947313edc478560.png" src="../../_images/8d513b59377560e8d209e8ec6faaf0344c8b5bae4affb2a11947313edc478560.png" />
-<img alt="../../_images/019497b3b7c8d13d0e678c16b827ffe64350eb271c137e4b2f94b8f6ae105f4a.png" src="../../_images/019497b3b7c8d13d0e678c16b827ffe64350eb271c137e4b2f94b8f6ae105f4a.png" />
-<img alt="../../_images/2d9d8850903e9d0ca0d47fda064d21359dc0a5f2ab9c084d0936928bcd28a264.png" src="../../_images/2d9d8850903e9d0ca0d47fda064d21359dc0a5f2ab9c084d0936928bcd28a264.png" />
-<img alt="../../_images/5da834c80138c05486f432cfc91ad69b202e4bdc08d1c754cb5d43bef3525f1e.png" src="../../_images/5da834c80138c05486f432cfc91ad69b202e4bdc08d1c754cb5d43bef3525f1e.png" />
+<img alt="../../_images/6c599ebf5fb2b8810b1ed9b3cf8d9272910d7b6b6be6b9095b3cdcdff1ce58ae.png" src="../../_images/6c599ebf5fb2b8810b1ed9b3cf8d9272910d7b6b6be6b9095b3cdcdff1ce58ae.png" />
+<img alt="../../_images/b29a884e0f9dd6cc57a13c53701321edffe04ae67df0d10d61fed01ab1610d22.png" src="../../_images/b29a884e0f9dd6cc57a13c53701321edffe04ae67df0d10d61fed01ab1610d22.png" />
+<img alt="../../_images/a549ed4ab74e03a09c5c6b44425f39bcedb9a3274738d814052a38591ee7034d.png" src="../../_images/a549ed4ab74e03a09c5c6b44425f39bcedb9a3274738d814052a38591ee7034d.png" />
+<img alt="../../_images/0dc525a60d8cd1f0553d20b92c2d7d0e66d5cad5e042002c5a43d747c9844615.png" src="../../_images/0dc525a60d8cd1f0553d20b92c2d7d0e66d5cad5e042002c5a43d747c9844615.png" />
 </div>
 </div>
 <div class="cell docutils container">

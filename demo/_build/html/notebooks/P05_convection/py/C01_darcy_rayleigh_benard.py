@@ -95,7 +95,7 @@ def darcy_rayleigh_benard_rectangle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        exprs_consts=(Ra, Di, Bu),
+        auxiliary=(Ra, Di, Bu),
     )
 
 
@@ -181,7 +181,7 @@ def darcy_rayleigh_benard_annulus(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        exprs_consts=(Ra, Di, Bu),
+        auxiliary=(Ra, Di, Bu),
     )
 
 
@@ -255,5 +255,5 @@ def darcy_rayleigh_benard_semicircle(
         psi_petsc=psi_petsc, 
         c_petsc=c_petsc, 
         diagnostic=diagnostic,
-        exprs_consts=(Ra, Di, Bu),
+        auxiliary=(Ra, Di, Bu),
     )

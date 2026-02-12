@@ -141,5 +141,5 @@ def stokes_rayleigh_benard_rectangle(
         c, dt[0], u, Di, D_adv, D_diff,
     )
     solvers = [up_solver, dt_solver, c_solver]
-    exprs_consts = [Ra, Lmbda, Di, Bu, u, p, mu, rho]
-    return solvers, t, dt, exprs_consts
+    auxiliary = [Ra, Lmbda, Di, Bu, u, p, mu, rho]
+    return solvers, t, dt, auxiliary

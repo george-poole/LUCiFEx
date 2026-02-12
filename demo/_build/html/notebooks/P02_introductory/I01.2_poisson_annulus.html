@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -455,6 +455,7 @@ document.write(`
 u_{\text{D}}\vert_{\partial\Omega_{\text{inner}}}=0 \\
 u_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=1 \\
 f=0 \\
+\hline
 u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inner}})}~~,~~r=\sqrt{x^2+y^2}
 \end{cases}\end{split}\]</div>
 <div class="cell docutils container">
@@ -465,7 +466,7 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Constant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">bvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">save_figure</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">triangulation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fe2py</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_tri_mesh</span><span class="p">,</span> <span class="n">as_tri_function</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.poisson</span><span class="w"> </span><span class="kn">import</span> <span class="n">poisson</span>
 
 <span class="n">Rinner</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -497,18 +498,14 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">u_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">((</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">u_tri</span><span class="p">),</span> <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">triangles</span><span class="o">=</span><span class="n">mesh_tri</span><span class="o">.</span><span class="n">triangles</span><span class="p">)</span>
-<span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">)</span>
+<span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,y)_mesh&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/f8a42490a59f4a39edda9b4714720945ae5c116ff7a6470c24f75f4f2a62c264.png" src="../../_images/f8a42490a59f4a39edda9b4714720945ae5c116ff7a6470c24f75f4f2a62c264.png" />
+<img alt="../../_images/7bf1a2b675d73470d26ec4c69e325641cd6313318e89b4e76f1fadc60f0d9b2b.png" src="../../_images/7bf1a2b675d73470d26ec4c69e325641cd6313318e89b4e76f1fadc60f0d9b2b.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -517,13 +514,14 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">Rinner</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Router</span> <span class="o">/</span> <span class="n">Rinner</span><span class="p">)</span>
 
-<span class="n">ue</span> <span class="o">=</span> <span class="p">[</span><span class="n">exact_solution</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)]</span>
+<span class="n">tri_mesh</span> <span class="o">=</span> <span class="n">as_tri_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+<span class="n">ue</span> <span class="o">=</span> <span class="p">[</span><span class="n">exact_solution</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">Rinner</span><span class="p">,</span> <span class="n">Router</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tri_mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">tri_mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)]</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ue</span><span class="p">),</span> 
+    <span class="p">(</span><span class="n">tri_mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">tri_mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">ue</span><span class="p">),</span> 
     <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{e}</span><span class="s1">}$&#39;</span><span class="p">,</span> 
     <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-    <span class="n">triangles</span><span class="o">=</span><span class="n">mesh_tri</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span>
+    <span class="n">triang</span><span class="o">=</span><span class="n">tri_mesh</span><span class="o">.</span><span class="n">triangulation</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;ue(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
@@ -535,28 +533,19 @@ u_{\text{e}}(r)=\frac{\ln(r/R_{\text{inner}})}{\ln(R_{\text{outer}}/R_{\text{inn
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">ue</span><span class="p">,</span> <span class="n">u_tri</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">u_tri</span> <span class="o">=</span> <span class="n">as_tri_function</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">ue</span><span class="p">,</span> <span class="n">u_tri</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">error</span><span class="p">),</span> 
+    <span class="p">(</span><span class="n">tri_mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">tri_mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">error</span><span class="p">),</span> 
     <span class="n">title</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{e}</span><span class="s1">} - u$&#39;</span><span class="p">,</span> 
-    <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-    <span class="n">triangles</span><span class="o">=</span><span class="n">mesh_tri</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span>
+    <span class="n">triang</span><span class="o">=</span><span class="n">tri_mesh</span><span class="o">.</span><span class="n">triangulation</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;error(x,y)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/48ba2f119bffa6e81b07c420cca9a1c9e72fe98587b3d5d04f1e63de1d9c3efd.png" src="../../_images/48ba2f119bffa6e81b07c420cca9a1c9e72fe98587b3d5d04f1e63de1d9c3efd.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
-
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
-</pre></div>
-</div>
+<img alt="../../_images/3adf23d4261dff02cd884cf29838cba8fb4d2045285e64078e0d60f04fa588f1.png" src="../../_images/3adf23d4261dff02cd884cf29838cba8fb4d2045285e64078e0d60f04fa588f1.png" />
 </div>
 </div>
 </section>

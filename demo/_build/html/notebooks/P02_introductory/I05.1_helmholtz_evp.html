@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -499,6 +499,61 @@ f = 0 \\
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">39</span>
+<span class="g g-Whitespace">     </span><span class="mi">30</span> <span class="n">nev</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="g g-Whitespace">     </span><span class="mi">31</span> <span class="n">slepc</span> <span class="o">=</span> <span class="n">OptionsSLEPc</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">32</span>     <span class="n">eps_tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">33</span>     <span class="n">eps_target</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span>     <span class="n">eps_which</span><span class="o">=</span><span class="s1">&#39;smallest_real&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">39</span> <span class="n">u_solver</span> <span class="o">=</span> <span class="n">evp</span><span class="p">(</span><span class="n">helmholtz</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">slepc</span><span class="p">)(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:841,</span> in <span class="ni">EigenvalueProblem.from_forms_factory.&lt;locals&gt;._create</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">839</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solutions</span><span class="p">,</span> <span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">)):</span>
+<span class="g g-Whitespace">    </span><span class="mi">840</span>         <span class="n">solutions</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">function_space</span>
+<span class="ne">--&gt; </span><span class="mi">841</span> <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">842</span>     <span class="n">solutions</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">843</span>     <span class="n">forms_factory</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+<span class="g g-Whitespace">    </span><span class="mi">844</span>     <span class="n">bcs</span><span class="p">,</span> 
+<span class="g g-Whitespace">    </span><span class="mi">845</span>     <span class="n">slepc</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">846</span>     <span class="n">jit</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">847</span>     <span class="n">ffcx</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">848</span>     <span class="n">cache_matrix</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">849</span>     <span class="n">future</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">850</span>     <span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">851</span> <span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/pde.py:772,</span> in <span class="ni">EigenvalueProblem.__init__</span><span class="nt">(self, solutions, forms, bcs, slepc, jit, ffcx, cache_matrix, future, overwrite)</span>
+<span class="g g-Whitespace">    </span><span class="mi">770</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">bcs</span>
+<span class="g g-Whitespace">    </span><span class="mi">771</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">772</span>     <span class="n">forms_weak_bcs</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_weak_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">773</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_strong_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>        
+<span class="g g-Whitespace">    </span><span class="mi">774</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_mpc</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">create_periodic_bcs</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+
+<span class="nn">File ~/Desktop/LUCiFEx/lucifex/solver/bcs.py:175,</span> in <span class="ni">BoundaryConditions.create_weak_bcs</span><span class="nt">(self, solution, weak_types)</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_weak_bcs</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span>     <span class="bp">self</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">165</span>     <span class="n">solution</span><span class="p">:</span> <span class="n">Function</span> <span class="o">|</span> <span class="n">FunctionSeries</span> <span class="o">|</span> <span class="n">FunctionSpace</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">169</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">170</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Form</span><span class="p">]:</span>
+<span class="g g-Whitespace">    </span><span class="mi">171</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span><span class="sd">     Weakly enforced boundary condition by a term `+∫ v·uW ds` with </span>
+<span class="g g-Whitespace">    </span><span class="mi">173</span><span class="sd">     test function `v` and prescribed value `uW` in the variational form `F(u,v)=0`.</span>
+<span class="g g-Whitespace">    </span><span class="mi">174</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">175</span>     <span class="n">fs</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">function_space</span>
+<span class="g g-Whitespace">    </span><span class="mi">176</span>     <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">177</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rescale_weak</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">AttributeError</span>: &#39;FunctionSpace&#39; object has no attribute &#39;function_space&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -509,16 +564,14 @@ f = 0 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[None,
- None,
- None,
- 4.444667393076721,
- 7.034411761557017,
- 7.034411761557114,
- 8.900046596911208,
- 9.967342410168534,
- 9.967342410168753,
- 11.361152904419761]
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">sqrt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">k_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">k_values</span>
+
+<span class="ne">NameError</span>: name &#39;u_solver&#39; is not defined
 </pre></div>
 </div>
 </div>
@@ -533,20 +586,14 @@ f = 0 \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/91ed16fb9b0cad976ef48d7207386aa11afc11b599f1d28567b3dde60315cff1.png" src="../../_images/91ed16fb9b0cad976ef48d7207386aa11afc11b599f1d28567b3dde60315cff1.png" />
-<img alt="../../_images/0b96976d0e39dbb21dbdac73d7050242657c422f068db959cdd089943523f83a.png" src="../../_images/0b96976d0e39dbb21dbdac73d7050242657c422f068db959cdd089943523f83a.png" />
-<img alt="../../_images/86abd646ccef14cc7c3674538b6b160f63bf344c7df59a2d4ec3d812e583cbac.png" src="../../_images/86abd646ccef14cc7c3674538b6b160f63bf344c7df59a2d4ec3d812e583cbac.png" />
-<img alt="../../_images/f6c28c3728e0fb08ed3b7f60ada755e462cedfb9a0715683ee5f51736777b3a5.png" src="../../_images/f6c28c3728e0fb08ed3b7f60ada755e462cedfb9a0715683ee5f51736777b3a5.png" />
-<img alt="../../_images/0b49830526acfa54686002f06de9bd0e1fa19d1f996b4424c4726ba7f0300891.png" src="../../_images/0b49830526acfa54686002f06de9bd0e1fa19d1f996b4424c4726ba7f0300891.png" />
-<img alt="../../_images/2c320a2cd29720b7f0af1a9c13f05d84b127d3a61d02c75342a0a61d7db65914.png" src="../../_images/2c320a2cd29720b7f0af1a9c13f05d84b127d3a61d02c75342a0a61d7db65914.png" />
-<img alt="../../_images/86be75a2dc24907d0518a95158b71462622f59a1936ca35a2afb4fe74b71ea8b.png" src="../../_images/86be75a2dc24907d0518a95158b71462622f59a1936ca35a2afb4fe74b71ea8b.png" />
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">k_values</span><span class="p">,</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">eigenfunctions</span><span class="p">):</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span>         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$k=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
 
-<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
-
-<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
-
-<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+<span class="ne">NameError</span>: name &#39;k_values&#39; is not defined
 </pre></div>
 </div>
 </div>
