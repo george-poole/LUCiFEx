@@ -6,4 +6,3 @@ from . import sim
 from . import viz
 from . import utils
 from . import pde
-from . import fe2py

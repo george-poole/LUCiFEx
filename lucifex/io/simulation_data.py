@@ -7,8 +7,7 @@ from collections.abc import Iterable
 from natsort import natsorted
 
 from ..utils.py_utils import MultiKey
-from ..fdm import FunctionSeries, ConstantSeries
-from ..fe2py import GridSeries, TriSeries, FloatSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridSeries, TriSeries, FloatSeries
 from .load import load_txt_dict
 from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 

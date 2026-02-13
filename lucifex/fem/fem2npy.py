@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from functools import cached_property
-from typing import TypeVar, Iterable, Generic, Callable, overload
+from typing import TypeVar, Generic, Callable
 from typing_extensions import Self
 
 import numpy as np
@@ -8,32 +7,18 @@ import numba
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from . import Function, Constant
-from ..fdm import Series, ExprSeries, ConstantSeries
-from ..sim import Simulation
+from . import Function
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, as_tri_mesh, as_grid_mesh
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    create_function, dofs,
+    create_function, dofs, is_grid, is_simplicial,
     mesh_vertices, mesh_axes,
-    is_scalar, NonScalarError,
+    is_scalar, NonScalarError, NonCartesianQuadMeshError,
 )
 
 
-class FE2PyMesh(ABC):
-    @abstractmethod
-    def __init__(
-        self, 
-        name: str | None = None,
-    ):
-        self._name = name
-
-    @property
-    def name(self) -> str | None:
-        return self._name
-
-
-M = TypeVar('M', bound=FE2PyMesh)
-class FE2PyFunction(Generic[M]):
+M = TypeVar('M', bound=NPyMesh)
+class NPyFunction(ABC, Generic[M]):
     def __init__(
         self,
         values: np.ndarray,
@@ -73,118 +58,7 @@ class FE2PyFunction(Generic[M]):
         )
     
 
-class GridMesh(FE2PyMesh):
-    def __init__(
-        self, 
-        axes: tuple[np.ndarray, ...],
-        name: str | None = None,
-    ):
-        super().__init__(name)
-        self._axes = axes
-
-    @classmethod
-    def from_mesh(
-        cls: type['GridMesh'], 
-        mesh: Mesh,
-        strict: bool = False,
-    ) -> Self:
-        axes = mesh_axes(use_cache=True)(mesh, strict)
-        name = mesh.name
-        return cls(axes, name)
-    
-    @property
-    def axes(self) -> tuple[np.ndarray, ...]:
-        return self._axes
-    
-    @property
-    def x_axis(self) -> np.ndarray:
-        return self._get_axis(0)
-    
-    @property
-    def y_axis(self) -> np.ndarray | None:
-        return self._get_axis(1)
-    
-    @property
-    def z_axis(self) -> np.ndarray | None:
-        return self._get_axis(2)
-        
-    def _get_axis(self, index: int):
-        try:
-            return self._axes[index]
-        except IndexError:
-            return None 
-    
-
-class TriMesh(FE2PyMesh):
-    def __init__(
-        self, 
-        x_coordinates: np.ndarray, 
-        y_coordinates: np.ndarray, 
-        triangles: list[np.ndarray], # TODO type hint dtypeint and shape
-        name: str | None = None,
-    ):
-        super().__init__(name)
-        self._x_coordinates = x_coordinates
-        self._y_coordinates = y_coordinates
-        self._triangles = triangles
-    
-    @classmethod
-    def from_mesh(
-        cls: type['TriMesh'], 
-        mesh: Mesh,
-    ) -> Self:
-        if not mesh.geometry.dim == 2:
-            raise ValueError(
-                f"""
-            Triangulation only valid in 2D, not 
-            dimension {mesh.geometry.dim} """
-            )
-        
-        if not is_simplicial(mesh):
-            raise ValueError(
-                f""" 
-            Triangulation only valid for triangle cells, not 
-            {mesh.topology.cell_name()} """
-            )
-
-        x_coordinates, y_coordinates = mesh_coordinates(mesh)
-
-        connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
-        n_cells = connec.num_nodes
-        triangles = [connec.links(i) for i in range(n_cells)]
-
-        return cls(x_coordinates, y_coordinates, triangles, mesh.name)
-    
-    @cached_property
-    def triangulation(self) -> Triangulation:
-        return Triangulation(
-            self._x_coordinates,
-            self._y_coordinates,
-            self._triangles,
-        )
-    
-    @property
-    def x_coordinates(self):
-        return self._x_coordinates
-
-    @property
-    def y_coordinates(self):
-        return self._y_coordinates
-
-    @property
-    def triangles(self):
-        return self._triangles
-    
-
-as_grid_mesh = optional_lru_cache(
-    replicate_callable(GridMesh.from_mesh)(lambda: None)
-)
-as_tri_mesh = optional_lru_cache(
-    replicate_callable(TriMesh.from_mesh)(lambda: None)
-)
-
-
-class GridFunction(FE2PyFunction[GridMesh]):
+class GridFunction(NPyFunction[GridMesh]):
     @classmethod
     def from_function(
         cls: type['GridFunction'],
@@ -204,7 +78,7 @@ class GridFunction(FE2PyFunction[GridMesh]):
         )
     
 
-class TriFunction(FE2PyFunction[TriMesh]):
+class TriFunction(NPyFunction[TriMesh]):
     @classmethod
     def from_function(
         cls: type['TriFunction'],
@@ -234,10 +108,29 @@ as_tri_function = optional_lru_cache(
 )
 
 
+def as_npy_function(
+    u: Function,
+    cartesian: bool | None = None,
+    use_cache: bool | tuple[bool, bool] = (True, False),
+) -> GridFunction | TriFunction:
+    
+    mesh = u.function_space.mesh
 
+    if isinstance(use_cache, bool):
+        use_cache = (use_cache, use_cache)
+    use_mesh_cache, use_func_cache = use_cache
 
+    if cartesian is None:
+        cartesian = is_grid(use_cache=use_mesh_cache)(mesh)
+    simplicial = is_simplicial(use_cache=use_mesh_cache)(mesh)
 
-
+    match simplicial, cartesian:
+        case True, False:
+            return as_tri_function(use_cache=use_func_cache)(u)
+        case _, True:
+            return as_grid_function(use_cache=use_func_cache)(u)
+        case False, False:
+            raise NonCartesianQuadMeshError
 
 
 def grid_dofs(

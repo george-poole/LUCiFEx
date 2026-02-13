@@ -12,7 +12,7 @@ from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler
 
-from ..fe2py import as_grid_function
+from ..fem import as_grid_function
 from ..utils.py_utils import MultipleDispatchTypeError, filter_kwargs
 from .utils import LW, set_legend, optional_ax, optional_fig_ax, set_axes, create_cycler, optional_fig_axs
 

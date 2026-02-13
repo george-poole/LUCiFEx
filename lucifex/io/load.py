@@ -12,7 +12,7 @@ from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, optional_lru_cache
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fe2py import GridSeries, FloatSeries, TriSeries
+from ..fdm.fdm2npy import GridSeries, FloatSeries, TriSeries
 from .read import read
 from .utils import file_path_ext
 

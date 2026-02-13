@@ -5,7 +5,7 @@ import numpy as np
 
 
 from ..utils.array_utils import as_index
-from .grid import as_grid_function
+from .fem2npy import as_grid_function
 
 
 def where_on_grid(

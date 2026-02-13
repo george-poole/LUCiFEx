@@ -12,7 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 from matplotlib.cm import ScalarMappable
 
-from ..fe2py import GridFunction, TriFunction, as_numpy_function
+from ..fem import GridFunction, TriFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_scalar, create_function, 
     is_grid, extract_mesh,
@@ -105,7 +105,7 @@ def _(
 ):
     if not is_scalar(u):
         raise ValueError("Colormap plots must be of scalar-valued quantities.")
-    u_new = as_numpy_function(u, cartesian, use_cache)
+    u_new = as_npy_function(u, cartesian, use_cache)
     return _plot_colormap(
         u_new, fig, ax, colorbar, cartesian, **kwargs
     )
@@ -253,7 +253,7 @@ def _(
     use_cache: bool | tuple[bool, bool] = (True, False),
     **kwargs,
 ) -> None:
-    u_np = as_numpy_function(f, cartesian, use_cache)
+    u_np = as_npy_function(f, cartesian, use_cache)
     return _plot_contours(
         u_np, ax, levels, cartesian, **kwargs
     )

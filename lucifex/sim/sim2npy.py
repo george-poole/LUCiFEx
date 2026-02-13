@@ -1,26 +1,26 @@
 from abc import ABC, abstractmethod
-from functools import cached_property
-from typing import TypeVar, Iterable, Generic, Callable, overload
+from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
-import numpy as np
+from dolfinx.fem import Function
 from ufl.core.expr import Expr
-from dolfinx.mesh import Mesh
+import numpy as np
 
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
 from ..fem import Function, Constant
-from ..fdm import Series, ExprSeries, ConstantSeries
-from ..sim import Simulation
+from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
+from ..fdm import Series, FunctionSeries, ConstantSeries, ExprSeries
+from ..fdm.fdm2npy import NPySeries, GridSeries, TriSeries, FloatSeries
 from ..utils.py_utils import MultiKey
-from ..utils.fenicsx_utils import NonScalarVectorError
-from ..utils.fenicsx_utils import get_component_functions
-from .array import FloatSeries
+from . import Simulation
+from ..utils.py_utils import replicate_callable
 
 
-M = TypeVar('M', bound=FE2PyMesh)
-F = TypeVar('F', bound=FE2PyFunction)
-S = TypeVar('S', bound=FE2PySeries)
+M = TypeVar('M', bound=NPyMesh)
+F = TypeVar('F', bound=NPyFunction)
+S = TypeVar('S', bound=NPySeries)
 class FE2PySimulation(
-    Generic[S],
+    Generic[M, F, S],
     MultiKey[str, S | F | FloatSeries | np.ndarray | float]
 ):
     def __init__(
@@ -96,63 +96,43 @@ class FE2PySimulation(
                 _auxiliary.append(_aux)
 
         return cls(_solutions, _auxiliary, sim.timings)
-    
+   
 
-# # FIXME
-# T = TypeVar('T') 
-# class FE2PySimulation(
-#     Generic[T],
-#     MultiKey[str, T]
-# ):
-#     ...
-    # def __init__(
-    #     self,
-    #     series: Iterable[T | FloatSeries],
-    #     auxiliary: Iterable[T | FloatSeries | dict[str, np.ndarray | float]] = (),
-    #     timings = None,
-    # ):
-    #     self._series = series
-    #     self._auxiliary = auxiliary
-    #     self._timings = timings
-
-    # def _getitem(
-    #     self, 
-    #     key,
-    # ):
-    #     return self.namespace[key]
-
-    # @property
-    # def series(self) -> list[T| FloatSeries]:
-    #     return list(self._series)
-
-    # @property
-    # def namespace(self) -> dict[str, T | FloatSeries | float]:
-    #     return {i.name: i for i in self._series} # TODO expr and consts too
-    
-    # @classmethod
-    # def from_simulation(
-    #     cls,
-    #     sim: Simulation,
-    #     slc: slice = slice(None, None, None),
-    #     auxiliary: bool = False, #FIXME
-    #     use_cache: tuple[bool, bool] = (True, True),
-    # ):
-    #     _series = []
-    #     for s in sim.solutions:
-    #         s_np = as_numpy_series(s, use_cache=use_cache, slc=slc)
-    #         _series.append(s_np)
-
-    #     _auxiliary = []
-    #     if auxiliary:
-    #         for aux in sim.auxiliary:
-    #             if isinstance(aux, Expr):
-    #                 aux_func = create_fem_function(...)
-    #                 aux_np = grid(...)(aux_func)
-    #                 _auxiliary.append(aux_np)
-    #             if isinstance(aux, Constant):
-    #                 _auxiliary.append
-
-    #     return cls(_series, _auxiliary, sim.timings)
+class GridSimulation(FE2PySimulation[GridMesh, GridFunction, GridSeries]):
+    @classmethod
+    def from_simulation(
+        cls: type['GridSimulation'],
+        sim: Simulation,
+        slc: slice = slice(None, None, None),
+        auxiliary: bool = False,
+        strict: bool = False,
+        jit: bool = True,
+        mask: float = np.nan,
+        use_mesh_map: bool = False,
+        use_mesh_cache: bool = True,
+        use_func_cache: bool = True,
+    ) -> Self:
+        convert_func = lambda u: (
+            GridSeries.from_series(
+                u, slc, strict, jit, mask, use_mesh_map, use_mesh_cache, use_func_cache,
+            )
+        )
+        return super().from_simulation(
+            sim,
+            convert_func,
+            auxiliary,
+        )
 
 
+class TriSimulation(FE2PySimulation[TriMesh, TriFunction, TriSeries]):
+    ...
 
+
+@replicate_callable(GridSimulation.from_simulation)
+def as_grid_simulation():
+    pass
+
+
+@replicate_callable(TriSimulation.from_simulation)
+def as_tri_simulation():
+    pass

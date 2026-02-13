@@ -13,7 +13,7 @@ from ..utils.fenicsx_utils import (
     is_simplicial,
 )
 from ..utils.py_utils import filter_kwargs
-from ..fe2py import as_grid_mesh, as_tri_mesh, quad_mesh
+from ..mesh import as_grid_mesh, as_tri_mesh, as_quad_mesh
 from .utils import optional_ax, set_axes
 
 
@@ -124,7 +124,7 @@ def _plot_quadrangulation(
     _kwargs = _poly_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
 
-    quad = quad_mesh(use_cache=use_cache)(mesh)
+    quad = as_quad_mesh(use_cache=use_cache)(mesh)
     # quadl = filter_kwargs(quadrangulation, Collection)(mesh, **_kwargs)
     quadl = ... # FIXME
 

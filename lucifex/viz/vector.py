@@ -8,7 +8,8 @@ from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
 from matplotlib.quiver import Quiver
 
-from ..fe2py import as_grid_function, as_grid_mesh, TriFunction, GridFunction, as_numpy_function
+from ..mesh import as_grid_mesh
+from ..fem import as_grid_function, TriFunction, GridFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
     NonCartesianQuadMeshError, is_simplicial, get_component_functions, 
@@ -156,8 +157,8 @@ def _x_y_fx_fy_arrays(
     use_cache: tuple[bool, bool],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    fx_np = as_numpy_function(fx, use_cache=use_cache)
-    fy_np = as_numpy_function(fy, use_cache=use_cache)
+    fx_np = as_npy_function(fx, use_cache=use_cache)
+    fy_np = as_npy_function(fy, use_cache=use_cache)
     
     if isinstance(fx_np, TriFunction):
         triangles = fx_np.mesh.triangles

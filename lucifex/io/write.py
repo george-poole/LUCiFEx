@@ -21,8 +21,7 @@ from ..utils.fenicsx_utils import (
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
-from ..fdm import FunctionSeries, ConstantSeries
-from ..fe2py import GridSeries, FloatSeries, TriSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridSeries, FloatSeries, TriSeries
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim

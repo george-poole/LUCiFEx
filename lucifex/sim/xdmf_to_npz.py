@@ -9,7 +9,7 @@ from dolfinx.mesh import Mesh
 from ..utils.fenicsx_utils import is_grid, CellType, NonCartesianQuadMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
 from ..fdm import ConstantSeries, FunctionSeries
-from ..fe2py import GridSeries, FloatSeries, TriSeries
+from ..fdm.fdm2npy import GridSeries, FloatSeries, TriSeries
 from ..io import (
     write, 
     load_mesh, 

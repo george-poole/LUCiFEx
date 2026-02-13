@@ -1,6 +1,7 @@
+import operator
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import TypeVar, Iterable, Generic, Callable, overload
+from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
 import numpy as np
@@ -8,7 +9,7 @@ from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
 from ..fem import Function, Constant
-from ..fem.fem2py import FE2PyMesh, FE2PyFunction, GridMesh, GridFunction
+from ..fem.fem2npy import NPyMesh, NPyFunction, GridMesh, GridFunction, as_grid_function, TriMesh, TriFunction, as_tri_function
 from . import Series, ExprSeries, ConstantSeries
 from ..utils.py_utils import replicate_callable
 from ..utils.fenicsx_utils import NonScalarVectorError
@@ -16,9 +17,9 @@ from ..utils.fenicsx_utils import get_component_functions
 from .series import FunctionSeries
 
 
-M = TypeVar('M', bound=FE2PyMesh)
-F = TypeVar('F', bound=FE2PyFunction)
-class FE2PySeries(ABC, Generic[M, F]):
+M = TypeVar('M', bound=NPyMesh)
+F = TypeVar('F', bound=NPyFunction)
+class NPySeries(ABC, Generic[M, F]):
     """
     Abstract base class for a Numpy-compatible series representing a time-dependent quantity.
     """
@@ -72,9 +73,8 @@ class FE2PySeries(ABC, Generic[M, F]):
             u.name,
         )
     
-    @abstractmethod
     def sub(
-        self: 'FE2PySeries', 
+        self: 'NPySeries', 
         index: int, 
         name: str | None = None,
     ) -> Self:
@@ -145,7 +145,7 @@ class FE2PySeries(ABC, Generic[M, F]):
     
 
 class GridSeries(
-    FE2PySeries[GridMesh, GridFunction]
+    NPySeries[GridMesh, GridFunction]
 ):            
     @classmethod
     def from_series(
@@ -171,8 +171,112 @@ class GridSeries(
         )
     
 
+class TriSeries(
+    NPySeries[TriMesh, TriFunction]
+):            
+    @classmethod
+    def from_series(
+        cls: type['GridSeries'], 
+        u: FunctionSeries,
+        slc: slice = slice(None, None, None),
+        use_mesh_cache: bool = True,
+        use_func_cache: bool = True,
+    ) -> Self:
+        convert_func = lambda u: (
+            as_tri_function(use_cache=use_func_cache)(
+                u, use_mesh_cache,
+            )
+        )
+        return super().from_series(
+            u, 
+            convert_func,
+            slc,
+        )
+
+
+class FloatSeries(NPySeries[None, int | float | np.ndarray]):
+    @classmethod
+    def from_series(
+        cls, 
+        u: ConstantSeries,
+        slc: slice = slice(None, None, None),
+    ) -> Self:
+        return cls(u.value_series[slc], u.time_series[slc], u.name)
+    
+    
+    def transform(
+        self, 
+        transf: str | Callable[[float | Iterable[float]], float] | Callable[[float, float], float],
+        other: Self | float | None = None,
+        name: str | None = None,
+    ) -> Self:
+        if isinstance(transf, str):
+            transf = getattr(operator, transf)
+
+        if other is None:
+            return FloatSeries([transf(i) for i in self.series], self.time_series, name)
+        elif isinstance(other, float):
+            return FloatSeries([transf(i, other) for i in self.series], self.time_series, name)
+        else:
+            size = min(len(self.time_series), len(other.time_series))
+            assert np.allclose(self.time_series[:size], other.time_series[:size])
+            return FloatSeries(
+                [transf(i, j) for i, j in zip(self.series[:size], other.series[:size])],
+                self.time_series[:size],
+                name,
+            )
+        
+
 @replicate_callable(GridSeries.from_series)
 def as_grid_series():
     pass
 
 
+@replicate_callable(TriSeries.from_series)
+def as_tri_series():
+    pass
+
+
+@replicate_callable(FloatSeries.from_series)
+def as_float_series():
+    pass
+
+
+
+# @overload
+# def as_numpy_series(
+#     u: ConstantSeries,
+#     slc: slice = slice(None, None, None),
+#     use_cache: tuple[bool, bool] = (True, True),
+# ) -> FloatSeries:
+#     ...
+
+
+# @overload
+# def as_numpy_series(
+#     u: FunctionSeries,
+#     slc: slice = slice(None, None, None),
+#     use_cache: tuple[bool, bool] = (True, True),
+# ) -> GridSeries | TriSeries:
+#     ...
+
+
+# def as_numpy_series(
+#     u: FunctionSeries| ConstantSeries,
+#     *,
+#     slc: slice = slice(None, None, None),
+#     use_cache: tuple[bool, bool] = (True, True),
+# ) :
+#     if isinstance(u, ConstantSeries):
+#         return FloatSeries.from_series(u, slc)
+#     else:
+#         simplicial = is_simplicial(use_cache=True)(u.mesh)
+#         cartesian = is_grid(use_cache=True)(u.mesh)
+
+#         match simplicial, cartesian:
+#             case True, False:
+#                 return TriSeries.from_series(u, use_cache, slc)
+#             case _, True:
+#                 return GridSeries.from_series(u, use_cache, slc)
+#             case False, False:
+#                 raise NonCartesianQuadMeshError
