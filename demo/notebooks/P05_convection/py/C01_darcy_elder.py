@@ -3,7 +3,7 @@ from lucifex.fem import  Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType
+from lucifex.utils.fenicsx_utils import CellType
 
 from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 

@@ -14,7 +14,7 @@ from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, evaluation, 
 )
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, limits_corrector
+from lucifex.utils.fenicsx_utils import CellType, limits_corrector
 
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.stokes import stokes_incompressible

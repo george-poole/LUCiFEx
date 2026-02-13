@@ -12,7 +12,7 @@ from lucifex.solver import (
     BoundaryConditions, OptionsPETSc, bvp, ibvp, 
     evaluation, interpolation
 )
-from lucifex.utils import CellType
+from lucifex.utils.fenicsx_utils import CellType
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.advection_diffusion import advection_diffusion, advection_diffusion_reaction

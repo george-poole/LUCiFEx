@@ -7,7 +7,7 @@ from lucifex.fdm.ufl_operators import exp
 from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import BoundaryConditions
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType, BoundaryType
+from lucifex.utils.fenicsx_utils import CellType, BoundaryType
 from lucifex.pde.scaling import ScalingChoice
 
 from ...P05_convection.py.C01_darcy_convection import darcy_convection_generic

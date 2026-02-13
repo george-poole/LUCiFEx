@@ -7,7 +7,7 @@ parts:
       - file: notebooks/P01_user_guide/U00_introduction
       - file: notebooks/P01_user_guide/U01_time_dependence
       - file: notebooks/P01_user_guide/U02_finite_differences
-      - file: notebooks/P01_user_guide/U03_initial_conditions
+      - file: notebooks/P01_user_guide/U03_perturbations
       - file: notebooks/P01_user_guide/Uxx_bcs_time_dependent
       - file: notebooks/P01_user_guide/Uxx_bcs_periodic
 

@@ -11,7 +11,7 @@ from lucifex.solver import (
 )
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType
+from lucifex.utils.fenicsx_utils import CellType
 
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress

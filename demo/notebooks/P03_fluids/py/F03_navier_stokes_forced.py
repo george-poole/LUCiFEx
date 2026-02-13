@@ -9,7 +9,7 @@ from lucifex.fdm import (
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import bvp, ibvp, interpolation, evaluation, BoundaryConditions
-from lucifex.utils import CellType
+from lucifex.utils.fenicsx_utils import CellType
 from lucifex.sim import configure_simulation
 from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction, streamfunction_from_vorticity
 from lucifex.pde.navier_stokes import navier_stokes_vorticity

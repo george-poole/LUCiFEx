@@ -11,7 +11,7 @@ from lucifex.solver import(
     ibvp, bvp, evaluation,
 )
 from lucifex.sim import configure_simulation
-from lucifex.utils import CellType
+from lucifex.utils.fenicsx_utils import CellType
 
 from lucifex.pde.advection_diffusion import advection_diffusion_reaction
 from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
