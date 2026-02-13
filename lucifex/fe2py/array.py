@@ -8,7 +8,7 @@ import numpy as np
 from dolfinx.fem import Function
 
 from ..fdm import ConstantSeries, FunctionSeries, Series, SubSeriesError
-from ..utils.fenicsx_utils import is_cartesian, is_simplicial, NonCartesianQuadMeshError
+from ..utils.fenicsx_utils import is_grid, is_simplicial, NonCartesianQuadMeshError
 from .grid import GridFunction, as_grid_function, GridSeries
 from .tri import TriFunction, as_tri_function, TriSeries
 from .abc import FE2PySeries

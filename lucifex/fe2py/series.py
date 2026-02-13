@@ -9,7 +9,7 @@ from matplotlib.tri.triangulation import Triangulation
 from dolfinx.mesh import Mesh
 
 from ..fdm import ConstantSeries, FunctionSeries, Series, SubSeriesError
-from ..utils.fenicsx_utils import ScalarVectorError, get_component_functions, is_cartesian, is_simplicial, NonCartesianQuadMeshError
+from ..utils.fenicsx_utils import NonScalarVectorError, get_component_functions, is_grid, is_simplicial, NonCartesianQuadMeshError
 
 from .grid import GridSeries
 from .tri import TriSeries

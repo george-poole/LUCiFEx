@@ -39,7 +39,7 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        auxiliary: Iterable[ExprSeries | Expr | tuple[str, Any]] = (),
+        auxiliary: Iterable[ExprSeries | Expr | Function | Constant | tuple[str, Any]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
@@ -72,7 +72,7 @@ class Simulation(
     ):
         return self.namespace[key]
 
-    def _map_to_solver_series(
+    def _map_to_solution(
         self,
         obj: dict[str | Iterable[str], T] | tuple[T, T] | T,
     ) -> dict[str, T]:
@@ -109,6 +109,10 @@ class Simulation(
             {*[s.solution_series for s in self.solvers], 
              *[s.correction_series for s in self.solvers if s.correction_series is not None]},
             )
+        
+    @property
+    def auxiliary(self):
+        return self._auxiliary
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
@@ -117,11 +121,7 @@ class Simulation(
         d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
         d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
         return d
-    
-    @property
-    def auxiliary(self):
-        return self._auxiliary
-    
+
     @property
     def store_delta(self) -> dict[str, int | float | None]:
         return self._store_delta
@@ -131,7 +131,7 @@ class Simulation(
         if value is Ellipsis:
             self._store_delta = {s.name: s.store for s in self.solutions}
         else:
-            self._store_delta = self._map_to_solver_series(value)
+            self._store_delta = self._map_to_solution(value)
             for name, store in self._store_delta.items():
                     self[name].store = store
 
@@ -141,7 +141,7 @@ class Simulation(
     
     @write_delta.setter
     def write_delta(self, value):
-        self._write_delta = self._map_to_solver_series(value)
+        self._write_delta = self._map_to_solution(value)
     
     @property
     def write_file(self) -> dict[str, str | None]:
@@ -149,7 +149,7 @@ class Simulation(
     
     @write_file.setter
     def write_file(self, value):
-        self._write_file = self._map_to_solver_series(value)
+        self._write_file = self._map_to_solution(value)
 
     @property
     def writers(self) -> list[Writer]:
@@ -244,7 +244,7 @@ class Simulation(
     def timings(self) -> dict:
         return self._timings
     
-    def attach_timings(
+    def set_timings(
         self,
         timings: dict,
         copy: bool = False

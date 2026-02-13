@@ -228,7 +228,7 @@ def mesh_axes(
     """
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
-    if strict and not is_cartesian(mesh):
+    if strict and not is_grid(mesh):
         raise NonCartesianMeshError('Axes')
     return tuple(np.sort(np.unique(i)) for i in mesh_coordinates(mesh))
 
@@ -240,7 +240,7 @@ def mesh_vertices_tensor(
     """
     Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
-    if strict and not is_cartesian(mesh):
+    if strict and not is_grid(mesh):
         raise NonCartesianMeshError('Vertices tensor')
     mesh_axes = mesh_axes(mesh)
     if len(mesh_axes) == 2:
@@ -258,13 +258,13 @@ def mesh_axes_spacing(
     strict: bool = False,
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
-    if strict and not is_cartesian(mesh):
+    if strict and not is_grid(mesh):
         raise NonCartesianMeshError('Axes spacing')
     return tuple(np.diff(i) for i in mesh_axes(mesh))
 
 
 @optional_lru_cache
-def is_cartesian(
+def is_grid(
     mesh: Mesh | tuple[np.ndarray, ...],
 ) -> bool:
     if isinstance(mesh, Mesh):
@@ -281,10 +281,10 @@ def is_cartesian(
 
 
 @optional_lru_cache
-def is_uniform_cartesian(
+def is_uniform_grid(
     mesh: Mesh,
 ) -> bool:
-    if not is_cartesian(mesh):
+    if not is_grid(mesh):
         return False
     return all(all(np.isclose(dx[0], dx)) for dx in mesh_axes_spacing(mesh))
 

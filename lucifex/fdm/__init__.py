@@ -10,3 +10,4 @@ from .timestep import (
     advective_diffusive_timestep, adr_timestep, diffusive_reactive_timestep,
     peclet, peclet_argument, courant_number,
 )
+from .fe2py import *

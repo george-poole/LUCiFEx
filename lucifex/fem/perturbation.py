@@ -11,7 +11,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpo
 
 from ..utils.fenicsx_utils import (
     BoundaryType, mesh_coordinates, mesh_vertices,
-    create_function, create_function_space, set_fem_function,
+    create_function, create_function_space, set_function,
 )
 
 
@@ -106,7 +106,7 @@ class DofsPerturbation:
             noise = self._rng.uniform(*self._amplitude, freq)
             dofs = RegularGridInterpolator(x_coarse, noise, method=method)(vs)
         
-        set_fem_function(f, dofs, dofs_indices=':')
+        set_function(f, dofs, dofs_indices=':')
         return f
     
     def combine_base_noise(
@@ -124,7 +124,7 @@ class DofsPerturbation:
 
         f = Function(fs, name=name)
         dofs = operator(base.x.array, perturbation.x.array)
-        set_fem_function(f, dofs, dofs_indices=':')
+        set_function(f, dofs, dofs_indices=':')
         if correct:
             self._corrector(f.x.array)
         return f

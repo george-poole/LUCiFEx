@@ -7,9 +7,10 @@ import operator
 from dolfinx.fem import Function
 
 from ..fdm import ConstantSeries, FunctionSeries, Series, SubSeriesError
-from ..utils.fenicsx_utils import is_cartesian, is_simplicial, NonCartesianQuadMeshError
-from .grid import GridFunction, as_grid_function, GridSeries
-from .tri import TriFunction, as_tri_function, TriSeries
+from ..sim import Simulation
+from ..utils.fenicsx_utils import is_grid, is_simplicial, NonCartesianQuadMeshError
+from .grid import GridFunction, as_grid_function, GridSeries, GridSimulation
+from .tri import TriFunction, as_tri_function, TriSeries, TriSimulation
 from .array import FloatSeries
 
 
@@ -26,7 +27,7 @@ def as_numpy_function(
     use_mesh_cache, use_func_cache = use_cache
 
     if cartesian is None:
-        cartesian = is_cartesian(use_cache=use_mesh_cache)(mesh)
+        cartesian = is_grid(use_cache=use_mesh_cache)(mesh)
     simplicial = is_simplicial(use_cache=use_mesh_cache)(mesh)
 
     match simplicial, cartesian:
@@ -37,7 +38,6 @@ def as_numpy_function(
         case False, False:
             raise NonCartesianQuadMeshError
         
-
 
 @overload
 def as_numpy_series(
@@ -67,7 +67,7 @@ def as_numpy_series(
         return FloatSeries.from_series(u, slc)
     else:
         simplicial = is_simplicial(use_cache=True)(u.mesh)
-        cartesian = is_cartesian(use_cache=True)(u.mesh)
+        cartesian = is_grid(use_cache=True)(u.mesh)
 
         match simplicial, cartesian:
             case True, False:
@@ -76,3 +76,16 @@ def as_numpy_series(
                 return GridSeries.from_series(u, use_cache, slc)
             case False, False:
                 raise NonCartesianQuadMeshError
+            
+
+def as_numpy_simulation(
+    sim: Simulation,
+) -> GridSimulation | TriSimulation:
+    
+    assert sim.mesh is not None
+    simplicial = is_simplicial(use_cache=True)(sim.mesh)
+    cartesian = is_grid(use_cache=True)(sim.mesh)
+    
+    match simplicial, cartesian:
+        case True, False:
+            ...

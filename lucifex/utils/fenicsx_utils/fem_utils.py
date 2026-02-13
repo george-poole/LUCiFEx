@@ -17,7 +17,7 @@ from .ufl_utils import (
     extract_mesh,     
     is_scalar,
     is_vector, 
-    VectorError,
+    NonVectorError,
     ShapeError
 )
 
@@ -179,7 +179,7 @@ def create_function(
             fs = create_function_space(fs, subspace_index, bool(use_cache))
             f = Function(fs, name=name)
 
-    set_fem_function(f, value, dofs_indices)
+    set_function(f, value, dofs_indices)
     return f
 
 
@@ -212,7 +212,7 @@ def get_component_functions(
 ) -> tuple[Function, ...]:
     
     if not is_vector(u):
-        raise VectorError(u)
+        raise NonVectorError(u)
     
     if isinstance(fs, tuple):
         fs = _as_function_space_tuple(fs, u)
@@ -294,7 +294,7 @@ def _as_function_space_tuple(
             raise TypeError
 
 
-def set_fem_function(
+def set_function(
     f: Function,
     value: Function 
     | Callable[[np.ndarray], np.ndarray] 
@@ -421,7 +421,7 @@ def _(value, f: Function):
     f.interpolate(lambda x: np.full_like(x[0], value, dtype=PETSc.ScalarType))
 
 
-def set_fem_constant(
+def set_constant(
     c: Constant,
     value: Constant | float | np.ndarray | Iterable[float],
 ) -> None:

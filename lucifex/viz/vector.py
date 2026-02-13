@@ -12,7 +12,7 @@ from ..fe2py import as_grid_function, as_grid_mesh, TriFunction, GridFunction, a
 from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
     NonCartesianQuadMeshError, is_simplicial, get_component_functions, 
-    is_cartesian,
+    is_grid,
 )
 from ..utils.py_utils import filter_kwargs
 from .utils import set_axes, optional_ax
@@ -160,14 +160,14 @@ def _x_y_fx_fy_arrays(
     fy_np = as_numpy_function(fy, use_cache=use_cache)
     
     if isinstance(fx_np, TriFunction):
-        triangles = fx_np.tri.triangles
-        x = fx_np.tri.x[triangles]
-        y = fx_np.tri.y[triangles]
+        triangles = fx_np.mesh.triangles
+        x = fx_np.mesh.x_coordinates[triangles]
+        y = fx_np.mesh.y_coordinates[triangles]
         fx_new = fx_np.values[triangles]
         fy_new = fy_np.values[triangles]
     
     if isinstance(fx_np, GridFunction):
-        x, y = fx_np.grid.axes
+        x, y = fx_np.mesh.axes
         fx_new = fx_np.values
         fy_new = fy_np.values
 

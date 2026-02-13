@@ -66,17 +66,17 @@ class ShapeError(ValueError):
         super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
 
 
-class ScalarError(ShapeError):
+class NonScalarError(ShapeError):
     def __init__(self, u):
         super().__init__(u, "'scalar'")
 
 
-class VectorError(ShapeError):
+class NonVectorError(ShapeError):
     def __init__(self, u):
         super().__init__(u, "'vector'")
 
 
-class ScalarVectorError(ShapeError):
+class NonScalarVectorError(ShapeError):
     def __init__(self, u):
         super().__init__(u, "'scalar or vector'")
 

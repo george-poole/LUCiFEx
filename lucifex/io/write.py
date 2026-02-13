@@ -17,7 +17,7 @@ from ..utils.fenicsx_utils import (
     extract_mesh, 
     create_function, 
     create_function_space, 
-    set_fem_function, 
+    set_function, 
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
@@ -418,7 +418,7 @@ def _(
     fs = create_function_space((mesh, *elem), use_cache=True)
     func = Function(fs, name=name)
     func.name = name
-    set_fem_function(func, u)
+    set_function(func, u)
     return write(func, file_name, dir_path, t, mode, comm)
 
 

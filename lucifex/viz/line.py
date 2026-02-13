@@ -71,7 +71,7 @@ def _(
     **kwargs,
 ) -> None:
     f_grid = as_grid_function(f)
-    _plot_line((f_grid.grid.x, f_grid), ax, cyc, **kwargs)
+    _plot_line((f_grid.mesh.x_axis, f_grid), ax, cyc, **kwargs)
 
 
 @_plot_line.register(tuple)

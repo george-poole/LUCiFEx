@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dolfinx.fem import Function, FunctionSpace
 
 from ..fdm import FunctionSeries
-from ..utils.fenicsx_utils import ScalarVectorError, is_discontinuous_lagrange
+from ..utils.fenicsx_utils import NonScalarVectorError, is_discontinuous_lagrange
 
 
 def create_dir_path(
@@ -119,4 +119,4 @@ def io_element(
         case (dim, ):
             return (*elem, dim)
         case _:
-            raise ScalarVectorError(u)
+            raise NonScalarVectorError(u)

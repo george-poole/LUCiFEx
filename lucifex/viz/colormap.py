@@ -15,7 +15,7 @@ from matplotlib.cm import ScalarMappable
 from ..fe2py import GridFunction, TriFunction, as_numpy_function
 from ..utils.fenicsx_utils import (
     is_scalar, create_function, 
-    is_cartesian, extract_mesh,
+    is_grid, extract_mesh,
 )
 from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
 
@@ -145,7 +145,7 @@ def _(
     cartesian: bool | None = None,
     **kwargs,
 ):
-    xyz = (*u.grid.axes, u.values)
+    xyz = (*u.mesh.axes, u.values)
     return _plot_colormap(
         xyz, fig, ax, colorbar, cartesian, **kwargs,
     )
@@ -160,9 +160,9 @@ def _(
     cartesian: bool | None = None,
     **kwargs,
 ):
-    xyz = (u.tri.x, u.tri.y, u.values)
+    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
     return _plot_colormap(
-        xyz, fig, ax, colorbar, cartesian, triang=u.tri.triangulation, **kwargs,
+        xyz, fig, ax, colorbar, cartesian, triang=u.mesh.triangulation, **kwargs,
     )
 
 
@@ -192,7 +192,7 @@ def _(
         cmap = filter_kwargs(ax.tripcolor)(triang, z, **_kwargs)
     else:
         if cartesian is None:
-            cartesian = is_cartesian((x, y))
+            cartesian = is_grid((x, y))
         if not cartesian:
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
         else:
@@ -283,7 +283,7 @@ def _(
     cartesian: bool | None = None,
     **kwargs,
 ) -> None:
-    xyz = (*u.grid.axes, u.values)
+    xyz = (*u.mesh.axes, u.values)
     return _plot_contours(xyz, ax, levels, cartesian, **kwargs)
 
 
@@ -295,8 +295,8 @@ def _(
     cartesian: bool | None = None,
     **kwargs,
 ) -> None:
-    xyz = (u.tri.x, u.tri.y, u.values)
-    return _plot_contours(xyz, ax, levels, cartesian, u.tri.triangulation, **kwargs)
+    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
+    return _plot_contours(xyz, ax, levels, cartesian, u.mesh.triangulation, **kwargs)
 
 
 @_plot_contours.register(tuple)
@@ -321,7 +321,7 @@ def _(
         filter_kwargs(ax.tricontour, ContourSet)(triang, z, levels=levels, **_kwargs)
     else:
         if cartesian is None:
-            cartesian = is_cartesian((x, y))
+            cartesian = is_grid((x, y))
         if not cartesian:
             filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
         else:

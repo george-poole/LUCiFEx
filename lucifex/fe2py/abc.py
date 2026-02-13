@@ -4,144 +4,107 @@ from typing import TypeVar, Iterable, Generic, Callable, overload
 from typing_extensions import Self
 
 import numpy as np
+from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from ..fdm import Series, SubSeriesError
+from ..fem import Function, Constant
+from ..fdm import Series, ExprSeries, ConstantSeries
+from ..sim import Simulation
 from ..utils.py_utils import MultiKey
+from ..utils.fenicsx_utils import NonScalarVectorError
 from ..utils.fenicsx_utils import get_component_functions
+from .array import FloatSeries
 
 
-class FE2PyMesh(ABC):
-    ...
-
-
-class FE2PyFunction(ABC):
-    ...
-
-
-D = TypeVar('D')
-T = TypeVar('T')
-class FE2PySeries(ABC, Generic[D, T]):
-    """
-    Abstract base class for a Numpy-compatible series representing a time-dependent quantity.
-    """
+M = TypeVar('M', bound=FE2PyMesh)
+F = TypeVar('F', bound=FE2PyFunction)
+S = TypeVar('S', bound=FE2PySeries)
+class FE2PySimulation(
+    Generic[S],
+    MultiKey[str, S | F | FloatSeries | np.ndarray | float]
+):
     def __init__(
+        self,
+        solutions: Iterable[S | FloatSeries],
+        auxiliary: Iterable[S | F | FloatSeries | tuple[str, np.ndarray | float]] = (),
+        timings: dict | None = None,
+    ):
+        self._solutions = list(solutions)
+        self._auxiliary = list(auxiliary)
+        self._timings = timings
+
+    def _getitem(
         self, 
-        series: Iterable[T], 
-        t: Iterable[float],
-        name: str | tuple[str, Iterable[str]] | None,
-    ): 
-        assert len(series) == len(t)
-        self._series = list(series)
-        self._time_series = list(t)
+        key,
+    ):
+        return self.namespace[key]
 
-        if isinstance(name, tuple):
-            name, subnames = name
-            subnames = tuple(subnames)
-        else:
-            subnames = None
+    @property
+    def solutions(self) -> list[S| FloatSeries]:
+        return list(self._solutions)
+    
+    @property
+    def auxiliary(self) -> list[S| FloatSeries | tuple[str, np.ndarray | float]]:
+        return self._auxiliary
 
-        if name is None:
-            name = self.__class__.__name__
+    @property
+    def namespace(self) -> dict[str, F | FloatSeries | float]:
+        d = {i.name: i for i in self._solutions}
+        d.update({f.name for f in self._auxiliary if not isinstance(f, tuple)})        
+        d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
+        return d
 
-        self.name = name
-        self._subnames = subnames
-        self._create_subname = lambda i: self._subnames[i] if self._subnames else f'{self.name}_{i}'
-
+    @property
+    def timings(self) -> dict | None:
+        return self._timings
+    
+    @property
+    def mesh(self) -> M:
+        return ...
+    
     @classmethod
     @abstractmethod
-    def from_series(
-        cls, 
-        cached_convert: Callable[..., Callable[[Series], T]] | Callable[..., Callable[[Mesh], D]],
-        u: Series,
-        use_cache: tuple[bool, bool] = (True, True),
-        slc: slice = slice(None, None, None),
-        **convert_kwargs,
-    ) -> tuple[list[T], list[float], D, ]:
-        use_mesh_cache, use_func_cache = use_cache
+    def from_simulation(
+        cls,
+        sim: Simulation,
+        convert_func: Callable[[Series], F],
+        auxiliary: bool = False, 
+    ):
+        _solutions = []
+        for s in sim.solutions:
+            if isinstance(s, ConstantSeries):
+                _sltn = ...
+            else:
+                _sltn = convert_func(s)
+            _solutions.append(_sltn)
 
-        match u.shape:
-            case (_, ):
-                series = [
-                    np.array(
-                        [
-                            cached_convert(use_cache=use_func_cache)(j, **convert_kwargs) 
-                            for j in get_component_functions(('P', 1), i, use_cache=Ellipsis)
-                        ]
-                    ) 
-                    for i in u.series[slc]
-                ]
-            case ():
-                series = [cached_convert(use_cache=use_func_cache)(i, **convert_kwargs) for i in u.series[slc]]
-            case _:
-                raise ScalarVectorError(u)
-            
-        return (
-            series,
-            u.time_series[slc],
-            cached_convert(use_cache=use_mesh_cache)(u.mesh), 
-        )
-    
-    @property
-    def series(self) -> list[T]:
-        return self._series
+        _auxiliary = []
+        if auxiliary:
+            for aux in sim.auxiliary:
+                if isinstance(aux, ExprSeries):
+                    raise NotImplementedError
+                elif isinstance(aux, Expr):
+                    raise NotImplementedError
+                elif isinstance(aux, Function):
+                    raise NotImplementedError
+                elif isinstance(aux, Constant):
+                    _aux = (aux.name, aux.value)
+                elif isinstance(aux, tuple):
+                    _aux = aux
+                else:
+                    raise TypeError
+                _auxiliary.append(_aux)
 
-    @property
-    def time_series(self) -> list[float]:
-        return self._time_series
-    
-    @property
-    def name(self) -> str | None:
-        return self._name
-    
-    @name.setter
-    def name(self, value):
-        assert isinstance(value, str)
-        assert '__' not in value
-        self._name = value
-    
-    @cached_property
-    def shape(self) -> tuple[int, ...] | list[tuple[int, ...]] | None:
-        if not self.series:
-            return None
-        _shape = lambda x: () if isinstance(x, (float, int)) else x.shape
-        shapes = [_shape(i) for i in self.series]
-        if len(set(shapes)) == 1:
-            return shapes[0]
-        else:
-            return shapes
-        
-    @property
-    def is_homogeneous(self) -> bool:
-        return not isinstance(self.shape, list)
-    
-    @abstractmethod
-    def sub(
-        self, 
-        index: int, 
-        name: str | None = None,
-    ) -> Self:
-        ...
-    
-    def split(
-        self,
-        names: Iterable[str] | None = None,
-    ) -> tuple[Self, ...]:
-        if self.shape == ():
-            raise SubSeriesError
-        subseries_indices = tuple(range(self.shape[0]))
-        if names is None:
-            names = [f'{self.name}_{i}' for i in subseries_indices]
-        return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
+        return cls(_solutions, _auxiliary, sim.timings)
     
 
-# FIXME
-T = TypeVar('T') 
-class FE2PySimulation(
-    Generic[T],
-    MultiKey[str, T]
-):
-    ...
+# # FIXME
+# T = TypeVar('T') 
+# class FE2PySimulation(
+#     Generic[T],
+#     MultiKey[str, T]
+# ):
+#     ...
     # def __init__(
     #     self,
     #     series: Iterable[T | FloatSeries],

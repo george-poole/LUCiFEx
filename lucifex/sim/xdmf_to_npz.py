@@ -6,7 +6,7 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils.fenicsx_utils import is_cartesian, CellType, NonCartesianQuadMeshError
+from ..utils.fenicsx_utils import is_grid, CellType, NonCartesianQuadMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
 from ..fdm import ConstantSeries, FunctionSeries
 from ..fe2py import GridSeries, FloatSeries, TriSeries
@@ -124,7 +124,7 @@ def _(
     cell_type = mesh.topology.cell_name()
 
     if cartesian is None:
-        cartesian = is_cartesian(mesh)
+        cartesian = is_grid(mesh)
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, False:

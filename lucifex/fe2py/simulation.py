@@ -5,7 +5,7 @@ from collections.abc import Iterable
 import numpy as np
 from ufl.core.expr import Expr
 
-from ..utils.fenicsx_utils import is_cartesian, is_simplicial, create_function
+from ..utils.fenicsx_utils import is_grid, is_simplicial, create_function
 from ..utils.py_utils import MultiKey
 from ..fem import Constant
 from .tri import TriSeries
@@ -33,7 +33,7 @@ def numpy_simulation(
     
     assert sim.mesh is not None
     simplicial = is_simplicial(use_cache=True)(sim.mesh)
-    cartesian = is_cartesian(use_cache=True)(sim.mesh)
+    cartesian = is_grid(use_cache=True)(sim.mesh)
     
     match simplicial, cartesian:
         case True, False:

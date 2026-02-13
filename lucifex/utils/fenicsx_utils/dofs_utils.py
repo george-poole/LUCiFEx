@@ -19,7 +19,7 @@ from .fem_utils import (
     get_component_functions, 
     set_fem_function_dofs,
 )
-from .ufl_utils import is_scalar, is_vector, ScalarVectorError
+from .ufl_utils import is_scalar, is_vector, NonScalarVectorError
 
 
 SpatialExpression = Callable[[np.ndarray], np.ndarray]
@@ -136,7 +136,7 @@ def dofs(
         )
         return np.linalg.norm(component_dofs, axis=1, ord=2)
     else:
-        raise ScalarVectorError(u)
+        raise NonScalarVectorError(u)
     
 
 def as_spatial_marker(

@@ -15,7 +15,7 @@ def where_on_grid(
 ) -> tuple[np.ndarray, ...]:
     use_mesh_cache, use_func_cache = use_cache
     f_grid = as_grid_function(use_cache=use_func_cache)(f, use_mesh_cache=use_mesh_cache)
-    axes = f_grid.grid.axes
+    axes = f_grid.mesh.axes
     indices = np.where(condition(f_grid))
     return tuple(x[i] for x, i in zip(axes, indices))
 
@@ -53,7 +53,7 @@ def cross_section(
     if isinstance(fxyz, Function):
         use_mesh_cache, use_func_cache = use_cache
         f_grid = as_grid_function(use_cache=use_func_cache)(fxyz, use_mesh_cache=use_mesh_cache)
-        axes = f_grid.grid.axes
+        axes = f_grid.mesh.axes
         values = f_grid.values
     else:
         values, *axes = fxyz

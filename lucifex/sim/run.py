@@ -110,7 +110,7 @@ def run(
             _timings[run.__name__].append(t_run_stop - t_run_start)
 
     if _timings:
-        simulation.attach_timings(_timings)
+        simulation.set_timings(_timings)
 
     if _writers:
         write_checkpoint(series_checkpointed, t, simulation.checkpoint_file, simulation.dir_path)

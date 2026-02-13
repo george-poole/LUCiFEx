@@ -9,8 +9,8 @@ from matplotlib.tri.triangulation import Triangulation
 from dolfinx.mesh import Mesh
 
 from . import grid, tri
-from ..utils.fenicsx_utils import ScalarVectorError, get_component_functions, is_cartesian, is_simplicial, NonCartesianQuadMeshError
-from ..fdm.series import ConstantSeries, FunctionSeries, Series, SubSeriesError
+from ..utils.fenicsx_utils import NonScalarVectorError, get_component_functions, is_grid, is_simplicial, NonCartesianQuadMeshError
+from .series import ConstantSeries, FunctionSeries, Series, SubSeriesError
 
 
 D = TypeVar('D')
@@ -68,7 +68,7 @@ class NumpySeries(ABC, Generic[D, T]):
             case ():
                 series = [cached_convert(use_cache=use_func_cache)(i, **convert_kwargs) for i in u.series[slc]]
             case _:
-                raise ScalarVectorError(u)
+                raise NonScalarVectorError(u)
             
         return (
             series,
@@ -316,7 +316,7 @@ def as_numpy_series(
         return FloatSeries.from_series(u, slc)
     else:
         simplicial = is_simplicial(use_cache=True)(u.mesh)
-        cartesian = is_cartesian(use_cache=True)(u.mesh)
+        cartesian = is_grid(use_cache=True)(u.mesh)
 
         match simplicial, cartesian:
             case True, False:

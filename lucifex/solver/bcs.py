@@ -24,7 +24,7 @@ from ..utils.fenicsx_utils import (
     DofsMethodType,
     FacetMethodType,
     is_scalar, is_vector, create_function, create_constant, extract_function_space,
-    ScalarVectorError,
+    NonScalarVectorError,
 )
 
 Value: TypeAlias = (
@@ -189,7 +189,7 @@ class BoundaryConditions:
                 elif is_vector(uW):
                     forms.append(scale * inner(v, uW) * ds(i))
                 else:
-                    raise ScalarVectorError(uW)
+                    raise NonScalarVectorError(uW)
 
         return forms
     

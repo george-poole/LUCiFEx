@@ -9,7 +9,7 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils.fenicsx_utils import set_fem_constant, set_fem_function, extract_mesh, create_function_space
+from ..utils.fenicsx_utils import set_constant, set_function, extract_mesh, create_function_space
 from ..utils.py_utils import MultipleDispatchTypeError, Writer
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
@@ -45,7 +45,9 @@ class Series(ABC, Generic[T]):
 
         self.name = name
         self._subnames = subnames
-        self._create_subname = lambda i: self._subnames[i] if self._subnames else f'{self.name}_{i}'
+        self._create_subname = lambda i: (
+            self._subnames[i] if self._subnames else f'{self.name}{i}'
+        )
     
     @property
     @abstractmethod
@@ -338,18 +340,18 @@ def _set_solution(solution, _) -> None:
 @_set_solution.register(Function)
 def _(solution: Function, value):
     if value is Unsolved:
-        return set_fem_function(solution, value.value, dofs_indices=':')
+        return set_function(solution, value.value, dofs_indices=':')
     elif isinstance(value, Function) and value.function_space == solution.function_space:
-        return set_fem_function(solution, value, dofs_indices=':')
+        return set_function(solution, value, dofs_indices=':')
     else:
-        return set_fem_function(solution, value)
+        return set_function(solution, value)
     
 @_set_solution.register(Constant)
 def _(solution: Constant, value):
     if value is Unsolved:
-        return set_fem_constant(solution, value.value)
+        return set_constant(solution, value.value)
     else:
-        return set_fem_constant(solution, value)
+        return set_constant(solution, value)
 
 
 T = TypeVar('T', bound=SolutionType)
@@ -538,10 +540,10 @@ class FunctionSeries(
         self,
         names: Iterable[str] | None = None,
     ) -> tuple['SubFunctionSeries', ...]:
-        subspace_indices = tuple(range(self.function_space.num_sub_spaces))
+        n_sub = self.function_space.num_sub_spaces
         if names is None:
             names = [None] * self.function_space.num_sub_spaces
-        return tuple(self.sub(i, n) for i, n in zip(subspace_indices, names, strict=True))
+        return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
 
         
 class SubFunctionSeries(Series[Expr]):

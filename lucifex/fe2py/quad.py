@@ -8,7 +8,7 @@ import numpy as np
 
 from ..utils.fenicsx_utils import (
     dofs, CellType, mesh_vertices, mesh_coordinates, mesh_axes, is_simplicial,
-    is_scalar, ScalarError,
+    is_scalar, NonScalarError,
 )
 from ..utils.py_utils import optional_lru_cache
 

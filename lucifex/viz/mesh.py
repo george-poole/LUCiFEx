@@ -9,7 +9,7 @@ from ..mesh.cartesian import CellType
 from ..utils.fenicsx_utils import (
     mesh_coordinates,
     mesh_axes,
-    is_cartesian,
+    is_grid,
     is_simplicial,
 )
 from ..utils.py_utils import filter_kwargs
@@ -81,7 +81,7 @@ def _plot_rectangle_mesh(
     use_cache: bool,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    cartesian = is_cartesian(mesh)
+    cartesian = is_grid(mesh)
     simplicial = is_simplicial(mesh)
 
     match simplicial, cartesian:
@@ -104,8 +104,8 @@ def _plot_triangulation(
     tri_mesh = as_tri_mesh(use_cache=use_cache)(mesh)
     filter_kwargs(set_axes)(
         ax,
-        x_lims=tri_mesh.x,
-        y_lims=tri_mesh.y,
+        x_lims=tri_mesh.x_coordinates,
+        y_lims=tri_mesh.y_coordinates,
         **kwargs,
     )
     filter_kwargs(ax.triplot, Line2D)(tri_mesh.triangulation, **kwargs)
