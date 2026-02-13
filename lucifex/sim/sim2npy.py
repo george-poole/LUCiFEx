@@ -19,7 +19,7 @@ from ..utils.py_utils import replicate_callable
 M = TypeVar('M', bound=NPyMesh)
 F = TypeVar('F', bound=NPyFunction)
 S = TypeVar('S', bound=NPySeries)
-class FE2PySimulation(
+class NPySimulation(
     Generic[M, F, S],
     MultiKey[str, S | F | FloatSeries | np.ndarray | float]
 ):
@@ -98,7 +98,7 @@ class FE2PySimulation(
         return cls(_solutions, _auxiliary, sim.timings)
    
 
-class GridSimulation(FE2PySimulation[GridMesh, GridFunction, GridSeries]):
+class GridSimulation(NPySimulation[GridMesh, GridFunction, GridSeries]):
     @classmethod
     def from_simulation(
         cls: type['GridSimulation'],
@@ -124,7 +124,7 @@ class GridSimulation(FE2PySimulation[GridMesh, GridFunction, GridSeries]):
         )
 
 
-class TriSimulation(FE2PySimulation[TriMesh, TriFunction, TriSeries]):
+class TriSimulation(NPySimulation[TriMesh, TriFunction, TriSeries]):
     ...
 
 

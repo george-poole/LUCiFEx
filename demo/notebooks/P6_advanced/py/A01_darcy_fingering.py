@@ -10,7 +10,7 @@ from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType, BoundaryType
 from lucifex.pde.scaling import ScalingChoice
 
-from ...P05_convection.py.C01_darcy_convection import darcy_convection_generic
+from ...P05_convection.py.C010_darcy_convection import darcy_convection_generic
 
 
 DARCY_FINGERING_SCALINGS = ScalingChoice(

@@ -1,43 +1,47 @@
-from ufl import as_vector
+import numpy as np
+from ufl import as_vector, Dx
 
-from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
-from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries, FiniteDifference, FE, CN, BE,
-    FiniteDifferenceArgwise, ExprSeries, finite_difference_order, advective_timestep,
+    BE, FE, CN, FiniteDifference, FiniteDifferenceArgwise, advective_timestep, 
+    FunctionSeries, ConstantSeries, ExprSeries, finite_difference_order,
 )
+from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import (
     BoundaryConditions, ibvp, evaluation,
 )
+from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
+from lucifex.utils.fenicsx_utils import CellType
 
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
 
-from .C03_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
+from .C031_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(
     store_delta=1,
     write_delta=None,
 )
-def navier_stokes_rayleigh_taylor_rectangle(
+def navier_stokes_marangoni(
     # domain
-    aspect: float = 2.0,
-    Nx: int = 64,
-    Ny: int = 64,
-    cell: str = 'quadrilateral',
-    # physical
+    aspect: float,
+    Nx: int,
+    Ny: int,
+    cell: str = CellType.QUADRILATERAL,
+    # physical
     scaling: str = 'diffusive',
-    Pr = 1.0,
-    Ra = 1e3,
+    Pr: float = 1.0,
+    Ra: float = 1.0,
+    Ma: float = 1.0,
     # initial perturbation
+    zeta0: float = 0.8,
+    zeta_eps: float = 0.01,
     c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
-    c_seed: tuple[int, int] = (12, 34),
     # time step
-    dt_max: float = 0.5,
+    dt_max: float = 0.1,
     dt_min: float = 0.0,
     dt_courant: float = 0.75,
     # time discretization
@@ -47,16 +51,13 @@ def navier_stokes_rayleigh_taylor_rectangle(
     D_adv_c: FiniteDifference | FiniteDifferenceArgwise = (BE @ BE),
     D_diff_c: FiniteDifference = CN,
 ):
-    """
-    `∂c/∂t + 𝐮·∇c = Di∇²c` \\
-    `∇·𝐮 = 0` \\
-    `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu c 𝐞ʸ`
-    """
     scaling_map = NAVIER_STOKES_CONVECTION_SCALINGS[scaling](Ra, Pr)
     X = scaling_map['X']
     Lx = aspect * X
     Ly = 1.0 * X
-    # space
+    Lzeta = zeta0 * Ly
+    Lzeta_eps = zeta_eps * Ly
+    # space
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -69,37 +70,43 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
     dim = Omega.geometry.dim
     u_zero = [0.0] * dim
-    # time
+    # time
     order = finite_difference_order(
         D_adv_ns, D_visc_ns, D_buoy_ns, D_adv_c, D_diff_c,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
-    # constants
+    # constants
     Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
     Pr = Constant(Omega, Pr, 'Pr')
-    Ra = Constant(Omega, Ra, 'Ra')  
-    # initial and boundary conditions
+    Ra = Constant(Omega, Ra, 'Ra')
+    Ma = Constant(Omega, Ma, 'Ma')
+    # flow
+    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
+    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
+    # transport
     c_ics = SpatialPerturbation(
-        lambda x: 1.0 * (x[1] > Ly / 2) + 0.0,
-        cubic_noise(['neumann', 'neumann'], [Lx, Ly], c_freq, c_seed),
+        lambda x: np.exp(-(x[1] - Lzeta)**2 / Lzeta_eps),
+        sinusoid_noise(['neumann', 'neumann'], [Lx, Ly], c_freq),
         [Lx, Ly],
         c_ampl,
-    )   
+    ) 
+    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
+    # constitutive
+    deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
+    rho = ExprSeries(c, 'rho')
+    f = Bu * rho * as_vector([0, -1])
+    # boundary conditions
     c_bcs = BoundaryConditions(
         ('neumann', dOmega.union, 0.0)
     )
     u_bcs = BoundaryConditions(
-        ('dirichlet', dOmega.union, u_zero),
+        ('dirichlet', dOmega['lower', 'left', 'right'], u_zero),
+        ('dirichlet', dOmega['upper'], 0.0, 1),
+    )  
+    sigma_bcs = BoundaryConditions(
+        ('natural', dOmega['upper'], as_vector([-Ma * Dx(c[0], 0), 0.0])),
     )
-    # flow and transport
-    u = FunctionSeries((Omega, 'P', 2, dim), 'u', order, ics=u_zero)
-    p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
-    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
-    # constitutive
-    deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
-    rho = ExprSeries(c, 'rho')
-    f = Bu * rho * as_vector([0, -1]) 
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
         u[0], 'hmin', dt_courant, dt_max, dt_min,
@@ -108,6 +115,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
         u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, 
         f=f, 
         u_bcs=u_bcs, 
+        sigma_bcs=sigma_bcs, 
         p_scale=Vi,
     )
     c_solver = ibvp(advection_diffusion, bcs=c_bcs)(
@@ -115,5 +123,5 @@ def navier_stokes_rayleigh_taylor_rectangle(
     )
     solvers = [dt_solver, *ns_solvers, c_solver]
     auxiliary = [Pr, Ra, Di, Vi, Bu, rho]
-    return solvers, t, dt, auxiliary
-
+    return solvers, t, dt, auxiliary 
+    

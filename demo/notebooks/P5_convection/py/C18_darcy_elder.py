@@ -5,7 +5,7 @@ from lucifex.solver import BoundaryConditions, OptionsPETSc
 from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType
 
-from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
+from .C010_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 
 
 @configure_simulation(

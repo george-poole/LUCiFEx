@@ -11,7 +11,7 @@ from lucifex.sim import Simulation, configure_simulation
 from lucifex.utils.fenicsx_utils import CellType
 from lucifex.pde.constitutive import permeability_cross_bedded
 
-from .C01_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
+from .C010_darcy_convection import darcy_convection_generic, DARCY_CONVECTION_SCALINGS
 
 
 @configure_simulation(
