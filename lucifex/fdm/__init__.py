@@ -4,8 +4,7 @@ from .finite_difference import (
     BDF1, BDF2, BDF3, finite_difference_order,
     ImplicitDiscretizationError, ExplicitDiscretizationError,
 )
-from .series import FunctionSeries, ConstantSeries, Series, ExprSeries
-from .series_numpy import GridSeries, FloatSeries, TriangulationSeries, as_numpy_series
+from .series import FunctionSeries, ConstantSeries, Series, ExprSeries, SubSeriesError, SubFunctionSeries
 from .timestep import (
     advective_timestep, reactive_timestep, diffusive_timestep, advective_reactive_timestep, 
     advective_diffusive_timestep, adr_timestep, diffusive_reactive_timestep,

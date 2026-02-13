@@ -9,7 +9,7 @@ from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils import set_fem_constant, set_fem_function, extract_mesh, create_fem_space
+from ..utils.fenicsx_utils import set_fem_constant, set_fem_function, extract_mesh, create_function_space
 from ..utils.py_utils import MultipleDispatchTypeError, Writer
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
@@ -67,6 +67,11 @@ class Series(ABC, Generic[T]):
         """
         `[t⁰, t¹, t², ...]`
         """
+        ...
+
+    @property
+    @abstractmethod
+    def shape(self) -> tuple[int, ...]:
         ...
 
     @property
@@ -475,7 +480,7 @@ class FunctionSeries(
         store: int | float | Callable[[], bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
     ):
-        fs = create_fem_space(fs)
+        fs = create_function_space(fs)
         self._function_space = fs
         self._ics_perturbation = None
         super().__init__(lambda i: Function(fs, Unsolved, index=i), name, order, store, ics)

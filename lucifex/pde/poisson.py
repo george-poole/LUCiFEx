@@ -7,8 +7,8 @@ from ufl.geometry import GeometricCellQuantity
 
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
-from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
+from lucifex.utils.fenicsx_utils import is_zero
 
 
 def poisson(
@@ -35,7 +35,7 @@ def poisson(
     F_lhs = -inner(grad(v), w * grad(u_trial)) * dx
     forms = [F_lhs]
 
-    if f is not None:
+    if not is_zero(f):
         F_rhs = -inner(v, f) * dx
         forms.append(F_rhs)
 
@@ -48,7 +48,7 @@ def poisson(
             F_robin = sum([v * uR * ds(i) for i, uR in u_robin])
             forms.append(F_robin)
 
-    if f is None and bcs is None:
+    if is_zero(f) and bcs is None:
         F_zero = v * Constant(fs.mesh, 0.0) * dx
         forms.append(F_zero)
 

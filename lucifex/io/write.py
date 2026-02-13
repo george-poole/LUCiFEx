@@ -13,15 +13,16 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ..utils import (
+from ..utils.fenicsx_utils import (
     extract_mesh, 
-    create_fem_function, 
-    create_fem_space, 
+    create_function, 
+    create_function_space, 
     set_fem_function, 
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, FloatSeries, TriangulationSeries
+from ..fdm import FunctionSeries, ConstantSeries
+from ..fe2py import GridSeries, FloatSeries, TriSeries
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim
@@ -241,7 +242,7 @@ def _(
 
     if mode == "c":
         interval = _cell_per_dof_interval(u.function_space.mesh, len(u.x.array), u.name)
-        dp0_function = create_fem_function(
+        dp0_function = create_function(
             (interval, 'DP', 0), 
             u.x.array,
             dofs_indices=':',
@@ -277,7 +278,7 @@ def _(
         comm = c.mesh.comm
 
     interval = _cell_per_dof_interval(c.mesh, dofs_array_dim(c.ufl_shape), c.name)
-    dp0_function = create_fem_function(
+    dp0_function = create_function(
         (interval, 'DP', 0), 
         c.value.flatten(),
         dofs_indices=':',
@@ -338,9 +339,9 @@ def _(
     np.savez(file_path, **d)
 
 
-@_write.register(TriangulationSeries)
+@_write.register(TriSeries)
 def _(
-    u: TriangulationSeries,
+    u: TriSeries,
     file_name: str,
     dir_path,
     slc=slice(0, None), 
@@ -351,7 +352,7 @@ def _(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
 
     slc = as_slice(slc)
-    u = TriangulationSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
+    u = TriSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):
@@ -414,7 +415,7 @@ def _(
         dim = shape[0]
         elem = (*fam_deg, dim)
 
-    fs = create_fem_space((mesh, *elem), use_cache=True)
+    fs = create_function_space((mesh, *elem), use_cache=True)
     func = Function(fs, name=name)
     func.name = name
     set_fem_function(func, u)

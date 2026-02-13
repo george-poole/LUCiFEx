@@ -14,7 +14,7 @@ from dolfinx.mesh import Mesh, locate_entities, meshtags
 from ufl.geometry import (GeometricCellQuantity, Circumradius, 
                           CellDiameter, MaxCellEdgeLength, MinCellEdgeLength)
 
-from .py_utils import optional_lru_cache, StrEnum
+from ..py_utils import optional_lru_cache, StrEnum
 from .fem_utils import extract_mesh
 from .dofs_utils import (
     dofs,
@@ -197,7 +197,6 @@ def mesh_integral(
     return _
 
 
-
 def mesh_vertices(
     mesh: Mesh,
     dim: int = None,
@@ -266,13 +265,19 @@ def mesh_axes_spacing(
 
 @optional_lru_cache
 def is_cartesian(
-    mesh: Mesh,
+    mesh: Mesh | tuple[np.ndarray, ...],
 ) -> bool:
-    axes = mesh_axes(mesh, strict=False)
-    n_vertices = len(mesh.geometry.x)
-    n_axes = [len(i) for i in axes]
-    n_vertices_cartesian = np.prod(n_axes)
-    return bool(n_vertices == n_vertices_cartesian)
+    if isinstance(mesh, Mesh):
+        axes = mesh_axes(mesh, strict=False)
+        n_vertices = len(mesh.geometry.x)
+        n_axes = [len(i) for i in axes]
+        n_vertices_cartesian = np.prod(n_axes)
+        return bool(n_vertices == n_vertices_cartesian)
+    else:
+        for x in mesh:
+            if not len(x) == len(np.unique(x)):
+                return False
+        return True
 
 
 @optional_lru_cache

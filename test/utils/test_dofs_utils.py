@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 from lucifex.fem import Function
 from lucifex.mesh import rectangle_mesh
-from lucifex.utils import minimum, maximum
+from lucifex.solver import minimum, maximum
 
 
 @pytest.mark.parametrize("fs", [('P', 1), ('P', 2), ('DP', 1)])

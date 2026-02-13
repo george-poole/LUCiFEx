@@ -11,10 +11,8 @@ from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, optional_lru_cache
-from ..fdm import (
-    FunctionSeries, ConstantSeries, GridSeries, FloatSeries, 
-    TriangulationSeries,
-)
+from ..fdm import FunctionSeries, ConstantSeries
+from ..fe2py import GridSeries, FloatSeries, TriSeries
 from .read import read
 from .utils import file_path_ext
 
@@ -183,7 +181,7 @@ def load_triangulation_series(
     dir_path: str,
     file_name: str,
     sep: str = '__',
-) -> TriangulationSeries:
+) -> TriSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
@@ -245,7 +243,7 @@ def load_npz_dict(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
     *,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | FloatSeries | GridSeries | TriangulationSeries]:
+) -> dict[str, float | np.ndarray | FloatSeries | GridSeries | TriSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -292,7 +290,7 @@ def load_npz_dict(
             if spatial_arrays:
                 if set(spatial_attrs) == set(trigl_attrs):
                     trigl = Triangulation(*spatial_arrays)
-                    value = TriangulationSeries(series, time_series, trigl, name)
+                    value = TriSeries(series, time_series, trigl, name)
                 else:
                     value = GridSeries(series, time_series, tuple(spatial_arrays), name)
             else:

@@ -11,6 +11,7 @@ from dolfinx.fem import Function, FunctionSpace, Constant, Function, VectorFunct
 from dolfinx.fem import Expression
 from ufl import FiniteElement, MixedElement, VectorElement
 
+from ..py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache, as_slice
 from .ufl_utils import (
     is_same_element,
     extract_mesh,     
@@ -19,7 +20,6 @@ from .ufl_utils import (
     VectorError,
     ShapeError
 )
-from .py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache, as_slice
 
 
 def is_mixed_space(fs: FunctionSpace) -> bool:
@@ -74,7 +74,7 @@ def get_fem_subspaces(
 
 
 @overload
-def create_fem_space(
+def create_function_space(
     fs: FunctionSpace,
     subspace_index: int | None = None,
 ) -> FunctionSpace:
@@ -82,7 +82,7 @@ def create_fem_space(
 
 
 @overload
-def create_fem_space(
+def create_function_space(
     fs: tuple[Mesh, str, int]
     | tuple[Mesh, str, int]
     | tuple[Mesh, str, int, int]
@@ -93,7 +93,7 @@ def create_fem_space(
     ...
 
 
-def create_fem_space(
+def create_function_space(
     fs,
     subspace_index=None,
     use_cache=False,
@@ -141,7 +141,7 @@ def _function_space(
     return get_fem_subspace(fs, subspace_index)
 
 
-def create_fem_function(
+def create_function(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
     value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
     subspace_index: int | None = None,
@@ -176,7 +176,7 @@ def create_fem_function(
         if use_cache is True:
             f = _create_function(fs, subspace_index, name)
         else:
-            fs = create_fem_space(fs, subspace_index, bool(use_cache))
+            fs = create_function_space(fs, subspace_index, bool(use_cache))
             f = Function(fs, name=name)
 
     set_fem_function(f, value, dofs_indices)
@@ -204,7 +204,7 @@ def get_subfunctions(
         return u.split()
 
 
-def get_component_fem_functions(
+def get_component_functions(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
@@ -229,16 +229,16 @@ def get_component_fem_functions(
     if isinstance(u, Function) and is_component_space(u.function_space):
         # e.g. `u(𝐱) ∈ P₁⨯P₁`
         return tuple(
-            create_fem_function(fs, i.collapse(), name=n, use_cache=use_cache) 
+            create_function(fs, i.collapse(), name=n, use_cache=use_cache) 
             for i, n in zip(u.split(), names, strict=True)
         )
     else:
         # e.g. `u(𝐱) ∈ BDM`
-        u = create_fem_function((*fs, dim), u, use_cache=Ellipsis)
-        return get_component_fem_functions(fs, u, names, use_cache)
+        u = create_function((*fs, dim), u, use_cache=Ellipsis)
+        return get_component_functions(fs, u, names, use_cache)
 
 
-def create_fem_constant(
+def create_constant(
     mesh: Mesh,
     value: float | Iterable[float] | Constant,
     try_identity: bool = False,

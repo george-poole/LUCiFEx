@@ -5,7 +5,7 @@ from functools import lru_cache
 import numpy as np
 
 from ..utils.py_utils import replicate_callable
-from ..utils import SpatialMarkerAlias, as_spatial_marker
+from ..utils.fenicsx_utils import SpatialMarkerAlias, as_spatial_marker
 from .gmsh_utils import create_gmsh_mesh_factory
 
 

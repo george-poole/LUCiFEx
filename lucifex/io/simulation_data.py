@@ -7,15 +7,34 @@ from collections.abc import Iterable
 from natsort import natsorted
 
 from ..utils.py_utils import MultiKey
-from ..fdm import FunctionSeries, GridSeries, ConstantSeries, FloatSeries, TriangulationSeries
+from ..fdm import FunctionSeries, ConstantSeries
+from ..fe2py import GridSeries, TriSeries, FloatSeries
 from .load import load_txt_dict
 from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 
 
-class DataSet(
+class GridSimulationData(
     MultiKey[
         str,
-        FunctionSeries |  GridSeries | TriangulationSeries | ConstantSeries | FloatSeries
+        GridSeries | FloatSeries
+    ]
+):
+    ...
+
+
+class TriSimulationData(
+    MultiKey[
+        str,
+        TriSeries | ConstantSeries
+    ]
+):
+    ...
+
+
+class SimulationData(
+    MultiKey[
+        str,
+        FunctionSeries |  GridSeries | TriSeries | ConstantSeries | FloatSeries
     ]
 ):
     def __init__(
@@ -23,11 +42,12 @@ class DataSet(
         dir_path: str,
         parameter_file: str | None = None,
         *metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]],
+        # lazy: bool = True
         ):
         self._dir_path = dir_path
         self._loaded: dict[
             str, 
-            FunctionSeries | ConstantSeries | GridSeries | FloatSeries | TriangulationSeries
+            FunctionSeries | ConstantSeries | GridSeries | FloatSeries | TriSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file
@@ -107,13 +127,13 @@ class DataSet(
         return self._parameter_file
     
 
-def find_datasets(
+def find_simulations(
     root_dir_path: str,
     *metadata: tuple[ObjectName, ObjectType, FileName, Unpack[tuple]],
     include: str | Iterable[str] = '*',
     exclude: str | Iterable[str] = (),
     parameter_file: str | None = None,
-) -> list[DataSet]:
+) -> list[SimulationData]:
 
     dir_paths = set()
 
@@ -130,7 +150,7 @@ def find_datasets(
     datasets = []
     for dir_path in dir_paths:
         datasets.append(
-            DataSet(
+            SimulationData(
                 dir_path,
                 parameter_file,
                 *metadata,
@@ -141,10 +161,10 @@ def find_datasets(
 
 
 def filter_by_parameters(
-    datasets: Iterable[DataSet],
+    datasets: Iterable[SimulationData],
     parameters: dict[str, Any] | Iterable[dict, str, Any],
     *load_parameter_dict_args,
-) -> list[DataSet]:
+) -> list[SimulationData]:
     if not isinstance(parameters, dict):
         filtered = set()
         for p in parameters:
@@ -169,11 +189,11 @@ def filter_by_parameters(
 
 
 def filter_by_dirname(
-    datasets: Iterable[DataSet],
+    datasets: Iterable[SimulationData],
     substr: Iterable[str | dict[str, Any]] = (),  
     parameters: dict[str, Any] | None = None,
     sep: str = '=',
-) -> list[DataSet]:
+) -> list[SimulationData]:
     if parameters is None:
         parameters = {}
 
@@ -196,10 +216,10 @@ class FindDirectoryError(ValueError):
 
 
 def find_by_parameters(
-    datasets: Iterable[DataSet],
+    datasets: Iterable[SimulationData],
     parameters: dict[str, Any],
     *load_parameter_dict_args,
-) -> DataSet:
+) -> SimulationData:
     filtered = filter_by_parameters(datasets, parameters, *load_parameter_dict_args)
     n = len(filtered)
     if n == 1:
@@ -209,11 +229,11 @@ def find_by_parameters(
 
 
 def find_by_dirname(
-    datasets: Iterable[DataSet],
+    datasets: Iterable[SimulationData],
     substr: Iterable[str] = (),  
     parameters: dict[str, Any] | None = None,
     sep: str = '='
-) -> DataSet:
+) -> SimulationData:
     filtered = filter_by_dirname(datasets, substr, parameters, sep)
     n = len(filtered)
     if n == 1:

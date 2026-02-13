@@ -103,30 +103,36 @@ def log_timing(
 
 P = ParamSpec("P")
 R = TypeVar('R')
-def replicate_callable(func: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
+def replicate_callable(clbl: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
     """
-    For example, to replicate the callable `func`
+    For example, to replicate the callable `clbl` into the function `replica`
 
     ```
-    @replicate_callable(func)
-    def dummy_func():
+    @replicate_callable(clbl)
+    def replica():
         pass
+    ```
+
+    or alternatively
+
+    ```
+    replica = replicate_callable(clbl)(lambda: None)
     ```
     """
     def _decorator(dummy: Callable[[], None]):
         assert dummy() is None
         def _wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+            return clbl(*args, **kwargs)
         assigned = ["__annotations__"]
         if dummy.__doc__ is None:
             assigned.append("__doc__")
         else:
             _wrapper.__doc__ = dummy.__doc__
-        update_wrapper(_wrapper, func, assigned)
+        update_wrapper(_wrapper, clbl, assigned)
         _wrapper.__name__ = dummy.__name__
         _wrapper.__qualname__ = dummy.__qualname__
-        _wrapper.__defaults__ = func.__defaults__ 
-        _wrapper.__module__ = func.__module__
+        _wrapper.__defaults__ = clbl.__defaults__ 
+        _wrapper.__module__ = clbl.__module__
         return _wrapper
     return _decorator
 

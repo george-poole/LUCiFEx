@@ -53,17 +53,17 @@ class ScalingChoice(Generic[P]):
     def __init__(
         self,
         names: tuple[str, ...],
-        func_choices: Callable[P, dict[str, tuple[float, ...]]],
+        choices_factory: Callable[P, dict[str, tuple[float, ...]]],
     ):
         self._symbols = names
-        self._func_choices = func_choices
+        self._choices_factory = choices_factory
 
     def __getitem__(
         self, 
         option: str,
     ) -> Callable[P, ScalingMap]:
         def _(*args: P.args, **kwargs: P.kwargs) -> ScalingMap:
-            values = self._func_choices(*args, **kwargs)[option]
+            values = self._choices_factory(*args, **kwargs)[option]
             return ScalingMap(dict(zip(self._symbols, values)), option)
         return _
     

@@ -6,12 +6,12 @@ from dolfinx.mesh import Mesh
 from dolfinx.fem import Function
 from matplotlib import colormaps as mpl_colormaps
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.quiver import Quiver
 
-from ..utils import (
-    is_vector, grid, triangulation, create_fem_function, extract_mesh, ShapeError, 
-    NonCartesianQuadMeshError, is_simplicial, get_component_fem_functions, 
+from ..fe2py import as_grid_function, as_grid_mesh, TriFunction, GridFunction, as_numpy_function
+from ..utils.fenicsx_utils import (
+    is_vector, create_function, extract_mesh, ShapeError, 
+    NonCartesianQuadMeshError, is_simplicial, get_component_functions, 
     is_cartesian,
 )
 from ..utils.py_utils import filter_kwargs
@@ -137,15 +137,15 @@ def _xy_components(
     if isinstance(f, Expr) and not isinstance(f, Function):
         if mesh is None:
             mesh = extract_mesh(f)
-        f = create_fem_function((mesh, 'P', 1, 2), f)
+        f = create_function((mesh, 'P', 1, 2), f)
     
     if isinstance(f, Function):
         if not is_vector(f, dim=2):
             raise ShapeError(f, (2, ))
         
-        fx, fy = get_component_fem_functions(('P', 1), f)
+        fx, fy = get_component_functions(('P', 1), f)
     else:
-        fx, fy = (create_fem_function(('P', 1), i, try_identity=True) for i in f)
+        fx, fy = (create_function(('P', 1), i, try_identity=True) for i in f)
 
     return fx, fy
 
@@ -154,23 +154,22 @@ def _x_y_fx_fy_arrays(
     fx: Function, 
     fy: Function,
     use_cache: tuple[bool, bool],
-    error_msg: str,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    mesh = fx.function_space.mesh
-    use_mesh_cache = use_func_cache = use_cache
-    if is_cartesian(mesh):
-        x, y = grid(use_cache=use_mesh_cache)(mesh)
-        fx_np = grid(use_cache=use_func_cache)(fx)
-        fy_np = grid(use_cache=use_func_cache)(fy)
-    else:
-        if not is_simplicial(mesh):
-            raise NonCartesianQuadMeshError(error_msg)
-        trigl = triangulation(use_cache=use_mesh_cache)(mesh)
-        triangles = trigl.triangles
-        x = trigl.x[triangles]
-        y = trigl.y[triangles]
-        fx_np = triangulation(use_cache=use_func_cache)(fx)[triangles]
-        fy_np = triangulation(use_cache=use_func_cache)(fy)[triangles]
 
-    return x, y, fx_np, fy_np
+    fx_np = as_numpy_function(fx, use_cache=use_cache)
+    fy_np = as_numpy_function(fy, use_cache=use_cache)
+    
+    if isinstance(fx_np, TriFunction):
+        triangles = fx_np.tri.triangles
+        x = fx_np.tri.x[triangles]
+        y = fx_np.tri.y[triangles]
+        fx_new = fx_np.values[triangles]
+        fy_new = fy_np.values[triangles]
+    
+    if isinstance(fx_np, GridFunction):
+        x, y = fx_np.grid.axes
+        fx_new = fx_np.values
+        fy_new = fy_np.values
+
+    return x, y, fx_new, fy_new
 

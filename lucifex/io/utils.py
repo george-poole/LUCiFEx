@@ -4,8 +4,9 @@ from typing import Any
 from collections.abc import Iterable
 
 from dolfinx.fem import Function, FunctionSpace
+
 from ..fdm import FunctionSeries
-from ..utils.ufl_utils import ScalarVectorError, is_discontinuous_lagrange
+from ..utils.fenicsx_utils import ScalarVectorError, is_discontinuous_lagrange
 
 
 def create_dir_path(

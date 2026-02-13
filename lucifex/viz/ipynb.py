@@ -95,9 +95,10 @@ def display_animation(
     ext: str = '.mp4',
     **kwargs,
 ):
+    _kwargs = {}
     if anim_path[:-4] != len(ext):
         anim_path = f'{anim_path}{ext}'
     if loop:
-        _kwargs = dict(html_attributes="controls loop")
-        kwargs.update(_kwargs)
-    return Video(anim_path, embed=embed, width=width, **kwargs)
+        _kwargs.update(html_attributes="controls loop")
+    _kwargs.update(kwargs)
+    return Video(anim_path, embed=embed, width=width, **_kwargs)

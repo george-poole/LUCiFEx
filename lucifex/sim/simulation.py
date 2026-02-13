@@ -39,7 +39,7 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        exprs_consts: Iterable[ExprSeries | Expr | tuple[str, Any]] = (),
+        auxiliary: Iterable[ExprSeries | Expr | tuple[str, Any]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
@@ -55,7 +55,7 @@ class Simulation(
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
-        self._exprs_consts = list(exprs_consts)
+        self._auxiliary = list(auxiliary)
         self.stoppers = list(stoppers)
         self.dir_path = dir_path
         self.parameter_file = parameter_file
@@ -77,7 +77,7 @@ class Simulation(
         obj: dict[str | Iterable[str], T] | tuple[T, T] | T,
     ) -> dict[str, T]:
         if obj is None or isinstance(obj, T.__constraints__):
-            return {s.name: obj for s in self.series}
+            return {s.name: obj for s in self.solutions}
             
         if isinstance(obj, dict):
             d = {}
@@ -93,34 +93,34 @@ class Simulation(
         if isinstance(obj, tuple):
             assert len(obj) == 2
             obj_function, obj_constant = obj
-            function_dict = {s.name: obj_function for s in self.series if isinstance(s, FunctionSeries)}
-            constant_dict = {s.name: obj_constant for s in self.series if isinstance(s, ConstantSeries)}
+            function_dict = {s.name: obj_function for s in self.solutions if isinstance(s, FunctionSeries)}
+            constant_dict = {s.name: obj_constant for s in self.solutions if isinstance(s, ConstantSeries)}
             return function_dict | constant_dict
         
         raise MultipleDispatchTypeError(obj)
     
     @property
-    def series(self) -> list[FunctionSeries | ConstantSeries]:
+    def solutions(self) -> list[FunctionSeries | ConstantSeries]:
         """
         `len(series) ≤ len(solvers)` because a series may be solved for by more 
         than one solvers (e.g. in splitting or linearization schemes)
         """
         return list(
-            {*[s.series for s in self.solvers], 
+            {*[s.solution_series for s in self.solvers], 
              *[s.correction_series for s in self.solvers if s.correction_series is not None]},
             )
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
-        d.update({s.name: s for s in self.series})
-        d.update({f.name: f for f in self._exprs_consts if not isinstance(f, tuple)})
-        d.update({f[0]: f[1] for f in self._exprs_consts if isinstance(f, tuple)})
+        d.update({s.name: s for s in self.solutions})
+        d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
+        d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
         return d
     
     @property
-    def exprs_consts(self):
-        return self._exprs_consts
+    def auxiliary(self):
+        return self._auxiliary
     
     @property
     def store_delta(self) -> dict[str, int | float | None]:
@@ -129,7 +129,7 @@ class Simulation(
     @store_delta.setter
     def store_delta(self, value):
         if value is Ellipsis:
-            self._store_delta = {s.name: s.store for s in self.series}
+            self._store_delta = {s.name: s.store for s in self.solutions}
         else:
             self._store_delta = self._map_to_solver_series(value)
             for name, store in self._store_delta.items():
@@ -175,7 +175,7 @@ class Simulation(
     ) -> int | tuple[int, ...]:
         indices = []
         for i, s in enumerate(self.solvers):
-            if s.series.name == name:
+            if s.solution_series.name == name:
                 indices.append(i)
 
         if len(indices) == 0:
@@ -224,7 +224,7 @@ class Simulation(
             s.initial if isinstance(s, (IBVP, IVP)) and s.initial is not None 
             else s for s in solvers
         ]
-
+        
         if dt_init is not None:
             dt_solver_init = Evaluation(self.dt, lambda: dt_init)
             if self.dt_solver is None:
@@ -256,7 +256,7 @@ class Simulation(
 
     @property
     def meshes(self) -> list[Mesh]:
-        return [i.mesh for i in self.series]
+        return [i.mesh for i in self.solutions]
     
     @property
     def mesh(self) -> Mesh | None:
@@ -306,19 +306,19 @@ def configure_simulation(
 
     P = ParamSpec('P')
     def _decorator(
-        simulation_func: Callable[
+        simulation_factory: Callable[
             P, 
             tuple[Iterable[Solver], ConstantSeries, ConstantSeries] 
             | tuple[Iterable[Solver], ConstantSeries, ConstantSeries, Iterable[ExprSeries | Function | Constant | tuple[str, Expr]]] 
             | Simulation],
     ):
-        _collisions = arg_name_collisions(simulation_func, configure_simulation)
+        _collisions = arg_name_collisions(simulation_factory, configure_simulation)
         if _collisions:
             raise ArgNameCollisionError(_collisions)
 
         # TODO python 3.11+ typing.get_overloads a better solution?
-        setattr(configure_simulation, simulation_func.__name__, configure_simulation_sig_new)
-        simulation_func_params = signature(simulation_func).parameters
+        setattr(configure_simulation, simulation_factory.__name__, configure_simulation_sig_new)
+        simulation_factory_params = signature(simulation_factory).parameters
 
         @overload
         def _(*args: P.args, **kwargs: P.kwargs) -> Simulation:
@@ -344,7 +344,7 @@ def configure_simulation(
         ) -> Callable[P, Simulation]:
             ...
 
-        @wraps(simulation_func)
+        @wraps(simulation_factory)
         def _(*args, **kwargs):
             if not args and kwargs and all(i in configure_simulation_sig.parameters for i in kwargs):
 
@@ -361,15 +361,15 @@ def configure_simulation(
                         Interpolation,
                     )
                     [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
-                    sim_obj = simulation_func(*sim_func_args, **sim_func_kwargs)
+                    sim_obj = simulation_factory(*sim_func_args, **sim_func_kwargs)
                     [cls.set_defaults() for cls in classes]
     
                     sim_parameters = {
                         k: v.default
-                        for k, v in simulation_func_params.items()
+                        for k, v in simulation_factory_params.items()
                         if v.default is not v.empty
                     }
-                    sim_parameters.update({k: v for k, v in zip(simulation_func_params, sim_func_args)})
+                    sim_parameters.update({k: v for k, v in zip(simulation_factory_params, sim_func_args)})
                     sim_parameters.update(sim_func_kwargs)
                     dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
                     if isinstance(sim_obj, Simulation):
@@ -377,7 +377,7 @@ def configure_simulation(
                             sim_obj.solvers, 
                             sim_obj.t, 
                             sim_obj.dt,
-                            sim_obj.exprs_consts,
+                            sim_obj.auxiliary,
                         )
                     else:
                         simulation_args = sim_obj
@@ -389,14 +389,14 @@ def configure_simulation(
                             simulation.parameter_file, 
                             dir_path,
                             mode='w',
-                            preamble=[f'{simulation_func.__module__}.{simulation_func.__name__}'],
+                            preamble=[f'{simulation_factory.__module__}.{simulation_factory.__name__}'],
                         )
 
                     return simulation
                 
                 return _inner
             else:
-                error_params = [i for i in kwargs if not i in simulation_func_params]
+                error_params = [i for i in kwargs if not i in simulation_factory_params]
                 if len(error_params) == 1:
                     raise TypeError(f'Unrecognised keyword argument: {error_params[0]}.')
                 if len(error_params) > 1:

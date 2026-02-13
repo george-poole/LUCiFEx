@@ -57,7 +57,7 @@ def run(
     _dt = simulation.dt if isinstance(simulation.dt, Constant) else simulation.dt[0]
     simulation_init = simulation.initial(dt_init)
 
-    series_checkpointed = [t, *[s.series for s in simulation.solvers if s.series.ics is not None]]
+    series_checkpointed = [t, *[s.solution_series for s in simulation.solvers if s.solution_series.ics is not None]]
     if resume:
         n_init = 0
         read_checkpoint(series_checkpointed, simulation.dir_path, simulation.checkpoint_file)
@@ -84,7 +84,7 @@ def run(
     _timings = {} if timing is True else timing if isinstance(timing, dict) else None
     if isinstance(_timings, dict):
         for s in set((*simulation.solvers, *simulation_init.solvers)):
-            s.solve = log_timing(s.solve, _timings, f'{s.series.name}_{s.solve.__name__}')
+            s.solve = log_timing(s.solve, _timings, f'{s.solution_series.name}_{s.solve.__name__}')
         for w in _writers:
             w.write = log_timing(w.write, _timings, f'{w.name}_{w.write.__name__}')
         _timings[run.__name__] = []
@@ -102,7 +102,7 @@ def run(
         [w.write(t[0]) for w in _writers]
         if any(s.stop(t[0]) for s in _stoppers):
             break
-        [s.forward(t[0]) for s in _simulation.series]
+        [s.forward(t[0]) for s in _simulation.solutions]
         t.forward(t[0])
         _n += 1
         if _timings:

@@ -6,9 +6,10 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils import is_cartesian, CellType, NonCartesianQuadMeshError
+from ..utils.fenicsx_utils import is_cartesian, CellType, NonCartesianQuadMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
-from ..fdm import ConstantSeries, FunctionSeries, GridSeries, FloatSeries, TriangulationSeries
+from ..fdm import ConstantSeries, FunctionSeries
+from ..fe2py import GridSeries, FloatSeries, TriSeries
 from ..io import (
     write, 
     load_mesh, 
@@ -71,9 +72,9 @@ def _(
     mode: str = 'a',
     npz_name: str | tuple[str, str] | None = None,
 ):
-    function_series = [i.series for i in sim.solvers if isinstance(i.series, FunctionSeries)]
+    function_series = [i.solution_series for i in sim.solvers if isinstance(i.solution_series, FunctionSeries)]
     function_series.extend([i.correction_series for i in sim.solvers if i.correction_series is not None])
-    constant_series = [i.series for i in sim.solvers if isinstance(i.series, ConstantSeries)]
+    constant_series = [i.solution_series for i in sim.solvers if isinstance(i.solution_series, ConstantSeries)]
     
     if include:
         _include = lambda n: n in include and not n in exclude
@@ -127,7 +128,7 @@ def _(
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, False:
-            NpSeries = TriangulationSeries
+            NpSeries = TriSeries
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
             NpSeries = GridSeries
         case CellType.QUADRILATERAL, False:

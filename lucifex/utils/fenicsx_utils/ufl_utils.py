@@ -1,14 +1,21 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 from basix.ufl_wrapper import BasixElement
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
-from ufl import Form
+from ufl import Form, Argument
 from ufl.core.expr import Expr
 from ufl.finiteelement import FiniteElement
 from ufl.algorithms.analysis import extract_coefficients, extract_constants
+
+
+def is_zero(
+    expr: Expr | Form,
+    zero_aliases: Iterable = (0, None),
+) -> bool:
+    return expr in zero_aliases
 
 
 def is_scalar(
@@ -198,3 +205,18 @@ def extract_integrand(
     form: Form,
 ) -> Expr:
     return sum(extract_integrands(form))
+
+
+def extract_function_space(
+    arg: Function | Argument | FunctionSpace | Any,
+) -> FunctionSpace:
+    if isinstance(arg, Function):
+        fs = arg.function_space
+    elif isinstance(arg, Argument):
+        fs = arg.ufl_function_space()
+    elif isinstance(arg, FunctionSpace):
+        fs = arg
+    else:
+        fs = getattr(arg, 'function_space')
+
+    return fs

@@ -10,7 +10,7 @@ from dolfinx.fem import Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils import SpatialMarkerAlias
+from ..utils.fenicsx_utils import SpatialMarkerAlias
 from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
@@ -21,31 +21,31 @@ T = TypeVar('T', Function, Constant)
 TS = TypeVar('TS', FunctionSeries, ConstantSeries)
 class Solver(ABC, Generic[T, TS]):
     """
-    Generic abstract base class
+    Generic abstract base class for solvers
     """
 
     def __init__(
         self,
-        solution: T | TS | Any, #FIXME typing
+        sltn: T | TS | Any, #FIXME typing
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
         future: bool = False,
         overwrite: bool = False,
         ):
-        if isinstance(solution, (Function, Constant)):
-            series = None
-        elif isinstance(solution, FunctionSeries):
-            series = solution
-            solution = Function(series.function_space, name=series.name)
-        elif isinstance(solution, ConstantSeries):
-            series = solution
-            solution = Constant(series.mesh, name=series.name, shape=series.shape)
+        if isinstance(sltn, (Function, Constant)):
+            sltn_series = None
+        elif isinstance(sltn, FunctionSeries):
+            sltn_series = sltn
+            sltn = Function(sltn_series.function_space, name=sltn_series.name)
+        elif isinstance(sltn, ConstantSeries):
+            sltn_series = sltn
+            sltn = Constant(sltn_series.mesh, name=sltn_series.name, shape=sltn_series.shape)
         else:
-            raise MultipleDispatchTypeError(solution)
+            raise MultipleDispatchTypeError(sltn)
 
-        self._solution = solution
-        self._series = series
+        self._solution = sltn
+        self._solution_series = sltn_series
         self._future = future
         self._overwrite = overwrite
 
@@ -60,17 +60,17 @@ class Solver(ABC, Generic[T, TS]):
                 raise ValueError('Solution and correction names must be distinct.')
             if isinstance(self._solution, Function):
                 self._correction = Function(self._solution.function_space, name=corr_name)
-                if self._series is not None:
+                if self._solution_series is not None:
                     self._correction_series = FunctionSeries(
-                        self._solution.function_space, corr_name, series.order, series.store,
+                        self._solution.function_space, corr_name, sltn_series.order, sltn_series.store,
                     )
             elif isinstance(self._solution, Constant):
                 self._correction = Constant(
                     self._solution.mesh, name=corr_name, shape=self._solution.ufl_shape,
                 )
-                if self._series is not None:
+                if self._solution_series is not None:
                     self._correction_series = ConstantSeries(
-                        self._solution.mesh, corr_name, self._series.order, self._series.shape, self._series.store,
+                        self._solution.mesh, corr_name, self._solution_series.order, self._solution_series.shape, self._solution_series.store,
                     )
             else:
                 raise TypeError
@@ -80,8 +80,8 @@ class Solver(ABC, Generic[T, TS]):
         return self._solution
 
     @property
-    def series(self) -> TS | None:
-        return self._series
+    def solution_series(self) -> TS | None:
+        return self._solution_series
     
     @property
     def correction(self) -> T | None:
@@ -114,8 +114,8 @@ class Solver(ABC, Generic[T, TS]):
             if self._correction_series is not None:
                 self._correction_series.update(self._correction, future, overwrite)
 
-        if self._series is not None:
-            self._series.update(self._solution, future, overwrite)
+        if self._solution_series is not None:
+            self._solution_series.update(self._solution, future, overwrite)
 
 
 P = ParamSpec("P")
@@ -135,10 +135,10 @@ class Evaluation(Solver[T, TS]):
         self._evaluation = evaluation
 
     @classmethod
-    def from_expr_func(
+    def from_expr_factory(
         cls, 
         solution: T | TS, 
-        expr_func: Callable[P, Any],
+        expr_factory: Callable[P, Any],
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
@@ -149,7 +149,7 @@ class Evaluation(Solver[T, TS]):
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: expr_func(*args, **kwargs), corrector, future, overwrite)
+            return cls(solution, lambda: expr_factory(*args, **kwargs), corrector, future, overwrite)
         return _create
 
     def solve(
@@ -215,7 +215,7 @@ class Interpolation(Evaluation[Function, FunctionSeries]):
         super().__init__(solution, _evaluation, corrector, future, overwrite)
 
     @classmethod
-    def from_expr_func(
+    def from_expr_factory(
         cls,
         solution: Function | FunctionSeries, 
         expression_func: Callable[P, Function | Expr],
@@ -248,7 +248,7 @@ P = ParamSpec("P")
 class Integration(Evaluation[Constant, ConstantSeries]):
     
     @classmethod
-    def from_expr_func(
+    def from_expr_factory(
         cls, 
         solution: Constant | ConstantSeries, 
         integrand_func: Callable[P, Expr | tuple[Expr, ...]],
@@ -288,14 +288,14 @@ class Integration(Evaluation[Constant, ConstantSeries]):
         return _create
     
 
-@replicate_callable(Evaluation[Constant | Function, ConstantSeries | FunctionSeries].from_expr_func)
+@replicate_callable(Evaluation[Constant | Function, ConstantSeries | FunctionSeries].from_expr_factory)
 def evaluation():
     pass
 
-@replicate_callable(Interpolation.from_expr_func)
+@replicate_callable(Interpolation.from_expr_factory)
 def interpolation():
     pass
 
-@replicate_callable(Integration.from_expr_func)
+@replicate_callable(Integration.from_expr_factory)
 def integration():
     pass

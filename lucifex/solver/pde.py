@@ -19,7 +19,7 @@ from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
 from slepc4py import SLEPc
 
-from ..utils import create_fem_space, SpatialMarkerAlias
+from ..utils.fenicsx_utils import create_function_space, SpatialMarkerAlias
 from ..utils.py_utils import replicate_callable
 from ..fdm import (
     FiniteDifference, FiniteDifferenceArgwise, 
@@ -241,9 +241,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._init_vector_nontermwise = True
 
     @classmethod
-    def from_forms_func(
+    def from_forms_factory(
         cls,
-        forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
+        forms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
         bcs: BoundaryConditions 
         | list[DirichletBCMetaClass] 
         | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
@@ -262,7 +262,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     ):
         """
         If the `solution` argument is not provided, it will be inferred
-        as the zeroth argument to `forms_func`.
+        as the zeroth argument to `forms_factory`.
         """
         def _create(
             *args: P.args,
@@ -273,7 +273,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
                 solution = _deduce_from_args(0, args, kwargs)
             return cls(
                 solution, 
-                forms_func(*args, **kwargs), 
+                forms_factory(*args, **kwargs), 
                 bcs, 
                 petsc, 
                 jit, 
@@ -538,7 +538,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             self._n_init = 0
 
     @classmethod
-    def from_forms_func(
+    def from_forms_factory(
         cls,
         forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
         ics: Function | Constant | Perturbation | None = None,
@@ -659,7 +659,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         )
 
     @classmethod
-    def from_forms_func(
+    def from_forms_factory(
         cls,
         forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
         ics: Function | Constant | Perturbation | None = None,
@@ -676,7 +676,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         solution: FunctionSeries | None = None, 
     ):
         bcs = None
-        return InitialBoundaryValueProblem.from_forms_func(
+        return InitialBoundaryValueProblem.from_forms_factory(
             forms_func,
             ics,
             bcs,
@@ -757,7 +757,7 @@ class EigenvalueProblem:
                 raise TypeError
         else:
             nev = slepc.get(EPS_NEV_ATTR, self.slepc_default.eps_nev)
-            fs = create_fem_space(solutions)
+            fs = create_function_space(solutions)
             eigenfunctions = [Function(fs) for _ in range(nev)]
             eigenseries = [FunctionSeries(fs) for _ in range(nev)]
         
@@ -817,9 +817,9 @@ class EigenvalueProblem:
         self._ffcx = ffcx
 
     @classmethod
-    def from_forms_func(
+    def from_forms_factory(
         cls,
-        forms_func: Callable[P, tuple[Form, Form]],
+        forms_factory: Callable[P, tuple[Form, Form]],
         bcs: BoundaryConditions | None = None,
         slepc: OptionsSLEPc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -840,7 +840,7 @@ class EigenvalueProblem:
                     solutions = solutions.function_space
             return cls(
                 solutions,
-                forms_func(*args, **kwargs),
+                forms_factory(*args, **kwargs),
                 bcs, 
                 slepc,
                 jit,
@@ -991,10 +991,10 @@ class Projection(BoundaryValueProblem):
         )
 
     @classmethod
-    def from_expr_func(
+    def from_expr_factory(
         cls,
         solution: Function | FunctionSeries, 
-        expr_func: Callable[P, Function | Expr],
+        expr_factory: Callable[P, Function | Expr],
         bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerAlias, Value] | tuple[SpatialMarkerAlias, Value, SubspaceIndex]] | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -1011,7 +1011,7 @@ class Projection(BoundaryValueProblem):
         ) -> Self:
             return cls(
                 solution, 
-                expr_func(*args, **kwargs), 
+                expr_factory(*args, **kwargs), 
                 bcs, 
                 petsc, 
                 jit, 
@@ -1023,23 +1023,23 @@ class Projection(BoundaryValueProblem):
         return _create
 
 
-@replicate_callable(BoundaryValueProblem.from_forms_func)
+@replicate_callable(BoundaryValueProblem.from_forms_factory)
 def bvp():
     pass
 
-@replicate_callable(InitialBoundaryValueProblem.from_forms_func)
+@replicate_callable(InitialBoundaryValueProblem.from_forms_factory)
 def ibvp():
     pass
 
-@replicate_callable(InitialValueProblem.from_forms_func)
+@replicate_callable(InitialValueProblem.from_forms_factory)
 def ivp():
     pass
 
-@replicate_callable(EigenvalueProblem.from_forms_func)
+@replicate_callable(EigenvalueProblem.from_forms_factory)
 def evp():
     pass
 
-@replicate_callable(Projection.from_expr_func)
+@replicate_callable(Projection.from_expr_factory)
 def projection():
     pass
 

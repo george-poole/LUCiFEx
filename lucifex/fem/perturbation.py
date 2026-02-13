@@ -9,8 +9,10 @@ import numpy as np
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
 from scipy.interpolate import CubicSpline, PchipInterpolator, RegularGridInterpolator
 
-from ..utils.mesh_utils import BoundaryType, mesh_coordinates, mesh_vertices
-from ..utils.fem_utils import create_fem_function, create_fem_space, set_fem_function
+from ..utils.fenicsx_utils import (
+    BoundaryType, mesh_coordinates, mesh_vertices,
+    create_function, create_function_space, set_fem_function,
+)
 
 
 @runtime_checkable
@@ -77,7 +79,7 @@ class DofsPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = create_fem_function(fs, self._base)
+        f = create_function(fs, self._base)
         if correct:
             self._corrector(f.x.array)
         return f
@@ -90,7 +92,7 @@ class DofsPerturbation:
     ) -> Function:
         if freq is None:
             freq = self._freq
-        fs = create_fem_space(fs)
+        fs = create_function_space(fs)
 
         f = Function(fs)
         if freq is None:
@@ -115,7 +117,7 @@ class DofsPerturbation:
         correct: bool = True,
         name: str | None = None,
     ) -> Function:
-        fs = create_fem_space(fs)
+        fs = create_function_space(fs)
         if base is None:
             base = self.base(fs, False) 
         perturbation = self.noise(fs)
@@ -162,7 +164,7 @@ class SpatialPerturbation:
         fs: FunctionSpace,
         correct: bool = True,
     ) -> Function:
-        f = create_fem_function(fs, self._base)
+        f = create_function(fs, self._base)
         if correct:
             self._corrector(f.x.array)
         return f
@@ -171,7 +173,7 @@ class SpatialPerturbation:
         self,
         fs: FunctionSpace,
     ) -> Function:
-        return create_fem_function(fs, self._noise)
+        return create_function(fs, self._noise)
 
     def combine_base_noise(
         self,
@@ -188,7 +190,7 @@ class SpatialPerturbation:
                 base = self.base(fs, False) 
             perturbation = self.noise(fs)
             perturbed = operator(base, perturbation)
-        f = create_fem_function(fs, perturbed)
+        f = create_function(fs, perturbed)
         if correct:
             self._corrector(f.x.array)
         if name is not None:

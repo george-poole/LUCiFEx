@@ -5,8 +5,7 @@ from ufl.core.expr import Expr
 from ufl import inner, div, grad
 from dolfinx.fem import Function
 
-from ..utils.dofs_utils import dofs
-from ..utils.mesh_utils import mesh_integral
+from ..utils.fenicsx_utils import dofs, mesh_integral
 
 
 def l_norm(

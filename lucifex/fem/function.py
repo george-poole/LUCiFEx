@@ -8,7 +8,7 @@ from dolfinx.fem import Function as DOLFINxFunction
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils import create_fem_space
+from ..utils.fenicsx_utils import create_function_space
 from ..utils.py_utils.str_utils import str_indexed
 from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
@@ -40,7 +40,7 @@ class Function(DOLFINxFunction):
         """
         Subclass with additional utilities, not to be confused with `dolfinx.fem.Function.`
         """
-        fs = create_fem_space(fs)
+        fs = create_function_space(fs)
 
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'

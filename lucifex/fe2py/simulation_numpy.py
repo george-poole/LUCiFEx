@@ -2,27 +2,30 @@ from abc import abstractmethod
 from typing import Generic, TypeVar
 from collections.abc import Iterable
 
-from ..fdm.series_numpy import NumpySeriesABC, TriangulationSeries, GridSeries, FloatSeries, as_numpy_series
-from ..utils import is_cartesian, is_simplicial
+import numpy as np
+from ufl.core.expr import Expr
+
+from ..fem import Constant
+from .series import NumpySeries, TriSeries, GridSeries, FloatSeries, as_numpy_series
+from ..utils import is_cartesian, is_simplicial, create_fem_function, grid
 from ..utils.py_utils import MultiKey
 
-from .simulation import Simulation
+from ..sim.simulation import Simulation
         
 
-T = TypeVar('T')
+T = TypeVar('T') # FIXME bounded by NumpySeriesABC
 class NumpySimulationABC(
     Generic[T],
     MultiKey[str, T]
 ):
-
     def __init__(
         self,
         series: Iterable[T | FloatSeries],
-        exprs_consts = (),
+        auxiliary: Iterable[T | FloatSeries | dict[str, np.ndarray | float]] = (),
         timings = None,
     ):
         self._series = series
-        self._exprs_consts = exprs_consts
+        self._auxiliary = auxiliary
         self._timings = timings
 
     def _getitem(
@@ -39,29 +42,37 @@ class NumpySimulationABC(
     def namespace(self) -> dict[str, T | FloatSeries | float]:
         return {i.name: i for i in self._series} # TODO expr and consts too
     
-
-class GridSimulation(NumpySimulationABC[GridSeries]):
-
     @classmethod
     def from_simulation(
         cls,
         sim: Simulation,
+        slc: slice = slice(None, None, None),
+        auxiliary: bool = False, #FIXME
         use_cache: tuple[bool, bool] = (True, True),
-        slc: slice = slice(None, None, None)
     ):
-        series = {}
-        for s in sim.series:
+        _series = []
+        for s in sim.solutions:
             s_np = as_numpy_series(s, use_cache=use_cache, slc=slc)
-            series[s.name] = s_np
+            _series.append(s_np)
 
-        # exprs_consts = sim.exprs_consts
-        # timings = sim.timings
+        _auxiliary = []
+        if auxiliary:
+            for aux in sim.auxiliary:
+                if isinstance(aux, Expr):
+                    aux_func = create_fem_function(...)
+                    aux_np = grid(...)(aux_func)
+                    _auxiliary.append(aux_np)
+                if isinstance(aux, Constant):
+                    _auxiliary.append
 
-        return cls(series)
+        return cls(_series, _auxiliary, sim.timings)
 
 
-class TriangulationSimulation(NumpySimulationABC[TriangulationSeries]):
+class GridSimulation(NumpySimulationABC[GridSeries]):
+    ...
 
+
+class TriangulationSimulation(NumpySimulationABC[TriSeries]):
     ...
 
 

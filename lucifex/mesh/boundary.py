@@ -2,7 +2,7 @@ import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
 from ..utils.py_utils import MultiKey
-from ..utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
+from ..utils.fenicsx_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
 
 
 class MeshBoundary(

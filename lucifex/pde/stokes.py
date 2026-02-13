@@ -8,6 +8,7 @@ from ufl.core.expr import Expr
 
 from lucifex.solver import BoundaryConditions
 from lucifex.fem import Function, Constant
+from lucifex.utils.fenicsx_utils import is_zero
 
 
 def stokes_incompressible(
@@ -53,7 +54,6 @@ def stokes_streamfunction(
     """
     `∇⁴ψ = ∂fʸ/∂x - ∂fˣ/∂y`
     """
-    _none = (None, 0)
     dx = Measure('dx', psi.function_space.mesh)
     dS = Measure('dS', psi.function_space.mesh)
     v = TestFunction(psi.function_space)
@@ -69,10 +69,10 @@ def stokes_streamfunction(
 
     forms = [F_dx, F_dS]
 
-    if not fx in _none:
+    if not is_zero(fx):
         F_fx = v * Dx(fx, 1) * dx
         forms.append(F_fx)
-    if not fy in _none:
+    if not is_zero(fy):
         F_fy = -v * Dx(fy, 0) * dx
         forms.append(F_fy)
 

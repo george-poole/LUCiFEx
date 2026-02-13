@@ -13,7 +13,7 @@ from lucifex.fdm import (
     Series, FiniteDifferenceArgwise)
 from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
-from lucifex.utils import mesh_integral
+from lucifex.utils.fenicsx_utils import mesh_integral
 
 from .supg import supg_form
 from .cg import derivative_form, advection_form, diffusion_forms, reaction_forms

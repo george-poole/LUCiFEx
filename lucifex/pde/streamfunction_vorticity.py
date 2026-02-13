@@ -3,7 +3,6 @@ from ufl import Form, as_matrix, as_vector, grad, curl, Dx, split
 
 from lucifex.fem import Function
 from lucifex.solver import BoundaryConditions
-from lucifex.utils import get_component_fem_functions
 from .poisson import poisson
 
 
@@ -33,7 +32,7 @@ def vorticity_from_velocity(
         if isinstance(u, tuple):
             ux, uy = u
         else:
-            ux, uy = split(u) #get_component_fem_functions(('P', 1), u)
+            ux, uy = split(u)
         return Dx(uy, 0) - Dx(ux, 1)
     else:
         if isinstance(u, tuple):

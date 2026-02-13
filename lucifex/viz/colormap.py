@@ -12,10 +12,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
 from matplotlib.cm import ScalarMappable
 
-from ..utils import (
-    is_scalar, grid, triangulation, create_fem_function, 
-    is_cartesian, NonCartesianQuadMeshError, 
-    extract_mesh, is_simplicial,
+from ..fe2py import GridFunction, TriFunction, as_numpy_function
+from ..utils.fenicsx_utils import (
+    is_scalar, create_function, 
+    is_cartesian, extract_mesh,
 )
 from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
 
@@ -55,6 +55,20 @@ def _plot_colormap(
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
+    u: GridFunction,
+    colorbar: bool | tuple[float, float] = True,
+    cartesian: bool | None = None,
+    use_cache: bool | tuple[bool, bool] = (True, False),
+    mesh: Mesh | None = None,
+    **kwargs,
+) -> None:
+    ...
+
+
+@overload
+def _plot_colormap(
+    fig: Figure,
+    ax: Axes, 
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
@@ -64,8 +78,8 @@ def _plot_colormap(
 
 
 @singledispatch
-def _plot_colormap(f, *_, **__):
-    raise MultipleDispatchTypeError(f, _plot_colormap)
+def _plot_colormap(arg, *_, **__):
+    raise MultipleDispatchTypeError(arg, _plot_colormap)
 
 
 @_plot_colormap.register(Figure)
@@ -81,7 +95,7 @@ def _(
 
 @_plot_colormap.register(Function)
 def _(
-    f: Function,
+    u: Function,
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
@@ -89,33 +103,11 @@ def _(
     use_cache: bool | tuple[bool, bool] = (True, False),
     **kwargs,
 ):
-    if not is_scalar(f):
+    if not is_scalar(u):
         raise ValueError("Colormap plots must be of scalar-valued quantities.")
-
-    mesh = f.function_space.mesh
-
-    if isinstance(use_cache, bool):
-        use_cache = (use_cache, use_cache)
-    use_mesh_cache, use_func_cache = use_cache
-
-    if cartesian is None:
-        cartesian = is_cartesian(use_cache=use_mesh_cache)(mesh)
-    simplicial = is_simplicial(use_cache=use_mesh_cache)(mesh)
-
-    match simplicial, cartesian:
-        case True, False:
-            trigl = triangulation(use_cache=use_mesh_cache)(f.function_space.mesh)
-            f_tri = triangulation(use_cache=use_func_cache)(f)
-            xyz = (trigl, f_tri)
-        case _, True:
-            x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
-            f_grid = grid(use_cache=use_func_cache)(f)
-            xyz = (x, y, f_grid)
-        case False, False:
-            raise NonCartesianQuadMeshError('Colormap plotting')
-
+    u_new = as_numpy_function(u, cartesian, use_cache)
     return _plot_colormap(
-        xyz, fig, ax, colorbar, cartesian, **kwargs
+        u_new, fig, ax, colorbar, cartesian, **kwargs
     )
 
 
@@ -132,9 +124,9 @@ def _(
 ):
     if mesh is None:
         mesh = extract_mesh(expr)
-    f = create_fem_function((mesh, 'P', 1), expr)
+    u = create_function((mesh, 'P', 1), expr)
     return _plot_colormap(
-        f,
+        u,
         fig, 
         ax,
         colorbar,
@@ -144,40 +136,63 @@ def _(
     )
 
 
-@_plot_colormap.register(tuple)
+@_plot_colormap.register(GridFunction)
 def _(
-    xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
+    u: GridFunction,
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
     cartesian: bool | None = None,
     **kwargs,
 ):
-    triang_available = len(xyz) == 2
+    xyz = (*u.grid.axes, u.values)
+    return _plot_colormap(
+        xyz, fig, ax, colorbar, cartesian, **kwargs,
+    )
 
-    if triang_available:
-        tri, z = xyz
-        assert isinstance(tri, Triangulation)
-        x, y = tri.x, tri.y
-    else:
-        x, y, z = xyz
+
+@_plot_colormap.register(TriFunction)
+def _(
+    u: TriFunction,
+    fig: Figure,
+    ax: Axes,
+    colorbar: bool | tuple[float, float] = True,
+    cartesian: bool | None = None,
+    **kwargs,
+):
+    xyz = (u.tri.x, u.tri.y, u.values)
+    return _plot_colormap(
+        xyz, fig, ax, colorbar, cartesian, triang=u.tri.triangulation, **kwargs,
+    )
+
+
+@_plot_colormap.register(tuple)
+def _(
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
+    fig: Figure,
+    ax: Axes,
+    colorbar: bool | tuple[float, float] = True,
+    cartesian: bool | None = None,
+    triang: Triangulation | None = None,
+    **kwargs,
+):
+    x, y, z = xyz
 
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(**kwargs)
-
     filter_kwargs(set_axes)(ax, **_kwargs)
 
     if isinstance(colorbar, tuple):
         vmin, vmax = colorbar
         _kwargs.update(vmin=vmin, vmax=vmax)
 
-    if triang_available:
-        cmap = filter_kwargs(ax.tripcolor)(tri, z, **_kwargs)
+    if triang is not None:
+        cmap = filter_kwargs(ax.tripcolor)(triang, z, **_kwargs)
     else:
         if cartesian is None:
-            cartesian = bool(len(x) == len(np.unique(x)) and len(y) == len(np.unique(y)))
+            cartesian = is_cartesian((x, y))
         if not cartesian:
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
         else:
@@ -192,69 +207,130 @@ def _(
 plot_colormap = optional_fig_ax(_plot_colormap)
 
 
-@optional_ax
-def plot_contours(
+# @overload
+# def _plot_contours(
+#     ax: Axes,
+#     f: Function,
+#     levels: Iterable[float] | int | None = None,
+#     use_cache: bool | tuple[bool, bool] = (True, False),
+#     **kwargs,
+# ) -> None:
+#     ...
+
+
+# @overload
+# def _plot_contours(
+#     ax: Axes,
+#     f: Expr,
+#     levels: Iterable[float] | int | None = None,
+#     use_cache: bool | tuple[bool, bool] = (True, False),
+#     **kwargs,
+# ) -> None:
+#     ...
+
+
+@singledispatch
+def _plot_contours(arg, *_, **__):
+    raise MultipleDispatchTypeError(arg, _plot_contours)
+
+
+@_plot_contours.register(Axes)
+def _(
     ax: Axes,
-    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray] | Expr,
+    arg,
+    *args,
+    **kwargs,
+):
+    return _plot_contours(arg, ax, *args, **kwargs)
+
+
+@_plot_contours.register(Function)
+def _(
+    f: Function,
+    ax: Axes,
     levels: Iterable[float] | int | None = None,
+    cartesian: bool | None = None,
+    use_cache: bool | tuple[bool, bool] = (True, False),
+    **kwargs,
+) -> None:
+    u_np = as_numpy_function(f, cartesian, use_cache)
+    return _plot_contours(
+        u_np, ax, levels, cartesian, **kwargs
+    )
+
+
+@_plot_contours.register(Expr)
+def _(
+    f: Expr,
+    ax: Axes,
+    levels: Iterable[float] | int | None = None,
+    cartesian: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
-    """Plots contours of a scalar-valued function"""
-    return _plot_contours(ax, f, levels, use_cache, mesh, **kwargs)
+    if mesh is None:
+        mesh = extract_mesh(f)
+    f = create_function((mesh, 'P', 1), f)
+    return _plot_contours(f, ax, levels, cartesian, use_cache, **kwargs)
 
 
-def _plot_contours(
+@_plot_contours.register(GridFunction)
+def _(
+    u: GridFunction,
     ax: Axes,
-    f: Function | tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray] | Expr,
-    levels: Iterable[float] | int | None,
-    use_cache: bool | tuple[bool, bool],
-    mesh: Mesh | None = None,
+    levels: Iterable[float] | int | None = None,
+    cartesian: bool | None = None,
     **kwargs,
 ) -> None:
-    
-    if isinstance(f, Expr) and not isinstance(f, Function):
-        if mesh is None:
-            mesh = extract_mesh(f)
-        f = create_fem_function((mesh, 'P', 1), f)
+    xyz = (*u.grid.axes, u.values)
+    return _plot_contours(xyz, ax, levels, cartesian, **kwargs)
 
-    if isinstance(f, tuple):
-        triang_available = len(f) == 2
-        
-        if triang_available:
-            tri, z = f
-            assert isinstance(tri, Triangulation)
-            x, y = tri.x, tri.y
-        else:
-            x, y, z = f
 
-        _plt_kwargs = dict(linestyles="solid", color="black", linewidths=LW)
-        _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
-        _axs_kwargs.update(x_lims=x, y_lims=y)
-        _kwargs = _plt_kwargs | _axs_kwargs
-        _kwargs.update(**kwargs)
-        filter_kwargs(set_axes)(ax, **_kwargs)
+@_plot_contours.register(TriFunction)
+def _(
+    u: TriFunction,
+    ax: Axes,
+    levels: Iterable[float] | int | None = None,
+    cartesian: bool | None = None,
+    **kwargs,
+) -> None:
+    xyz = (u.tri.x, u.tri.y, u.values)
+    return _plot_contours(xyz, ax, levels, cartesian, u.tri.triangulation, **kwargs)
 
-        if triang_available:
-            filter_kwargs(ax.tricontour, ContourSet)(tri, z, levels=levels, **_kwargs)
+
+@_plot_contours.register(tuple)
+def _(  
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
+    ax: Axes,
+    levels: Iterable[float] | int | None,
+    cartesian: bool | None = None,
+    triang: Triangulation | None = None,
+    **kwargs,
+) -> None:
+    x, y, z = xyz
+
+    _plt_kwargs = dict(linestyles="solid", color="black", linewidths=LW)
+    _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
+    _axs_kwargs.update(x_lims=x, y_lims=y)
+    _kwargs = _plt_kwargs | _axs_kwargs
+    _kwargs.update(**kwargs)
+    filter_kwargs(set_axes)(ax, **_kwargs)
+
+    if triang is not None:
+        filter_kwargs(ax.tricontour, ContourSet)(triang, z, levels=levels, **_kwargs)
+    else:
+        if cartesian is None:
+            cartesian = is_cartesian((x, y))
+        if not cartesian:
+            filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
         else:
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
-
-    else:
-        if isinstance(use_cache, bool):
-            use_cache = (use_cache, use_cache)
-        use_mesh_cache, use_func_cache = use_cache
-        cartesian = is_cartesian(use_cache=use_mesh_cache)(f.function_space.mesh)
-        if not cartesian:
-            trigl = triangulation(use_cache=use_mesh_cache)(f.function_space.mesh)
-            f_trigl = triangulation(use_cache=use_func_cache)(f)
-            return _plot_contours(ax, (trigl, f_trigl), levels, use_cache, **kwargs)
-        else:
-            x, y = grid(use_cache=use_mesh_cache)(f.function_space.mesh)
-            f_grid = grid(use_cache=use_func_cache)(f)
-            return _plot_contours(ax, (x, y, f_grid), levels, use_cache, **kwargs)
+            
                 
+
+plot_contours = optional_ax(_plot_contours)
+
 
 @optional_fig_axs
 def plot_colormap_multifigure(

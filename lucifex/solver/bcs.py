@@ -14,16 +14,16 @@ from dolfinx.fem import (
 
 from ..fdm import FunctionSeries
 from ..fem import Function, Constant
-from ..utils.fem_utils import is_scalar, is_vector, create_fem_function, create_fem_constant
-from ..utils.mesh_utils import BoundaryType, create_tagged_measure
-from ..utils.dofs_utils import (
+from ..utils.fenicsx_utils import (
+    BoundaryType, 
+    create_tagged_measure,
     as_spatial_marker,
     dofs_indices,
     SpatialMarkerAlias,
     SpatialMarker,
-    SubspaceIndex,
     DofsMethodType,
     FacetMethodType,
+    is_scalar, is_vector, create_function, create_constant, extract_function_space,
     ScalarVectorError,
 )
 
@@ -35,6 +35,8 @@ Value: TypeAlias = (
     | Iterable[float]
     | Expr
 )
+
+SubspaceIndex: TypeAlias = int | None 
 
 
 class BoundaryConditions:
@@ -112,7 +114,7 @@ class BoundaryConditions:
                     else:
                         dbc = dirichletbc(uD, dofs, fs.sub(i))
                 else:
-                    uD = create_fem_function(fs, uD, i, try_identity=True)
+                    uD = create_function(fs, uD, i, try_identity=True)
                     if i is None:
                         dbc = dirichletbc(uD, dofs)
                     else:
@@ -170,7 +172,7 @@ class BoundaryConditions:
         Weakly enforced boundary condition by a term `+∫ v·uW ds` with 
         test function `v` and prescribed value `uW` in the variational form `F(u,v)=0`.
         """
-        fs = solution.function_space
+        fs = extract_function_space(solution)
         v = TestFunction(fs)
         if self._rescale_weak is not None:
             scale = Constant(fs.mesh, self._rescale_weak)
@@ -208,13 +210,7 @@ class BoundaryConditions:
         Given `n_total` boundary conditions, `ds(n_total)` is the measure for the subset of the boundary 
         where no boundary conditions are applied.
         """
-        if isinstance(solution, (Function, FunctionSeries)):
-            fs = solution.function_space
-        elif isinstance(solution, Argument):
-            fs = solution.ufl_function_space()
-        else:
-            fs = solution
-            
+        fs = extract_function_space(solution) 
         boundary_types = [BoundaryType(i) for i in boundary_types]
         tag = 0
         tags = {b: [] for b in boundary_types}
@@ -232,13 +228,13 @@ class BoundaryConditions:
                     pass 
                 elif isinstance(g, Iterable):
                     if all(isinstance(gi, (float, int)) for gi in g):
-                        g = create_fem_constant(fs.mesh, g)
+                        g = create_constant(fs.mesh, g)
                     else:
-                        g = create_fem_function(fs, g, i)
+                        g = create_function(fs, g, i)
                 elif isinstance(g, (float, int)):
-                    g = create_fem_constant(fs.mesh, g)
+                    g = create_constant(fs.mesh, g)
                 else:
-                    g = create_fem_function(fs, g, i)
+                    g = create_function(fs, g, i)
 
                 tags[b].append(tag)
                 markers[b].append(m)

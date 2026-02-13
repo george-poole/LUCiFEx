@@ -22,13 +22,13 @@ class FuncAnimationFromSeries(Protocol, Generic[T]):
 P = ParamSpec('P')
 T = TypeVar('T')
 def create_animation(    
-    plot_func: Callable[Concatenate[Figure, Axes, T, P], None]
+    plot: Callable[Concatenate[Figure, Axes, T, P], None]
     | Callable[Concatenate[Figure, list, list, T, P], None],
     clear_func: Callable[[Figure], None] | None = None,
     millisecs: int = 100,
     anim_kwargs: dict | None = None,
     close: bool = True,
-    **plot_func_kwargs,
+    **plot_kwargs,
 ) -> FuncAnimationFromSeries[T]:
     """
     To display `anim: FunctionAnimation` in an IPython environment
@@ -52,18 +52,18 @@ def create_animation(
         ) -> tuple[Figure, ...]:
             _kwargs_series = {k: v[n] for k, v in kwargs_series.items()}
             if setup:
-                return plot_func(
+                return plot(
                     arg_series[n],
                     **_kwargs_series,
-                    **plot_func_kwargs
+                    **plot_kwargs
                 )
             else:
-                plot_func(
+                plot(
                     fig, 
                     *ax_objects,
                     arg_series[n],
                     **_kwargs_series,
-                    **plot_func_kwargs
+                    **plot_kwargs
                 )
                 return fig, *ax_objects
             

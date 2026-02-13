@@ -11,7 +11,8 @@ from lucifex.fdm import (
 )
 from lucifex.fdm.ufl_operators import inner, grad, div
 from lucifex.fem import Function, Constant
-from lucifex.solver import BoundaryConditions, create_robin
+from lucifex.solver import BoundaryConditions
+from lucifex.utils.fenicsx_utils import is_zero
 
 
 def derivative_form(
@@ -94,9 +95,8 @@ def reaction_forms(
     """
     `vRu + vJ`
     """
-    forms = []
-    _none = (None, 0) 
-    if not r in _none:
+    forms = [] 
+    if not is_zero(r):
         _expr = lambda r, u: r * u
         if isinstance(D_reac, FiniteDifference):
             expr = D_reac(_expr(r, u), trial=u)
@@ -104,7 +104,7 @@ def reaction_forms(
             expr = D_reac(_expr, r, u, trial=u)
         F_reac = v * expr * dx
         forms.append(F_reac)
-    if not j in _none:
+    if not is_zero(j):
         F_src = v * D_src(j, trial=u) * dx
         forms.append(F_src)
     return forms

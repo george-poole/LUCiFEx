@@ -1,20 +1,24 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import TypeVar, Iterable, Generic, Callable
+from typing import TypeVar, Iterable, Generic, Callable, overload
 from typing_extensions import Self
 import operator
 
 import numpy as np
 from matplotlib.tri.triangulation import Triangulation
+from dolfinx.mesh import Mesh
 
-from ..utils import grid, triangulation, is_cartesian, is_simplicial, NonCartesianQuadMeshError
-from ..utils.ufl_utils import ScalarVectorError
-from ..utils.fem_utils import get_component_fem_functions
-from .series import ConstantSeries, FunctionSeries, SubSeriesError
+from . import grid, tri
+from ..utils.fenicsx_utils import ScalarVectorError, get_component_functions, is_cartesian, is_simplicial, NonCartesianQuadMeshError
+from ..fdm.series import ConstantSeries, FunctionSeries, Series, SubSeriesError
 
 
+D = TypeVar('D')
 T = TypeVar('T')
-class NumpySeriesABC(ABC, Generic[T]):
+class NumpySeries(ABC, Generic[D, T]):
+    """
+    Abstract base class for a Numpy-compatible series representing a time-dependent quantity.
+    """
     def __init__(
         self, 
         series: Iterable[T], 
@@ -41,10 +45,36 @@ class NumpySeriesABC(ABC, Generic[T]):
     @classmethod
     @abstractmethod
     def from_series(
-        *args, 
-        **kwargs,
-    ) -> Self:
-        ...
+        cls, 
+        cached_convert: Callable[..., Callable[[Series], T]] | Callable[..., Callable[[Mesh], D]],
+        u: Series,
+        use_cache: tuple[bool, bool] = (True, True),
+        slc: slice = slice(None, None, None),
+        **convert_kwargs,
+    ) -> tuple[list[T], list[float], D, ]:
+        use_mesh_cache, use_func_cache = use_cache
+
+        match u.shape:
+            case (_, ):
+                series = [
+                    np.array(
+                        [
+                            cached_convert(use_cache=use_func_cache)(j, **convert_kwargs) 
+                            for j in get_component_functions(('P', 1), i, use_cache=Ellipsis)
+                        ]
+                    ) 
+                    for i in u.series[slc]
+                ]
+            case ():
+                series = [cached_convert(use_cache=use_func_cache)(i, **convert_kwargs) for i in u.series[slc]]
+            case _:
+                raise ScalarVectorError(u)
+            
+        return (
+            series,
+            u.time_series[slc],
+            cached_convert(use_cache=use_mesh_cache)(u.mesh), 
+        )
     
     @property
     def series(self) -> list[T]:
@@ -99,7 +129,7 @@ class NumpySeriesABC(ABC, Generic[T]):
         return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
 
 
-class FloatSeries(NumpySeriesABC[int | float | np.ndarray]):
+class FloatSeries(NumpySeries[int | float | np.ndarray]):
     @classmethod
     def from_series(
         cls, 
@@ -142,49 +172,18 @@ class FloatSeries(NumpySeriesABC[int | float | np.ndarray]):
             )
     
 
-class GridSeries(NumpySeriesABC[np.ndarray]):
+class GridSeries(
+    NumpySeries[tuple[np.ndarray, ...], np.ndarray]
+):
     def __init__(
         self, 
         series: list[np.ndarray], 
         t: list[float], 
-        x: tuple[np.ndarray, ...],
+        axes: tuple[np.ndarray, ...],
         name: str | None = None,
     ): 
         super().__init__(series, t, name)
-        self._axes = x
-    
-    @classmethod
-    def from_series(
-        cls, 
-        u: FunctionSeries,
-        use_cache: tuple[bool, bool] = (True, True),
-        slc: slice = slice(None, None, None),
-        **grid_kwargs,
-    ) -> Self:
-        use_mesh_cache, use_func_cache = use_cache
-
-        match u.shape:
-            case (_, ):
-                series = [
-                    np.array(
-                        [
-                            grid(use_cache=use_func_cache)(j, **grid_kwargs) 
-                            for j in get_component_fem_functions(('P', 1), i, use_cache=Ellipsis)
-                        ]
-                    ) 
-                    for i in u.series[slc]
-                ]
-            case ():
-                series = [grid(use_cache=use_func_cache)(i, **grid_kwargs) for i in u.series[slc]]
-            case _:
-                raise ScalarVectorError(u)
-            
-        return cls(
-            series,
-            u.time_series[slc],
-            grid(use_cache=use_mesh_cache)(u.mesh), 
-            u.name,
-        )
+        self._axes = axes
     
     @property
     def axes(self) -> tuple[np.ndarray, ...]:
@@ -199,8 +198,27 @@ class GridSeries(NumpySeriesABC[np.ndarray]):
             name = self._create_subname(index)
         return GridSeries([i[index] for i in self.series], self.time_series, self.axes, name)
     
+    @classmethod
+    def from_series(
+        cls: type['GridSeries'], 
+        u: Series,
+        use_cache: tuple[bool, bool] = (True, True),
+        slc: slice = slice(None, None, None),
+        **grid_kwargs,
+    ):
+        series, time_series, axes = super().from_series(
+            grid,
+            u,
+            use_cache,
+            slc,
+            **grid_kwargs,
+        )
+        return cls(series, time_series, axes, u.name)
+    
 
-class TriangulationSeries(NumpySeriesABC[np.ndarray]):
+class TriangulationSeries(
+    NumpySeries[Triangulation, np.ndarray]
+):
     def __init__(
         self, 
         series: list[np.ndarray], 
@@ -217,60 +235,94 @@ class TriangulationSeries(NumpySeriesABC[np.ndarray]):
     
     @classmethod
     def from_series(
-        cls, 
+        cls: type['TriangulationSeries'], 
         u: FunctionSeries,
         use_cache: tuple[bool, bool] = (True, True),
         slc: slice = slice(None, None, None),
+        **tri_kwargs,
     ) -> Self:
-        use_mesh_cache, use_func_cache = use_cache
-
-        match u.shape:
-            case (_, ):
-                series = [
-                    np.array(
-                        [
-                            triangulation(use_func_cache=use_func_cache)(j) 
-                            for j in get_component_fem_functions(('P', 1), i, use_cache=(True, True))
-                        ]
-                    )
-                    for i in u.series[slc]
-                ]
-            case ():
-                series = [triangulation(use_func_cache=use_func_cache)(i) for i in u.series[slc]]
-            case _:
-                raise ScalarVectorError(u)
-            
-        return cls(
-            series,
-            u.time_series[slc],
-            triangulation(use_cache=use_mesh_cache)(u.mesh), 
-            u.name,
+        series, time_series, trigl = super().from_series(
+            tri,
+            u,
+            use_cache,
+            slc,
+            **tri_kwargs,
         )
+        return cls(series, time_series, trigl, u.name)
+        
+        
+        
+        # use_mesh_cache, use_func_cache = use_cache
+
+        # match u.shape:
+        #     case (_, ):
+        #         series = [
+        #             np.array(
+        #                 [
+        #                     triangulation(use_func_cache=use_func_cache)(j) 
+        #                     for j in get_component_functions(('P', 1), i, use_cache=(True, True))
+        #                 ]
+        #             )
+        #             for i in u.series[slc]
+        #         ]
+        #     case ():
+        #         series = [triangulation(use_func_cache=use_func_cache)(i) for i in u.series[slc]]
+        #     case _:
+        #         raise ScalarVectorError(u)
+            
+        # return cls(
+        #     series,
+        #     u.time_series[slc],
+        #     triangulation(use_cache=use_mesh_cache)(u.mesh), 
+        #     u.name,
+        # )
     
     def sub(
         self, 
         index: int, 
         name: str | None = None,
+
     ) -> Self:
         if name is None:
             name = self._create_subname(index)
         return TriangulationSeries([i[index] for i in self.series], self.time_series, self.triangulation, name)
     
 
+@overload
+def as_numpy_series(
+    u: ConstantSeries,
+    slc: slice = slice(None, None, None),
+    use_cache: tuple[bool, bool] = (True, True),
+) -> FloatSeries:
+    ...
+
+
+@overload
 def as_numpy_series(
     u: FunctionSeries,
-    use_cache: tuple[bool, bool] = (True, True),
     slc: slice = slice(None, None, None),
+    use_cache: tuple[bool, bool] = (True, True),
 ) -> GridSeries | TriangulationSeries:
-    
-    simplicial = is_simplicial(use_cache=True)(u.mesh)
-    cartesian = is_cartesian(use_cache=True)(u.mesh)
+    ...
 
-    match simplicial, cartesian:
-        case True, False:
-            return TriangulationSeries.from_series(u, use_cache, slc)
-        case _, True:
-            return GridSeries.from_series(u, use_cache, slc)
-        case False, False:
-            raise NonCartesianQuadMeshError
+
+def as_numpy_series(
+    u: FunctionSeries| ConstantSeries,
+    *,
+    slc: slice = slice(None, None, None),
+    use_cache: tuple[bool, bool] = (True, True),
+) :
+    if isinstance(u, ConstantSeries):
+        return FloatSeries.from_series(u, slc)
+    else:
+        simplicial = is_simplicial(use_cache=True)(u.mesh)
+        cartesian = is_cartesian(use_cache=True)(u.mesh)
+
+        match simplicial, cartesian:
+            case True, False:
+                return TriangulationSeries.from_series(u, use_cache, slc)
+            case _, True:
+                return GridSeries.from_series(u, use_cache, slc)
+            case False, False:
+                raise NonCartesianQuadMeshError
 

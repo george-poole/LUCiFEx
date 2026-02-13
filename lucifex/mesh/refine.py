@@ -1,8 +1,8 @@
-from typing import Callable, Iterable
+from typing import Callable
 
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
-from ..utils import as_spatial_marker, is_simplicial, SpatialMarker, SpatialMarkerAlias
+from ..utils.fenicsx_utils import as_spatial_marker, is_simplicial, SpatialMarker, SpatialMarkerAlias
 from .cartesian import CellType
 
 
@@ -15,7 +15,7 @@ def refine(
     name: str | None = None,
 ) -> Mesh:
     """
-    For simplex meshes only.
+    For simplicial meshes only.
     """
     if not is_simplicial(mesh):
         raise ValueError('Only implemented for simplex meshes.')

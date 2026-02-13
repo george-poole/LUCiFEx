@@ -7,7 +7,7 @@ from ufl import (
 from lucifex.fem import Function, Constant
 from lucifex.fdm import FunctionSeries
 from lucifex.solver import BoundaryConditions
-from lucifex.utils import is_tensor
+from lucifex.utils.fenicsx_utils import is_tensor, is_zero
 
 from .poisson import poisson
 
@@ -35,11 +35,10 @@ def darcy_streamfunction(
     else:
         weight = (mu / k)
 
-    _none = (None, 0) 
     rhs = 0
-    if not fx in _none:
+    if not is_zero(fx):
         rhs += Dx(fx, 1)
-    if not fy in _none:
+    if not is_zero(fy):
         rhs += -Dx(fy, 0)
 
     return poisson(psi, rhs, weight, bcs)
