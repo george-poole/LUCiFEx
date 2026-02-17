@@ -1,21 +1,23 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
-from dolfinx.fem import Function
-from ufl.core.expr import Expr
 import numpy as np
+from dolfinx.mesh import Mesh
+from ufl.core.expr import Expr
 
-from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, as_npy_object, QuadMesh
 from ..fem import Function, Constant
-from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction, NPyConstant
-from ..fdm import Series, FunctionSeries, ConstantSeries, ExprSeries
+from ..fem.fem2npy import (
+    NPyFunction, GridFunction, TriFunction, NPyConstant, QuadFunction,
+    as_grid_function, as_tri_function, as_npy_constant,
+)
+from ..fdm import FunctionSeries, ConstantSeries, ExprSeries
 from ..fdm.fdm2npy import (
-    NPyFunctionSeries, GridFunctionSeries, as_grid_function_series,
+    NPyFunctionSeries, GridFunctionSeries, QuadFunctionSeries, as_grid_function_series,
     as_tri_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
 )
-from ..utils.py_utils import MultiKey
-from ..utils.py_utils import replicate_callable
+from ..utils.py_utils import MultiKey, replicate_callable, StrSlice, as_slice
 from .simulation import Simulation
 
 
@@ -29,7 +31,7 @@ class NPySimulation(
     def __init__(
         self,
         solutions: Iterable[S | NPyConstantSeries],
-        auxiliary: Iterable[S | F | NPyConstantSeries | tuple[str, np.ndarray | float]] = (),
+        auxiliary: Iterable[S | F | NPyConstantSeries | NPyConstant | tuple[str, float | int | np.ndarray]] = (),
         timings: dict | None = None,
     ):
         self._solutions = list(solutions)
@@ -62,39 +64,45 @@ class NPySimulation(
         return self._timings
     
     @property
-    def mesh(self) -> M:
-        return ...
+    def meshes(self) -> list[Mesh]:
+        return [i.mesh for i in self.solutions if isinstance(i, NPyFunctionSeries)]
+    
+    @property
+    def mesh(self) -> M | None:
+        if len(set(self.meshes)) == 1:
+            return self.meshes[0]
+        else:
+            return None
     
     @classmethod
     @abstractmethod
     def from_simulation(
         cls,
         sim: Simulation,
-        convert_func: Callable[[FunctionSeries], F],
-        slc_const: slice = slice(None, None, None),
-        auxiliary: bool = False, 
+        convert_series: Callable[[FunctionSeries | ExprSeries], S],
+        convert_func: Callable[[Function | Expr], F],
+        slc_const: StrSlice = ':',
+        auxiliary: bool = True, 
     ):
         _solutions = []
         for s in sim.solutions:
             if isinstance(s, ConstantSeries):
-                _sltn = as_npy_constant_series(s, slc_const)
+                _sltn = as_npy_constant_series(s, as_slice(slc_const))
             else:
-                _sltn = convert_func(s)
+                _sltn = convert_series(s)
             _solutions.append(_sltn)
 
         _auxiliary = []
         if auxiliary:
             for aux in sim.auxiliary:
-                if isinstance(aux, ExprSeries):
-                    raise NotImplementedError
-                elif isinstance(aux, Expr):
-                    raise NotImplementedError
-                elif isinstance(aux, Function):
-                    raise NotImplementedError
-                elif isinstance(aux, Constant):
-                    _aux = (aux.name, aux.value)
-                elif isinstance(aux, tuple):
+                if isinstance(aux, tuple):
                     _aux = aux
+                elif isinstance(aux, Constant):
+                    _aux = as_npy_constant(aux)
+                elif isinstance(aux, (Function, Expr)):
+                    _aux = convert_func(aux)
+                if isinstance(aux, (FunctionSeries, ExprSeries)):
+                    _aux = convert_series(aux)
                 else:
                     raise TypeError
                 _auxiliary.append(_aux)
@@ -107,23 +115,27 @@ class GridSimulation(NPySimulation[GridMesh, GridFunction, GridFunctionSeries]):
     def from_simulation(
         cls: type['GridSimulation'],
         sim: Simulation,
-        slc_func: slice = slice(None, None, None),
-        slc_const: slice = slice(None, None, None),
-        auxiliary: bool = False,
+        slc_func: StrSlice = ':',
+        slc_const: StrSlice = ':',
+        auxiliary: bool = True,
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
-        use_mesh_map: bool = False,
+        use_mesh_map: bool = True,
         use_mesh_cache: bool = True,
         use_func_cache: bool = True,
     ) -> Self:
-        convert_func = lambda u: (
+        convert_series = lambda u: (
             as_grid_function_series(
-                u, slc_func, strict, jit, mask, use_mesh_map, use_mesh_cache, use_func_cache,
+                u, slc_func, strict, jit, mask, use_mesh_map, use_mesh_cache, use_func_cache, sim.mesh,
             )
+        )
+        convert_func = lambda u: (
+            as_grid_function(u, strict, jit, mask, use_mesh_map, use_mesh_cache, sim.mesh)
         )
         return super().from_simulation(
             sim,
+            convert_series,
             convert_func,
             slc_const,
             auxiliary,
@@ -135,20 +147,37 @@ class TriSimulation(NPySimulation[TriMesh, TriFunction, TriFunctionSeries]):
     def from_simulation(
         cls: type['TriSimulation'],
         sim: Simulation,
-        slc_func: slice = slice(None, None, None),
-        slc_const: slice = slice(None, None, None),
-        auxiliary: bool = False,
+        slc_func: StrSlice = ':',
+        slc_const: StrSlice = ':',
+        auxiliary: bool = True,
+        use_mesh_cache: bool = True,
+        use_func_cache: bool = True,
     ) -> Self:
+        convert_series = lambda u: (
+            as_tri_function_series(u, slc_func, use_mesh_cache, use_func_cache, sim.mesh),
+        )
         convert_func = lambda u: (
-            as_tri_function_series(u, ...)
+            as_tri_function(u, use_mesh_cache, sim.mesh),
         )
         return super().from_simulation(
             sim,
+            convert_series,
             convert_func,
             slc_const,
             auxiliary,
         )
+    
 
+class QuadSimulation(NPySimulation[QuadMesh, QuadFunction, QuadFunctionSeries]):
+    @classmethod
+    def from_simulation(
+        cls: type['QuadSimulation'],
+        sim: Simulation,
+        slc_func: StrSlice = ':',
+        slc_const: StrSlice = ':',
+    ) -> Self:
+        raise NotImplementedError
+    
 
 @replicate_callable(GridSimulation.from_simulation)
 def as_grid_simulation():
@@ -160,5 +189,22 @@ def as_tri_simulation():
     pass
 
 
-def as_npy_simulation():
-    ...
+@replicate_callable(QuadSimulation.from_simulation)
+def as_quad_simulation():
+    pass
+
+
+def as_npy_simulation(
+    sim: Simulation,
+    grid: bool | None = None,
+    use_mesh_cache: bool = True,  
+):
+    return as_npy_object(
+        sim,
+        as_grid_simulation,
+        as_tri_simulation,
+        as_quad_simulation,
+        sim.mesh,
+        grid,
+        use_mesh_cache,
+    )

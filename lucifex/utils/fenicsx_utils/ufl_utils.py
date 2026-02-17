@@ -164,8 +164,11 @@ def is_discontinuous_family(family: str) -> bool:
 
 
 def extract_mesh(
-    expr: Expr | Expression | Any,
+    expr: Expr | Expression | Function | Any,
 ) -> Mesh:
+    if isinstance(expr, Function):
+        return expr.function_space.mesh
+
     meshes = extract_meshes(expr)
     if len(meshes) == 0:
         raise ValueError(

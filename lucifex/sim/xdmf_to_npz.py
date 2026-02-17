@@ -6,7 +6,7 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils.fenicsx_utils import is_grid, CellType, NonCartesianQuadMeshError
+from ..utils.fenicsx_utils import is_grid, CellType, QuadNonGridMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
 from ..fdm import ConstantSeries, FunctionSeries
 from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
@@ -132,7 +132,7 @@ def _(
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
             NpSeries = GridFunctionSeries
         case CellType.QUADRILATERAL, False:
-            raise NonCartesianQuadMeshError('Conversion to `numpy` data')
+            raise QuadNonGridMeshError('Conversion to `numpy` data')
         case _:
             raise ValueError
     

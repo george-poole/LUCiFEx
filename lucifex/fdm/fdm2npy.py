@@ -1,23 +1,23 @@
-from abc import ABC, abstractmethod
-from functools import cached_property
+from abc import abstractmethod
 from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
 import numpy as np
+from ufl.core.expr import Expr
+from dolfinx.mesh import Mesh
 
-from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh, as_npy_object
 from ..fem import Function, Constant
 from ..fem.fem2npy import (
-    NPyNamedObject, NPyFunction, GridFunction, as_grid_function, 
-    TriFunction, as_tri_function, NPyConstant, as_npy_constant,
+    NPyUFL, NPyFunction, GridFunction, as_grid_function, 
+    TriFunction, as_tri_function, NPyConstant, QuadFunction, as_npy_constant,
 )
-from . import Series, ExprSeries, ConstantSeries
-from ..utils.py_utils import replicate_callable
-from .series import FunctionSeries
+from ..utils.py_utils import replicate_callable, StrSlice, as_slice
+from .series import Series, FunctionSeries, ExprSeries, ConstantSeries
 
 
-F = TypeVar('F', bound=NPyNamedObject)
-class NPySeries(NPyNamedObject, Generic[F]):
+F = TypeVar('F', bound=NPyUFL)
+class NPySeries(NPyUFL, Generic[F]):
     def __init__(
         self, 
         series: Iterable[F], 
@@ -79,12 +79,12 @@ class NPyConstantSeries(
     def from_series(
         cls, 
         c: ConstantSeries,
-        slc: slice = slice(None, None, None),
+        slc: StrSlice = ':',
     ) -> Self:
+        slc = as_slice(slc)
         series = [as_npy_constant(ci) for ci in c.series[slc]]
         return cls(series, c.time_series, c.name)
     
-
 
 M = TypeVar('M', bound=NPyMesh)
 F = TypeVar('F', bound=NPyFunction)
@@ -93,10 +93,11 @@ class NPyFunctionSeries(NPySeries[F], Generic[M, F]):
     @abstractmethod
     def from_series(
         cls, 
-        u: Series,
-        convert_func: Callable[[Function], F],
-        slc: slice = slice(None, None, None),
+        u: FunctionSeries | ExprSeries,
+        convert_func: Callable[[Function | Expr], F],
+        slc: StrSlice = ':',
     ) -> Self:
+        slc = as_slice(slc)
         series = [convert_func(ui) for ui in u.series[slc]]
         return cls(
             series,
@@ -116,18 +117,19 @@ class GridFunctionSeries(
     @classmethod
     def from_series(
         cls: type['GridFunctionSeries'], 
-        u: FunctionSeries,
-        slc: slice = slice(None, None, None),
+        u: FunctionSeries | ExprSeries,
+        slc: StrSlice = ':',
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
         use_mesh_map: bool = False,
         use_mesh_cache: bool = True,
         use_func_cache: bool = True,
+        mesh: Mesh | None = None,
     ) -> Self:
         convert_func = lambda u: (
             as_grid_function(use_cache=use_func_cache)(
-                u, strict, jit, mask, use_mesh_map, use_mesh_cache
+                u, strict, jit, mask, use_mesh_map, use_mesh_cache, mesh
             )
         )
         return super().from_series(
@@ -142,15 +144,16 @@ class TriFunctionSeries(
 ):            
     @classmethod
     def from_series(
-        cls: type['GridFunctionSeries'], 
-        u: FunctionSeries,
-        slc: slice = slice(None, None, None),
+        cls: type['TriFunctionSeries'], 
+        u: FunctionSeries | ExprSeries,
+        slc: StrSlice = ':',
         use_mesh_cache: bool = True,
         use_func_cache: bool = True,
+        mesh: Mesh | None = None,
     ) -> Self:
         convert_func = lambda u: (
             as_tri_function(use_cache=use_func_cache)(
-                u, use_mesh_cache,
+                u, use_mesh_cache, mesh,
             )
         )
         return super().from_series(
@@ -158,6 +161,58 @@ class TriFunctionSeries(
             convert_func,
             slc,
         )
+    
+
+class QuadFunctionSeries(
+    NPyFunctionSeries[QuadMesh, QuadFunction]
+):
+    @classmethod
+    def from_series(
+        cls: type['QuadFunctionSeries'], 
+        u: FunctionSeries | ExprSeries,
+        slc: StrSlice = ':',
+    ):
+        raise NotImplementedError
+        
+
+@replicate_callable(NPyConstantSeries.from_series)
+def as_npy_constant_series():
+    pass
+
+
+@replicate_callable(GridFunctionSeries.from_series)
+def as_grid_function_series():
+    pass
+
+
+@replicate_callable(TriFunctionSeries.from_series)
+def as_tri_function_series():
+    pass
+
+
+@replicate_callable(QuadFunctionSeries.from_series)
+def as_quad_function_series():
+    pass
+
+
+def as_npy_function_series(
+    u: FunctionSeries | ExprSeries,
+    grid: bool | None = None,
+    use_mesh_cache: bool = True,  
+    mesh: Mesh | None = None,
+):
+    if mesh is None:
+        mesh = u.mesh
+    return as_npy_object(
+        u,
+        as_grid_function_series,
+        as_tri_function_series,
+        as_quad_function_series,
+        mesh,
+        grid, 
+        use_mesh_cache,
+    )
+
 
 
     # def transform(
@@ -200,25 +255,8 @@ class TriFunctionSeries(
     # @property
     # def is_homogeneous(self) -> bool: #FIXME
     #     return not isinstance(self.shape, list)
-        
-
-@replicate_callable(NPyConstantSeries.from_series)
-def as_npy_constant_series():
-    pass
 
 
-@replicate_callable(GridFunctionSeries.from_series)
-def as_grid_function_series():
-    pass
-
-
-@replicate_callable(TriFunctionSeries.from_series)
-def as_tri_function_series():
-    pass
-
-
-def as_npy_function_series():
-    ...
 
 
 # @overload

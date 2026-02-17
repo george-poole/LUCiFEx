@@ -4,7 +4,7 @@ from dolfinx.fem import Function
 import numpy as np
 
 from ..utils.array_utils import as_index
-from ..utils.py_utils import as_slice
+from ..utils.py_utils import as_slice, StrSlice
 from ..mesh.mesh2npy import GridMesh
 from .fem2npy import as_grid_function, GridFunction
 
@@ -143,7 +143,7 @@ def grid_cross_section_series(
 def grid_average(
     u: Function  | np.ndarray,
     axis: str | int | None = None,
-    slc: slice | tuple[slice, slice] | None = None,
+    slc: StrSlice | tuple[StrSlice, StrSlice] = ':',
 ) -> np.ndarray:
     if isinstance(u, Function):
         values = as_grid_function(u).values

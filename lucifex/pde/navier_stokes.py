@@ -190,9 +190,10 @@ def chorin_solvers(
     f: FunctionSeries | Function | Constant| None = None,
     u_bcs: BoundaryConditions | None = None,
     p_bcs: BoundaryConditions | None = None,    
+    sigma_bcs: BoundaryConditions | None = None, # FIXME
     adv_scale: Constant | float = 1,
     p_scale: Constant | float = 1,
-):
+) -> tuple[IBVP, BVP, BVP]:
     """
     `∂𝐮/∂t + 𝐮·∇𝐮 = -∇p + ∇·𝜏(𝐮) + 𝐟` \\
     `∇·𝐮 = 0`
@@ -212,6 +213,37 @@ def chorin_solvers(
     return chorin1_solver, chorin2_solver, chorin3_solver
 
 
+def navier_stokes_solvers(
+    scheme: str,
+    u: FunctionSeries,
+    p: FunctionSeries,
+    dt: Constant,
+    deviatoric_stress: Callable[[Function], Expr],
+    D_adv: FiniteDifference,
+    D_visc: FiniteDifference,
+    D_force: FiniteDifference = FE,
+    D_dt: FiniteDifferenceDerivative = DT,
+    f: FunctionSeries | Function | Constant| None = None,
+    u_bcs: BoundaryConditions | None = None,
+    p_bcs: BoundaryConditions | None = None, 
+    sigma_bcs: BoundaryConditions | None = None,   
+    adv_scale: Constant | float = 1,
+    p_scale: Constant | float = 1,
+) -> tuple[IBVP, BVP, BVP]:
+    match scheme:
+        case 'ipcs':
+            ns_solvers_func = ipcs_solvers
+        case 'chorin':
+            ns_solvers_func = chorin_solvers
+        case _:
+            raise ValueError(f"Navier-Stokes scheme '{scheme}' not implemented.")
+        
+    return ns_solvers_func(
+        u, p, dt, deviatoric_stress, D_adv, D_visc, D_force, D_dt, f, 
+        u_bcs, p_bcs, sigma_bcs, adv_scale, p_scale,
+    )
+
+
 def navier_stokes_vorticity(
     omega: FunctionSeries,
     dt: Constant,
@@ -220,11 +252,14 @@ def navier_stokes_vorticity(
     mu: Constant,
     D_adv: FiniteDifference,
     D_diff: FiniteDifference,
-    D_reac: FiniteDifference = FE,
+    D_force: FiniteDifference = FE,
     D_dt: FiniteDifferenceDerivative = DT,
     fx: Function | None = None,
     fy: Function | None = None,
 ) -> list[Form]:
+    """
+    `ρ(∂ω/∂t + 𝐮·∇ω) = μ∇²ω + ∂fʸ/∂x - ∂fˣ/∂y`
+    """
     d = mu / rho
     j = 0
     if not is_zero(fx):
@@ -236,6 +271,6 @@ def navier_stokes_vorticity(
         j=j, 
         D_adv=D_adv, 
         D_diff=D_diff, 
-        D_reac=D_reac,
+        D_src=D_force,
         D_dt=D_dt,
     )

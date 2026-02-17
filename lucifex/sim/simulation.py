@@ -12,6 +12,7 @@ from typing import (
 from typing_extensions import Self
 from types import EllipsisType
 
+import numpy as np
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
@@ -39,7 +40,7 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        auxiliary: Iterable[ExprSeries | Expr | Function | Constant | tuple[str, Any]] = (),
+        auxiliary: Iterable[ExprSeries | Expr | Function | Constant | tuple[str, float | int | np.ndarray]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,

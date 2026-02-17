@@ -22,6 +22,7 @@ def plot_line(
     fig: Figure,
     ax: Axes,
     f: Function
+    | GridFunction
     | tuple[Iterable[float], Iterable[float]]
     | Iterable[Function | tuple[Iterable[float], Iterable[float]]],
     legend_labels: list[str | float | int] | tuple[float, float] | None = None,
@@ -30,7 +31,7 @@ def plot_line(
     **kwargs,
 ) -> None:
     
-    if isinstance(f, (Function, tuple)):
+    if isinstance(f, (Function, GridFunction, tuple)):
         if cyc is not None:
             cyc = create_cycler(cyc)
         _plot_line(f, ax, cyc, **kwargs)

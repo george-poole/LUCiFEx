@@ -12,7 +12,7 @@ from ..mesh import as_grid_mesh
 from ..fem import as_grid_function, TriFunction, GridFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
-    NonCartesianQuadMeshError, is_simplicial, get_component_functions, 
+    QuadNonGridMeshError, is_simplicial, get_component_functions, 
     is_grid,
 )
 from ..utils.py_utils import filter_kwargs
@@ -35,7 +35,7 @@ def plot_quiver(
         return _plot_quiver(ax, f, arrow_slc, **kwargs)
 
     fx, fy = _xy_components(f, mesh)
-    x, y, fx_np, fy_np = _x_y_fx_fy_arrays(fx, fy, use_cache, 'Quiver plotting')
+    x, y, fx_np, fy_np = _x_y_fx_fy_arrays(fx, fy, use_cache)
     
     return _plot_quiver(ax, (x, y, fx_np, fy_np), arrow_slc, **kwargs)
 
@@ -97,7 +97,7 @@ def plot_streamlines(
         return _plot_streamlines(ax, f, density, color, **kwargs)
     
     fx, fy = _xy_components(f, mesh)
-    x, y, fx_np, fy_np = _x_y_fx_fy_arrays(fx, fy, use_cache, 'Streamline plotting')
+    x, y, fx_np, fy_np = _x_y_fx_fy_arrays(fx, fy, use_cache)
 
     return _plot_streamlines(ax, (x, y, fx_np, fy_np), density, color, **kwargs)
 

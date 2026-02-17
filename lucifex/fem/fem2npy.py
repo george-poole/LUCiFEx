@@ -3,19 +3,23 @@ from typing import TypeVar, Generic, Callable, Iterable
 from typing_extensions import Self
 
 import numpy as np
+from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh
+from ..mesh.mesh2npy import (
+    NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh,
+    as_npy_object,
+)
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    dofs, grid_dofs, is_grid, is_simplicial, get_component_functions,
-    NonScalarVectorError, NonCartesianQuadMeshError,
+    dofs, grid_values, get_component_functions,
+    NonScalarVectorError, extract_mesh,
 )
 from .function import Function
 from .constant import Constant
 
 
-class NPyNamedObject(ABC):
+class NPyUFL(ABC):
     @abstractmethod
     def __init__(
         self,
@@ -73,8 +77,47 @@ class NPyNamedObject(ABC):
         return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
 
 
+class NPyConstant(NPyUFL):
+    def __init__(
+        self,
+        value: float | int | np.ndarray,
+        name: str | None = None,
+    ):
+        super().__init__(name)
+        self._value = value
+
+    @classmethod
+    def from_constant(
+        cls: type['NPyConstant'],
+        c: Constant,
+    ) -> Self:
+        return cls(c.value, c.name)
+    
+    @property
+    def value(self):
+        return self._value
+    
+    @property
+    def ufl_shape(self) -> tuple[int, ...]:
+        if isinstance(self._value, (float, int)):
+            return ()
+        return self._value.shape
+    
+    def sub(
+        self: 'NPyConstant',
+        index: int,
+        name: str | None = None,
+    ) -> Self | None:
+        if self.ufl_shape == ():
+            return None
+        return self.__class__(
+            self._value[index], 
+            self._create_subname(index) if name is None else name,
+        )
+
+
 M = TypeVar('M', bound=NPyMesh)
-class NPyFunction(NPyNamedObject, Generic[M]):
+class NPyFunction(NPyUFL, Generic[M]):
     def __init__(
         self,
         values: np.ndarray | tuple[np.ndarray, ...],
@@ -123,20 +166,20 @@ class NPyFunction(NPyNamedObject, Generic[M]):
     def from_function(
         cls,
         u: Function,
-        values_func: Callable[[Function], np.ndarray],
-        mesh_func: Callable[[Mesh], M],
+        get_values: Callable[[Function | Expr], np.ndarray],
+        convert_mesh: Callable[[Mesh], M],
     ):
         match u.ufl_shape:
             case (_, ):
                 values = tuple(
-                    values_func(ui) for ui in get_component_functions(('P', 1), u, use_cache=Ellipsis)
+                    get_values(ui) for ui in get_component_functions(('P', 1), u, use_cache=Ellipsis)
                 )
             case ():
-                values = values_func(u)
+                values = get_values(u)
             case _:
                 raise NonScalarVectorError(u)
             
-        msh = mesh_func(u.function_space.mesh)
+        msh = convert_mesh(u.function_space.mesh)
         return cls(
             values,
             msh,
@@ -148,19 +191,20 @@ class GridFunction(NPyFunction[GridMesh]):
     @classmethod
     def from_function(
         cls: type['GridFunction'],
-        u: Function,
+        u: Function | Expr,
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
         use_mesh_map: bool = False,
         use_mesh_cache: bool = True,
+        mesh: Mesh | None = None,
     ) -> Self:
-        values_func = lambda u: grid_dofs(u, strict, jit, mask, use_mesh_map, use_mesh_cache)
-        mesh_func = lambda m: as_grid_mesh(use_cache=use_mesh_cache)(m, strict)
+        get_values = lambda u: grid_values(u, strict, jit, mask, use_mesh_map, use_mesh_cache, mesh)
+        convert_mesh = lambda m: as_grid_mesh(use_cache=use_mesh_cache)(m, strict)
         return super().from_function(
             u,
-            values_func,
-            mesh_func,
+            get_values,
+            convert_mesh,
         )
     
 
@@ -168,104 +212,68 @@ class TriFunction(NPyFunction[TriMesh]):
     @classmethod
     def from_function(
         cls: type['TriFunction'],
-        u: Function,
+        u: Function | Expr,
         use_mesh_cache: bool = True,
+        mesh: Mesh | None = None,
     ) -> Self:
-        """
-        Interpolates function to P₁ (which has identity vertex-to-DoF map)
-        to evaluate the function at the vertex values.
-
-        Note that this is suitable on both Cartesian and unstructured meshes.
-        """
-        values_func = lambda u: dofs(u, ('P', 1), try_identity=True)
-        mesh_func = lambda m: as_tri_mesh(use_cache=use_mesh_cache)(m)
+        if mesh is None:
+            elem = ('P', 1)
+        else:
+            elem = (mesh, 'P', 1)
+        get_values = lambda u: dofs(u, elem, try_identity=True)
+        convert_mesh = lambda m: as_tri_mesh(use_cache=use_mesh_cache)(m)
         return super().from_function(
             u,
-            values_func,
-            mesh_func,
+            get_values,
+            convert_mesh,
         )
     
 
 class QuadFunction(NPyFunction[QuadMesh]):
-    ...
-
-
-class NPyConstant(NPyNamedObject):
-    def __init__(
-        self,
-        value: float | int | np.ndarray,
-        name: str | None = None,
-    ):
-        super().__init__(name)
-        self._value = value
-
     @classmethod
-    def from_constant(
-        cls: type['NPyConstant'],
-        c: Constant,
+    def from_function(
+        cls: type['QuadFunction'],
+        u: Function | Expr,
+        use_mesh_cache: bool = True,
+        mesh: Mesh | None = None,
     ) -> Self:
-        return cls(c.value, c.name)
-    
-    @property
-    def value(self):
-        return self._value
-    
-    @property
-    def ufl_shape(self) -> tuple[int, ...]:
-        if isinstance(self._value, (float, int)):
-            return ()
-        return self._value.shape
-    
-    def sub(
-        self: 'NPyConstant',
-        index: int,
-        name: str | None = None,
-    ) -> Self | None:
-        if self.ufl_shape == ():
-            return None
-        return self.__class__(
-            self._value[index], 
-            self._create_subname(index) if name is None else name,
-        )
+        raise NotImplementedError
 
+
+as_npy_constant = replicate_callable(NPyConstant.from_constant)(lambda: None)
 
 as_grid_function = optional_lru_cache(
     replicate_callable(GridFunction.from_function)(lambda: None)
 )
+
 as_tri_function = optional_lru_cache(
     replicate_callable(TriFunction.from_function)(lambda: None)
 )
 
-as_npy_constant = replicate_callable(NPyConstant.from_constant)(lambda: None)
+as_quad_function = optional_lru_cache(
+    replicate_callable(QuadFunction.from_function)(lambda: None)
+)
 
 
 def as_npy_function(
-    u: Function,
-    cartesian: bool | None = None,
+    u: Function | Expr,
+    grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
-) -> GridFunction | TriFunction:
-    
-    mesh = u.function_space.mesh
-
+    mesh: Mesh | None = None,
+):
     if isinstance(use_cache, bool):
-        use_cache = (use_cache, use_cache)
+        use_cache = use_cache, use_cache
     use_mesh_cache, use_func_cache = use_cache
 
-    if cartesian is None:
-        cartesian = is_grid(use_cache=use_mesh_cache)(mesh)
-    simplicial = is_simplicial(use_cache=use_mesh_cache)(mesh)
+    if mesh is None:
+        mesh = extract_mesh(u)
 
-    match simplicial, cartesian:
-        case True, False:
-            return as_tri_function(use_cache=use_func_cache)(u)
-        case _, True:
-            return as_grid_function(use_cache=use_func_cache)(u)
-        case False, False:
-            raise NonCartesianQuadMeshError
-
-
-
-
-
-
-
+    return as_npy_object(
+        u,
+        as_grid_function(use_cache=use_func_cache),
+        as_tri_function(use_cache=use_func_cache),
+        as_quad_function(use_cache=use_func_cache),
+        mesh,
+        grid,
+        use_mesh_cache,
+    )

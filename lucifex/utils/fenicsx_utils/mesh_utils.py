@@ -224,12 +224,13 @@ def mesh_coordinates(
 def mesh_axes(
     mesh: Mesh,
     strict: bool = False,
+    use_grid_cache: bool = True,
 )-> tuple[np.ndarray, ...]:
     """
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
-    if strict and not is_grid(mesh):
-        raise NonCartesianMeshError('Axes')
+    if strict and not is_grid(use_cache=use_grid_cache)(mesh):
+        raise NonGridMeshError
     return tuple(np.sort(np.unique(i)) for i in mesh_coordinates(mesh))
 
 
@@ -241,7 +242,7 @@ def mesh_vertices_tensor(
     Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
     if strict and not is_grid(mesh):
-        raise NonCartesianMeshError('Vertices tensor')
+        raise NonGridMeshError('Vertices tensor')
     mesh_axes = mesh_axes(mesh)
     if len(mesh_axes) == 2:
         x, y = mesh_axes
@@ -259,16 +260,17 @@ def mesh_axes_spacing(
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
     if strict and not is_grid(mesh):
-        raise NonCartesianMeshError('Axes spacing')
+        raise NonGridMeshError('Axes spacing')
     return tuple(np.diff(i) for i in mesh_axes(mesh))
 
 
 @optional_lru_cache
 def is_grid(
     mesh: Mesh | tuple[np.ndarray, ...],
+    use_axes_cache: bool = True,
 ) -> bool:
     if isinstance(mesh, Mesh):
-        axes = mesh_axes(mesh, strict=False)
+        axes = mesh_axes(use_cache=use_axes_cache)(mesh, strict=False)
         n_vertices = len(mesh.geometry.x)
         n_axes = [len(i) for i in axes]
         n_vertices_cartesian = np.prod(n_axes)
@@ -283,8 +285,9 @@ def is_grid(
 @optional_lru_cache
 def is_uniform_grid(
     mesh: Mesh,
+    use_grid_cache: bool = True,
 ) -> bool:
-    if not is_grid(mesh):
+    if not is_grid(use_cache=use_grid_cache)(mesh):
         return False
     return all(all(np.isclose(dx[0], dx)) for dx in mesh_axes_spacing(mesh))
 
@@ -374,7 +377,7 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
         raise ValueError(f'Invalid cell size quantity {h}.')
     
 
-class NonCartesianMeshError(NotImplementedError):
+class NonGridMeshError(NotImplementedError):
     def __init__(
         self, 
         unsupported: str | None = None,
@@ -383,10 +386,10 @@ class NonCartesianMeshError(NotImplementedError):
             msg = f'{unsupported} is not supported'
         else:
             msg = 'Not supported'
-        super().__init__(f'{msg} on a non-Cartesian mesh.')
+        super().__init__(f'{msg} on a non-grid mesh.')
 
 
-class NonCartesianQuadMeshError(NotImplementedError):
+class QuadNonGridMeshError(NotImplementedError):
     def __init__(
         self, 
         unsupported: str | None = None,
@@ -395,4 +398,4 @@ class NonCartesianQuadMeshError(NotImplementedError):
             msg = f'{unsupported} is not supported'
         else:
             msg = 'Not supported'
-        super().__init__(f'{msg} on a non-Cartesian mesh of quadrilateral cell.')
+        super().__init__(f'{msg} on a non-grid mesh of quadrilateral cell.')

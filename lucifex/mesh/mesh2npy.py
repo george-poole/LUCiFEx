@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import Literal
+from typing import Literal, Callable, TypeVar
 from typing_extensions import Self
 
 import numpy as np
@@ -11,7 +11,7 @@ from dolfinx.mesh import Mesh
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
     is_simplicial, mesh_coordinates,
-    mesh_axes,
+    mesh_axes, is_grid,
 )
 
 
@@ -194,6 +194,52 @@ as_tri_mesh = optional_lru_cache(
 as_quad_mesh = optional_lru_cache(
     replicate_callable(QuadMesh.from_mesh)(lambda: None)
 )
+
+
+def as_npy_mesh(
+    mesh: Mesh,
+    grid: bool | None = None,
+    use_cache: bool = True,
+):
+    return as_npy_object(
+        mesh, 
+        as_grid_mesh(use_cache=use_cache),
+        as_tri_mesh(use_cache=use_cache),
+        as_quad_mesh(use_cache=use_cache),
+        mesh,
+        grid,
+        use_cache,
+    )
+
+
+O = TypeVar('O')
+G = TypeVar('G')
+T = TypeVar('T')
+Q = TypeVar('Q')
+def as_npy_object(
+    obj: O,
+    as_grid: Callable[[O], G],
+    as_tri: Callable[[O], T],
+    as_quad: Callable[[O], Q],
+    mesh: Mesh | Callable[[O], Mesh],
+    grid: bool | None = None,
+    use_mesh_cache: bool = True,
+) -> G | T | Q:
+    
+    if not isinstance(mesh, Mesh):
+        mesh = mesh(obj)
+
+    if grid is None:
+        grid = is_grid(use_cache=use_mesh_cache)(mesh)
+    simplicial = is_simplicial(use_cache=use_mesh_cache)(mesh)
+
+    match simplicial, grid:
+        case _, True:
+            return as_grid(obj)
+        case True, False:
+            return as_tri(obj)
+        case False, False:
+            return as_quad(obj)
 
 
 def _reorder_quad_vertices(

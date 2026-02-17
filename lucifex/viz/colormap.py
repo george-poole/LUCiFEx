@@ -26,13 +26,13 @@ from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optiona
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
-    f: Function,
+    f: Function | Expr,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
+    mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
-    """Plots colormap of a scalar-valued function"""
     ...
 
 
@@ -40,26 +40,10 @@ def _plot_colormap(
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
-    expr: Expr,
+    u: GridFunction | TriFunction,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
-    mesh: Mesh | None = None,
-    **kwargs,
-) -> None:
-    """Plots colormap of a scalar-valued expression"""
-    ...
-
-
-@overload
-def _plot_colormap(
-    fig: Figure,
-    ax: Axes, 
-    u: GridFunction,
-    colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
-    mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
     ...
@@ -71,7 +55,7 @@ def _plot_colormap(
     ax: Axes, 
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     **kwargs,
 ) -> None:
     ...
@@ -94,45 +78,22 @@ def _(
 
 
 @_plot_colormap.register(Function)
-def _(
-    u: Function,
-    fig: Figure,
-    ax: Axes,
-    colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
-    **kwargs,
-):
-    if not is_scalar(u):
-        raise ValueError("Colormap plots must be of scalar-valued quantities.")
-    u_new = as_npy_function(u, cartesian, use_cache)
-    return _plot_colormap(
-        u_new, fig, ax, colorbar, cartesian, **kwargs
-    )
-
-
 @_plot_colormap.register(Expr)
 def _(
-    expr: Expr,
+    u: Function | Expr,
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
 ):
-    if mesh is None:
-        mesh = extract_mesh(expr)
-    u = create_function((mesh, 'P', 1), expr)
+    if not is_scalar(u):
+        raise ValueError("Colormap plots must be of scalar-valued quantities.")
+    u_npy = as_npy_function(u, grid, use_cache, mesh)
     return _plot_colormap(
-        u,
-        fig, 
-        ax,
-        colorbar,
-        cartesian,
-        use_cache,
-        **kwargs
+        u_npy, fig, ax, colorbar, grid, **kwargs
     )
 
 
@@ -142,12 +103,12 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     **kwargs,
 ):
     xyz = (*u.mesh.axes, u.values)
     return _plot_colormap(
-        xyz, fig, ax, colorbar, cartesian, **kwargs,
+        xyz, fig, ax, colorbar, grid, **kwargs,
     )
 
 
@@ -157,12 +118,12 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     **kwargs,
 ):
     xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
     return _plot_colormap(
-        xyz, fig, ax, colorbar, cartesian, triang=u.mesh.triangulation, **kwargs,
+        xyz, fig, ax, colorbar, grid, triang=u.mesh.triangulation, **kwargs,
     )
 
 
@@ -172,7 +133,7 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     triang: Triangulation | None = None,
     **kwargs,
 ):
@@ -191,12 +152,12 @@ def _(
     if triang is not None:
         cmap = filter_kwargs(ax.tripcolor)(triang, z, **_kwargs)
     else:
-        if cartesian is None:
-            cartesian = is_grid((x, y))
-        if not cartesian:
-            cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
-        else:
+        if grid is None:
+            grid = is_grid((x, y))
+        if grid:
             cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
+        else:
+            cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
 
     if colorbar is not False:
         divider = make_axes_locatable(ax)
@@ -245,34 +206,20 @@ def _(
 
 
 @_plot_contours.register(Function)
-def _(
-    f: Function,
-    ax: Axes,
-    levels: Iterable[float] | int | None = None,
-    cartesian: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
-    **kwargs,
-) -> None:
-    u_np = as_npy_function(f, cartesian, use_cache)
-    return _plot_contours(
-        u_np, ax, levels, cartesian, **kwargs
-    )
-
-
 @_plot_contours.register(Expr)
 def _(
-    f: Expr,
+    u: Function | Expr,
     ax: Axes,
     levels: Iterable[float] | int | None = None,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = (True, False),
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
-    if mesh is None:
-        mesh = extract_mesh(f)
-    f = create_function((mesh, 'P', 1), f)
-    return _plot_contours(f, ax, levels, cartesian, use_cache, **kwargs)
+    u_npy = as_npy_function(u, grid, use_cache, mesh)
+    return _plot_contours(
+        u_npy, ax, levels, grid, **kwargs
+    )
 
 
 @_plot_contours.register(GridFunction)
@@ -280,11 +227,11 @@ def _(
     u: GridFunction,
     ax: Axes,
     levels: Iterable[float] | int | None = None,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     **kwargs,
 ) -> None:
     xyz = (*u.mesh.axes, u.values)
-    return _plot_contours(xyz, ax, levels, cartesian, **kwargs)
+    return _plot_contours(xyz, ax, levels, grid, **kwargs)
 
 
 @_plot_contours.register(TriFunction)
@@ -292,11 +239,11 @@ def _(
     u: TriFunction,
     ax: Axes,
     levels: Iterable[float] | int | None = None,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     **kwargs,
 ) -> None:
     xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
-    return _plot_contours(xyz, ax, levels, cartesian, u.mesh.triangulation, **kwargs)
+    return _plot_contours(xyz, ax, levels, grid, u.mesh.triangulation, **kwargs)
 
 
 @_plot_contours.register(tuple)
@@ -304,7 +251,7 @@ def _(
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
     ax: Axes,
     levels: Iterable[float] | int | None,
-    cartesian: bool | None = None,
+    grid: bool | None = None,
     triang: Triangulation | None = None,
     **kwargs,
 ) -> None:
@@ -320,9 +267,9 @@ def _(
     if triang is not None:
         filter_kwargs(ax.tricontour, ContourSet)(triang, z, levels=levels, **_kwargs)
     else:
-        if cartesian is None:
-            cartesian = is_grid((x, y))
-        if not cartesian:
+        if grid is None:
+            grid = is_grid((x, y))
+        if not grid:
             filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
         else:
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)

@@ -41,8 +41,8 @@ from .mesh_utils import(
     is_grid,
     is_uniform_grid,
     is_simplicial,
-    NonCartesianQuadMeshError,
-    NonCartesianMeshError,
+    QuadNonGridMeshError,
+    NonGridMeshError,
 )
 from .fem_utils import (
     create_constant, 
@@ -51,9 +51,9 @@ from .fem_utils import (
     get_component_functions,
     set_constant, 
     set_function, 
-    set_fem_function_interpolate,
+    set_function_interpolate,
     is_mixed_space,
-    get_fem_subspace,
-    get_fem_subspaces,
+    get_subspace,
+    get_subspaces,
 )
-from .grid_utils import grid_dofs
+from .grid_values import grid_values

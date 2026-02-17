@@ -1,8 +1,9 @@
+import itertools
 from typing import ParamSpec, Callable, TypeVar, Any, Iterable, Protocol, Generic
 
 from joblib import Parallel, delayed
 
-from .sim2npy import as_grid_simulation
+from .sim2npy import as_grid_simulation, as_tri_simulation
 from .run import run
 from .simulation import Simulation
 
@@ -26,9 +27,9 @@ def create_and_run(
         elif return_as == 'grid':
             return as_grid_simulation(sim)
         elif return_as == 'tri':
-            raise NotImplementedError
+            return as_tri_simulation(sim)
         else:
-            raise ValueError
+            raise ValueError(return_as)
     return _inner
 
 
@@ -38,7 +39,7 @@ class ParallelRunCallable(Protocol, Generic[T]):
         self, 
         **parallel_kws: Iterable[Any],
     ) -> list[T]:
-        pass
+        ...
 
 
 T = TypeVar('T')
@@ -50,6 +51,7 @@ def parallel_run(
     dt_init: float | None = None,
     n_init: int | None = None,
     return_as: Callable[[Simulation], T] | str = 'grid',
+    product: bool = False,
 ):
     """
     The type `T` returned by `return_as` must be picklable by `joblib`.
@@ -67,20 +69,27 @@ def parallel_run(
                 raise TypeError('Positional parallel arguments not accepted.')  
             if not parallel_kws:
                 raise TypeError('Keyword parallel arguments required.')
-
-            n_kws = [len(v) for v in parallel_kws.values()]
-            n_total = n_kws[0]
-            if not all(n == n_total for n in n_kws):
-                raise TypeError('Keyword parallel arguments must all have the same length.')
+             
+            if product:
+                vals = itertools.product(parallel_kws.values())
+                job_kws = [
+                    dict(zip(parallel_kws.keys(), v, strict=True)) for v in vals
+                ]
+            else:
+                n_kws = [len(v) for v in parallel_kws.values()]
+                n_total = n_kws[0]
+                if not all(n == n_total for n in n_kws):
+                    raise TypeError('Keyword parallel arguments must all have the same length.')
+                job_kws = [{k: v[n] for k, v in parallel_kws.items()} for n in range(n_total)]
 
             job_func = create_and_run(factory, n_stop, t_stop, dt_init, n_init, return_as)
             if n_proc is None:
                 sims = [
-                    job_func(*args, **kwargs, **{k: v[n] for k, v in parallel_kws.items()}) for n in range(n_total)
+                    job_func(*args, **kwargs, **kws) for kws in job_kws
                 ]
             else:
                 sims = Parallel(n_jobs=n_proc, return_as='list')(
-                    delayed(job_func)(*args, **kwargs, **{k: v[n] for k, v in parallel_kws.items()}) for n in range(n_total)
+                    delayed(job_func)(*args, **kwargs, **kws) for kws in job_kws
                 )
             return sims
         

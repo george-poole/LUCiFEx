@@ -41,14 +41,14 @@ def is_component_space(fs: FunctionSpace) -> bool:
     if not is_mixed_space(fs):
         return False
     else:
-        subspaces = get_fem_subspaces(fs)
+        subspaces = get_subspaces(fs)
         sub0 = subspaces[0]
         if not is_scalar(sub0):
             return False
         return all([sub.ufl_element() == sub0.ufl_element() for sub in subspaces])
     
 
-def get_fem_subspace(
+def get_subspace(
     fs: FunctionSpace,
     subspace_index: int | None = None,
     collapse: bool = True,
@@ -62,14 +62,14 @@ def get_fem_subspace(
         return fs_sub
 
 
-def get_fem_subspaces(
+def get_subspaces(
     fs: FunctionSpace,
     collapse: bool = True,
 ) -> tuple[FunctionSpace, ...]:
     subspaces = []
     n_sub = fs.num_sub_spaces
     for n in range(n_sub):
-        subspaces.append(get_fem_subspace(fs, n, collapse))
+        subspaces.append(get_subspace(fs, n, collapse))
     return tuple(subspaces)
 
 
@@ -102,7 +102,7 @@ def create_function_space(
     Typecast to `dolfinx.fem.FunctionSpace`.
     """
     if isinstance(fs, FunctionSpace):
-        return get_fem_subspace(fs, subspace_index)
+        return get_subspace(fs, subspace_index)
     else:
         return _function_space(use_cache=use_cache)(fs, subspace_index)
     
@@ -128,17 +128,14 @@ def _function_space(
                 else:
                     raise ValueError(f'{e}')
             fs = FunctionSpace(mesh, MixedElement(*mixed_elements))
-
         case mesh, fam, deg:
             fs = FunctionSpace(mesh, (fam, deg))
-        
         case mesh, fam, deg, dim:
             fs = VectorFunctionSpace(mesh, (fam, deg), dim)
-        
         case _:
             raise ValueError(f'{fs_hashable}')
 
-    return get_fem_subspace(fs, subspace_index)
+    return get_subspace(fs, subspace_index)
 
 
 def create_function(
@@ -167,7 +164,7 @@ def create_function(
     if isinstance(fs, FunctionSpace):
         if try_identity and isinstance(value, Function) and value.function_space == fs:
             return value
-        fs = get_fem_subspace(fs, subspace_index)
+        fs = get_subspace(fs, subspace_index)
         f = Function(fs, name=name)
     else:
         fs = _as_function_space_tuple(fs, value)
@@ -310,12 +307,12 @@ def set_function(
     method. Does not mutate `value`.
     """
     if dofs_indices is None:
-        set_fem_function_interpolate(f, value)
+        set_function_interpolate(f, value)
     else:
-        set_fem_function_dofs(f, value, dofs_indices)
+        set_function_dofs(f, value, dofs_indices)
 
 
-def set_fem_function_dofs(
+def set_function_dofs(
     f: Function | np.ndarray,
     value: Function 
     | Callable[[np.ndarray], np.ndarray] 
@@ -337,71 +334,71 @@ def set_fem_function_dofs(
     if isinstance(f, Function):
         f = f.x.array
 
-    return _set_fem_function_dofs(value, f, dofs_indices)
+    return _set_function_dofs(value, f, dofs_indices)
 
 
 @singledispatch
-def _set_fem_function_dofs(value, *_, **__):
+def _set_function_dofs(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
-@_set_fem_function_dofs.register(Function)
+@_set_function_dofs.register(Function)
 def _(value: Function, arr: np.ndarray, indices: np.ndarray | None):
     # assert f.function_space == value.function_space
     arr[indices] = value.x.array[indices]
 
 
-@_set_fem_function_dofs.register(Constant)
+@_set_function_dofs.register(Constant)
 def _(value: Constant, arr: np.ndarray, indices: np.ndarray | None):
-    _set_fem_function_dofs(value.value.item(), arr, indices)
+    _set_function_dofs(value.value.item(), arr, indices)
 
 
-@_set_fem_function_dofs.register(float)
-@_set_fem_function_dofs.register(int)
+@_set_function_dofs.register(float)
+@_set_function_dofs.register(int)
 def _(value, arr: np.ndarray, indices: np.ndarray | None):
     arr[indices] = value
 
-@_set_fem_function_dofs.register(Iterable)
+@_set_function_dofs.register(Iterable)
 def _(value, arr: np.ndarray, indices: np.ndarray | None):
     arr[indices] = value[indices]
 
 
-def set_fem_function_interpolate(
+def set_function_interpolate(
     f: Function,
     value: Function | Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
 ) -> None:
     """
     Mutates `f` by calling its `interpolate` method. Does not mutate `value`.
     """
-    return _set_fem_function_interpolate(value, f)
+    return _set_function_interpolate(value, f)
 
 
 @singledispatch
-def _set_fem_function_interpolate(u, *_, **__):
+def _set_function_interpolate(u, *_, **__):
     raise MultipleDispatchTypeError(u)
 
 
-@_set_fem_function_interpolate.register(Expr)
+@_set_function_interpolate.register(Expr)
 def _(u: Expr, f: Function):
     f.interpolate(Expression(u, f.function_space.element.interpolation_points()))
 
-@_set_fem_function_interpolate.register(Function)
-@_set_fem_function_interpolate.register(Expression)
-@_set_fem_function_interpolate.register(Callable)
+@_set_function_interpolate.register(Function)
+@_set_function_interpolate.register(Expression)
+@_set_function_interpolate.register(Callable)
 def _(value, f: Function):
     f.interpolate(value)
 
-@_set_fem_function_interpolate.register(Constant)
+@_set_function_interpolate.register(Constant)
 def _(value: Constant, f: Function):
     if is_scalar(value):
-        return _set_fem_function_interpolate(value.value.item(), f)
+        return _set_function_interpolate(value.value.item(), f)
     else:
         if not f.ufl_shape == value.value.shape:
             raise ShapeError(f, value.value.shape)
-        return _set_fem_function_interpolate(value.value, f)
+        return _set_function_interpolate(value.value, f)
     
 
-@_set_fem_function_interpolate.register(Iterable)
+@_set_function_interpolate.register(Iterable)
 def _(value: Iterable[float | Constant | Callable], f: Function):
     def _inner(u) -> Callable[[np.ndarray], np.ndarray]:
         if isinstance(u, (int ,float)):
@@ -415,8 +412,8 @@ def _(value: Iterable[float | Constant | Callable], f: Function):
     f.interpolate(lambda x: np.vstack([_inner(i)(x) for i in value]))
 
 
-@_set_fem_function_interpolate.register(float)
-@_set_fem_function_interpolate.register(int)
+@_set_function_interpolate.register(float)
+@_set_function_interpolate.register(int)
 def _(value, f: Function):
     f.interpolate(lambda x: np.full_like(x[0], value, dtype=PETSc.ScalarType))
 
@@ -428,30 +425,30 @@ def set_constant(
     """
     Mutates `c` by setting its value array. Does not mutate `value`.
     """
-    return _set_fem_constant(value, c)
+    return _set_constant(value, c)
 
 
 @singledispatch
-def _set_fem_constant(value, *_, **__):
+def _set_constant(value, *_, **__):
     raise MultipleDispatchTypeError(value)
 
 
-@_set_fem_constant.register(Constant)
+@_set_constant.register(Constant)
 def _(value: Constant, const: Constant):
     const.value = value.value.copy()
 
 
-@_set_fem_constant.register(float)
-@_set_fem_constant.register(int)
+@_set_constant.register(float)
+@_set_constant.register(int)
 def _(value, const: Constant):
     const.value = value
 
-@_set_fem_constant.register(np.ndarray)
+@_set_constant.register(np.ndarray)
 def _(value: np.ndarray, const: Constant):
     if not const.value.shape == value.shape:
         raise ShapeError(const, value.shape)
     const.value = value
 
-@_set_fem_constant.register(Iterable)
+@_set_constant.register(Iterable)
 def _(value, const: Constant):
-    return _set_fem_constant(np.array(value), const)
+    return _set_constant(np.array(value), const)

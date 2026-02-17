@@ -17,7 +17,7 @@ from ..py_utils import StrEnum
 from .fem_utils import (
     create_function, 
     get_component_functions, 
-    set_fem_function_dofs,
+    set_function_dofs,
 )
 from .ufl_utils import is_scalar, is_vector, NonScalarVectorError
 
@@ -117,7 +117,8 @@ def dofs(
     """
     
     if fs is None:
-        assert isinstance(u, Function)
+        if not isinstance(u, Function):
+            raise TypeError('`Function` object required if no function space specified.')
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
@@ -223,6 +224,6 @@ def dirichlet_corrector(
 
     def _(u: np.ndarray) -> None:
         for d, v in zip(d, values):
-            set_fem_function_dofs(u, v, d)
+            set_function_dofs(u, v, d)
 
     return _
