@@ -1,14 +1,10 @@
-import time
-from typing import Iterable
-
 import numpy as np
-from joblib import Parallel, delayed
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fem import Constant
 from lucifex.fdm import CN, FunctionSeries, ConstantSeries
 from lucifex.solver import ibvp, BoundaryConditions
 from lucifex.sim import Simulation, configure_simulation, parallel_run
-from lucifex.sim import create_and_run, parallel_run
+from lucifex.sim import parallel_run
 from lucifex.pde.diffusion import diffusion
 
 
@@ -75,7 +71,9 @@ if __name__ == "__main__":
     NY = 200
     DT = 0.01
     D_OPTS = (0.1, 1.0, 5.0, 10.0)
+
     create_sim = create_simulation(store_delta=STORE)
+
     parallel_run(
         create_sim, N_PROC, N_STOP, return_as='grid',
     )(NX, NY, DT)(d=D_OPTS)

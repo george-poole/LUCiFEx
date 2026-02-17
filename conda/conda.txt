@@ -112,6 +112,7 @@ importlib_metadata               8.6.1               hd8ed1ab_0               co
 importlib_resources              6.5.2               pyhd8ed1ab_0             conda-forge
 iniconfig                        2.0.0               pyhd8ed1ab_1             conda-forge
 ipykernel                        6.29.5              pyh57ce528_0             conda-forge
+ipyparallel                      9.0.2               pyhcf101f3_0             conda-forge
 ipython                          8.31.0              pyh707e725_0             conda-forge
 isoduration                      20.11.0             pyhd8ed1ab_1             conda-forge
 isort                            6.0.1               pyhd8ed1ab_1             conda-forge
@@ -246,7 +247,7 @@ occt                             7.7.2               all_hd7ce604_201         co
 openexr                          3.2.1               h747cbf1_0               conda-forge
 openh264                         2.3.1               hf0c8a7f_2               conda-forge
 openjpeg                         2.5.0               h13ac156_2               conda-forge
-openssl                          3.6.0               h230baf5_0               conda-forge
+openssl                          3.6.1               hb6871ef_1               conda-forge
 overrides                        7.7.0               pyhd8ed1ab_1             conda-forge
 p11-kit                          0.24.1              h65f8906_0               conda-forge
 packaging                        23.1                pyhd8ed1ab_0             conda-forge
@@ -359,6 +360,7 @@ tinycss2                         1.4.0               pyhd8ed1ab_0             co
 tk                               8.6.12              h5dbffcc_0               conda-forge
 tomli                            2.2.1               pyhe01879c_2             conda-forge
 tornado                          6.4.2               py310hbb8c376_0          conda-forge
+tqdm                             4.67.3              pyh8f84b5b_0             conda-forge
 traitlets                        5.14.3              pyhd8ed1ab_1             conda-forge
 typing-extensions                4.7.1               hd8ed1ab_0               conda-forge
 typing_extensions                4.7.1               pyha770c72_0             conda-forge

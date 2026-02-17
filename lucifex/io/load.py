@@ -12,7 +12,7 @@ from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, optional_lru_cache
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fdm.fdm2npy import GridSeries, FloatSeries, TriSeries
+from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
 from .read import read
 from .utils import file_path_ext
 
@@ -168,7 +168,7 @@ def load_grid_series(
     file_name: str,
     sep: str = '__',
     axis_names: tuple[str, ...] = ('x', 'y', 'z'),
-) -> GridSeries:
+) -> GridFunctionSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, axis_names, target_name=name)[name]
     except KeyError:
@@ -181,7 +181,7 @@ def load_triangulation_series(
     dir_path: str,
     file_name: str,
     sep: str = '__',
-) -> TriSeries:
+) -> TriFunctionSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
@@ -194,7 +194,7 @@ def load_numeric_series(
     dir_path: str,
     file_name: str,
     sep: str = '__',
-) -> FloatSeries:
+) -> NPyConstantSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
@@ -243,7 +243,7 @@ def load_npz_dict(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
     *,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | FloatSeries | GridSeries | TriSeries]:
+) -> dict[str, float | np.ndarray | NPyConstantSeries | GridFunctionSeries | TriFunctionSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -271,7 +271,7 @@ def load_npz_dict(
 
     dict_return: dict[
         str, 
-        float | np.ndarray | FloatSeries | GridSeries,
+        float | np.ndarray | NPyConstantSeries | GridFunctionSeries,
     ] = {}
 
     for name, value in dict_load.items():
@@ -290,11 +290,11 @@ def load_npz_dict(
             if spatial_arrays:
                 if set(spatial_attrs) == set(trigl_attrs):
                     trigl = Triangulation(*spatial_arrays)
-                    value = TriSeries(series, time_series, trigl, name)
+                    value = TriFunctionSeries(series, time_series, trigl, name)
                 else:
-                    value = GridSeries(series, time_series, tuple(spatial_arrays), name)
+                    value = GridFunctionSeries(series, time_series, tuple(spatial_arrays), name)
             else:
-                value = FloatSeries(series, time_series, name)
+                value = NPyConstantSeries(series, time_series, name)
         dict_return[name] = value
 
     return dict_return

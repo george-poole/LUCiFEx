@@ -1,53 +1,94 @@
-import operator
 from abc import ABC, abstractmethod
 from functools import cached_property
 from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
 import numpy as np
-from ufl.core.expr import Expr
-from dolfinx.mesh import Mesh
 
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
 from ..fem import Function, Constant
-from ..fem.fem2npy import NPyMesh, NPyFunction, GridMesh, GridFunction, as_grid_function, TriMesh, TriFunction, as_tri_function
+from ..fem.fem2npy import (
+    NPyNamedObject, NPyFunction, GridFunction, as_grid_function, 
+    TriFunction, as_tri_function, NPyConstant, as_npy_constant,
+)
 from . import Series, ExprSeries, ConstantSeries
 from ..utils.py_utils import replicate_callable
-from ..utils.fenicsx_utils import NonScalarVectorError
-from ..utils.fenicsx_utils import get_component_functions
 from .series import FunctionSeries
 
 
-M = TypeVar('M', bound=NPyMesh)
-F = TypeVar('F', bound=NPyFunction)
-class NPySeries(ABC, Generic[M, F]):
-    """
-    Abstract base class for a Numpy-compatible series representing a time-dependent quantity.
-    """
+F = TypeVar('F', bound=NPyNamedObject)
+class NPySeries(NPyNamedObject, Generic[F]):
     def __init__(
         self, 
-        series: Iterable[F] | Iterable[Iterable[F]], 
+        series: Iterable[F], 
         t: Iterable[float],
         name: str | tuple[str, Iterable[str]] | None,
     ): 
+        super().__init__(name)
         assert len(series) == len(t)
         self._series = list(series)
         self._time_series = list(t)
 
-        if isinstance(name, tuple):
-            name, subnames = name
-            subnames = tuple(subnames)
-        else:
-            subnames = None
+    @property
+    def series(self) -> list[F]:
+        return self._series
 
-        if name is None:
-            name = self.__class__.__name__
+    @property
+    def time_series(self) -> list[float]:
+        return self._time_series
+    
+    @property
+    def ufl_shape(self) -> tuple[int, ...] | None:
+        if self.series:
+            return self.series[0].ufl_shape
+        
+    # @property
+    # def npy_shape(self) -> tuple[int, ...] | None:
+    #     if self.series:
+    #         return self.series[0].npy_shape
 
-        self.name = name
-        self._subnames = subnames
-        self._create_subname = lambda i: (
-            self._subnames[i] if self._subnames else f'{self.name}{i}'
+    def sub(
+        self, 
+        index: int, 
+        name: str | None = None,
+    ) -> Self | None:
+        if self.ufl_shape == ():
+            return None
+        subseries = [i.sub(index) for i in self.series]
+        return self.__class__(
+            subseries,
+            self.time_series,
+            self._create_subname(index) if name is None else name,
         )
 
+    @classmethod
+    @abstractmethod
+    def from_series(
+        cls,
+        u: Series,
+        *args,
+        **kwargs,
+    ):
+        ...
+
+
+class NPyConstantSeries(
+    NPySeries[NPyConstant]
+):
+    @classmethod
+    def from_series(
+        cls, 
+        c: ConstantSeries,
+        slc: slice = slice(None, None, None),
+    ) -> Self:
+        series = [as_npy_constant(ci) for ci in c.series[slc]]
+        return cls(series, c.time_series, c.name)
+    
+
+
+M = TypeVar('M', bound=NPyMesh)
+F = TypeVar('F', bound=NPyFunction)
+class NPyFunctionSeries(NPySeries[F], Generic[M, F]):
     @classmethod
     @abstractmethod
     def from_series(
@@ -56,100 +97,25 @@ class NPySeries(ABC, Generic[M, F]):
         convert_func: Callable[[Function], F],
         slc: slice = slice(None, None, None),
     ) -> Self:
-        match u.shape:
-            case (_, ):
-                series = [
-                    [convert_func(j) for j in get_component_functions(('P', 1), i, use_cache=Ellipsis)] 
-                    for i in u.series[slc]
-                ]
-            case ():
-                series = [convert_func(i) for i in u.series[slc]]
-            case _:
-                raise NonScalarVectorError(u)
-            
+        series = [convert_func(ui) for ui in u.series[slc]]
         return cls(
             series,
             u.time_series[slc],
             u.name,
         )
     
-    def sub(
-        self: 'NPySeries', 
-        index: int, 
-        name: str | None = None,
-    ) -> Self:
-        assert not self.is_scalar
-        if name is None:
-            name = self._create_subname(index)
-        return self.__class__(
-            [i[index] for i in self.series], 
-            self.time_series, 
-            name,
-        )
-    
-    def split(
-        self,
-        names: Iterable[str] | None = None,
-    ) -> tuple[Self, ...]:
-        assert not self.is_scalar
-        n_sub = len(self.series[0])
-        subseries_indices = range(len(self.series[0]))
-        if names is None:
-            names = [f'{self.name}_{i}' for i in subseries_indices]
-        return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
-    
     @property
-    def series(self) -> list[F] | list[list[F]]:
-        return self._series
-
-    @property
-    def time_series(self) -> list[float]:
-        return self._time_series
-    
-    @property
-    def mesh(self) -> M:
-        return ...
-    
-    @property
-    def name(self) -> str | None:
-        return self._name
-    
-    @name.setter
-    def name(self, value):
-        assert isinstance(value, str)
-        assert '__' not in value
-        self._name = value
-
-    @cached_property
-    def is_scalar(self):
-        return all(isinstance(i, F.__bound__) for i in self.series)
-    
-    # @cached_property
-    # def shape(self) -> tuple[int, ...] | list[tuple[int, ...]]:
-    #     shapes = [] 
-    #     for i in self.series:
-    #         if isinstance(i, FE2PyFunction):
-    #             shp = i.shape
-    #         else:
-    #             shp = [j.shape for j in i]
-    #         shapes.append(shp)
-
-    #     if len(set(shapes)) == 1:
-    #         return shapes[0]
-    #     else:
-    #         return shapes
-        
-    # @property
-    # def is_homogeneous(self) -> bool: #FIXME
-    #     return not isinstance(self.shape, list)
+    def mesh(self) -> M | None:
+        if self.series:
+            return self.series[0].mesh
     
 
-class GridSeries(
-    NPySeries[GridMesh, GridFunction]
+class GridFunctionSeries(
+    NPyFunctionSeries[GridMesh, GridFunction]
 ):            
     @classmethod
     def from_series(
-        cls: type['GridSeries'], 
+        cls: type['GridFunctionSeries'], 
         u: FunctionSeries,
         slc: slice = slice(None, None, None),
         strict: bool = False,
@@ -171,12 +137,12 @@ class GridSeries(
         )
     
 
-class TriSeries(
-    NPySeries[TriMesh, TriFunction]
+class TriFunctionSeries(
+    NPyFunctionSeries[TriMesh, TriFunction]
 ):            
     @classmethod
     def from_series(
-        cls: type['GridSeries'], 
+        cls: type['GridFunctionSeries'], 
         u: FunctionSeries,
         slc: slice = slice(None, None, None),
         use_mesh_cache: bool = True,
@@ -194,53 +160,65 @@ class TriSeries(
         )
 
 
-class FloatSeries(NPySeries[None, int | float | np.ndarray]):
-    @classmethod
-    def from_series(
-        cls, 
-        u: ConstantSeries,
-        slc: slice = slice(None, None, None),
-    ) -> Self:
-        return cls(u.value_series[slc], u.time_series[slc], u.name)
-    
-    
-    def transform(
-        self, 
-        transf: str | Callable[[float | Iterable[float]], float] | Callable[[float, float], float],
-        other: Self | float | None = None,
-        name: str | None = None,
-    ) -> Self:
-        if isinstance(transf, str):
-            transf = getattr(operator, transf)
+    # def transform(
+    #     self, 
+    #     transf: str | Callable[[float | Iterable[float]], float] | Callable[[float, float], float],
+    #     other: Self | float | None = None,
+    #     name: str | None = None,
+    # ) -> Self:
+    #     if isinstance(transf, str):
+    #         transf = getattr(operator, transf)
 
-        if other is None:
-            return FloatSeries([transf(i) for i in self.series], self.time_series, name)
-        elif isinstance(other, float):
-            return FloatSeries([transf(i, other) for i in self.series], self.time_series, name)
-        else:
-            size = min(len(self.time_series), len(other.time_series))
-            assert np.allclose(self.time_series[:size], other.time_series[:size])
-            return FloatSeries(
-                [transf(i, j) for i, j in zip(self.series[:size], other.series[:size])],
-                self.time_series[:size],
-                name,
-            )
+    #     if other is None:
+    #         return NPyConstantSeries([transf(i) for i in self.series], self.time_series, name)
+    #     elif isinstance(other, float):
+    #         return NPyConstantSeries([transf(i, other) for i in self.series], self.time_series, name)
+    #     else:
+    #         size = min(len(self.time_series), len(other.time_series))
+    #         assert np.allclose(self.time_series[:size], other.time_series[:size])
+    #         return NPyConstantSeries(
+    #             [transf(i, j) for i, j in zip(self.series[:size], other.series[:size])],
+    #             self.time_series[:size],
+    #             name,
+    #         )
+        
+    # @cached_property
+    # def shape(self) -> tuple[int, ...] | list[tuple[int, ...]]:
+    #     shapes = [] 
+    #     for i in self.series:
+    #         if isinstance(i, FE2PyFunction):
+    #             shp = i.shape
+    #         else:
+    #             shp = [j.shape for j in i]
+    #         shapes.append(shp)
+
+    #     if len(set(shapes)) == 1:
+    #         return shapes[0]
+    #     else:
+    #         return shapes
+        
+    # @property
+    # def is_homogeneous(self) -> bool: #FIXME
+    #     return not isinstance(self.shape, list)
         
 
-@replicate_callable(GridSeries.from_series)
-def as_grid_series():
+@replicate_callable(NPyConstantSeries.from_series)
+def as_npy_constant_series():
     pass
 
 
-@replicate_callable(TriSeries.from_series)
-def as_tri_series():
+@replicate_callable(GridFunctionSeries.from_series)
+def as_grid_function_series():
     pass
 
 
-@replicate_callable(FloatSeries.from_series)
-def as_float_series():
+@replicate_callable(TriFunctionSeries.from_series)
+def as_tri_function_series():
     pass
 
+
+def as_npy_function_series():
+    ...
 
 
 # @overload

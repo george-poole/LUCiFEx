@@ -9,7 +9,7 @@ from dolfinx.mesh import Mesh
 from ..utils.fenicsx_utils import is_grid, CellType, NonCartesianQuadMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
 from ..fdm import ConstantSeries, FunctionSeries
-from ..fdm.fdm2npy import GridSeries, FloatSeries, TriSeries
+from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
 from ..io import (
     write, 
     load_mesh, 
@@ -88,7 +88,7 @@ def _(
         for i in function_series if _include(i.name)
     ]
     constant_series_metadata = [
-        (i.name, sim.write_file[i.name], i.shape) 
+        (i.name, sim.write_file[i.name], i.ufl_shape) 
         for i in constant_series if _include(i.name)
     ]
 
@@ -128,9 +128,9 @@ def _(
 
     match cell_type, cartesian:
         case CellType.TRIANGLE, False:
-            NpSeries = TriSeries
+            NpSeries = TriFunctionSeries
         case CellType.TRIANGLE | CellType.QUADRILATERAL, True:
-            NpSeries = GridSeries
+            NpSeries = GridFunctionSeries
         case CellType.QUADRILATERAL, False:
             raise NonCartesianQuadMeshError('Conversion to `numpy` data')
         case _:
@@ -139,7 +139,7 @@ def _(
     if npz_name is None:
         npz_name = (
             NpSeries.__name__,
-            FloatSeries.__name__,
+            NPyConstantSeries.__name__,
         )
     if isinstance(npz_name, str):
         npz_name = (npz_name, npz_name)
@@ -161,7 +161,7 @@ def _(
         shape = i[2:]
         c = load_constant_series(name, dir_path, file_name, mesh, *shape)
         write(
-            FloatSeries.from_series(c), 
+            NPyConstantSeries.from_series(c), 
             file_name=consts_npz_name, 
             dir_path=dir_path,
             mode=mode,

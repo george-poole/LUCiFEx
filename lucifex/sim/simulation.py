@@ -102,13 +102,13 @@ class Simulation(
     @property
     def solutions(self) -> list[FunctionSeries | ConstantSeries]:
         """
-        `len(series) ≤ len(solvers)` because a series may be solved for by more 
-        than one solvers (e.g. in splitting or linearization schemes)
+        `len(solutions) ≤ len(solvers)` because a solution may be solved for by more 
+        than one solver (e.g. in splitting or linearization schemes)
         """
         return list(
             {*[s.solution_series for s in self.solvers], 
              *[s.correction_series for s in self.solvers if s.correction_series is not None]},
-            )
+        )
         
     @property
     def auxiliary(self):

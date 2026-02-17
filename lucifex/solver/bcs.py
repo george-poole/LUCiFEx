@@ -107,18 +107,18 @@ class BoundaryConditions:
             strict=True,
         ):
             if b in strong_types:
-                dofs = dofs_indices(fs, m, i, d, facet_method=facet_method)
+                indices = dofs_indices(fs, m, i, d, facet_method=facet_method)
                 if isinstance(uD, Constant):
                     if i is None:
-                        dbc = dirichletbc(uD, dofs, fs)
+                        dbc = dirichletbc(uD, indices, fs)
                     else:
-                        dbc = dirichletbc(uD, dofs, fs.sub(i))
+                        dbc = dirichletbc(uD, indices, fs.sub(i))
                 else:
                     uD = create_function(fs, uD, i, try_identity=True)
                     if i is None:
-                        dbc = dirichletbc(uD, dofs)
+                        dbc = dirichletbc(uD, indices)
                     else:
-                        dbc = dirichletbc(uD, dofs, fs.sub(i))
+                        dbc = dirichletbc(uD, indices, fs.sub(i))
                 dirichlet.append(dbc)
                 
         return dirichlet

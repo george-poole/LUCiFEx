@@ -21,7 +21,7 @@ from ..utils.fenicsx_utils import (
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, FloatSeries, TriSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim
@@ -81,7 +81,7 @@ def write(
 
 @overload
 def write(
-    u: GridSeries,
+    u: GridFunctionSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
     slc: StrSlice = slice(0, None),
@@ -94,7 +94,7 @@ def write(
 
 @overload
 def write(
-    u: FloatSeries,
+    u: NPyConstantSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
     slc: StrSlice = slice(0, None),
@@ -315,9 +315,9 @@ def _(
             mode = "a"
 
 
-@_write.register(GridSeries)
+@_write.register(GridFunctionSeries)
 def _(
-    u: GridSeries,
+    u: GridFunctionSeries,
     file_name: str,
     dir_path,
     slc=slice(0, None), 
@@ -328,7 +328,7 @@ def _(
     file_path = file_path_ext(dir_path, file_name, 'npz')
 
     slc = as_slice(slc)
-    u = GridSeries(u.series[slc], u.time_series[slc], u.axes, u.name)
+    u = GridFunctionSeries(u.series[slc], u.time_series[slc], u.axes, u.name)
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):
@@ -338,9 +338,9 @@ def _(
     np.savez(file_path, **d)
 
 
-@_write.register(TriSeries)
+@_write.register(TriFunctionSeries)
 def _(
-    u: TriSeries,
+    u: TriFunctionSeries,
     file_name: str,
     dir_path,
     slc=slice(0, None), 
@@ -351,7 +351,7 @@ def _(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
 
     slc = as_slice(slc)
-    u = TriSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
+    u = TriFunctionSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):
@@ -361,9 +361,9 @@ def _(
     np.savez(file_path, **d)
 
 
-@_write.register(FloatSeries)
+@_write.register(NPyConstantSeries)
 def _(
-    u: FloatSeries,
+    u: NPyConstantSeries,
     file_name: str,
     dir_path,
     slc = slice(0, None), 
@@ -373,7 +373,7 @@ def _(
     file_path = file_path_ext(dir_path, file_name, 'npz')
 
     slc = as_slice(slc)
-    u = FloatSeries(u.series[slc], u.time_series[slc], u.name)
+    u = NPyConstantSeries(u.series[slc], u.time_series[slc], u.name)
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):

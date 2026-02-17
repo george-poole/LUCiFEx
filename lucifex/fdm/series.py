@@ -73,7 +73,7 @@ class Series(ABC, Generic[T]):
 
     @property
     @abstractmethod
-    def shape(self) -> tuple[int, ...]:
+    def ufl_shape(self) -> tuple[int, ...]:
         ...
 
     @property
@@ -318,7 +318,7 @@ class ExprSeries(
             return None 
 
     @property
-    def shape(self) -> tuple[int, ...]:
+    def ufl_shape(self) -> tuple[int, ...]:
         return self.sequence[0].ufl_shape
 
 
@@ -506,7 +506,7 @@ class FunctionSeries(
         return self.function_space.mesh
     
     @property
-    def shape(self) -> tuple[int, ...]:
+    def ufl_shape(self) -> tuple[int, ...]:
         return self._function_space.ufl_element().value_shape()
 
     @property
@@ -602,9 +602,9 @@ class ConstantSeries(
         self._mesh = mesh
         self._shape = shape
         if self._subnames:
-            if self.shape == ():
+            if self.ufl_shape == ():
                 raise SubSeriesError
-            assert len(self._subnames) == self.shape[0]
+            assert len(self._subnames) == self.ufl_shape[0]
 
     @staticmethod
     def set_solution(container: Constant, value):
@@ -615,7 +615,7 @@ class ConstantSeries(
         return self._mesh
 
     @property
-    def shape(self) -> tuple[int, ...]:
+    def ufl_shape(self) -> tuple[int, ...]:
         return self._shape
 
     @property
@@ -630,13 +630,13 @@ class ConstantSeries(
         index: int, 
         name: str | None = None,
     ) -> Self:
-        if self.shape == ():
+        if self.ufl_shape == ():
             raise SubSeriesError
 
         if name is None:
             name = self._create_subname(index)
         
-        subseries = ConstantSeries(self.mesh, name, self.order, self.shape[1:], store=1)
+        subseries = ConstantSeries(self.mesh, name, self.order, self.ufl_shape[1:], store=1)
         for c, t in zip(self.series, self.time_series):
             subseries.update(c.value[index])
             subseries.forward(t)
@@ -648,11 +648,11 @@ class ConstantSeries(
         self,
         names: Iterable[str] | None = None,
     ) -> tuple[Self, ...]:
-        if self.shape == ():
+        if self.ufl_shape == ():
             raise SubSeriesError
-        subseries_indices = tuple(range(self.shape[0]))
+        subseries_indices = tuple(range(self.ufl_shape[0]))
         if names is None:
-            names = [None] * self.shape[0]
+            names = [None] * self.ufl_shape[0]
         return tuple(self.sub(i, n) for i, n in zip(subseries_indices, names, strict=True))
     
 

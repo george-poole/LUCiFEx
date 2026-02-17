@@ -76,7 +76,7 @@ dependencies:
   - lz4-c=1.9.4=hf0c8a7f_0
   - nspr=4.35=hea0b92c_0
   - openh264=2.3.1=hf0c8a7f_2
-  - openssl=3.6.0
+  - openssl=3.6.1
   - p11-kit=0.24.1=h65f8906_0
   - pcre2=10.40=h1c4e4bc_0
   - pkg-config=0.29.2=ha3d46e9_1008
@@ -300,4 +300,5 @@ dependencies:
   - jupyter-book
   - ghp-import
   - notebook
+  - ipyparallel
 prefix: /Users/George/miniconda3/envs/lucifex

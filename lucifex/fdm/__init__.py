@@ -10,4 +10,8 @@ from .timestep import (
     advective_diffusive_timestep, adr_timestep, diffusive_reactive_timestep,
     peclet, peclet_argument, courant_number,
 )
-from .fdm2npy import TriSeries, GridSeries, as_grid_series, as_tri_series, FloatSeries, as_float_series
+from .fdm2npy import (
+    TriFunctionSeries, GridFunctionSeries, 
+    as_grid_function_series, as_tri_function_series, NPyConstantSeries, as_npy_constant_series,
+    as_npy_function_series,
+)

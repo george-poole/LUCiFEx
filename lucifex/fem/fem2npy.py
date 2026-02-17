@@ -1,45 +1,122 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Callable
+from typing import TypeVar, Generic, Callable, Iterable
 from typing_extensions import Self
 
 import numpy as np
-import numba
-from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
-from . import Function
-from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, as_tri_mesh, as_grid_mesh
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    create_function, dofs, is_grid, is_simplicial,
-    mesh_vertices, mesh_axes,
-    is_scalar, NonScalarError, NonCartesianQuadMeshError,
+    dofs, grid_dofs, is_grid, is_simplicial, get_component_functions,
+    NonScalarVectorError, NonCartesianQuadMeshError,
 )
+from .function import Function
+from .constant import Constant
+
+
+class NPyNamedObject(ABC):
+    @abstractmethod
+    def __init__(
+        self,
+        name: str | None = None,
+    ):
+        self._name = name
+        if isinstance(name, tuple):
+            name, subnames = name
+            subnames = tuple(subnames)
+        else:
+            subnames = None
+
+        if name is None:
+            name = self.__class__.__name__
+
+        self.name = name
+        self._subnames = subnames
+        self._create_subname = lambda i: (
+            self._subnames[i] if self._subnames else f'{self.name}{i}'
+        )
+
+    @property
+    def name(self) -> str | None:
+        return self._name
+    
+    @name.setter
+    def name(self, value):
+        assert isinstance(value, str)
+        assert '__' not in value
+        self._name = value
+
+    @property
+    @abstractmethod
+    def ufl_shape(self) -> tuple[int, ...] | None:
+        ...
+
+    @abstractmethod
+    def sub(
+        self,
+        index: int,
+        name: str | None = None,
+    ) -> Self | None:
+        ...
+
+    def split(
+        self,
+        names: Iterable[str] | None = None,
+    ) -> Self | None:
+        if self.ufl_shape == ():
+            return None
+        else:
+            n_sub = self.ufl_shape[0]
+        if names is None:
+            names = [self._create_subname(i) for i in range(n_sub)]
+        return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
 
 
 M = TypeVar('M', bound=NPyMesh)
-class NPyFunction(ABC, Generic[M]):
+class NPyFunction(NPyNamedObject, Generic[M]):
     def __init__(
         self,
-        values: np.ndarray,
+        values: np.ndarray | tuple[np.ndarray, ...],
         mesh: M,
         name: str | None = None,
     ):
+        super().__init__(name)
         self._values = values
         self._mesh = mesh
-        self._name = name
 
     @property
     def values(self) -> np.ndarray: #FIXME shape type hints
         return self._values
     
-    @property 
-    def shape(self) -> tuple[int, ...]:
-        return self.values.shape
-    
     @property
     def mesh(self) -> M:
         return self._mesh
+    
+    @property
+    def ufl_shape(self) -> tuple[int, ...]:
+        if isinstance(self._values, tuple):
+            return (len(self._values), )
+        else:
+            return ()
+        
+    @property 
+    def npy_shape(self) -> tuple[int, ...]:
+        if self.ufl_shape == ():
+            return self._values.shape
+        else:
+            return self._values[0].shape
+        
+    def sub(
+        self: 'NPyFunction',
+        index: int,
+        name: str | None = None,
+    ) -> Self | None:
+        if self.ufl_shape == ():
+            return None
+        if name is None:
+            name = self._create_subname(index)
+        return self.__class__(self._values[index], self.mesh, name)
     
     @classmethod
     @abstractmethod
@@ -49,7 +126,16 @@ class NPyFunction(ABC, Generic[M]):
         values_func: Callable[[Function], np.ndarray],
         mesh_func: Callable[[Mesh], M],
     ):
-        values = values_func(u)
+        match u.ufl_shape:
+            case (_, ):
+                values = tuple(
+                    values_func(ui) for ui in get_component_functions(('P', 1), u, use_cache=Ellipsis)
+                )
+            case ():
+                values = values_func(u)
+            case _:
+                raise NonScalarVectorError(u)
+            
         msh = mesh_func(u.function_space.mesh)
         return cls(
             values,
@@ -98,6 +184,49 @@ class TriFunction(NPyFunction[TriMesh]):
             values_func,
             mesh_func,
         )
+    
+
+class QuadFunction(NPyFunction[QuadMesh]):
+    ...
+
+
+class NPyConstant(NPyNamedObject):
+    def __init__(
+        self,
+        value: float | int | np.ndarray,
+        name: str | None = None,
+    ):
+        super().__init__(name)
+        self._value = value
+
+    @classmethod
+    def from_constant(
+        cls: type['NPyConstant'],
+        c: Constant,
+    ) -> Self:
+        return cls(c.value, c.name)
+    
+    @property
+    def value(self):
+        return self._value
+    
+    @property
+    def ufl_shape(self) -> tuple[int, ...]:
+        if isinstance(self._value, (float, int)):
+            return ()
+        return self._value.shape
+    
+    def sub(
+        self: 'NPyConstant',
+        index: int,
+        name: str | None = None,
+    ) -> Self | None:
+        if self.ufl_shape == ():
+            return None
+        return self.__class__(
+            self._value[index], 
+            self._create_subname(index) if name is None else name,
+        )
 
 
 as_grid_function = optional_lru_cache(
@@ -106,6 +235,8 @@ as_grid_function = optional_lru_cache(
 as_tri_function = optional_lru_cache(
     replicate_callable(TriFunction.from_function)(lambda: None)
 )
+
+as_npy_constant = replicate_callable(NPyConstant.from_constant)(lambda: None)
 
 
 def as_npy_function(
@@ -132,161 +263,6 @@ def as_npy_function(
         case False, False:
             raise NonCartesianQuadMeshError
 
-
-def grid_dofs(
-    f: Function | Expr,
-    strict: bool = False,
-    jit: bool = True,
-    mask: float = np.nan,
-    use_mesh_map: bool = False,
-    use_mesh_cache: bool = True,
-) -> np.ndarray:
-    """Interpolates the finite element function to the `P₁` function space
-    (which has identity vertex-to-DoF map) to evaluate the function at the vertex values,
-    then returns these vertex values in a `np.ndarray`.
-
-    Note that this is suitable only if the mesh is Cartesian.
-    """
-    if not is_scalar(f):
-        raise NonScalarError(f)
-    
-    if not isinstance(f, Function):
-        f = create_function((mesh, 'P', 1), f)
-    
-    mesh = f.function_space.mesh
-    axes = mesh_axes(use_cache=use_mesh_cache)(mesh, strict)
-    vertices = mesh_vertices(mesh)
-    vertex_values = dofs(f, ('P', 1), try_identity=True)
-
-    n_vertices = len(vertices)
-    n_values = len(vertex_values)
-    if n_vertices != n_values:
-        raise ValueError(
-            f""" 
-        Number of vertex values {n_values} does not 
-        match number of vertices {n_vertices} """
-        )
-
-    if use_mesh_map:
-        mapping = vertex_to_grid_index_map(use_cache=use_mesh_cache)(
-            mesh, strict, jit, use_mesh_cache
-        )
-        return _grid_dofs_from_map(mapping, vertex_values, axes, mask)
-    else:
-        if jit:
-            return _grid_dofs_jit(vertex_values, numba.typed.List(vertices), axes, mask)
-        else:
-            return _grid_dofs_nojit(vertex_values, vertices, axes, mask)
-
-
-@numba.jit(nopython=True)
-def _grid_dofs_jit(
-    vertex_values: np.ndarray,
-    vertices: list[tuple[float, ...]],
-    axes: tuple[np.ndarray, ...],
-    mask: float,
-) -> np.ndarray:
-    """
-    Returns the vertex values on a Cartesian grid.
-    See also `_grid_nojit` for a slower, non-compiled version.
-    """
-
-    n_vertex = len(vertex_values)
-    dim = len(axes)
-
-    if dim ==1 :
-        nx = len(axes[0])
-        f_grid = np.full((nx, ), mask)
-        for vertex_index in range(n_vertex):
-            x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
-            f_grid[x_index] = vertex_values[vertex_index]
-
-    elif dim == 2:
-            nx, ny = len(axes[0]), len(axes[1])
-            f_grid = np.full((nx, ny), mask)
-            for vertex_index in range(n_vertex):
-                x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
-                y_index = np.searchsorted(axes[1], vertices[vertex_index][1])
-                f_grid[x_index, y_index] = vertex_values[vertex_index]
-    elif dim == 3:
-        nx, ny, nz = len(axes[0]), len(axes[1]), len(axes[2])
-        f_grid = np.full((nx, ny, nz), mask)
-        for vertex_index in range(n_vertex):
-            x_index = np.searchsorted(axes[0], vertices[vertex_index][0])
-            y_index = np.searchsorted(axes[1], vertices[vertex_index][1])
-            z_index = np.searchsorted(axes[2], vertices[vertex_index][2])
-            f_grid[x_index, y_index, z_index] = vertex_values[vertex_index]
-    else:
-        raise ValueError(f"Spatial dimension should be 1, 2 or 3, not {dim}")
-
-    return f_grid
-
-
-def _grid_dofs_nojit(
-    vertex_values: np.ndarray,
-    vertices: list[tuple[float, ...]],
-    axes: tuple[np.ndarray, ...],
-    mask: float,
-) -> np.ndarray:
-    """
-    Returns the vertex values on a Cartesian grid. 
-    See also `_grid_jit` for a faster, JIT-compiled version.
-    """
-    return _grid_dofs_jit.__wrapped__(vertex_values, vertices, axes, mask)
-
-
-def _grid_dofs_from_map(
-    vertex_grid_map: np.ndarray,
-    vertex_values: np.ndarray,
-    x_axes: tuple[np.ndarray, ...],
-    mask: float,
-) -> np.ndarray:
-    nx = tuple(len(i) for i in x_axes)
-    f_grid = np.full(nx, mask)
-
-    for vertex_index, x_index in vertex_grid_map.items():
-        f_grid[x_index] = vertex_values[vertex_index]
-
-    return f_grid
-
-
-@optional_lru_cache
-def vertex_to_grid_index_map(
-    mesh: Mesh,
-    strict: bool = False,
-    jit: bool = True,
-    use_cache: bool = True,
-) -> dict[int, tuple[int, ...]]:
-    axes = mesh_axes(use_cache=use_cache)(mesh, strict)
-    vertices = mesh_vertices(mesh)
-    if jit:
-        map_array = _vertex_to_grid_index_map_jit(numba.typed.List(vertices), axes)
-    else:
-        map_array = _vertex_to_grid_index_map_nojit(vertices, axes)
-    return {i: tuple(map_array[i]) for i in range(len(map_array))}
-
-
-@numba.jit(nopython=True)
-def _vertex_to_grid_index_map_jit(
-    vertices: list[tuple[float, ...]],
-    axes: tuple[np.ndarray, ...],
-) -> np.ndarray:
-    n_vertices = len(vertices)
-    dim = len(axes)
-    map_array = np.empty((n_vertices, dim), dtype=np.int64)
-
-    for vertex_index in range(n_vertices):
-        for d in range(dim):
-            map_array[vertex_index, d] = np.searchsorted(axes[d], vertices[vertex_index][d])
-
-    return map_array
-
-
-def _vertex_to_grid_index_map_nojit(
-    vertices: list[tuple[float, ...]],
-    axes: tuple[np.ndarray, ...],
-) -> np.ndarray:
-    return _vertex_to_grid_index_map_jit.__wrapped__(vertices, axes)
 
 
 

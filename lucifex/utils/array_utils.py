@@ -9,8 +9,14 @@ from .py_utils import StrSlice, as_slice
 def derivative(
     y: Iterable[float],
     x: Iterable[float],
+    order: int = 1,
+    edge_order: int = 2,
 ):
-    ...
+    _dydx = np.gradient(y, x, edge_order=edge_order)
+    for _ in range(order - 1):
+        _dydx = np.gradient(_dydx, x, edge_order=edge_order)
+
+    return _dydx
 
 
 @overload

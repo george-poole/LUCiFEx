@@ -184,7 +184,6 @@ class QuadMesh(NPyMesh):
             self._triangles,
         )
 
-    
 
 as_grid_mesh = optional_lru_cache(
     replicate_callable(GridMesh.from_mesh)(lambda: None)
@@ -195,7 +194,6 @@ as_tri_mesh = optional_lru_cache(
 as_quad_mesh = optional_lru_cache(
     replicate_callable(QuadMesh.from_mesh)(lambda: None)
 )
-
 
 
 def _reorder_quad_vertices(

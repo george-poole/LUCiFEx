@@ -38,7 +38,7 @@ def ipcs_1(
 ) -> list[Form]:
     v = TestFunction(u.function_space)
     n = FacetNormal(u.function_space.mesh)
-    dim = u.shape[0]
+    dim = u.ufl_shape[0]
     epsilon = strain(v)
 
     F_dt = inner(v, D_dt(u, dt)) * dx

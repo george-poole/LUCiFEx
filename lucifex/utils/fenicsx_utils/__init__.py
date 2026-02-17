@@ -56,3 +56,4 @@ from .fem_utils import (
     get_fem_subspace,
     get_fem_subspaces,
 )
+from .grid_utils import grid_dofs

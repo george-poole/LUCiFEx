@@ -83,7 +83,7 @@ https://conda.anaconda.org/conda-forge/osx-64/libxml2-2.11.4-hd95e348_0.conda
 https://conda.anaconda.org/conda-forge/osx-64/lz4-c-1.9.4-hf0c8a7f_0.conda
 https://conda.anaconda.org/conda-forge/osx-64/nspr-4.35-hea0b92c_0.conda
 https://conda.anaconda.org/conda-forge/osx-64/openh264-2.3.1-hf0c8a7f_2.conda
-https://conda.anaconda.org/conda-forge/osx-64/openssl-3.6.0-h230baf5_0.conda
+https://conda.anaconda.org/conda-forge/osx-64/openssl-3.6.1-hb6871ef_1.conda
 https://conda.anaconda.org/conda-forge/osx-64/p11-kit-0.24.1-h65f8906_0.tar.bz2
 https://conda.anaconda.org/conda-forge/osx-64/pcre2-10.40-h1c4e4bc_0.tar.bz2
 https://conda.anaconda.org/conda-forge/osx-64/pkg-config-0.29.2-ha3d46e9_1008.tar.bz2
@@ -210,6 +210,7 @@ https://conda.anaconda.org/conda-forge/noarch/sphinxcontrib-jsmath-1.0.1-pyhd8ed
 https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhcf101f3_3.conda
 https://conda.anaconda.org/conda-forge/noarch/tomli-2.2.1-pyhe01879c_2.conda
 https://conda.anaconda.org/conda-forge/osx-64/tornado-6.4.2-py310hbb8c376_0.conda
+https://conda.anaconda.org/conda-forge/noarch/tqdm-4.67.3-pyh8f84b5b_0.conda
 https://conda.anaconda.org/conda-forge/noarch/traitlets-5.14.3-pyhd8ed1ab_1.conda
 https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.7.1-pyha770c72_0.conda
 https://conda.anaconda.org/conda-forge/noarch/typing_utils-0.1.0-pyhd8ed1ab_1.conda
@@ -357,6 +358,7 @@ https://conda.anaconda.org/conda-forge/osx-64/netcdf4-1.6.4-nompi_py310h3504ac7_
 https://conda.anaconda.org/conda-forge/osx-64/petsc-3.18.5-real_h04a6aba_100.conda
 https://conda.anaconda.org/conda-forge/osx-64/scikit-image-0.24.0-py310hbf2a7f0_2.conda
 https://conda.anaconda.org/conda-forge/osx-64/vtk-base-9.2.6-qt_py310h1234567_207.conda
+https://conda.anaconda.org/conda-forge/noarch/ipyparallel-9.0.2-pyhcf101f3_0.conda
 https://conda.anaconda.org/conda-forge/noarch/jupyter-cache-1.0.1-pyhff2d567_0.conda
 https://conda.anaconda.org/conda-forge/noarch/meshio-5.3.5-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/nbconvert-core-7.16.6-pyh29332c3_0.conda

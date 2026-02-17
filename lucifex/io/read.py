@@ -127,7 +127,7 @@ def _(
         slc = as_slice(slc)
 
     if isinstance(u, ConstantSeries):
-        container = Constant(u.mesh, name=u.name, shape=u.shape)
+        container = Constant(u.mesh, name=u.name, shape=u.ufl_shape)
     elif isinstance(u, FunctionSeries):
         assert is_continuous_lagrange(u.function_space, 1) or is_discontinuous_lagrange(u.function_space, 0)
         container = Function(u.function_space, name=u.name)

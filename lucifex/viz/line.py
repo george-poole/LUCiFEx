@@ -12,7 +12,7 @@ from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler
 
-from ..fem import as_grid_function
+from ..fem import as_grid_function, GridFunction
 from ..utils.py_utils import MultipleDispatchTypeError, filter_kwargs
 from .utils import LW, set_legend, optional_ax, optional_fig_ax, set_axes, create_cycler, optional_fig_axs
 
@@ -71,7 +71,18 @@ def _(
     **kwargs,
 ) -> None:
     f_grid = as_grid_function(f)
-    _plot_line((f_grid.mesh.x_axis, f_grid), ax, cyc, **kwargs)
+    _plot_line(f_grid, ax, cyc, **kwargs)
+
+
+@_plot_line.register(GridFunction)
+def _(
+    f: GridFunction,
+    ax: Axes,
+    cyc: Cycler | None = None,
+    **kwargs,
+) -> None:
+    xy = (f.mesh.x_axis, f.values)
+    return _plot_line(xy, ax, cyc, **kwargs)
 
 
 @_plot_line.register(tuple)

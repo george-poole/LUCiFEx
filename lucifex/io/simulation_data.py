@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from natsort import natsorted
 
 from ..utils.py_utils import MultiKey
-from ..fdm import FunctionSeries, ConstantSeries, GridSeries, TriSeries, FloatSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NPyConstantSeries
 from .load import load_txt_dict
 from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 
@@ -15,7 +15,7 @@ from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 class GridSimulationData(
     MultiKey[
         str,
-        GridSeries | FloatSeries
+        GridFunctionSeries | NPyConstantSeries
     ]
 ):
     ...
@@ -24,7 +24,7 @@ class GridSimulationData(
 class TriSimulationData(
     MultiKey[
         str,
-        TriSeries | ConstantSeries
+        TriFunctionSeries | ConstantSeries
     ]
 ):
     ...
@@ -33,7 +33,7 @@ class TriSimulationData(
 class SimulationData(
     MultiKey[
         str,
-        FunctionSeries |  GridSeries | TriSeries | ConstantSeries | FloatSeries
+        FunctionSeries |  GridFunctionSeries | TriFunctionSeries | ConstantSeries | NPyConstantSeries
     ]
 ):
     def __init__(
@@ -46,7 +46,7 @@ class SimulationData(
         self._dir_path = dir_path
         self._loaded: dict[
             str, 
-            FunctionSeries | ConstantSeries | GridSeries | FloatSeries | TriSeries
+            FunctionSeries | ConstantSeries | GridFunctionSeries | NPyConstantSeries | TriFunctionSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file

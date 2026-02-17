@@ -40,7 +40,7 @@ class Solver(ABC, Generic[T, TS]):
             sltn = Function(sltn_series.function_space, name=sltn_series.name)
         elif isinstance(sltn, ConstantSeries):
             sltn_series = sltn
-            sltn = Constant(sltn_series.mesh, name=sltn_series.name, shape=sltn_series.shape)
+            sltn = Constant(sltn_series.mesh, name=sltn_series.name, shape=sltn_series.ufl_shape)
         else:
             raise MultipleDispatchTypeError(sltn)
 
@@ -70,7 +70,7 @@ class Solver(ABC, Generic[T, TS]):
                 )
                 if self._solution_series is not None:
                     self._correction_series = ConstantSeries(
-                        self._solution.mesh, corr_name, self._solution_series.order, self._solution_series.shape, self._solution_series.store,
+                        self._solution.mesh, corr_name, self._solution_series.order, self._solution_series.ufl_shape, self._solution_series.store,
                     )
             else:
                 raise TypeError

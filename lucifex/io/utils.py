@@ -113,7 +113,7 @@ def io_element(
         elem = ('DP', 0)
     else:
         elem = ('P', 1)
-    match u.shape:
+    match u.ufl_shape:
         case ():
             return elem
         case (dim, ):
