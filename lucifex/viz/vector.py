@@ -24,7 +24,7 @@ def plot_quiver(
     ax: Axes,
     f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | Expr,
     arrow_slc: int | tuple[int, int] = 1,
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: tuple[bool, bool] = True,
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
@@ -86,7 +86,7 @@ def plot_streamlines(
     f: Function | tuple[Function, Function] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | Expr,
     density: float = 1.0,
     color: str | tuple[str, Callable]= 'black',
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
@@ -154,7 +154,7 @@ def _xy_components(
 def _x_y_fx_fy_arrays(
     fx: Function, 
     fy: Function,
-    use_cache: tuple[bool, bool],
+    use_cache: bool | tuple[bool, bool],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     fx_np = as_npy_function(fx, use_cache=use_cache)

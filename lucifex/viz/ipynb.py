@@ -18,7 +18,8 @@ def set_ipynb_variable(
     as_type: Callable[[str], T] | None = None,
 ) -> T:
     """
-    Set a variable from the terminal with `export env_key=value`
+    Optionally set a variable's value from the terminal with `export env_key=value`, 
+    otherwise set to `default`.
     """
     _default = object()
     value = os.environ.get(env_key, _default)

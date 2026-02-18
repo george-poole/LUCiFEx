@@ -2,12 +2,12 @@ from inspect import signature, Signature, Parameter
 from functools import wraps
 from collections.abc import Iterable
 from typing import (
+    Any,
     Callable,
-    TypeVar,
     ParamSpec,
     TypeAlias,
     overload,
-    Any,
+    get_args
 )
 from typing_extensions import Self
 from types import EllipsisType
@@ -31,7 +31,10 @@ from ..solver import IBVP, IVP, Evaluation
 from .utils import arg_name_collisions, ArgNameCollisionError
 
 
-T = TypeVar('T', int | None, str | None, float | None)
+DeltaType: TypeAlias = int | float | None
+AuxiliaryType: TypeAlias = ExprSeries | Expr | Function | Constant
+
+
 class Simulation(
     MultiKey[str, FunctionSeries | ConstantSeries | ExprSeries | Expr | Function | Constant | float | int | np.ndarray]
 ):
@@ -40,12 +43,12 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        auxiliary: Iterable[ExprSeries | Expr | Function | Constant | tuple[str, float | int | np.ndarray]] = (),
+        auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | float | int | np.ndarray]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         dir_path: str | None = None,
-        store_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | EllipsisType | None = ...,
-        write_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = None,
+        store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] | EllipsisType = Ellipsis,
+        write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
         parameter_file: str | None = None,
         checkpoint_file: str | None = None,
@@ -79,10 +82,15 @@ class Simulation(
         `len(solutions) ≤ len(solvers)` because a solution may be solved for by more 
         than one solver (e.g. in splitting or linearization schemes)
         """
-        return list(
-            {*[s.solution_series for s in self.solvers], 
-             *[s.correction_series for s in self.solvers if s.correction_series is not None]},
-        )
+        _solutions = []
+
+        for s in self.solvers:
+            if not s.solution_series in _solutions:
+                _solutions.append(s.solution_series)
+            if s.correction_series is not None:
+                _solutions.append(s.correction_series)
+
+        return _solutions
         
     @property
     def auxiliary(self):
@@ -121,16 +129,22 @@ class Simulation(
         else:
             self._timings = timings
 
-    def _map_to_solution(
+    def _solution_delta_mapping(
         self,
-        obj: dict[str | Iterable[str], T] | tuple[T, T] | T,
-    ) -> dict[str, T]:
-        if obj is None or isinstance(obj, T.__constraints__):
-            return {s.name: obj for s in self.solutions}
-            
-        if isinstance(obj, dict):
+        delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType],
+    ) -> dict[str, DeltaType]:
+        if isinstance(delta, get_args(DeltaType)):
+            return {s.name: delta for s in self.solutions}
+        
+        if isinstance(delta, tuple) and len(delta) == 2:
+            obj_function, obj_constant = delta
+            function_dict = {s.name: obj_function for s in self.solutions if isinstance(s, FunctionSeries)}
+            constant_dict = {s.name: obj_constant for s in self.solutions if isinstance(s, ConstantSeries)}
+            return function_dict | constant_dict
+        
+        if isinstance(delta, dict):
             d = {}
-            for k, v in obj.items():
+            for k, v in delta.items():
                 if isinstance(k, str):
                     d.update({k: v})
                 elif isinstance(Iterable):
@@ -139,25 +153,18 @@ class Simulation(
                     raise TypeError
             return d
         
-        if isinstance(obj, tuple):
-            assert len(obj) == 2
-            obj_function, obj_constant = obj
-            function_dict = {s.name: obj_function for s in self.solutions if isinstance(s, FunctionSeries)}
-            constant_dict = {s.name: obj_constant for s in self.solutions if isinstance(s, ConstantSeries)}
-            return function_dict | constant_dict
-        
-        raise MultipleDispatchTypeError(obj)
+        raise MultipleDispatchTypeError(delta)
 
     @property
     def store_delta(self) -> dict[str, int | float | None]:
         return self._store_delta
     
     @store_delta.setter
-    def store_delta(self, value):
-        if value is Ellipsis:
+    def store_delta(self, delta_value):
+        if delta_value is Ellipsis:
             self._store_delta = {s.name: s.store for s in self.solutions}
         else:
-            self._store_delta = self._map_to_solution(value)
+            self._store_delta = self._solution_delta_mapping(delta_value)
             for name, store in self._store_delta.items():
                     self[name].store = store
 
@@ -166,8 +173,8 @@ class Simulation(
         return self._write_delta
     
     @write_delta.setter
-    def write_delta(self, value):
-        self._write_delta = self._map_to_solution(value)
+    def write_delta(self, delta_value):
+        self._write_delta = self._solution_delta_mapping(delta_value)
     
     @property
     def write_file(self) -> dict[str, str | None]:
@@ -175,7 +182,7 @@ class Simulation(
     
     @write_file.setter
     def write_file(self, value):
-        self._write_file = self._map_to_solution(value)
+        self._write_file = self._solution_delta_mapping(value)
 
     @property
     def writers(self) -> list[Writer]:
@@ -267,14 +274,12 @@ class Simulation(
         )
     
 
-FunctionSeriesDelta: TypeAlias = int | float | None
-ConstantSeriesDelta: TypeAlias = int | float | None
 def configure_simulation(
     petsc: OptionsPETSc | dict | None = None,
     jit: OptionsJIT | dict | None = None,
     ffcx: OptionsFFCX | dict | None = None,
-    store_delta: int | float | tuple[FunctionSeriesDelta, ConstantSeriesDelta] | dict[str | Iterable[str], int | float] | None = None,
-    write_delta: int | float | tuple[FunctionSeriesDelta, ConstantSeriesDelta] | dict[str | Iterable[str], int | float] | None = None,
+    store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
+    write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
     parameter_file: str = 'PARAMETERS',
     checkpoint_file: str = 'CHECKPOINT',

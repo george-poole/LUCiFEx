@@ -17,7 +17,7 @@ from ..fdm.fdm2npy import (
     NPyFunctionSeries, GridFunctionSeries, QuadFunctionSeries, as_grid_function_series,
     as_tri_function_series, TriFunctionSeries, NumericSeries, as_npy_constant_series,
 )
-from ..utils.py_utils import MultiKey, replicate_callable, StrSlice, as_slice
+from ..utils.py_utils import MultiKey, MultipleDispatchTypeError, replicate_callable, StrSlice, as_slice
 from .simulation import Simulation
 
 
@@ -55,7 +55,7 @@ class NPySimulation(
     @property
     def namespace(self) -> dict[str, F | NumericSeries | float]:
         d = {i.name: i for i in self._solutions}
-        d.update({f.name for f in self._auxiliary if not isinstance(f, tuple)})        
+        d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})        
         d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
         return d
     
@@ -92,22 +92,39 @@ class NPySimulation(
                 _sltn = convert_series(s)
             _solutions.append(_sltn)
 
+        _as_npy = lambda arg: (
+            as_npy_or_numeric(arg, convert_series, convert_func)
+        )
+
         _auxiliary = []
         if auxiliary:
             for aux in sim.auxiliary:
                 if isinstance(aux, tuple):
-                    _aux = aux
-                elif isinstance(aux, Constant):
-                    _aux = as_npy_constant(aux)
-                elif isinstance(aux, (Function, Expr)):
-                    _aux = convert_func(aux)
-                if isinstance(aux, (FunctionSeries, ExprSeries)):
-                    _aux = convert_series(aux)
+                    name, value = aux
+                    _aux = (name, _as_npy(value))
                 else:
-                    raise TypeError
+                    _aux = _as_npy(aux)
                 _auxiliary.append(_aux)
 
         return cls(_solutions, _auxiliary, sim.timings)
+    
+
+F = TypeVar('F', bound=NPyFunction)
+S = TypeVar('S', bound=NPyFunctionSeries)
+def as_npy_or_numeric(
+    obj,
+    convert_series: Callable[[FunctionSeries | ExprSeries], S],
+    convert_func: Callable[[Function | Expr], F],
+):
+    if isinstance(obj, (float, int, np.ndarray)):
+        return obj
+    if isinstance(obj, Constant):
+        return as_npy_constant(obj)
+    if isinstance(obj, (Function, Expr)):
+        return convert_func(obj)
+    if isinstance(obj, ExprSeries):
+        return convert_series(obj)
+    raise MultipleDispatchTypeError(obj)
    
 
 class GridSimulation(NPySimulation[GridMesh, GridFunction, GridFunctionSeries]):

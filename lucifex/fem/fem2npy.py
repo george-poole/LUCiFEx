@@ -18,15 +18,13 @@ from ..utils.fenicsx_utils import (
 from .function import Function
 from .constant import Constant
 
-T = TypeVar('T')
-class NPyUFL(ABC, Generic[T]):
-    @abstractmethod
+
+class NPyNameAttr(ABC):
+    
     def __init__(
         self,
-        value: T,
-        name: str | None = None,
+        name: str | tuple[str, Iterable[str]] | None = None,
     ):
-        self._value = value
         self._name = name
         if isinstance(name, tuple):
             name, subnames = name
@@ -54,10 +52,6 @@ class NPyUFL(ABC, Generic[T]):
         self._name = value
 
     @property
-    def value(self) -> T: #FIXME np.ndarray shape type hints
-        return self._value
-
-    @property
     @abstractmethod
     def ufl_shape(self) -> tuple[int, ...] | None:
         ...
@@ -73,7 +67,7 @@ class NPyUFL(ABC, Generic[T]):
     def split(
         self,
         names: Iterable[str] | None = None,
-    ) -> Self | None:
+    ) -> tuple[Self, ...] | None:
         if self.ufl_shape == ():
             return None
         else:
@@ -83,7 +77,24 @@ class NPyUFL(ABC, Generic[T]):
         return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
 
 
-class NPyConstant(NPyUFL[float | int | np.ndarray]):
+
+T = TypeVar('T')
+class NPyNameValueAttr(NPyNameAttr, Generic[T]):
+    
+    def __init__(
+        self,
+        value: T,
+        name: str | None = None,
+    ):
+        super().__init__(name)
+        self._value = value
+
+    @property
+    def value(self) -> T: #FIXME np.ndarray shape type hints
+        return self._value
+
+
+class NPyConstant(NPyNameValueAttr[float | int | np.ndarray]):
     @classmethod
     def from_constant(
         cls: type['NPyConstant'],
@@ -115,7 +126,7 @@ class NPyConstant(NPyUFL[float | int | np.ndarray]):
 
 
 M = TypeVar('M', bound=NPyMesh)
-class NPyFunction(NPyUFL[np.ndarray | tuple[np.ndarray, ...]], Generic[M]):
+class NPyFunction(NPyNameValueAttr[np.ndarray | tuple[np.ndarray, ...]], Generic[M]):
     def __init__(
         self,
         value: np.ndarray | tuple[np.ndarray, ...],
@@ -251,7 +262,7 @@ as_quad_function = optional_lru_cache(
 def as_npy_function(
     u: Function | Expr,
     grid: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     mesh: Mesh | None = None,
 ):
     if isinstance(use_cache, bool):

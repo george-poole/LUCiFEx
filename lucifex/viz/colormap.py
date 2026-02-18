@@ -29,7 +29,7 @@ def _plot_colormap(
     f: Function | Expr,
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:
@@ -43,7 +43,7 @@ def _plot_colormap(
     u: GridFunction | TriFunction,
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     **kwargs,
 ) -> None:
     ...
@@ -85,7 +85,7 @@ def _(
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     mesh: Mesh | None = None,
     **kwargs,
 ):
@@ -173,7 +173,7 @@ plot_colormap = optional_fig_ax(_plot_colormap)
 #     ax: Axes,
 #     f: Function,
 #     levels: Iterable[float] | int | None = None,
-#     use_cache: bool | tuple[bool, bool] = (True, False),
+#     use_cache: bool | tuple[bool, bool] = True,
 #     **kwargs,
 # ) -> None:
 #     ...
@@ -184,7 +184,7 @@ plot_colormap = optional_fig_ax(_plot_colormap)
 #     ax: Axes,
 #     f: Expr,
 #     levels: Iterable[float] | int | None = None,
-#     use_cache: bool | tuple[bool, bool] = (True, False),
+#     use_cache: bool | tuple[bool, bool] = True,
 #     **kwargs,
 # ) -> None:
 #     ...
@@ -212,7 +212,7 @@ def _(
     ax: Axes,
     levels: Iterable[float] | int | None = None,
     grid: bool | None = None,
-    use_cache: bool | tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     mesh: Mesh | None = None,
     **kwargs,
 ) -> None:

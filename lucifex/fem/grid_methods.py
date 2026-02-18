@@ -18,7 +18,7 @@ def grid_cross_section(
     value: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
 ) -> tuple[GridFunction, float]: 
     ...
 
@@ -30,7 +30,7 @@ def grid_cross_section(
     value: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     strict: bool = False,
 ) -> tuple[list[GridFunction], float | list[float]]: 
     ... 
@@ -48,8 +48,10 @@ def _(
     value: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
 ): 
+    if isinstance(use_cache, bool):
+        use_cache = (use_cache, use_cache)
     use_mesh_cache, use_func_cache = use_cache
     f_grid = as_grid_function(use_cache=use_func_cache)(fxyz, use_mesh_cache=use_mesh_cache)
     return grid_cross_section(
@@ -118,7 +120,7 @@ def _(
     value: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
     strict: bool = False,
 ): 
     _cross_sections = []
@@ -220,7 +222,7 @@ def grid_average(
     slc: StrSlice | tuple[StrSlice, ...] = ':',
     use_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-) -> GridFunction:
+) -> GridFunction | float:
     ...
 
 
@@ -231,7 +233,7 @@ def grid_average(
     slc: StrSlice | tuple[StrSlice, ...] = ':',
     use_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-) -> list[GridFunction]:
+) -> list[GridFunction] | list[float]:
     ...
 
 
@@ -242,7 +244,7 @@ def grid_average(
     slc: StrSlice | tuple[StrSlice, ...] = ':',
     use_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
-) -> GridFunction | list[GridFunction]:
+):
     
     if not isinstance(u, (Function, GridFunction)):
         return [grid_average(i, axis, slc, use_cache, axis_names) for i in u]
@@ -260,9 +262,11 @@ def grid_average(
 
     avg = _grid_average(u.value, _axis, *_slc)
 
-    avg_axes = [ax[s] for i, (ax, s) in enumerate(zip(u.mesh.axes, _slc)) if not i in _axis]
-
-    return GridFunction(avg, GridMesh(avg_axes))
+    if isinstance(avg, float):
+        return avg
+    else:
+        avg_axes = [ax[s] for i, (ax, s) in enumerate(zip(u.mesh.axes, _slc)) if not i in _axis]
+        return GridFunction(avg, GridMesh(avg_axes))
 
 
 def _grid_average(
@@ -277,8 +281,10 @@ def _grid_average(
 def where_on_grid(
     f: GridFunction | Function,
     condition: Callable[[np.ndarray], np.ndarray],
-    use_cache: tuple[bool, bool] = (True, False),
+    use_cache: bool | tuple[bool, bool] = True,
 ) -> tuple[np.ndarray, ...]:
+    if isinstance(use_cache, bool):
+        use_cache = (use_cache, use_cache)
     use_mesh_cache, use_func_cache = use_cache
     f_grid = as_grid_function(use_cache=use_func_cache)(f, use_mesh_cache=use_mesh_cache)
     axes = f_grid.mesh.axes

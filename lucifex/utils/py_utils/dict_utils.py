@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from types import MappingProxyType
 from typing import (
     TypeVar,
     overload,
@@ -34,8 +33,6 @@ class MultiKey(ABC, Generic[K, V]):
             return tuple(self[i] for i in key)
         else:
             return self._getitem(key)
-        # else:
-        #     raise TypeError
         
     @abstractmethod
     def _getitem(

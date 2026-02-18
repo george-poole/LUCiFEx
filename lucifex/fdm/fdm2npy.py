@@ -7,17 +7,17 @@ from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
 from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh, as_npy_object
-from ..fem import Function, Constant
+from ..fem import Function
 from ..fem.fem2npy import (
-    NPyUFL, NPyFunction, GridFunction, as_grid_function, 
+    NPyNameAttr, NPyNameValueAttr, NPyFunction, GridFunction, as_grid_function, 
     TriFunction, as_tri_function, NPyConstant, QuadFunction, as_npy_constant,
 )
 from ..utils.py_utils import replicate_callable, StrSlice, as_slice
 from .series import Series, FunctionSeries, ExprSeries, ConstantSeries
 
 
-F = TypeVar('F', bound=NPyUFL)
-class NPySeries(NPyUFL, Generic[F]):
+F = TypeVar('F', bound=NPyNameValueAttr)
+class NPySeries(NPyNameAttr, Generic[F]):
     def __init__(
         self, 
         series: Iterable[F], 
@@ -45,11 +45,6 @@ class NPySeries(NPyUFL, Generic[F]):
     def ufl_shape(self) -> tuple[int, ...] | None:
         if self.series:
             return self.series[0].ufl_shape
-        
-    # @property
-    # def npy_shape(self) -> tuple[int, ...] | None:
-    #     if self.series:
-    #         return self.series[0].npy_shape
 
     def sub(
         self, 

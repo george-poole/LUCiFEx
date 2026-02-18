@@ -16,20 +16,20 @@ def create_and_run(
     t_stop: float | None = None,
     dt_init: float | None = None,
     n_init: int | None = None,
-    return_as: Callable[[Simulation], T] | str = 'grid',
+    serialize: Callable[[Simulation], T] | str = 'grid',
 ) -> Callable[P, T]:
     def _inner(*args: P.args, **kwargs: P.kwargs):
         sim = factory(*args, **kwargs)
         if n_stop is not None or t_stop is not None:
             run(sim, n_stop, t_stop, dt_init, n_init)
-        if callable(return_as):
-            return return_as(sim)
-        elif return_as == 'grid':
+        if callable(serialize):
+            return serialize(sim)
+        elif serialize == 'grid':
             return as_grid_simulation(sim)
-        elif return_as == 'tri':
+        elif serialize == 'tri':
             return as_tri_simulation(sim)
         else:
-            raise ValueError(return_as)
+            raise ValueError(serialize)
     return _inner
 
 

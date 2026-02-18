@@ -22,14 +22,14 @@ from .fem_utils import (
 from .ufl_utils import is_scalar, is_vector, NonScalarVectorError
 
 
-SpatialExpression = Callable[[np.ndarray], np.ndarray]
+SpatialExpression: TypeAlias = Callable[[np.ndarray], np.ndarray]
 """
 Function of coordinates `x = (x₀, x₁, x₂)` returning an expression `f(x)`
 such that `f(x) = 0 ` defines the boundary.
 
 e.g. `lambda x: x[1] - Ly` if a boundary is defined by `y = Ly`
 """
-SpatialMarker = Callable[[np.ndarray], bool]
+SpatialMarker: TypeAlias = Callable[[np.ndarray], bool]
 """
 Function of coordinates `x = (x₀, x₁, x₂)` returning `True` or `False`
 

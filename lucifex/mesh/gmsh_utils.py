@@ -31,13 +31,17 @@ def create_gmsh_mesh_factory(
         h: float | tuple[float, float],
         cell: CellType = DEFAULT_CELL,
         name: str = DEFAULT_NAME,
-        comm = MPI.COMM_WORLD,
+        comm: MPI.Comm | str = MPI.COMM_WORLD,
         rank: int = 0,
         markers: Iterable[tuple[str, int, Callable[[gmsh.model], tuple]]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),
         meshtags: bool = False,
         gmsh_set_number: dict | None = None,
         **gmsh_set_mesh,
-    ) -> Callable[P, Mesh | tuple[Mesh, MeshTags_int32, MeshTagsMetaClass]]:    
+    ) -> Callable[P, Mesh | tuple[Mesh, MeshTags_int32, MeshTagsMetaClass]]:  
+
+        if isinstance(comm, str):
+            comm = getattr(MPI, comm)
+
         def _(*args: P.args, **kwargs: P.kwargs):
             if comm.rank == rank:
                 initialize_model(gmsh.model, name)
