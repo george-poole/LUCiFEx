@@ -7,4 +7,4 @@ from .scatter import plot_scatter
 from .sparsity import plot_sparsity
 from .utils import create_multifigure, set_axes, create_cycler
 from .vector import plot_quiver, plot_streamlines
-from .ipynb import save_figure, display_animation, get_ipynb_file_name
+from .ipynb import save_figure, display_animation, get_ipynb_file_name, set_ipynb_variable

@@ -74,7 +74,7 @@ def darcy_convection_generic(
     dispersion: Callable[[Phi, U], Series] | Callable[[Phi], Function] = lambda phi: phi,
     density: Callable[[C], Series] = lambda c: c,
     viscosity: Callable[[C], Series] = lambda c: 1 + 0 * c, 
-    # time step
+    # timestep
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",

@@ -36,7 +36,7 @@ def navier_stokes_rayleigh_taylor_rectangle(
     c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (12, 34),
-    # time step
+    # timestep
     dt_max: float = 0.5,
     dt_min: float = 0.0,
     dt_courant: float = 0.75,

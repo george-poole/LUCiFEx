@@ -31,14 +31,14 @@ def evolution(
 
 
 
-def evolution_update(
+def evolution_rhs(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Series | Expr | Function,
     D_rhs: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
-    explicit: int | None = None,
+    argwise_index: int | None = None,
 ) -> Expr:
     """
     `𝜑∂u/∂t = R`
@@ -55,11 +55,14 @@ def evolution_update(
 
     if isinstance(D_rhs, FiniteDifference):
         if D_rhs.is_implicit:
-            raise ImplicitDiscretizationError(D_rhs, f"Reaction must be explicit in '{u.name}'.")
+            raise ImplicitDiscretizationError(D_rhs, f"Evolution must be explicit in '{u.name}'.")
     else:
-        if explicit is None:
+        if argwise_index is None:
             raise ValueError(f"Need to provide argument index of '{u.name}'")
-        if D_rhs.finite_differences[explicit].is_implicit:
-            raise ImplicitDiscretizationError(D_rhs.finite_differences[explicit], f"Reaction must be explicit in '{u.name}'.")
+        if D_rhs.finite_differences[argwise_index].is_implicit:
+            raise ImplicitDiscretizationError(
+                D_rhs.finite_differences[argwise_index], 
+                f"Evolution must be explicit in '{u.name}'.",
+            )
     
     return u[0] + (1 / phi) * dt * D_rhs(r, trial=u)

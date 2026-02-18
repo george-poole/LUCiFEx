@@ -12,7 +12,7 @@ from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, optional_lru_cache
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
+from ..fdm.fdm2npy import GridFunctionSeries, NumericSeries, TriFunctionSeries
 from .read import read
 from .utils import file_path_ext
 
@@ -194,7 +194,7 @@ def load_numeric_series(
     dir_path: str,
     file_name: str,
     sep: str = '__',
-) -> NPyConstantSeries:
+) -> NumericSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
     except KeyError:
@@ -243,7 +243,7 @@ def load_npz_dict(
     trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
     *,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | NPyConstantSeries | GridFunctionSeries | TriFunctionSeries]:
+) -> dict[str, float | np.ndarray | NumericSeries | GridFunctionSeries | TriFunctionSeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -271,7 +271,7 @@ def load_npz_dict(
 
     dict_return: dict[
         str, 
-        float | np.ndarray | NPyConstantSeries | GridFunctionSeries,
+        float | np.ndarray | NumericSeries | GridFunctionSeries,
     ] = {}
 
     for name, value in dict_load.items():
@@ -294,7 +294,7 @@ def load_npz_dict(
                 else:
                     value = GridFunctionSeries(series, time_series, tuple(spatial_arrays), name)
             else:
-                value = NPyConstantSeries(series, time_series, name)
+                value = NumericSeries(series, time_series, name)
         dict_return[name] = value
 
     return dict_return

@@ -59,7 +59,7 @@ def navier_stokes_thermosolutal_rectangle(
     noise_eps: float = 1e-6,
     noise_freq: tuple[int, int] = (8, 8),
     noise_seed: tuple[int, int, int, int] = (12, 34, 43, 21),
-    # time step
+    # timestep
     dt_max: float = 0.5,
     dt_min: float = 0.0,
     dt_courant: float = 0.75,

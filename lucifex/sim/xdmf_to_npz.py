@@ -9,7 +9,7 @@ from dolfinx.mesh import Mesh
 from ..utils.fenicsx_utils import is_grid, CellType, QuadNonGridMeshError
 from ..utils.py_utils import MultipleDispatchTypeError
 from ..fdm import ConstantSeries, FunctionSeries
-from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
+from ..fdm.fdm2npy import GridFunctionSeries, NumericSeries, TriFunctionSeries
 from ..io import (
     write, 
     load_mesh, 
@@ -139,7 +139,7 @@ def _(
     if npz_name is None:
         npz_name = (
             NpSeries.__name__,
-            NPyConstantSeries.__name__,
+            NumericSeries.__name__,
         )
     if isinstance(npz_name, str):
         npz_name = (npz_name, npz_name)
@@ -161,7 +161,7 @@ def _(
         shape = i[2:]
         c = load_constant_series(name, dir_path, file_name, mesh, *shape)
         write(
-            NPyConstantSeries.from_series(c), 
+            NumericSeries.from_series(c), 
             file_name=consts_npz_name, 
             dir_path=dir_path,
             mode=mode,

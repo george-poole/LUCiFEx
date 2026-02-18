@@ -164,13 +164,13 @@ def _x_y_fx_fy_arrays(
         triangles = fx_np.mesh.triangles
         x = fx_np.mesh.x_coordinates[triangles]
         y = fx_np.mesh.y_coordinates[triangles]
-        fx_new = fx_np.values[triangles]
-        fy_new = fy_np.values[triangles]
+        fx_new = fx_np.value[triangles]
+        fy_new = fy_np.value[triangles]
     
     if isinstance(fx_np, GridFunction):
         x, y = fx_np.mesh.axes
-        fx_new = fx_np.values
-        fy_new = fy_np.values
+        fx_new = fx_np.value
+        fy_new = fy_np.value
 
     return x, y, fx_new, fy_new
 

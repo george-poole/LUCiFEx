@@ -491,21 +491,14 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 &amp; \text{cold outer bound
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">5</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.utils.array_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_indices</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_mesh</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span>
-<span class="ne">----&gt; </span><span class="mi">5</span> <span class="kn">from</span><span class="w"> </span><span class="nn">py.C01_darcy_rayleigh_benard</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_rayleigh_benard_annulus</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_rayleigh_benard_annulus</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">9</span>     <span class="n">Rratio</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="n">Nradial</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span>     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="n">n_stop</span> <span class="o">=</span> <span class="mi">200</span>
-
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;py.C01_darcy_rayleigh_benard&#39;
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:root:running build_ext
+INFO:root:building &#39;libffcx_forms_d264a404531a4b9ce8c282b66b6279fea10c37ec&#39; extension
+INFO:root:clang -Wno-unused-result -Wsign-compare -Wunreachable-code -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /Users/George/miniconda3/envs/lucifex/include -fPIC -O2 -isystem /Users/George/miniconda3/envs/lucifex/include -I/Users/George/miniconda3/envs/lucifex/lib/python3.10/site-packages/ffcx/codegeneration -I/Users/George/miniconda3/envs/lucifex/include/python3.10 -c libffcx_forms_d264a404531a4b9ce8c282b66b6279fea10c37ec.c -o ./libffcx_forms_d264a404531a4b9ce8c282b66b6279fea10c37ec.o -O2 -g0
+INFO:root:clang -bundle -undefined dynamic_lookup -Wl,-rpath,/Users/George/miniconda3/envs/lucifex/lib -L/Users/George/miniconda3/envs/lucifex/lib -Wl,-rpath,/Users/George/miniconda3/envs/lucifex/lib -L/Users/George/miniconda3/envs/lucifex/lib ./libffcx_forms_d264a404531a4b9ce8c282b66b6279fea10c37ec.o -o ./libffcx_forms_d264a404531a4b9ce8c282b66b6279fea10c37ec.cpython-310-darwin.so
+INFO:root:running build_ext
+INFO:root:building &#39;libffcx_forms_04e755b72c3177c8a265795174d2ee8e45ad6347&#39; extension
+INFO:root:clang -Wno-unused-result -Wsign-compare -Wunreachable-code -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /Users/George/miniconda3/envs/lucifex/include -fPIC -O2 -isystem /Users/George/miniconda3/envs/lucifex/include -I/Users/George/miniconda3/envs/lucifex/lib/python3.10/site-packages/ffcx/codegeneration -I/Users/George/miniconda3/envs/lucifex/include/python3.10 -c libffcx_forms_04e755b72c3177c8a265795174d2ee8e45ad6347.c -o ./libffcx_forms_04e755b72c3177c8a265795174d2ee8e45ad6347.o -O2 -g0
+INFO:root:clang -bundle -undefined dynamic_lookup -Wl,-rpath,/Users/George/miniconda3/envs/lucifex/lib -L/Users/George/miniconda3/envs/lucifex/lib -Wl,-rpath,/Users/George/miniconda3/envs/lucifex/lib -L/Users/George/miniconda3/envs/lucifex/lib ./libffcx_forms_04e755b72c3177c8a265795174d2ee8e45ad6347.o -o ./libffcx_forms_04e755b72c3177c8a265795174d2ee8e45ad6347.cpython-310-darwin.so
 </pre></div>
 </div>
 </div>
@@ -525,80 +518,44 @@ c_{\text{D}}\vert_{\partial\Omega_{\text{outer}}}=0 &amp; \text{cold outer bound
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="n">plot_colormap</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="p">)(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;c(x,y,t)&#39;</span><span class="p">,</span> <span class="n">get_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
-
-<span class="ne">NameError</span>: name &#39;c&#39; is not defined
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
-<span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
-
 <span class="n">c_base</span><span class="p">,</span> <span class="n">c_pert</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ics_perturbation</span>
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">c_pert</span><span class="p">)),</span> 
-        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$\mathcal</span><span class="se">{{</span><span class="s1">N</span><span class="se">}}</span><span class="s1">$&#39;</span><span class="p">,</span>
-        <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-    <span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">c_pert</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$\mathcal</span><span class="se">{{</span><span class="s1">N</span><span class="se">}}</span><span class="s1">$&#39;</span><span class="p">)</span>
 <span class="n">plot_mesh</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;N(x,y)_mesh&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
-
-<span class="ne">NameError</span>: name &#39;c&#39; is not defined
-</pre></div>
-</div>
+<img alt="../../_images/81eef11e43a43acff5f1b09c5e8490d9630489a5aa148eb4e39d9b172eeb6d59.png" src="../../_images/81eef11e43a43acff5f1b09c5e8490d9630489a5aa148eb4e39d9b172eeb6d59.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
-<span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
-
-<span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="n">as_indices</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">fraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
-    <span class="n">c_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">c_tri</span><span class="p">),</span> 
+        <span class="n">c</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
         <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$c(t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">,</span>
-        <span class="n">cartesian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
     <span class="p">)</span>
     <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;c(x,y,t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">mesh</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">function_space</span><span class="o">.</span><span class="n">mesh</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">triangulation</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh_tri</span><span class="o">.</span><span class="n">y</span>
+<img alt="../../_images/1fa77186d8eb508592aae666e36db6647e741901da877c4fa2c08de3ba755c15.png" src="../../_images/1fa77186d8eb508592aae666e36db6647e741901da877c4fa2c08de3ba755c15.png" />
+<img alt="../../_images/f527a3942339293831e883823a8a012f625070540652139412ee26a599d6920a.png" src="../../_images/f527a3942339293831e883823a8a012f625070540652139412ee26a599d6920a.png" />
+<img alt="../../_images/ed1e252c948650a33b41e4021bb49c8cf17d96aa82015dda4d96c72d6687bff3.png" src="../../_images/ed1e252c948650a33b41e4021bb49c8cf17d96aa82015dda4d96c72d6687bff3.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
 
-<span class="ne">NameError</span>: name &#39;c&#39; is not defined
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
 </pre></div>
 </div>
 </div>

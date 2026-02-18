@@ -21,13 +21,13 @@ class NPySeries(NPyUFL, Generic[F]):
     def __init__(
         self, 
         series: Iterable[F], 
-        t: Iterable[float],
+        time_series: Iterable[float],
         name: str | tuple[str, Iterable[str]] | None,
     ): 
         super().__init__(name)
-        assert len(series) == len(t)
+        assert len(series) == len(time_series)
         self._series = list(series)
-        self._time_series = list(t)
+        self._time_series = list(time_series)
 
     @property
     def series(self) -> list[F]:
@@ -36,6 +36,10 @@ class NPySeries(NPyUFL, Generic[F]):
     @property
     def time_series(self) -> list[float]:
         return self._time_series
+    
+    @property
+    def value_series(self):
+        return [i.value for i in self.series]
     
     @property
     def ufl_shape(self) -> tuple[int, ...] | None:
@@ -72,9 +76,21 @@ class NPySeries(NPyUFL, Generic[F]):
         ...
 
 
-class NPyConstantSeries(
+class NumericSeries(
     NPySeries[NPyConstant]
 ):
+    def __init__(
+        self, 
+        series: Iterable[NPyConstant | float | int | np.ndarray], 
+        time_series, 
+        name,
+    ):
+        _series = [
+            NPyConstant(i) if not isinstance(i, NPyConstant) else i 
+            for i in series
+        ]
+        super().__init__(_series, time_series, name)
+    
     @classmethod
     def from_series(
         cls, 
@@ -175,7 +191,7 @@ class QuadFunctionSeries(
         raise NotImplementedError
         
 
-@replicate_callable(NPyConstantSeries.from_series)
+@replicate_callable(NumericSeries.from_series)
 def as_npy_constant_series():
     pass
 

@@ -7,33 +7,15 @@ from collections.abc import Iterable
 from natsort import natsorted
 
 from ..utils.py_utils import MultiKey
-from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NPyConstantSeries
-from .load import load_txt_dict
-from .proxy import proxy, Proxy, ObjectName, ObjectType, FileName
-
-
-class GridSimulationData(
-    MultiKey[
-        str,
-        GridFunctionSeries | NPyConstantSeries
-    ]
-):
-    ...
-
-
-class TriSimulationData(
-    MultiKey[
-        str,
-        TriFunctionSeries | ConstantSeries
-    ]
-):
-    ...
+from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NumericSeries
+from ..io.load import load_txt_dict
+from ..io.proxy import proxy, Proxy, ObjectName, ObjectType, FileName
 
 
 class SimulationData(
     MultiKey[
         str,
-        FunctionSeries |  GridFunctionSeries | TriFunctionSeries | ConstantSeries | NPyConstantSeries
+        FunctionSeries |  GridFunctionSeries | TriFunctionSeries | ConstantSeries | NumericSeries
     ]
 ):
     def __init__(
@@ -46,7 +28,7 @@ class SimulationData(
         self._dir_path = dir_path
         self._loaded: dict[
             str, 
-            FunctionSeries | ConstantSeries | GridFunctionSeries | NPyConstantSeries | TriFunctionSeries
+            FunctionSeries | ConstantSeries | GridFunctionSeries | NumericSeries | TriFunctionSeries
         ] = {}
         self._proxies: dict[str, Proxy] = {}
         self._parameter_file = parameter_file
@@ -101,19 +83,7 @@ class SimulationData(
         else:
             for n, v in zip(name, value):
                 self[n] = v
-            
-    def __iter__(self):
-        return iter(self.keys())
-
-    def items(self):
-        return self._loaded.items()
-    
-    def keys(self):
-        return self._loaded.keys()
-    
-    def values(self):
-        return self._loaded.values()
-    
+                
     def __repr__(self):
         return f'{self.__class__.__name__}(dir_path={self.dir_path})'
     
@@ -125,6 +95,37 @@ class SimulationData(
     def parameter_file(self):
         return self._parameter_file
     
+    def __iter__(self):
+        return iter(self.keys())
+
+    def items(self):
+        return self._loaded.items()
+    
+    def keys(self):
+        return self._loaded.keys()
+    
+    def values(self):
+        return self._loaded.values()
+
+
+
+class GridSimulation(
+    MultiKey[
+        str,
+        GridFunctionSeries | NumericSeries
+    ]
+):
+    ...
+
+
+class TriSimulationData(
+    MultiKey[
+        str,
+        TriFunctionSeries | ConstantSeries
+    ]
+):
+    ...
+
 
 def find_simulations(
     root_dir_path: str,

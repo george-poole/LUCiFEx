@@ -18,13 +18,15 @@ from ..utils.fenicsx_utils import (
 from .function import Function
 from .constant import Constant
 
-
-class NPyUFL(ABC):
+T = TypeVar('T')
+class NPyUFL(ABC, Generic[T]):
     @abstractmethod
     def __init__(
         self,
+        value: T,
         name: str | None = None,
     ):
+        self._value = value
         self._name = name
         if isinstance(name, tuple):
             name, subnames = name
@@ -52,6 +54,10 @@ class NPyUFL(ABC):
         self._name = value
 
     @property
+    def value(self) -> T: #FIXME np.ndarray shape type hints
+        return self._value
+
+    @property
     @abstractmethod
     def ufl_shape(self) -> tuple[int, ...] | None:
         ...
@@ -77,15 +83,7 @@ class NPyUFL(ABC):
         return tuple(self.sub(i, n) for i, n in zip(range(n_sub), names, strict=True))
 
 
-class NPyConstant(NPyUFL):
-    def __init__(
-        self,
-        value: float | int | np.ndarray,
-        name: str | None = None,
-    ):
-        super().__init__(name)
-        self._value = value
-
+class NPyConstant(NPyUFL[float | int | np.ndarray]):
     @classmethod
     def from_constant(
         cls: type['NPyConstant'],
@@ -117,20 +115,15 @@ class NPyConstant(NPyUFL):
 
 
 M = TypeVar('M', bound=NPyMesh)
-class NPyFunction(NPyUFL, Generic[M]):
+class NPyFunction(NPyUFL[np.ndarray | tuple[np.ndarray, ...]], Generic[M]):
     def __init__(
         self,
-        values: np.ndarray | tuple[np.ndarray, ...],
+        value: np.ndarray | tuple[np.ndarray, ...],
         mesh: M,
         name: str | None = None,
     ):
-        super().__init__(name)
-        self._values = values
+        super().__init__(value, name)
         self._mesh = mesh
-
-    @property
-    def values(self) -> np.ndarray: #FIXME shape type hints
-        return self._values
     
     @property
     def mesh(self) -> M:
@@ -138,17 +131,17 @@ class NPyFunction(NPyUFL, Generic[M]):
     
     @property
     def ufl_shape(self) -> tuple[int, ...]:
-        if isinstance(self._values, tuple):
-            return (len(self._values), )
+        if isinstance(self._value, tuple):
+            return (len(self._value), )
         else:
             return ()
         
     @property 
     def npy_shape(self) -> tuple[int, ...]:
         if self.ufl_shape == ():
-            return self._values.shape
+            return self._value.shape
         else:
-            return self._values[0].shape
+            return self._value[0].shape
         
     def sub(
         self: 'NPyFunction',
@@ -159,15 +152,15 @@ class NPyFunction(NPyUFL, Generic[M]):
             return None
         if name is None:
             name = self._create_subname(index)
-        return self.__class__(self._values[index], self.mesh, name)
+        return self.__class__(self._value[index], self.mesh, name)
     
     @classmethod
     @abstractmethod
     def from_function(
         cls,
-        u: Function,
+        u: Function | Expr,
         get_values: Callable[[Function | Expr], np.ndarray],
-        convert_mesh: Callable[[Mesh], M],
+        convert_mesh: Callable[[Mesh], M] | Mesh,
     ):
         match u.ufl_shape:
             case (_, ):
@@ -179,11 +172,11 @@ class NPyFunction(NPyUFL, Generic[M]):
             case _:
                 raise NonScalarVectorError(u)
             
-        msh = convert_mesh(u.function_space.mesh)
+        msh = convert_mesh(extract_mesh(u))
         return cls(
             values,
             msh,
-            u.name,
+            u.name if isinstance(u, Function) else None, #FIXME
         )
     
 

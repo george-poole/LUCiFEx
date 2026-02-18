@@ -33,7 +33,7 @@ from .utils import arg_name_collisions, ArgNameCollisionError
 
 T = TypeVar('T', int | None, str | None, float | None)
 class Simulation(
-    MultiKey[str, FunctionSeries | ConstantSeries | ExprSeries]
+    MultiKey[str, FunctionSeries | ConstantSeries | ExprSeries | Expr | Function | Constant | float | int | np.ndarray]
 ):
     def __init__(
         self,
@@ -72,6 +72,54 @@ class Simulation(
         key: str,
     ):
         return self.namespace[key]
+    
+    @property
+    def solutions(self) -> list[FunctionSeries | ConstantSeries]:
+        """
+        `len(solutions) ≤ len(solvers)` because a solution may be solved for by more 
+        than one solver (e.g. in splitting or linearization schemes)
+        """
+        return list(
+            {*[s.solution_series for s in self.solvers], 
+             *[s.correction_series for s in self.solvers if s.correction_series is not None]},
+        )
+        
+    @property
+    def auxiliary(self):
+        return self._auxiliary
+    
+    @property
+    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
+        d =  {self.t.name: self.t, self.dt.name: self.dt}
+        d.update({s.name: s for s in self.solutions})
+        d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
+        d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
+        return d
+    
+    @property
+    def meshes(self) -> list[Mesh]:
+        return [i.mesh for i in self.solutions]
+    
+    @property
+    def mesh(self) -> Mesh | None:
+        if len(set(self.meshes)) == 1:
+            return self.meshes[0]
+        else:
+            return None
+        
+    @property
+    def timings(self) -> dict:
+        return self._timings
+    
+    def set_timings(
+        self,
+        timings: dict,
+        copy: bool = False
+    ):
+        if copy:
+            self._timings = timings.copy()
+        else:
+            self._timings = timings
 
     def _map_to_solution(
         self,
@@ -99,29 +147,6 @@ class Simulation(
             return function_dict | constant_dict
         
         raise MultipleDispatchTypeError(obj)
-    
-    @property
-    def solutions(self) -> list[FunctionSeries | ConstantSeries]:
-        """
-        `len(solutions) ≤ len(solvers)` because a solution may be solved for by more 
-        than one solver (e.g. in splitting or linearization schemes)
-        """
-        return list(
-            {*[s.solution_series for s in self.solvers], 
-             *[s.correction_series for s in self.solvers if s.correction_series is not None]},
-        )
-        
-    @property
-    def auxiliary(self):
-        return self._auxiliary
-    
-    @property
-    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
-        d =  {self.t.name: self.t, self.dt.name: self.dt}
-        d.update({s.name: s for s in self.solutions})
-        d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
-        d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
-        return d
 
     @property
     def store_delta(self) -> dict[str, int | float | None]:
@@ -241,31 +266,6 @@ class Simulation(
             self.dt,
         )
     
-    @property
-    def timings(self) -> dict:
-        return self._timings
-    
-    def set_timings(
-        self,
-        timings: dict,
-        copy: bool = False
-    ):
-        if copy:
-            self._timings = timings.copy()
-        else:
-            self._timings = timings
-
-    @property
-    def meshes(self) -> list[Mesh]:
-        return [i.mesh for i in self.solutions]
-    
-    @property
-    def mesh(self) -> Mesh | None:
-        if len(set(self.meshes)) == 1:
-            return self.meshes[0]
-        else:
-            return None
-
 
 FunctionSeriesDelta: TypeAlias = int | float | None
 ConstantSeriesDelta: TypeAlias = int | float | None

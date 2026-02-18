@@ -40,7 +40,7 @@ def navier_stokes_marangoni(
     zeta_eps: float = 0.01,
     c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
-    # time step
+    # timestep
     dt_max: float = 0.1,
     dt_min: float = 0.0,
     dt_courant: float = 0.75,

@@ -41,7 +41,7 @@ def darcy_abc_convection_rectangle(
     a_seed: tuple[int, int] = (1234, 5678),
     b0: float = 1.0,
     c0: float = 0.0,
-    # time step
+    # timestep
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",

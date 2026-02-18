@@ -1,22 +1,93 @@
-from typing import Literal, Callable, Iterable
+from typing import Literal, Callable, overload
+from collections.abc import Iterable
+from functools import singledispatch
 
 from dolfinx.fem import Function
 import numpy as np
 
 from ..utils.array_utils import as_index
-from ..utils.py_utils import as_slice, StrSlice
+from ..utils.py_utils import as_slice, StrSlice, MultipleDispatchTypeError
 from ..mesh.mesh2npy import GridMesh
 from .fem2npy import as_grid_function, GridFunction
 
 
+@overload
 def grid_cross_section(
-    fxyz: Function | tuple[np.ndarray, ...],
+    fxyz: Function | GridFunction | tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
     value: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: tuple[bool, bool] = (True, False),
-) -> tuple[GridFunction, float]:    
+) -> tuple[GridFunction, float]: 
+    ...
+
+
+@overload
+def grid_cross_section(
+    fxyz: Iterable[Function | GridFunction],
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: tuple[bool, bool] = (True, False),
+    strict: bool = False,
+) -> tuple[list[GridFunction], float | list[float]]: 
+    ... 
+
+
+@singledispatch
+def grid_cross_section(f, *_, **__):
+    raise MultipleDispatchTypeError(f)
+
+
+@grid_cross_section.register(Function)
+def _(
+    fxyz: Function,
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: tuple[bool, bool] = (True, False),
+): 
+    use_mesh_cache, use_func_cache = use_cache
+    f_grid = as_grid_function(use_cache=use_func_cache)(fxyz, use_mesh_cache=use_mesh_cache)
+    return grid_cross_section(
+        f_grid,
+        axis,
+        value,
+        fraction,
+        axis_names,
+    )
+
+
+@grid_cross_section.register(tuple)
+def _(
+    fxyz: tuple[np.ndarray, ...],
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+): 
+    values, *axes = fxyz
+    f_grid = GridFunction(values, GridMesh(axes))
+    return grid_cross_section(
+        f_grid,
+        axis,
+        value,
+        fraction,
+        axis_names,
+    )
+
+
+@grid_cross_section.register(GridFunction)
+def _(
+    f_grid: GridFunction,
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+): 
     if fraction:
         f_fraction = value
         if f_fraction < 0 or f_fraction > 1:
@@ -31,13 +102,6 @@ def grid_cross_section(
     else:
         axis_index = axis
 
-    if isinstance(fxyz, Function):
-        use_mesh_cache, use_func_cache = use_cache
-        f_grid = as_grid_function(use_cache=use_func_cache)(fxyz, use_mesh_cache=use_mesh_cache)
-    else:
-        values, *axes = fxyz
-        f_grid = GridFunction(values, GridMesh(axes))
-
     dim = len(f_grid.mesh.axes)
     if dim == 2:
         return _cross_section_line(f_grid, f_fraction, f_value, axis_index)
@@ -45,6 +109,38 @@ def grid_cross_section(
         return _cross_section_colormap(f_grid, f_fraction, f_value, axis_index)
     else:
         raise ValueError(f'Cannot get a cross-section in d={dim}.')
+
+
+@grid_cross_section.register(Iterable)
+def _(
+    u: list[Function | GridFunction],
+    axis: str | Literal[0, 1, 2],
+    value: float | None = None,
+    fraction: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: tuple[bool, bool] = (True, False),
+    strict: bool = False,
+): 
+    _cross_sections = []
+    _values = []
+    grid, value  = grid_cross_section(
+        u[0], axis, value, fraction, axis_names, use_cache,
+    )
+    _cross_sections.append(grid)
+    _values.append(value)
+
+    for _u in u[1:]:
+        _grid, _value  = grid_cross_section(_u, axis, value, fraction, axis_names, use_cache)
+        if strict:
+            assert np.isclose(value, _value)
+            assert np.all(np.isclose(grid.mesh.axes, _grid.mesh.axes))
+        _cross_sections.append(_grid)
+        _values.append(_value)
+
+    if all(np.isclose(i, _values[0]) for i in _values):
+        _values = _values[0]
+
+    return _cross_sections, _values
 
 
 def _cross_section_line(
@@ -68,9 +164,9 @@ def _cross_section_line(
     y_value = y_axis[yaxis_index]
 
     if y_index == 0:
-        y_line = u.values[yaxis_index, :]
+        y_line = u.value[yaxis_index, :]
     elif y_index == 1:
-        y_line = u.values[:, yaxis_index]
+        y_line = u.value[:, yaxis_index]
     else:
         raise ValueError
     
@@ -101,11 +197,11 @@ def _cross_section_colormap(
     z_value = z_axis[zaxis_index]
 
     if z_index == 0:
-        z_grid = u.values[zaxis_index, :, :]
+        z_grid = u.value[zaxis_index, :, :]
     elif z_index == 1:
-        z_grid = u.values[:, zaxis_index, :]
+        z_grid = u.value[:, zaxis_index, :]
     elif z_index == 2:
-        z_grid = u.values[:, :, zaxis_index]
+        z_grid = u.value[:, :, zaxis_index]
     else:
         raise ValueError
     
@@ -117,55 +213,69 @@ def _cross_section_colormap(
     return u_cmap, z_value
 
 
-def grid_cross_section_series(
-    u: Iterable[Function | tuple[np.ndarray, ...]],
-    axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
-    use_cache: tuple[bool, bool] = (True, False),
+@overload
+def grid_average(
+    u: Function | GridFunction,
+    axis: str | int | tuple[str | int, ...],
+    slc: StrSlice | tuple[StrSlice, ...] = ':',
+    use_cache: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> GridFunction:
+    ...
+
+
+@overload
+def grid_average(
+    u: Iterable[Function | GridFunction],
+    axis: str | int | tuple[str | int, ...],
+    slc: StrSlice | tuple[StrSlice, ...] = ':',
+    use_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> list[GridFunction]:
-    _cross_sections = []
-    grid, value  = grid_cross_section(
-        u[0], axis, value, fraction, axis_names, use_cache,
-    )
-    _cross_sections.append(grid)
+    ...
 
-    for _u in u[1:]:
-        _grid, _value  = grid_cross_section(_u, axis, value, fraction, axis_names, use_cache)
-        assert np.isclose(value, _value)
-        assert np.all(np.isclose(grid.mesh.axes, _grid.mesh.axes))
-        _cross_sections.append(_grid)
-
-    return _cross_sections
 
 
 def grid_average(
-    u: Function  | np.ndarray,
-    axis: str | int | None = None,
-    slc: StrSlice | tuple[StrSlice, StrSlice] = ':',
-) -> np.ndarray:
+    u: Function | GridFunction | Iterable[Function | GridFunction],
+    axis: str | int | tuple[str | int, ...],
+    slc: StrSlice | tuple[StrSlice, ...] = ':',
+    use_cache: bool = True,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> GridFunction | list[GridFunction]:
+    
+    if not isinstance(u, (Function, GridFunction)):
+        return [grid_average(i, axis, slc, use_cache, axis_names) for i in u]
+    
     if isinstance(u, Function):
-        values = as_grid_function(u).values
-    else:
-        values = u
-        
-    if isinstance(axis, str):
-        axis = ('x', 'y', 'z').index(axis)
+        u = as_grid_function(use_cache=use_cache)(u)
+    
+    if not isinstance(axis, tuple):
+        axis = (axis, )
+    _axis = tuple(axis_names.index(i) for i in axis)
 
-    if isinstance(slc, tuple):
-        slc_x, slc_y = slc
-    else:
-        slc_x, slc_y = slc, slc
+    if not isinstance(slc, tuple):
+        slc = [slc] * len(u.mesh.axes)
+    _slc = tuple(as_slice(i) for i in slc)
 
-    slc_x = as_slice(slc_x)
-    slc_y = as_slice(slc_y)
+    avg = _grid_average(u.value, _axis, *_slc)
 
-    return np.mean(values[slc_x, slc_y], axis)
+    avg_axes = [ax[s] for i, (ax, s) in enumerate(zip(u.mesh.axes, _slc)) if not i in _axis]
+
+    return GridFunction(avg, GridMesh(avg_axes))
+
+
+def _grid_average(
+    values: np.ndarray,
+    axis: int | tuple[int, ...] | None,
+    *slc: slice,
+) -> np.ndarray | float:
+
+    return np.mean(values[slc], axis)
 
 
 def where_on_grid(
-    f: Function,
+    f: GridFunction | Function,
     condition: Callable[[np.ndarray], np.ndarray],
     use_cache: tuple[bool, bool] = (True, False),
 ) -> tuple[np.ndarray, ...]:

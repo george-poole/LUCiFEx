@@ -27,7 +27,7 @@ def darcy_rayleigh_benard_rectangle(
     c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
     c_seed: tuple[int, int] = (1234, 5678),
-    # time step
+    # timestep
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",
     dt_courant: float = 0.75,
@@ -114,7 +114,7 @@ def darcy_rayleigh_benard_annulus(
     # initial conditions
     c_ampl: float = 1e-6,
     c_freq: int = 8,
-    # time step
+    # timestep
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",
     dt_courant: float = 0.75,

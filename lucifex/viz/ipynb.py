@@ -10,13 +10,41 @@ from ..io.write import write
 from ..utils.py_utils import replicate_callable
 
 
+T = TypeVar('T')
+def set_ipynb_variable(
+    env_key: str,
+    default: T,
+    report: bool = True,
+    as_type: Callable[[str], T] | None = None,
+) -> T:
+    """
+    Set a variable from the terminal with `export env_key=value`
+    """
+    _default = object()
+    value = os.environ.get(env_key, _default)
+    if value is _default:
+        return default
+    
+    if as_type is None:
+        as_type = eval
+
+    if report:
+        print(f"Environment variable `{env_key}={value}`")  
+
+    value = as_type(value)
+    if not isinstance(value, type(default)):
+        raise TypeError
+
+    return value
+    
+
 def get_ipynb_file_name(
-    env: str = 'IPYNB_FILE_NAME',
-    key: str = '__vsc_ipynb_file__',
+    env_key: str = 'IPYNB_FILE_NAME',
+    dict_key: str = '__vsc_ipynb_file__',
     ext: bool = False,
 ) -> str:
     
-    ipynb_file_path = os.environ.get(env)
+    ipynb_file_path = os.environ.get(env_key)
     if ipynb_file_path is None:
         try:
             from IPython import get_ipython
@@ -25,7 +53,7 @@ def get_ipynb_file_name(
                 _globals = ip.user_global_ns 
         except Exception:
             _globals = globals()
-        ipynb_file_path = _globals[key]
+        ipynb_file_path = _globals[dict_key]
 
     ipynb_file_path = os.path.basename(ipynb_file_path)
     if ext:
@@ -45,7 +73,7 @@ def _save_figure(
         file_name: str,
         dir_path: str | None = './figures',
         prefix_ipynb: bool = True,
-        get_path: bool = False,
+        return_path: bool = False,
         mkdirs: bool = True,
         thumbnail: bool = False,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
@@ -70,7 +98,7 @@ def _save_figure(
             write(obj, file_name, **kwargs)
             if thumbnail:
                 write(obj, os.path.join(dir_path, ipynb_name), **kwargs)
-            if get_path:
+            if return_path:
                 return file_name
         return __
     return _
@@ -82,7 +110,7 @@ def save_figure():
     For interactive use in a `.ipynb` file. \\
     See `lucifex.io.write` for the general purpose `write` function. \\
     Default argument values from `write` are overridden. \\
-    File name dynamically created from notebook name can be returned with `get_path=True`.
+    File name dynamically created from notebook name can be returned with `return_path=True`.
     """
     pass
 

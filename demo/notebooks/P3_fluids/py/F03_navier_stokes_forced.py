@@ -30,7 +30,7 @@ def navier_stokes_forced(
     # physical
     fx: Callable[[np.ndarray], np.ndarray] | None = None,
     fy: Callable[[np.ndarray], np.ndarray] | None = None,
-    # time step
+    # timestep
     dt_max: float = 0.1,
     dt_min: float = 0.0,
     dt_courant: float = 0.75,

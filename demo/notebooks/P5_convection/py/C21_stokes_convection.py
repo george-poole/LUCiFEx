@@ -54,7 +54,7 @@ def stokes_rayleigh_benard_rectangle(
     # constitutive
     Lmbda: float | None = None,
     density: Callable[[FunctionSeries], Series] = lambda c: -c, 
-    # time step
+    # timestep
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     dt_courant: float = 0.75,

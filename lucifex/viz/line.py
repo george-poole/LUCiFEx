@@ -28,13 +28,14 @@ def plot_line(
     legend_labels: list[str | float | int] | tuple[float, float] | None = None,
     legend_title: str | None = None,
     cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None = None,
+    flip: bool = False,
     **kwargs,
 ) -> None:
     
     if isinstance(f, (Function, GridFunction, tuple)):
         if cyc is not None:
             cyc = create_cycler(cyc)
-        _plot_line(f, ax, cyc, **kwargs)
+        _plot_line(f, ax, cyc, flip, **kwargs)
     else:
         if isinstance(legend_labels, tuple):
             assert len(legend_labels) == 2
@@ -51,9 +52,9 @@ def plot_line(
         _kwargs.update(kwargs)
         for i, fi in enumerate(f):
             if i == 0:
-                _plot_line(fi, ax, cyc=cyc, **_kwargs)
+                _plot_line(fi, ax, cyc=cyc, flip=flip, **_kwargs)
             else:
-                _plot_line(fi, ax, cyc=Ellipsis, **_kwargs)
+                _plot_line(fi, ax, cyc=Ellipsis, flip=flip, **_kwargs)
 
     if legend_labels is not None and not isinstance(legend_labels, tuple):
         filter_kwargs(set_legend)(ax, legend_labels, legend_title, **kwargs)
@@ -69,10 +70,11 @@ def _(
     f: Function,
     ax: Axes,
     cyc: Cycler | None = None,
+    flip: bool = False,
     **kwargs,
 ) -> None:
     f_grid = as_grid_function(f)
-    _plot_line(f_grid, ax, cyc, **kwargs)
+    _plot_line(f_grid, ax, cyc, flip, **kwargs)
 
 
 @_plot_line.register(GridFunction)
@@ -80,10 +82,11 @@ def _(
     f: GridFunction,
     ax: Axes,
     cyc: Cycler | None = None,
+    flip: bool = False,
     **kwargs,
 ) -> None:
-    xy = (f.mesh.x_axis, f.values)
-    return _plot_line(xy, ax, cyc, **kwargs)
+    xy = (f.mesh.x_axis, f.value)
+    return _plot_line(xy, ax, cyc, flip, **kwargs)
 
 
 @_plot_line.register(tuple)
@@ -91,10 +94,13 @@ def _(
     xy: tuple[np.ndarray, np.ndarray],
     ax: Axes,
     cyc: Cycler | EllipsisType | None = None,
+    flip: bool = False,
     **kwargs,
 ) -> None:
     
     x, y = xy
+    if flip:
+        x, y = y, x
 
     _kwargs = dict(x_lims=x)
     _kwargs.update(**kwargs)

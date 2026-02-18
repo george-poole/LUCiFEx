@@ -286,17 +286,17 @@ class ExprSeries(
             return lambda *a, **k: _(func, *a, **k)
         
     @classmethod
-    def from_expr_func(
+    def from_expr_factory(
         cls, 
-        func: Callable[P, Self], 
+        factory: Callable[P, Self], 
         /,
         *,
         name: str | None = None,
     ) -> Callable[P, Self]:
-        return cls._from_expr(func, name=name)
+        return cls._from_expr(factory, name=name)
     
     @classmethod
-    def from_expr_args(
+    def from_expr_factory_args(
         cls, 
         *args: Any | Callable[..., Self],
         name: str | None = None,

@@ -27,6 +27,17 @@ class NPyMesh(ABC):
     def name(self) -> str | None:
         return self._name
     
+    @classmethod
+    @abstractmethod
+    def from_mesh(
+        cls,
+        mesh: Mesh,
+        *args,
+        **kwargs,
+    ):
+        ... 
+
+    
 
 class GridMesh(NPyMesh):
     def __init__(
@@ -110,6 +121,22 @@ class TriMesh(NPyMesh):
 
         return cls(x_coordinates, y_coordinates, triangles, mesh.name)
     
+    @property
+    def x_coordinates(self) -> np.ndarray:
+        return self._x_coordinates
+
+    @property
+    def y_coordinates(self) -> np.ndarray:
+        return self._y_coordinates
+
+    @property
+    def triangles(self) -> list[np.ndarray]:
+        return self._triangles
+    
+    @property
+    def vertices(self) -> np.ndarray:
+        return np.array((self.x_coordinates, self.y_coordinates))[self.triangles]
+    
     @cached_property
     def triangulation(self) -> Triangulation:
         return Triangulation(
@@ -118,35 +145,25 @@ class TriMesh(NPyMesh):
             self._triangles,
         )
     
-    @property
-    def x_coordinates(self):
-        return self._x_coordinates
-
-    @property
-    def y_coordinates(self):
-        return self._y_coordinates
-
-    @property
-    def triangles(self):
-        return self._triangles
-    
 
 class QuadMesh(NPyMesh):
     def __init__(
         self, 
-        x_coordinates, 
-        y_coordinates, 
-        quads,
+        x_coordinates: np.ndarray, 
+        y_coordinates: np.ndarray, 
+        quadrilaterals: list[np.ndarray],
         name: str | None = None,
     ):
         super().__init__(name)
-        raise NotImplementedError
+        self._x_coordinates = x_coordinates
+        self._y_coordinates = y_coordinates
+        self._quadrilaterals = quadrilaterals
 
     @classmethod
     def from_mesh(
         cls: type['QuadMesh'], 
         mesh: Mesh,
-        **polycollection_kwargs,
+        **reorder_kws,
     ) -> Self:
         if not mesh.geometry.dim == 2:
             raise ValueError(
@@ -162,27 +179,39 @@ class QuadMesh(NPyMesh):
             {mesh.topology.cell_name()} """
             )
 
-        xy_coordinates = mesh.geometry.x[:, :2]
+        x_coordinates, y_coordinates = mesh_coordinates(mesh)
 
         connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
         n_cells = connec.num_nodes
-        quads = [_reorder_quad_vertices(connec.links(i)) for i in range(n_cells)]
+        quads = [
+            _reorder_quad_vertices(connec.links(i), **reorder_kws) for i in range(n_cells)
+        ]
 
-        vertices = xy_coordinates[quads]
-
-        _kwargs = dict(facecolor='white', edgecolor='black')
-        _kwargs.update(polycollection_kwargs)
-        quadl = PolyCollection(vertices, **_kwargs)
-
-        raise NotImplementedError
+        return cls(x_coordinates, y_coordinates, quads, mesh.name)
     
-    @cached_property
-    def triangulation(self) -> Triangulation:
-        return Triangulation(
-            self._x_coordinates,
-            self._y_coordinates,
-            self._triangles,
-        )
+    @property
+    def x_coordinates(self) -> np.ndarray:
+        return self._x_coordinates
+
+    @property
+    def y_coordinates(self) -> np.ndarray:
+        return self._y_coordinates
+
+    @property
+    def quadrilaterals(self) -> list[np.ndarray]:
+        return self._quadrilaterals
+    
+    @property
+    def vertices(self) -> np.ndarray:
+        return np.array((self.x_coordinates, self.y_coordinates))[self.quadrilaterals]
+    
+    def polycollection(
+        self,
+        facecolor='white', 
+        edgecolor='black',
+        **kwargs,
+    ) -> PolyCollection:
+        return PolyCollection(self.vertices, facecolor=facecolor, edgecolor=edgecolor, **kwargs)
 
 
 as_grid_mesh = optional_lru_cache(

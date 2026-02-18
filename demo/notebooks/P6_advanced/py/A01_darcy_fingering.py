@@ -52,7 +52,7 @@ def darcy_fingering_rectangle(
     erf_eps: float = 1e-2,
     c_ampl: float = 1e-6,
     c_freq: tuple[int, int] = (8, 8),
-    # time step
+    # timestep
     dt_max: float = 0.25,
     dt_h: str | float = "hmin",
     dt_courant: float = 0.25,

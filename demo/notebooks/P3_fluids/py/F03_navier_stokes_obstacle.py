@@ -28,7 +28,7 @@ def navier_stokes_circle_obstacle(
     rho: float,
     mu: float,
     p_in: float,
-    # time step
+    # timestep
     dt_max: float,
     dt_min: float,
     dt_courant: float,

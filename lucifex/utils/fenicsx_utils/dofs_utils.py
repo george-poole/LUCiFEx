@@ -36,7 +36,6 @@ Function of coordinates `x = (x₀, x₁, x₂)` returning `True` or `False`
 e.g. `lambda x: np.isclose(x[1], Ly)` if a boundary is defined by `y = Ly`
 """
 
-# TODO int and str markers from gmsh meshtags
 SpatialMarkerAlias: TypeAlias = SpatialExpression | Iterable[SpatialExpression | SpatialMarker]
 """
 Alias types to `SpatialMarker`.

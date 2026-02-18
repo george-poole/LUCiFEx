@@ -106,7 +106,7 @@ def _(
     grid: bool | None = None,
     **kwargs,
 ):
-    xyz = (*u.mesh.axes, u.values)
+    xyz = (*u.mesh.axes, u.value)
     return _plot_colormap(
         xyz, fig, ax, colorbar, grid, **kwargs,
     )
@@ -121,7 +121,7 @@ def _(
     grid: bool | None = None,
     **kwargs,
 ):
-    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
+    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.value)
     return _plot_colormap(
         xyz, fig, ax, colorbar, grid, triang=u.mesh.triangulation, **kwargs,
     )
@@ -230,7 +230,7 @@ def _(
     grid: bool | None = None,
     **kwargs,
 ) -> None:
-    xyz = (*u.mesh.axes, u.values)
+    xyz = (*u.mesh.axes, u.value)
     return _plot_contours(xyz, ax, levels, grid, **kwargs)
 
 
@@ -242,7 +242,7 @@ def _(
     grid: bool | None = None,
     **kwargs,
 ) -> None:
-    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.values)
+    xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.value)
     return _plot_contours(xyz, ax, levels, grid, u.mesh.triangulation, **kwargs)
 
 
