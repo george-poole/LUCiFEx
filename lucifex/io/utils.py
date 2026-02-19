@@ -12,31 +12,31 @@ from ..utils.fenicsx_utils import NonScalarVectorError, is_discontinuous_lagrang
 def create_dir_path(
     namespace: dict[str, Any],
     *,
-    dir_base: str,
+    dir_root: str,
     dir_params: Iterable[str] | str,
     dir_prefix: str | None,
     dir_suffix: str | None,
-    dir_timestamp: bool | None,
-    dir_seps: tuple[str, str] = ('|', '__'),
+    dir_datetime: bool | None,
+    dir_seps: tuple[str, str, str] = ('|', '__', '__'),
     mkdir: bool = False,
     slc: slice = slice(2, -4),
 ) -> str:
     
     dir_name = ''
-    arg_sep, sep = dir_seps
+    arg_sep, prefix_sep, suffix_sep = dir_seps
 
     if isinstance(dir_params, str):
         dir_params = dir_params.split()
     dir_params_values = arg_sep.join([f"{arg_name}={namespace[arg_name]}" for arg_name in dir_params])
-    dir_name = f'{dir_name}{dir_params_values}'
+    dir_name = ''.join((dir_name, dir_params_values))
 
     if dir_prefix:
-        dir_name = f"{dir_prefix}{sep}{dir_name}"
+        dir_name = prefix_sep.join((dir_prefix, dir_name)) if dir_name else dir_prefix
     
     if dir_suffix:
-        dir_name = f"{dir_name}{sep}{dir_suffix}"
+        dir_name = suffix_sep.join((dir_name, dir_suffix)) if dir_name else dir_suffix
 
-    if dir_timestamp:
+    if dir_datetime:
         time = str(datetime.datetime.now())[slc]
         whitespace_delims = " ", "_"
         year_month_day_delims = "-", "-"
@@ -48,12 +48,12 @@ def create_dir_path(
             .replace(*hour_min_sec_delims)
             .replace(*decimal_delims)
         )
-        dir_name = f"{dir_name}{sep}{time}"
+        dir_name = suffix_sep.join((dir_name, time)) if dir_name else time
 
     if mkdir:
         os.makedirs(dir_name, exist_ok=True)
 
-    return os.path.join(dir_base, dir_name)
+    return os.path.join(dir_root, dir_name)
 
 
 def file_name_ext(
@@ -101,7 +101,7 @@ def dofs_array_dim(
             raise NotImplementedError(f'I/O with shape {shape} is not supported.')
         
 
-def io_element(
+def xdmf_element(
     u: FunctionSpace | Function | FunctionSeries,
 ) -> tuple[str, int] | tuple[str, int, int]:
     if isinstance(u, FunctionSpace):
@@ -113,6 +113,7 @@ def io_element(
         elem = ('DP', 0)
     else:
         elem = ('P', 1)
+    
     match u.ufl_shape:
         case ():
             return elem

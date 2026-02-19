@@ -26,7 +26,7 @@ def l_norm(
 def L_norm(
     u:  Function | Expr,
     p: float,
-    mod: bool = True,
+    absolute: bool = True,
 ) -> Expr:
     """
     `‖u‖ℒₚᵖ = ∫ |u(𝐱)|ᵖ dx`
@@ -34,7 +34,7 @@ def L_norm(
     Note that raising the evaluated integral to the power of `1/p` 
     is required to recover the usual definition of the divergence norm.
     """
-    if mod:
+    if absolute:
         _abs = abs
     else:
         _abs = lambda u: u
@@ -45,7 +45,7 @@ def L_norm(
 def div_norm(
     u:  Function | Expr,
     p: float,
-    mod: bool = True,
+    absolute: bool = True,
 ) -> Expr:
     """
     `‖𝐮‖divₚᵖ = ∫ |∇·𝐮(𝐱)|ᵖ dx = ‖∇·𝐮‖ℒₚᵖ`
@@ -53,14 +53,14 @@ def div_norm(
     Note that raising the evaluated integral to the power of `1/p` 
     is required to recover the usual definition of the divergence norm.
     """
-    return L_norm(div(u), p, mod)
+    return L_norm(div(u), p, absolute)
 
 
 @mesh_integral
 def grad_norm(
     u:  Function | Expr,
     p: float,
-    mod: bool = True,
+    absolute: bool = True,
 ) -> Expr:
     """
     `‖u‖gradₚᵖ = ∫ |∇u(𝐱)·∇u(𝐱)|ᵖ dx = ‖∇u·∇u‖ℒₚ`
@@ -68,7 +68,7 @@ def grad_norm(
     Note that raising the evaluated integral to the power of `1/p` 
     is required to recover the usual definition of the divergence norm.
     """
-    return L_norm(inner(grad(u), grad(u)), p, mod)
+    return L_norm(inner(grad(u), grad(u)), p, absolute)
 
 
 def extrema(

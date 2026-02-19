@@ -72,7 +72,7 @@ def write(
     u: FunctionSeries | ConstantSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
-    slc: StrSlice = slice(0, None),
+    slc: StrSlice = ':',
     mode: Literal["a", "w"] = "a",
     comm: MPI.Comm | None = None,
 ) -> None:
@@ -84,9 +84,9 @@ def write(
     u: GridFunctionSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
-    slc: StrSlice = slice(0, None),
+    slc: StrSlice = ':',
     mode: Literal["a", "w"] = "a",
-    sep: str = '__',
+    sep: str = GridFunctionSeries.SEPARATOR,
     axes: tuple[str, ...] = ('x', 'y', 'z'),
 ) -> None:
     ...
@@ -97,9 +97,9 @@ def write(
     u: NumericSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
-    slc: StrSlice = slice(0, None),
+    slc: StrSlice = ':',
     mode: Literal["a", "w"] = "a",
-    sep: str = '__',
+    sep: str = NumericSeries.SEPARATOR,
 ) -> None:
     ...
 
@@ -293,7 +293,7 @@ def _(
     u: FunctionSeries | ConstantSeries,
     file_name: str,
     dir_path,
-    slc=slice(0, None),
+    slc=':',
     mode='a',
     comm=None,
 ):    
@@ -316,69 +316,36 @@ def _(
 
 
 @_write.register(GridFunctionSeries)
-def _(
-    u: GridFunctionSeries,
-    file_name: str,
-    dir_path,
-    slc=slice(0, None), 
-    mode='a',
-    sep='__',
-    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
-): 
-    file_path = file_path_ext(dir_path, file_name, 'npz')
-
-    slc = as_slice(slc)
-    u = GridFunctionSeries(u.series[slc], u.time_series[slc], u.axes, u.name)
-
-    d = {}
-    if mode == 'a' and os.path.exists(file_path):
-        d.update(np.load(file_path).items())
-    d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.series)))
-    d.update({_create_npz_key(u.name, k, sep): v for k, v in zip(axis_names, u.axes)})
-    np.savez(file_path, **d)
-
-
 @_write.register(TriFunctionSeries)
-def _(
-    u: TriFunctionSeries,
-    file_name: str,
-    dir_path,
-    slc=slice(0, None), 
-    mode='a',
-    sep='__',
-): 
-    file_path = file_path_ext(dir_path, file_name, 'npz')
-    trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
-
-    slc = as_slice(slc)
-    u = TriFunctionSeries(u.series[slc], u.time_series[slc], u.triangulation, u.name)
-
-    d = {}
-    if mode == 'a' and os.path.exists(file_path):
-        d.update(np.load(file_path).items())
-    d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.series)))
-    d.update({_create_npz_key(u.name, attr, sep): getattr(u.triangulation, attr) for attr in trigl_attrs})
-    np.savez(file_path, **d)
-
-
 @_write.register(NumericSeries)
 def _(
-    u: NumericSeries,
+    u: GridFunctionSeries | TriFunctionSeries | NumericSeries,
     file_name: str,
     dir_path,
-    slc = slice(0, None), 
-    mode = 'a',
-    sep='__',
+    slc=':', 
+    mode='a',
+    sep=None,
 ): 
     file_path = file_path_ext(dir_path, file_name, 'npz')
-
     slc = as_slice(slc)
-    u = NumericSeries(u.series[slc], u.time_series[slc], u.name)
+    if sep is None:
+        sep = u.SEPARATOR
+
+    u = type(u)(u.series[slc], u.time_series[slc], u.name)
+
+    if isinstance(u, GridFunctionSeries):
+        mesh_kws = ('axes', )
+    elif isinstance(u, TriFunctionSeries):
+        mesh_kws = ('x_coordinates', 'y_coordinates', 'triangles')
+    else:
+        mesh_kws = ()
 
     d = {}
     if mode == 'a' and os.path.exists(file_path):
         d.update(np.load(file_path).items())
-    d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.series)))
+    d.update(dict(zip([_create_npz_key(u.name, t, sep) for t in u.time_series], u.value_series)))
+    if mesh_kws:
+        d.update({_create_npz_key(u.name, k, sep): v for k, v in zip(mesh_kws, (getattr(u.mesh, i) for i in mesh_kws))})
     np.savez(file_path, **d)
 
 
@@ -458,7 +425,7 @@ def _(
         array_dict.update(namespace)
         np.savez(file_path, **array_dict, **kwargs)
     else:
-        raise ValueError
+        raise ValueError(file_ext)
     
 
 @_write.register(float)

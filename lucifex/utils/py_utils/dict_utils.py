@@ -68,6 +68,9 @@ class FrozenDict(MultiKey[str, Any]):
     
     def values(self):
         return self._dict.values()
+    
+    def items(self):
+        return self._dict.items()
         
 
 

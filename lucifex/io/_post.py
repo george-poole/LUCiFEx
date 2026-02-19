@@ -4,7 +4,7 @@ from functools import wraps
 from collections.abc import Iterable
 
 from .write import write
-from .proxy import Proxy, CoProxy
+from ._proxy import Proxy, CoProxy
 
 
 @overload

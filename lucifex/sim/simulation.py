@@ -6,6 +6,7 @@ from typing import (
     Callable,
     ParamSpec,
     TypeAlias,
+    TypeVar,
     overload,
     get_args
 )
@@ -46,13 +47,14 @@ class Simulation(
         auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | float | int | np.ndarray]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
-        dir_path: str | None = None,
+        parameters: dict[str, Any] | None = None,
         store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] | EllipsisType = Ellipsis,
         write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
-        parameter_file: str | None = None,
+        config_file: str | None = None,
         checkpoint_file: str | None = None,
         timing_file: str | None = None,
+        **create_dir_path_kws,
     ):
         if isinstance(solvers, Solver):
             solvers = [solvers]
@@ -61,13 +63,17 @@ class Simulation(
         self.dt = dt
         self._auxiliary = list(auxiliary)
         self.stoppers = list(stoppers)
-        self.dir_path = dir_path
-        self.parameter_file = parameter_file
-        self.checkpoint_file = checkpoint_file
-        self.timing_file = timing_file
+        self._parameters = parameters
         self.store_delta = store_delta
         self.write_delta = write_delta
         self.write_file = write_file
+        self.config_file = config_file
+        self.checkpoint_file = checkpoint_file
+        self.timing_file = timing_file
+        if create_dir_path_kws:
+            self._dir_path = filter_kwargs(create_dir_path)(parameters, **create_dir_path_kws)
+        else:
+            self._dir_path = None
         self._timings = None
     
     def _getitem(
@@ -116,12 +122,12 @@ class Simulation(
             return None
         
     @property
-    def timings(self) -> dict:
+    def timings(self) -> dict[str, list[float]]:
         return self._timings
     
     def set_timings(
         self,
-        timings: dict,
+        timings: dict[str, list[float]],
         copy: bool = False
     ):
         if copy:
@@ -129,11 +135,13 @@ class Simulation(
         else:
             self._timings = timings
 
-    def _solution_delta_mapping(
+    _T = TypeVar('_T')
+    def _solution_mapping(
         self,
-        delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType],
-    ) -> dict[str, DeltaType]:
-        if isinstance(delta, get_args(DeltaType)):
+        delta: _T | tuple[_T, _T] | dict[str | Iterable[str], _T],
+        elementary_types: Iterable[_T],
+    ) -> dict[str, _T]:
+        if isinstance(delta, elementary_types):
             return {s.name: delta for s in self.solutions}
         
         if isinstance(delta, tuple) and len(delta) == 2:
@@ -164,7 +172,7 @@ class Simulation(
         if delta_value is Ellipsis:
             self._store_delta = {s.name: s.store for s in self.solutions}
         else:
-            self._store_delta = self._solution_delta_mapping(delta_value)
+            self._store_delta = self._solution_mapping(delta_value, get_args(DeltaType))
             for name, store in self._store_delta.items():
                     self[name].store = store
 
@@ -174,7 +182,7 @@ class Simulation(
     
     @write_delta.setter
     def write_delta(self, delta_value):
-        self._write_delta = self._solution_delta_mapping(delta_value)
+        self._write_delta = self._solution_mapping(delta_value, get_args(DeltaType))
     
     @property
     def write_file(self) -> dict[str, str | None]:
@@ -182,7 +190,17 @@ class Simulation(
     
     @write_file.setter
     def write_file(self, value):
-        self._write_file = self._solution_delta_mapping(value)
+        self._write_file = self._solution_mapping(value, (str, type(None)))
+
+    @property
+    def parameters(self) -> dict[str, Any]:
+        if self._parameters is None:
+            return {}
+        return self._parameters
+
+    @property
+    def dir_path(self) -> str | None:
+        return self._dir_path
 
     @property
     def writers(self) -> list[Writer]:
@@ -281,15 +299,15 @@ def configure_simulation(
     store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
-    parameter_file: str = 'PARAMETERS',
+    config_file: str = 'CONFIG',
     checkpoint_file: str = 'CHECKPOINT',
     timing_file: str = 'TIMING',
-    dir_base: str = './',
+    dir_root: str = './',
     dir_params: Iterable[str] | str = '',
     dir_prefix: str | None = None,
     dir_suffix: str | None = None,
-    dir_timestamp: bool = False,
-    dir_seps: tuple[str, str] = ('|', '__'),
+    dir_datetime: bool = False,
+    dir_seps: tuple[str, str] = ('|', '__', '__'),
 ):
     if petsc is None:
         petsc = OptionsPETSc.default()
@@ -322,7 +340,7 @@ def configure_simulation(
         if _collisions:
             raise ArgNameCollisionError(_collisions)
 
-        # TODO python 3.11+ typing.get_overloads a better solution?
+        # TODO python 3.11+ typing.get_overloads a better way?
         setattr(configure_simulation, simulation_factory.__name__, configure_simulation_sig_new)
         simulation_factory_params = signature(simulation_factory).parameters
 
@@ -341,11 +359,11 @@ def configure_simulation(
             parameter_file: str = ...,
             checkpoint_file: str = ...,
             timing_file: str = ...,
-            dir_base: str = ...,
+            dir_root: str = ...,
             dir_params: Iterable[str] | str = ...,
             dir_prefix: str | None = ...,   
             dir_suffix: str | None = ...,
-            dir_timestamp: bool = ...,
+            dir_datetime: bool = ...,
             dir_seps: tuple[str, str] = ...,
         ) -> Callable[P, Simulation]:
             ...
@@ -377,7 +395,7 @@ def configure_simulation(
                     }
                     sim_parameters.update({k: v for k, v in zip(simulation_factory_params, sim_func_args)})
                     sim_parameters.update(sim_func_kwargs)
-                    dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
+                    # dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
                     if isinstance(sim_obj, Simulation):
                         simulation_args = (
                             sim_obj.solvers, 
@@ -387,16 +405,21 @@ def configure_simulation(
                         )
                     else:
                         simulation_args = sim_obj
-                    simulation = filter_kwargs(Simulation)(*simulation_args, dir_path=dir_path, **kwargs_complete)
+                    simulation = filter_kwargs(Simulation, include=create_dir_path)(
+                        *simulation_args,
+                        parameters=sim_parameters, 
+                        # dir_path=dir_path, 
+                        **kwargs_complete,
+                    )
                     
-                    if simulation.writers:
-                        write(
-                            sim_parameters, 
-                            simulation.parameter_file, 
-                            dir_path,
-                            mode='w',
-                            preamble=[f'{simulation_factory.__module__}.{simulation_factory.__name__}'],
-                        )
+                    # if simulation.writers:
+                    #     write(
+                    #         sim_parameters, 
+                    #         simulation.config_file, 
+                    #         dir_path,
+                    #         mode='w',
+                    #         preamble=[f'{simulation_factory.__module__}.{simulation_factory.__name__}'],
+                    #     )
 
                     return simulation
                 
@@ -413,14 +436,14 @@ def configure_simulation(
                     ffcx=ffcx, 
                     store_delta=store_delta, 
                     write_delta=write_delta, 
-                    dir_base=dir_base, 
+                    dir_root=dir_root, 
                     dir_params=dir_params,
                     dir_prefix=dir_prefix, 
                     dir_suffix=dir_suffix, 
-                    dir_timestamp=dir_timestamp, 
+                    dir_datetime=dir_datetime, 
                     dir_seps=dir_seps,
                     write_file=write_file, 
-                    parameter_file=parameter_file, 
+                    config_file=config_file, 
                     checkpoint_file=checkpoint_file, 
                     timing_file=timing_file,
                 )(*args, **kwargs)

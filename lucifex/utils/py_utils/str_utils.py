@@ -98,8 +98,8 @@ def str_indexed(
     name: str, 
     n: int,
     mode: Literal['superscript', 'subscript'],
-    sgn: bool = False,
-    parantheses: bool = False,    
+    show_plus: bool = False,
+    parentheses: bool = False,    
 ) -> str:
     if mode == 'superscript':
         d = SUPERSCRIPTS
@@ -118,10 +118,10 @@ def str_indexed(
 
     if n < 0:
         superscript = f'⁻{superscript}'
-    if n > 0 and sgn:
+    if n > 0 and show_plus:
         superscript = f'⁺{superscript}'
 
-    if parantheses:
+    if parentheses:
         superscript = f'⁽{superscript}⁾'
 
     return f'{name}{superscript}'
@@ -211,51 +211,68 @@ TEX_SYMBOLS = (
 
 
 def str_tex(
-    label: str | float | int | None,
+    s: str | float | int | None,
     escape: str = "/",
+    tex_symbols: Iterable[str] = TEX_SYMBOLS,
 ) -> str:
     """
-    Returns a TeX string
+    Returns a TeX-formatted string
     """
 
-    if isinstance(label, (float, int)):
-        return f"${label}$"
+    if isinstance(s, (float, int)):
+        return f"${s}$"
 
-    if label == "" or label is None:
+    if s == "" or s is None:
         return ""
 
-    if label[0] == "$" and label[-1] == "$":
-        return label
+    if s[0] == "$" and s[-1] == "$":
+        return s
     
     for char in (escape, '$'):
-        if label[0] == char and label[-1] == char:
-            return label[1:-1]
+        if s[0] == char and s[-1] == char:
+            return s[1:-1]
 
-    for i in TEX_SYMBOLS:
-        if (i in label) and (f"\\{i}" not in label):
-            label = label.replace(i, f"\\{i}")
+    for i in tex_symbols:
+        if (i in s) and (f"\\{i}" not in s):
+            s = s.replace(i, f"\\{i}")
 
-    label = f"${label}$"
-    return label
+    s = f"${s}$"
+    return s
+
+
+UNICODE_MAP = {
+    **{v: k for v, k in SUPERSCRIPTS.items()},
+    **{v: k for v, k in SUBSCRIPTS.items()},
+}
 
 
 def str_plain(
-    label: str | None,
+    s: str | None,
     strip_wspace: bool = True,
+    tex_symbols: Iterable[str] = TEX_SYMBOLS,
+    unicode_map: dict[str, str] | None = None, 
 ) -> str:
     """
-    Strips any Tex formatting.
+    Strips any TeX or Unicode formatting.
     """
-    if label == "" or label is None:
+    if s == "" or s is None:
         return ""
-    if label[0] == '$' and label[-1] == '$':
-        return str_plain(label[1:-1])
     
-    for i in TEX_SYMBOLS:
-        if f'\\{i}' in label:
-            label = label.replace(f'\\{i}', i)
+    if s[0] == '$' and s[-1] == '$':
+        return str_plain(s[1:-1])
+
+    if unicode_map is None:
+        unicode_map = UNICODE_MAP
+    
+    for i in tex_symbols:
+        if f'\\{i}' in s:
+            s = s.replace(f'\\{i}', i)
+
+    for uni, plain in unicode_map.items():
+        if uni in s:
+            s = s.replace(uni, plain)
 
     if strip_wspace:
-        label = label.replace(' ', '')
+        s = s.replace(' ', '')
 
-    return label
+    return s

@@ -83,8 +83,8 @@ class NonScalarVectorError(ShapeError):
 
 class ElementFamilyType(set, Enum):
     CONTINUOUS_LAGRANGE = {"P", "Q", "CG", "Lagrange"}
-    DISCONTINOUS_LAGRANGE = {"DP", "DQ", "DG", "Discontinuous Lagrange"}
-    LAGRANGE = CONTINUOUS_LAGRANGE.union(DISCONTINOUS_LAGRANGE)
+    DISCONTINOUS_LAGRANGE = {"DP", "DQ", "DG", "Discontinuous Lagrange"} 
+    LAGRANGE = DISCONTINOUS_LAGRANGE | CONTINUOUS_LAGRANGE
     BREZZI_DOUGLAS_MARINI = {"BDM", "Brezzi-Douglas-Marini"}
     RAVIART_THOMAS = {"RT", "Raviart-Thomas"}
 
@@ -131,16 +131,16 @@ def is_same_element(
 def is_family_alias(
     name: str,
     other: str,
-) -> bool | None:
+) -> bool:
     if name == other:
         return True
     else:
         for family in ElementFamilyType:
             if (name in family) and (other in family):
                 return True
-            if (name in family) and (other not in family):
-                return False
-        return None
+            # if (name in family) and (other not in family):
+            #     return False
+        return False
     
 
 def is_continuous_lagrange(

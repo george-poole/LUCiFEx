@@ -38,7 +38,7 @@ class NPySeries(NPyNameAttr, Generic[F]):
         return self._time_series
     
     @property
-    def value_series(self):
+    def value_series(self): #FIXME type hinting
         return [i.value for i in self.series]
     
     @property
@@ -133,7 +133,7 @@ class GridFunctionSeries(
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
-        use_mesh_map: bool = False,
+        use_mesh_map: bool = True,
         use_mesh_cache: bool = True,
         use_func_cache: bool = True,
         mesh: Mesh | None = None,
@@ -182,7 +182,7 @@ class QuadFunctionSeries(
         cls: type['QuadFunctionSeries'], 
         u: FunctionSeries | ExprSeries,
         slc: StrSlice = ':',
-    ):
+    )-> Self:
         raise NotImplementedError
         
 

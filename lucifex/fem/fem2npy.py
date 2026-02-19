@@ -20,6 +20,8 @@ from .constant import Constant
 
 
 class NPyNameAttr(ABC):
+
+    SEPARATOR = '___'
     
     def __init__(
         self,
@@ -47,8 +49,10 @@ class NPyNameAttr(ABC):
     
     @name.setter
     def name(self, value):
-        assert isinstance(value, str)
-        assert '__' not in value
+        if not isinstance(value, str):
+            raise TypeError(value)
+        if self.SEPARATOR in value:
+            raise ValueError(f'Name cannot contain {self.SEPARATOR}')
         self._name = value
 
     @property

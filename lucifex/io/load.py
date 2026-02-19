@@ -1,18 +1,20 @@
-from typing import Protocol, Any, TypeVar, Generic, Iterable, get_args
+from typing import Protocol, Any, TypeVar, Generic, Iterable, Callable, get_args
 from typing_extensions import Self
 from types import UnionType
 import pickle as pkl
 
 import numpy as np
-from matplotlib.tri.triangulation import Triangulation
+
 from matplotlib.figure import Figure
 from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
 from ..utils.py_utils import StrSlice, optional_lru_cache
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
+from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fdm.fdm2npy import GridFunctionSeries, NumericSeries, TriFunctionSeries
+from ..fdm.fdm2npy import GridFunctionSeries, NumericSeries, TriFunctionSeries, NPySeries
 from .read import read
 from .utils import file_path_ext
 
@@ -162,28 +164,41 @@ def load_constant_series(
 
 
 @optional_lru_cache
-def load_grid_series(
+def load_grid_function_series(
     name: str,
     dir_path: str,
     file_name: str,
-    sep: str = '__',
-    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
+    sep: str = GridFunctionSeries.SEPARATOR,
 ) -> GridFunctionSeries:
     try:
-        return load_npz_dict(dir_path, file_name, sep, axis_names, target_name=name)[name]
+        return load_npz_dict(
+            dir_path, file_name, sep,
+            mesh_kws=('axes', ),
+            mesh_factory=GridMesh,
+            function_factory=GridFunction,
+            series_factory=GridFunctionSeries,
+            target_name=name,
+        )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
     
 
 @optional_lru_cache
-def load_triangulation_series(
+def load_tri_function_series(
     name: str,
     dir_path: str,
     file_name: str,
-    sep: str = '__',
+    sep: str = TriFunctionSeries.SEPARATOR,
 ) -> TriFunctionSeries:
     try:
-        return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
+        return load_npz_dict(
+            dir_path, file_name, sep, 
+            mesh_kws=('x_coordinates', 'y_coordinates', 'triangles'),
+            mesh_factory=TriMesh,
+            function_factory=TriFunction,
+            series_factory=TriFunctionSeries,
+            target_name=name,
+        )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
 
@@ -193,7 +208,7 @@ def load_numeric_series(
     name: str,
     dir_path: str,
     file_name: str,
-    sep: str = '__',
+    sep: str = NumericSeries.SEPARATOR,
 ) -> NumericSeries:
     try:
         return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
@@ -238,12 +253,14 @@ def load_txt_dict(
 def load_npz_dict(
     dir_path: str,
     file_name: str,
-    sep: str = '__',
-    axis_names: tuple[str, ...] = ('x', 'y', 'z'),
-    trigl_attrs: tuple[str, str] = ('x', 'y', 'triangles', 'mask'),
+    sep: str = NPyFunction.SEPARATOR,
     *,
+    mesh_kws: Iterable[str] = (),
+    mesh_factory: Callable[..., NPyMesh] | None = None,
+    function_factory: Callable[..., NPyFunction] | None = None,
+    series_factory: Callable[..., NPySeries] | None = None,
     target_name: str | None = None,
-) -> dict[str, float | np.ndarray | NumericSeries | GridFunctionSeries | TriFunctionSeries]:
+) -> dict[str, float | np.ndarray | NPySeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
 
@@ -258,10 +275,10 @@ def load_npz_dict(
         if isinstance(v, np.ndarray) and v.shape == ():
             v = v.item()
         match k.split(sep):
-            case (name, spatial_attr) if spatial_attr in (*axis_names, *trigl_attrs): 
+            case (name, msh_kw) if msh_kw in mesh_kws: 
                 if name not in dict_load:
                     dict_load[name] = {}
-                dict_load[name].update({spatial_attr: v}) 
+                dict_load[name].update({msh_kw: v}) 
             case (name, time): 
                 if name not in dict_load:
                     dict_load[name] = {}
@@ -271,28 +288,24 @@ def load_npz_dict(
 
     dict_return: dict[
         str, 
-        float | np.ndarray | NumericSeries | GridFunctionSeries,
+        float | np.ndarray | NPySeries,
     ] = {}
 
     for name, value in dict_load.items():
         if isinstance(value, dict):
             time_series: list[float] = []
             series: list[np.ndarray] = []
-            spatial_attrs: list[str] = []
-            spatial_arrays: list[np.ndarray] = []
+            mesh_kwargs: dict[str, np.ndarray] = {}
             for i, j in value.items():
                 if isinstance(i, float):
                    time_series.append(i)
                    series.append(j)
                 else:
-                    spatial_attrs.append(i)
-                    spatial_arrays.append(j)
-            if spatial_arrays:
-                if set(spatial_attrs) == set(trigl_attrs):
-                    trigl = Triangulation(*spatial_arrays)
-                    value = TriFunctionSeries(series, time_series, trigl, name)
-                else:
-                    value = GridFunctionSeries(series, time_series, tuple(spatial_arrays), name)
+                    mesh_kwargs[i] = j
+            if mesh_kwargs:
+                mesh = mesh_factory(**mesh_kwargs)
+                series = [function_factory(i, mesh) for i in series]
+                value = series_factory(series, time_series, name)
             else:
                 value = NumericSeries(series, time_series, name)
         dict_return[name] = value
@@ -328,7 +341,7 @@ def load_value(
 LoadObject.register(load_mesh)
 LoadObject.register(load_function_series)
 LoadObject.register(load_constant_series)
-LoadObject.register(load_grid_series)
+LoadObject.register(load_grid_function_series)
 LoadObject.register(load_numeric_series)
 LoadObject.register(load_value, str, int, float, np.ndarray)
 
