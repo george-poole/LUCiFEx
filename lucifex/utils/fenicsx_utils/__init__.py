@@ -43,6 +43,7 @@ from .mesh_utils import(
     is_simplicial,
     QuadNonGridMeshError,
     NonGridMeshError,
+    ParallelizationError,
 )
 from .fem_utils import (
     create_constant, 
@@ -56,4 +57,4 @@ from .fem_utils import (
     get_subspace,
     get_subspaces,
 )
-from .grid_values import grid_values
+from .dofs_grid import dofs_grid

@@ -6,6 +6,7 @@ from typing import (
     Generic,
     Any,
 )
+from typing_extensions import Self
 
 
 K = TypeVar('K')
@@ -42,14 +43,31 @@ class MultiKey(ABC, Generic[K, V]):
         ...
 
 
-class FrozenDict(MultiKey[str, Any]):
+K = TypeVar('K')
+V = TypeVar('V')
+class FrozenDict(MultiKey[K, V], Generic[K, V]):
     """
     An immutable dictionary with multi-key access
     """
 
-    def __init__(self, **kwargs: Any):
-        self._dict = kwargs
-        
+    @overload
+    def __init__(self: 'FrozenDict[K]', d: dict[K, V]):
+        ...
+
+    @overload
+    def __init__(self: 'FrozenDict[str, V]', **kwargs: V):
+        ...
+
+    def __init__(self, *args: dict, **kwargs):
+        if kwargs and args:
+            raise TypeError
+        if kwargs and not args:
+            self._dict = kwargs
+        if args and not kwargs:
+            if len(args) > 1:
+                raise TypeError
+            self._dict = args[0].copy()
+
     def _getitem(
         self,
         key: str,
@@ -62,6 +80,11 @@ class FrozenDict(MultiKey[str, Any]):
     def __repr__(self) -> str:
         kws = ', '.join([f'{k}={v}' for k, v in self._dict.items()])
         return f'{self.__class__.__name__}({kws})'
+    
+    def replace(self, **kwargs: Any) -> Self:
+        _kwargs = self._dict.copy()
+        _kwargs.update(**kwargs)
+        return self.__class__(**_kwargs)
     
     def keys(self):
         return self._dict.keys()

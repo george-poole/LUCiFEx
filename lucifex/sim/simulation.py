@@ -51,7 +51,7 @@ class Simulation(
         store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] | EllipsisType = Ellipsis,
         write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
-        config_file: str | None = None,
+        parameter_file: str | None = None,
         checkpoint_file: str | None = None,
         timing_file: str | None = None,
         **create_dir_path_kws,
@@ -67,11 +67,11 @@ class Simulation(
         self.store_delta = store_delta
         self.write_delta = write_delta
         self.write_file = write_file
-        self.config_file = config_file
+        self.parameter_file = parameter_file
         self.checkpoint_file = checkpoint_file
         self.timing_file = timing_file
         if create_dir_path_kws:
-            self._dir_path = filter_kwargs(create_dir_path)(parameters, **create_dir_path_kws)
+            self._dir_path = create_dir_path(parameters, **create_dir_path_kws)
         else:
             self._dir_path = None
         self._timings = None
@@ -299,7 +299,7 @@ def configure_simulation(
     store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
-    config_file: str = 'CONFIG',
+    parameter_file: str = 'PARAMETERS',
     checkpoint_file: str = 'CHECKPOINT',
     timing_file: str = 'TIMING',
     dir_root: str = './',
@@ -307,6 +307,7 @@ def configure_simulation(
     dir_prefix: str | None = None,
     dir_suffix: str | None = None,
     dir_datetime: bool = False,
+    dir_uid: bool = False,
     dir_seps: tuple[str, str] = ('|', '__', '__'),
 ):
     if petsc is None:
@@ -315,12 +316,12 @@ def configure_simulation(
         jit = OptionsJIT.default()
     if ffcx is None:
         ffcx = OptionsFFCX.default()
-    kwargs_default = locals().copy()
+    _KWARGS_DEFAULT = locals().copy()
     
     configure_simulation_sig = signature(configure_simulation)
     configure_simulation_params = configure_simulation_sig.parameters
     configure_simulation_params_new = [
-        Parameter(p.name, p.kind, default=kwargs_default[p.name], annotation=p.annotation) 
+        Parameter(p.name, p.kind, default=_KWARGS_DEFAULT[p.name], annotation=p.annotation) 
         for p in configure_simulation_params.values()
     ]
     configure_simulation_sig_new = Signature(
@@ -364,6 +365,7 @@ def configure_simulation(
             dir_prefix: str | None = ...,   
             dir_suffix: str | None = ...,
             dir_datetime: bool = ...,
+            dir_uid: bool = ...,
             dir_seps: tuple[str, str] = ...,
         ) -> Callable[P, Simulation]:
             ...
@@ -372,11 +374,11 @@ def configure_simulation(
         def _(*args, **kwargs):
             if not args and kwargs and all(i in configure_simulation_sig.parameters for i in kwargs):
 
-                kwargs_complete = kwargs_default.copy()
+                kwargs_complete = _KWARGS_DEFAULT.copy()
                 kwargs_complete.update(kwargs)
 
                 def _inner(*sim_func_args, **sim_func_kwargs):
-                    classes = (
+                    solver_classes = (
                         BoundaryValueProblem, 
                         InitialBoundaryValueProblem, 
                         InitialValueProblem, 
@@ -384,9 +386,9 @@ def configure_simulation(
                         Projection, 
                         Interpolation,
                     )
-                    [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in classes]
-                    sim_obj = simulation_factory(*sim_func_args, **sim_func_kwargs)
-                    [cls.set_defaults() for cls in classes]
+                    [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in solver_classes]
+                    sim_return = simulation_factory(*sim_func_args, **sim_func_kwargs)
+                    [cls.set_defaults() for cls in solver_classes]
     
                     sim_parameters = {
                         k: v.default
@@ -395,41 +397,29 @@ def configure_simulation(
                     }
                     sim_parameters.update({k: v for k, v in zip(simulation_factory_params, sim_func_args)})
                     sim_parameters.update(sim_func_kwargs)
-                    # dir_path = filter_kwargs(create_dir_path)(sim_parameters, **kwargs_complete)
-                    if isinstance(sim_obj, Simulation):
+                    if isinstance(sim_return, Simulation):
                         simulation_args = (
-                            sim_obj.solvers, 
-                            sim_obj.t, 
-                            sim_obj.dt,
-                            sim_obj.auxiliary,
+                            sim_return.solvers, 
+                            sim_return.t, 
+                            sim_return.dt,
+                            sim_return.auxiliary,
                         )
                     else:
-                        simulation_args = sim_obj
+                        simulation_args = sim_return
                     simulation = filter_kwargs(Simulation, include=create_dir_path)(
                         *simulation_args,
-                        parameters=sim_parameters, 
-                        # dir_path=dir_path, 
+                        parameters=sim_parameters,  
                         **kwargs_complete,
                     )
-                    
-                    # if simulation.writers:
-                    #     write(
-                    #         sim_parameters, 
-                    #         simulation.config_file, 
-                    #         dir_path,
-                    #         mode='w',
-                    #         preamble=[f'{simulation_factory.__module__}.{simulation_factory.__name__}'],
-                    #     )
-
                     return simulation
                 
                 return _inner
             else:
-                error_params = [i for i in kwargs if not i in simulation_factory_params]
-                if len(error_params) == 1:
-                    raise TypeError(f'Unrecognised keyword argument: {error_params[0]}.')
-                if len(error_params) > 1:
-                    raise TypeError(f'Unrecognised keyword arguments: {tuple(error_params)}.')
+                unrecognised = [i for i in kwargs if not i in simulation_factory_params]
+                if len(unrecognised) == 1:
+                    raise TypeError(f'Unrecognised keyword argument: {unrecognised[0]}.')
+                if len(unrecognised) > 1:
+                    raise TypeError(f'Unrecognised keyword arguments: {tuple(unrecognised)}.')
                 return _(
                     petsc=petsc, 
                     jit=jit, 
@@ -441,9 +431,10 @@ def configure_simulation(
                     dir_prefix=dir_prefix, 
                     dir_suffix=dir_suffix, 
                     dir_datetime=dir_datetime, 
+                    dir_uid=dir_uid,
                     dir_seps=dir_seps,
                     write_file=write_file, 
-                    config_file=config_file, 
+                    parameter_file=parameter_file, 
                     checkpoint_file=checkpoint_file, 
                     timing_file=timing_file,
                 )(*args, **kwargs)

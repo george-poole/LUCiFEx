@@ -98,7 +98,7 @@ class Function(DOLFINxFunction):
         collapse: bool = False,
     ) -> Self:
         if name is None:
-            name = f'{self.name}_{subspace_index}'
+            name = f'{self.name}{subspace_index}'
         f = Function(
             self.function_space.sub(subspace_index), 
             self.x, 
@@ -120,7 +120,7 @@ class Function(DOLFINxFunction):
             raise RuntimeError("No subfunctions to extract")
         subspace_indices = tuple(range(self.function_space.num_sub_spaces))
         if names is None:
-            names = [f'{self.name}_{i}' for i in subspace_indices]
+            names = [f'{self.name}{i}' for i in subspace_indices]
         return tuple(self.sub(i, n, collapse) for i, n in zip(subspace_indices, names, strict=True))
         
     def collapse(self) -> Self:

@@ -2,11 +2,10 @@ from typing import Iterable, Literal, ParamSpec, TypeVar, Callable, overload
 from collections.abc import Iterable
 from functools import wraps
 
-
 import numpy as np
 from ufl import Measure
 from ufl.core.expr import Expr
-from dolfinx.fem import assemble_scalar, form
+from dolfinx.fem import assemble_scalar, form, FunctionSpace
 from dolfinx.cpp.mesh import entities_to_geometry
 from dolfinx.mesh import CellType as DolfinxCellType
 from dolfinx.mesh import DiagonalType as DolfinxDiagonalType
@@ -15,7 +14,7 @@ from ufl.geometry import (GeometricCellQuantity, Circumradius,
                           CellDiameter, MaxCellEdgeLength, MinCellEdgeLength)
 
 from ..py_utils import optional_lru_cache, StrEnum
-from .fem_utils import extract_mesh
+from .fem_utils import extract_mesh, create_function
 from .dofs_utils import (
     dofs,
     as_spatial_marker,
@@ -108,7 +107,7 @@ def create_tagged_measure(
 P = ParamSpec('P')
 R = TypeVar('R') # Expr | tuple[Expr, ...]
 def mesh_integral(
-    func: Callable[P, R]
+    integrand_factory: Callable[P, R]
 ):
     """
     Decorator for functions returning integrand expressions.
@@ -126,6 +125,7 @@ def mesh_integral(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
         *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
+        fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
         **measure_kwargs,
     ) -> Callable[P, float | np.ndarray]:
         ...
@@ -135,26 +135,33 @@ def mesh_integral(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
         *markers: SpatialMarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
+        fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
         **measure_kwargs,
     ):
         """
         If more than one marker provided, returned array will have shape
-        `(n_marker, )` or `(n_marker, n_expr)` for a size `n_expr` of the 
+        `(n_marker, )` or `(n_marker, n_expr)` for a length `n_expr` of the 
         tuple of expressions returned by the integrand function.
-
-            
-            """
+        """
         if facet_side is not None:
             _facet_side = lambda expr: expr(facet_side)
         else:
             _facet_side = lambda expr: expr
 
         def _inner(*a, **k):
-            integrand = func(*a, **k)
+            integrand = integrand_factory(*a, **k)
             if isinstance(integrand, Expr):
                 integrand = _facet_side(integrand)
             else:
                 integrand = tuple(_facet_side(i) for i in integrand)
+
+            if fs is not None:
+                if isinstance(integrand, tuple):
+                    integrand = tuple(
+                        create_function(fs, i, name=str(n), use_cache=True) for n, i in enumerate(integrand)
+                    )
+                else:
+                    integrand = create_function(fs, integrand, use_cache=True)
 
             if isinstance(measure, Measure):
                 dx = measure
@@ -187,12 +194,12 @@ def mesh_integral(
                 
         return _inner
 
-    @wraps(func)
+    @wraps(integrand_factory)
     def _(*args, **kwargs):
         if isinstance(args[0], (Measure, str)):
             return _overload(*args, **kwargs)
         else:
-            return func(*args, **kwargs)
+            return integrand_factory(*args, **kwargs)
         
     return _
 
@@ -273,8 +280,8 @@ def is_grid(
         axes = mesh_axes(use_cache=use_axes_cache)(mesh, strict=False)
         n_vertices = len(mesh.geometry.x)
         n_axes = [len(i) for i in axes]
-        n_vertices_cartesian = np.prod(n_axes)
-        return bool(n_vertices == n_vertices_cartesian)
+        n_vertices_grid = np.prod(n_axes)
+        return bool(n_vertices == n_vertices_grid)
     else:
         for x in mesh:
             if not len(x) == len(np.unique(x)):
@@ -399,3 +406,8 @@ class QuadNonGridMeshError(NotImplementedError):
         else:
             msg = 'Not supported'
         super().__init__(f'{msg} on a non-grid mesh of quadrilateral cell.')
+
+
+class ParallelizationError(NotImplementedError):
+    def __init__(self):
+        super().__init__('Distributed memory parallelism with MPI not supported.')

@@ -18,18 +18,20 @@ def create_and_run(
     n_init: int | None = None,
     serialize: Callable[[Simulation], T] | str = 'grid',
 ) -> Callable[P, T]:
+    if not callable(serialize):
+        match serialize:
+            case 'grid':
+                serialize = as_grid_simulation
+            case 'tri':
+                serialize = as_tri_simulation
+            case _:
+                raise ValueError(serialize)
+
     def _inner(*args: P.args, **kwargs: P.kwargs):
         sim = factory(*args, **kwargs)
         if n_stop is not None or t_stop is not None:
             run(sim, n_stop, t_stop, dt_init, n_init)
-        if callable(serialize):
-            return serialize(sim)
-        elif serialize == 'grid':
-            return as_grid_simulation(sim)
-        elif serialize == 'tri':
-            return as_tri_simulation(sim)
-        else:
-            raise ValueError(serialize)
+        return serialize(sim)
     return _inner
 
 
@@ -38,7 +40,7 @@ V = TypeVar('V')
 class ParallelRunCallable(Protocol, Generic[T]):
     def __call__(
         self, 
-        **parallel_kws: Iterable[V],
+        **kws_opts: Iterable[V],
     ) -> dict[tuple[V, ...], T] | dict[V, T]:
         ...
 
@@ -53,6 +55,7 @@ def parallel_run(
     n_init: int | None = None,
     serialize: Callable[[Simulation], T] | str = 'grid',
     link: bool = True,
+    **joblib_kws,
 ):
     """
     The type `T` returned by `serialize` must be serializable by `joblib`.
@@ -64,23 +67,22 @@ def parallel_run(
 
         def _inner(
             *a,
-            **parallel_kws: Iterable
+            **kws_opts: Iterable
         ):
             if a:
                 raise TypeError('Positional parallel arguments not accepted.')  
-            if not parallel_kws:
+            if not kws_opts:
                 raise TypeError('Keyword parallel arguments required.')
              
             if link:
-                n_kws = [len(v) for v in parallel_kws.values()]
+                n_kws = [len(v) for v in kws_opts.values()]
                 n_total = n_kws[0]
                 if not all(n == n_total for n in n_kws):
                     raise TypeError('Keyword parallel arguments must all have the same length.')
-                job_kws = [{k: v[n] for k, v in parallel_kws.items()} for n in range(n_total)]
+                job_kws = [{k: v[n] for k, v in kws_opts.items()} for n in range(n_total)]
             else:
-                vals = itertools.product(*([i for i in v] for v in parallel_kws.values()))
                 job_kws = [
-                    dict(zip(parallel_kws.keys(), v)) for v in vals
+                    dict(zip(kws_opts.keys(), v)) for v in itertools.product(*kws_opts.values())
                 ]
 
             job_func = create_and_run(factory, n_stop, t_stop, dt_init, n_init, serialize)
@@ -89,7 +91,7 @@ def parallel_run(
                     job_func(*args, **kwargs, **kws) for kws in job_kws
                 )
             else:
-                job_returns = Parallel(n_jobs=n_proc, return_as='generator')(
+                job_returns = Parallel(n_jobs=n_proc, return_as='generator', **joblib_kws)(
                     delayed(job_func)(*args, **kwargs, **kws) for kws in job_kws
                 )
 
@@ -101,3 +103,17 @@ def parallel_run(
         return _inner
     
     return _
+
+
+T = TypeVar('T')
+def combine_options(
+    *opts: Iterable[T],
+    link: bool,
+    return_as: type = list,
+) -> Iterable[tuple[T, ...]]:
+    if link:
+        gen = zip(*opts)
+    else:
+        gen = itertools.product(*opts)
+    return return_as(gen)
+

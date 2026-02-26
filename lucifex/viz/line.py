@@ -116,38 +116,31 @@ def _(
     filter_kwargs(ax.plot, Line2D)(x, y, **_kwargs)
 
 
-@optional_ax
+@optional_fig_ax
 def plot_twin_lines(
+    fig: Figure,
     ax: Axes,
-    x: np.ndarray | tuple[np.ndarray, np.ndarray],
-    y: tuple[np.ndarray, np.ndarray],
-    y_labels: tuple[str | None, str | None] = (None, None),
+    twin_lines: tuple[
+        Function | GridFunction | tuple[np.ndarray, np.ndarray], 
+        Function | GridFunction | tuple[np.ndarray, np.ndarray]
+    ],
+    twin_labels: tuple[str | None, str | None] = (None, None),
     twin_kwargs: tuple[dict[str, Any], dict[str, Any]] = None,
     **kwargs,
 ) -> None:
     _plt_kwargs = {'color': 'black', 'linewidth': LW}
-
     _plt_kwargs_left = _plt_kwargs | {'linestyle': 'solid'}
     _plt_kwargs_right = _plt_kwargs | {'linestyle': 'dashed'}
     if twin_kwargs is None:
         twin_kwargs = ({}, {})
-    _plt_kwargs_left.update(twin_kwargs[0])
-    _plt_kwargs_right.update(twin_kwargs[1])
+    _plt_kwargs_left.update(**twin_kwargs[0], **kwargs)
+    _plt_kwargs_right.update(**twin_kwargs[1], **kwargs)
 
-    y_left, y_right = y
-    if not isinstance(x, tuple):
-        x = (x, x)
-    x_left, x_right = x
-    ax.plot(x_left, y_left, **_plt_kwargs_left)
-
+    y_label_left, y_label_right = twin_labels
+    line_left, line_right = twin_lines
+    plot_line(fig, ax, line_left, y_label=y_label_left, **_plt_kwargs_left)
     ax_twin = ax.twinx()
-    ax_twin.plot(x_right, y_right, **_plt_kwargs_right)
-
-    y_label_left, y_label_right = y_labels
-    _kwargs = dict()
-    _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, x, y_label=y_label_left, **_kwargs)
-    filter_kwargs(set_axes)(ax_twin, y_label=y_label_right, **_kwargs)
+    plot_line(fig, ax_twin, line_right, y_label=y_label_right, **_plt_kwargs_right)
 
 
 def plot_stacked_lines(

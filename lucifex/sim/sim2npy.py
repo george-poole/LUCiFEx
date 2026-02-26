@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from functools import partial
 from typing import TypeVar, Iterable, Generic, Callable
 from typing_extensions import Self
 
@@ -83,9 +84,19 @@ class NPySimulation(
         convert_func: Callable[[Function | Expr], F],
         slc_const: StrSlice = ':',
         auxiliary: bool = True, 
+        *,
+        exclude: Iterable[str] = (),
+        include: Iterable[str] = (),
     ):
+        if include:
+            _include = lambda n: n in include and not n in exclude
+        else:
+            _include = lambda n: n not in exclude
+
         _solutions = []
         for s in sim.solutions:
+            if not _include(s.name):
+                continue
             if isinstance(s, ConstantSeries):
                 _sltn = as_npy_constant_series(s, as_slice(slc_const))
             else:
@@ -101,8 +112,12 @@ class NPySimulation(
             for aux in sim.auxiliary:
                 if isinstance(aux, tuple):
                     name, value = aux
+                    if not _include(s.name):
+                        continue
                     _aux = (name, _as_npy(value))
                 else:
+                    # if not _include(s.name): FIXME
+                    #     continue
                     _aux = _as_npy(aux)
                 _auxiliary.append(_aux)
 
@@ -135,20 +150,26 @@ class GridSimulation(NPySimulation[GridMesh, GridFunction, GridFunctionSeries]):
         slc_func: StrSlice = ':',
         slc_const: StrSlice = ':',
         auxiliary: bool = True,
+        use_func_cache: bool = True,
+        elem: tuple[str, int] = ('P', 1),
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
-        use_mesh_map: bool = True,
+        use_mapping: bool = True,
         use_mesh_cache: bool = True,
-        use_func_cache: bool = True,
+        use_dof_coordinates: bool = False,
+        *,
+        exclude: Iterable[str] = (),
+        include: Iterable[str] = (),
     ) -> Self:
         convert_series = lambda u: (
             as_grid_function_series(
-                u, slc_func, strict, jit, mask, use_mesh_map, use_mesh_cache, use_func_cache, sim.mesh,
+                u, slc_func, use_func_cache, elem, strict, jit, mask, 
+                use_mapping, use_mesh_cache, use_dof_coordinates, sim.mesh,
             )
         )
         convert_func = lambda u: (
-            as_grid_function(u, strict, jit, mask, use_mesh_map, use_mesh_cache, sim.mesh)
+            as_grid_function(u, strict, jit, mask, use_mapping, use_mesh_cache, sim.mesh)
         )
         return super().from_simulation(
             sim,
@@ -156,6 +177,8 @@ class GridSimulation(NPySimulation[GridMesh, GridFunction, GridFunctionSeries]):
             convert_func,
             slc_const,
             auxiliary,
+            exclude=exclude,
+            include=include,
         )
 
 
@@ -166,12 +189,15 @@ class TriSimulation(NPySimulation[TriMesh, TriFunction, TriFunctionSeries]):
         sim: Simulation,
         slc_func: StrSlice = ':',
         slc_const: StrSlice = ':',
+        use_func_cache: bool = True,
         auxiliary: bool = True,
         use_mesh_cache: bool = True,
-        use_func_cache: bool = True,
+        *,
+        exclude: Iterable[str] = (),
+        include: Iterable[str] = (),
     ) -> Self:
         convert_series = lambda u: (
-            as_tri_function_series(u, slc_func, use_mesh_cache, use_func_cache, sim.mesh),
+            as_tri_function_series(u, slc_func, use_func_cache, use_mesh_cache, sim.mesh),
         )
         convert_func = lambda u: (
             as_tri_function(u, use_mesh_cache, sim.mesh),
@@ -182,6 +208,8 @@ class TriSimulation(NPySimulation[TriMesh, TriFunction, TriFunctionSeries]):
             convert_func,
             slc_const,
             auxiliary,
+            exclude=exclude,
+            include=include,
         )
     
 
@@ -192,6 +220,9 @@ class QuadSimulation(NPySimulation[QuadMesh, QuadFunction, QuadFunctionSeries]):
         sim: Simulation,
         slc_func: StrSlice = ':',
         slc_const: StrSlice = ':',
+        *,
+        exclude: Iterable[str] = (),
+        include: Iterable[str] = (),
     ) -> Self:
         raise NotImplementedError
     
@@ -215,12 +246,15 @@ def as_npy_simulation(
     sim: Simulation,
     grid: bool | None = None,
     use_mesh_cache: bool = True,  
+    *,
+    exclude: Iterable[str] = (),
+    include: Iterable[str] = (),
 ):
     return as_npy_object(
         sim,
-        as_grid_simulation,
-        as_tri_simulation,
-        as_quad_simulation,
+        partial(as_grid_simulation, exclude=exclude, include=include),
+        partial(as_tri_simulation, exclude=exclude, include=include),
+        partial(as_quad_simulation, exclude=exclude, include=include),
         sim.mesh,
         grid,
         use_mesh_cache,

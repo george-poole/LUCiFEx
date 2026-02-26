@@ -3,7 +3,6 @@ from typing import Callable
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
 from ..utils.fenicsx_utils import as_spatial_marker, is_simplicial, SpatialMarker, SpatialMarkerAlias
-from .cartesian import CellType
 
 
 def refine(

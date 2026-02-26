@@ -2,10 +2,8 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
-from matplotlib.collections import Collection
 from dolfinx.mesh import Mesh
 
-from ..mesh.cartesian import CellType
 from ..utils.fenicsx_utils import (
     mesh_coordinates,
     mesh_axes,
@@ -81,10 +79,10 @@ def _plot_rectangle_mesh(
     use_cache: bool,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    cartesian = is_grid(mesh)
+    grid = is_grid(mesh)
     simplicial = is_simplicial(mesh)
 
-    match simplicial, cartesian:
+    match simplicial, grid:
         case True, _:
             _plot_triangulation(ax, mesh, use_cache, **kwargs)
         case False, True:

@@ -31,7 +31,7 @@ def create_gmsh_mesh_factory(
         h: float | tuple[float, float],
         cell: CellType = DEFAULT_CELL,
         name: str = DEFAULT_NAME,
-        comm: MPI.Comm | str = MPI.COMM_WORLD,
+        comm: MPI.Comm | str = 'COMM_WORLD',
         rank: int = 0,
         markers: Iterable[tuple[str, int, Callable[[gmsh.model], tuple]]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),
         meshtags: bool = False,

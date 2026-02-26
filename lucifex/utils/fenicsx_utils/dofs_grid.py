@@ -12,35 +12,37 @@ from .mesh_utils import mesh_vertices, mesh_axes
 from .ufl_utils import is_scalar, NonScalarError
 
 
-def grid_values(
+def dofs_grid(
     f: Function | Expr,
+    elem: tuple[str, int] = ('P', 1),
     strict: bool = False,
     jit: bool = True,
     mask: float = np.nan,
-    use_mesh_map: bool = False,
-    use_mesh_cache: bool = True,
+    use_mapping: bool = False,
+    use_cache: bool = True,
+    use_dof_coordinates: bool = False,
     mesh: Mesh | None = None,
 ) -> np.ndarray:
-    """Interpolates the finite element function to the `P₁` function space
-    (which has identity vertex-to-DoF map) to evaluate the function at the vertex values,
-    then returns these vertex values in a `np.ndarray`.
-
-    Note that this is suitable only if the mesh is Cartesian.
+    """
+    Interpolates the finite element function to the `P₁` function space
+    to evaluate the function at the vertex values, then returns these 
+    vertex values as a grid-like array.
     """
     if not is_scalar(f):
         raise NonScalarError(f)
     
     if not isinstance(f, Function):
         if mesh is None:
-            elem = ('P', 1)
-        else:
-            elem = (mesh, 'P', 1)
+            elem = (mesh, *elem)
         f = create_function(elem, f)
-    
-    mesh = f.function_space.mesh
-    axes = mesh_axes(use_cache=use_mesh_cache)(mesh, strict)
-    vertices = mesh_vertices(mesh)
-    vertex_values = dofs(f, ('P', 1), try_identity=True)
+
+    if use_dof_coordinates:
+        vertex_values = dofs(f, try_identity=True)
+    else:
+        vertex_values = dofs(f, ('P', 1), try_identity=True)
+    axes, vertices = _axes_vertices(use_cache=use_cache)(
+        f, strict, use_cache, use_dof_coordinates,
+    )
 
     n_vertices = len(vertices)
     n_values = len(vertex_values)
@@ -51,20 +53,40 @@ def grid_values(
         match number of vertices {n_vertices} """
         )
 
-    if use_mesh_map:
-        mapping = vertex_to_grid_index_mapping(use_cache=use_mesh_cache)(
-            mesh, strict, jit, use_mesh_cache
+    if use_mapping:
+        mapping = vertex_to_grid_index_mapping(use_cache=use_cache)(
+            f, strict, jit, use_cache, use_dof_coordinates,
         )
-        return _grid_values_from_mapping(mapping, vertex_values, axes, mask)
+        return _dofs_grid_from_mapping(mapping, vertex_values, axes, mask)
     else:
         if jit:
-            return _grid_values_jit(vertex_values, numba.typed.List(vertices), axes, mask)
+            return _dofs_grid_jit(vertex_values, numba.typed.List(vertices), axes, mask)
         else:
-            return _grid_values_nojit(vertex_values, vertices, axes, mask)
+            return _dofs_grid_nojit(vertex_values, vertices, axes, mask)
+
+
+@optional_lru_cache
+def _axes_vertices(
+    f: Function,
+    strict,
+    use_cache,
+    use_dof_coordinates,
+):
+    if use_dof_coordinates:
+        dim = f.function_space.mesh.geometry.dim
+        tabulated = f.function_space.tabulate_dof_coordinates()
+        dof_coordinates = tuple(tabulated[:, i] for i in range(dim))
+        axes = tuple(np.sort(np.unique(i)) for i in dof_coordinates)
+        vertices = [tuple(i[:dim]) for i in tabulated]
+    else:
+        mesh = f.function_space.mesh
+        axes = mesh_axes(use_cache=use_cache)(mesh, strict)
+        vertices = mesh_vertices(mesh)
+    return axes, vertices
 
 
 @numba.jit(nopython=True)
-def _grid_values_jit(
+def _dofs_grid_jit(
     vertex_values: np.ndarray,
     vertices: list[tuple[float, ...]],
     axes: tuple[np.ndarray, ...],
@@ -105,7 +127,7 @@ def _grid_values_jit(
     return f_grid
 
 
-def _grid_values_nojit(
+def _dofs_grid_nojit(
     vertex_values: np.ndarray,
     vertices: list[tuple[float, ...]],
     axes: tuple[np.ndarray, ...],
@@ -115,10 +137,10 @@ def _grid_values_nojit(
     Returns the vertex values on a Cartesian grid. 
     See also `_grid_jit` for a faster, JIT-compiled version.
     """
-    return _grid_values_jit.__wrapped__(vertex_values, vertices, axes, mask)
+    return _dofs_grid_jit.__wrapped__(vertex_values, vertices, axes, mask)
 
 
-def _grid_values_from_mapping(
+def _dofs_grid_from_mapping(
     vertex_grid_map: np.ndarray,
     vertex_values: np.ndarray,
     x_axes: tuple[np.ndarray, ...],
@@ -135,13 +157,15 @@ def _grid_values_from_mapping(
 
 @optional_lru_cache
 def vertex_to_grid_index_mapping(
-    mesh: Mesh,
+    f: Function,
     strict: bool = False,
     jit: bool = True,
-    use_axes_cache: bool = True,
+    use_cache: bool = True,
+    use_dof_coordinates: bool = False,
 ) -> dict[int, tuple[int, ...]]:
-    axes = mesh_axes(use_cache=use_axes_cache)(mesh, strict)
-    vertices = mesh_vertices(mesh)
+    axes, vertices = _axes_vertices(use_cache=use_cache)(
+        f, strict, use_cache, use_dof_coordinates,
+    )
     if jit:
         mapping = _vertex_to_grid_index_mapping_jit(numba.typed.List(vertices), axes)
     else:

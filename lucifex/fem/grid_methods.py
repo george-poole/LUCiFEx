@@ -15,8 +15,8 @@ from .fem2npy import as_grid_function, GridFunction
 def grid_cross_section(
     fxyz: Function | GridFunction | tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
+    target: int | float,
+    fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
 ) -> tuple[GridFunction, float]: 
@@ -27,8 +27,8 @@ def grid_cross_section(
 def grid_cross_section(
     fxyz: Iterable[Function | GridFunction],
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
+    target: int | float,
+    fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
     strict: bool = False,
@@ -45,8 +45,8 @@ def grid_cross_section(f, *_, **__):
 def _(
     fxyz: Function,
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
+    target: int | float,
+    fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
 ): 
@@ -57,7 +57,7 @@ def _(
     return grid_cross_section(
         f_grid,
         axis,
-        value,
+        target,
         fraction,
         axis_names,
     )
@@ -67,8 +67,8 @@ def _(
 def _(
     fxyz: tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
+    target: int | float,
+    fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ): 
     values, *axes = fxyz
@@ -76,7 +76,7 @@ def _(
     return grid_cross_section(
         f_grid,
         axis,
-        value,
+        target,
         fraction,
         axis_names,
     )
@@ -86,19 +86,10 @@ def _(
 def _(
     f_grid: GridFunction,
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
-    fraction: bool = True,
+    target: int | float,
+    fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ): 
-    if fraction:
-        f_fraction = value
-        if f_fraction < 0 or f_fraction > 1:
-            raise ValueError("Fraction must be in interval [0, 1]")
-        f_value = None
-    else:
-        f_fraction = None
-        f_value = value
-
     if not isinstance(axis, int):
         axis_index = axis_names.index(axis)
     else:
@@ -106,9 +97,9 @@ def _(
 
     dim = len(f_grid.mesh.axes)
     if dim == 2:
-        return _cross_section_line(f_grid, f_fraction, f_value, axis_index)
+        return _cross_section_line(f_grid, target, fraction, axis_index)
     elif dim == 3:
-        return _cross_section_colormap(f_grid, f_fraction, f_value, axis_index)
+        return _cross_section_colormap(f_grid, target, fraction, axis_index)
     else:
         raise ValueError(f'Cannot get a cross-section in d={dim}.')
 
@@ -147,22 +138,15 @@ def _(
 
 def _cross_section_line(
     u: GridFunction,
-    y_fraction: float | None,
-    y_value: float | int | None,
+    y_target: int | float,
+    fraction: bool,
     y_index: Literal[0, 1],
 ) -> tuple[GridFunction, float]:
     
     y_axis = u.mesh.axes[y_index]
     x_axis = u.mesh.axes[(y_index + 1) % 2]
 
-    if y_value is not None:
-        yaxis_index = as_index(y_axis, y_value)
-    else:
-        assert y_fraction is not None
-        if np.isclose(y_fraction, 1):
-            yaxis_index = -1
-        else:
-            yaxis_index = int(y_fraction * len(y_axis))
+    yaxis_index = as_index(y_axis, y_target, fraction)
     y_value = y_axis[yaxis_index]
 
     if y_index == 0:
@@ -182,8 +166,8 @@ def _cross_section_line(
 
 def _cross_section_colormap(
     u: GridFunction,
-    z_fraction: float | None,
-    z_value: float | int | None,
+    z_target: int | float,
+    fraction: bool,
     z_index: Literal[0, 1, 2],
 ) -> tuple[GridFunction, float]:
     
@@ -191,11 +175,7 @@ def _cross_section_colormap(
     x_axis = u.mesh.axes[(z_index + 1) % 3]
     y_axis = u.mesh.axes[(z_index + 2) % 3]
 
-    if z_value is not None:
-        zaxis_index = as_index(z_axis, z_value)
-    else:
-        assert z_fraction is not None
-        zaxis_index = int(z_fraction * len(z_axis))
+    zaxis_index = as_index(z_axis, z_target, fraction)
     z_value = z_axis[zaxis_index]
 
     if z_index == 0:

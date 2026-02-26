@@ -1,5 +1,7 @@
-import datetime
 import os
+import pickle
+import hashlib
+import datetime
 from typing import Any
 from collections.abc import Iterable
 
@@ -17,6 +19,7 @@ def create_dir_path(
     dir_prefix: str | None,
     dir_suffix: str | None,
     dir_datetime: bool | None,
+    dir_uid: bool = False,
     dir_seps: tuple[str, str, str] = ('|', '__', '__'),
     mkdir: bool = False,
     slc: slice = slice(2, -4),
@@ -50,10 +53,22 @@ def create_dir_path(
         )
         dir_name = suffix_sep.join((dir_name, time)) if dir_name else time
 
+    if dir_uid:
+        uid = create_uid(namespace)
+        dir_name = suffix_sep.join((dir_name, uid)) if dir_name else uid
+
     if mkdir:
         os.makedirs(dir_name, exist_ok=True)
 
     return os.path.join(dir_root, dir_name)
+
+
+def create_uid(
+    namespace: dict[str, Any],
+    digest_size: int = 8,
+) -> str:
+    pickle_bytes = pickle.dumps(dict(sorted(namespace.items())))
+    return hashlib.blake2b(pickle_bytes, digest_size=digest_size).hexdigest()
 
 
 def file_name_ext(

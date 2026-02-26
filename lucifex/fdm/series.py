@@ -555,7 +555,7 @@ class SubFunctionSeries(Series[Expr]):
         name: str | None = None,
     ):
         if name is None:
-            name = f'{self.name}_{subspace_index}'
+            name = f'{self.name}{subspace_index}'
         order = len(mixed.sequence) - 1
         super().__init__(
             lambda i: split(mixed.sequence[i - self.FUTURE_INDEX - 1])[subspace_index], 

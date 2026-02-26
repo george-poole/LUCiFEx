@@ -2,7 +2,7 @@ import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
 from ..utils.py_utils import MultiKey
-from ..utils.fenicsx_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker
+from ..utils.fenicsx_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker, ParallelizationError
 
 
 class MeshBoundary(
@@ -66,7 +66,7 @@ def mesh_boundary(
     """
     if verify or complete:
         if mesh.comm.Get_size() > 1:
-            raise NotImplementedError('Not supported in parallel.')
+            raise ParallelizationError
         dim = mesh.geometry.dim - 1
         n_boundary_entities = [
             len(locate_entities_boundary(mesh, dim, as_spatial_marker(v)))

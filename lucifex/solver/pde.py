@@ -62,6 +62,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         jit=None,
         ffcx=None,
     ):
+        """
+        `cls.set_defaults()` without any arguments will reset defaults.
+        """
         if petsc is None:
             petsc = OptionsPETSc.default()
         if jit is None:

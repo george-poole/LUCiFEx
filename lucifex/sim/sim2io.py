@@ -33,7 +33,7 @@ class SimulationFromEXT(
         function_series: Iterable[str],
         constant_series: Iterable[str],
         write_file: str | dict[str, str] | None = None,
-        config_file: str = 'CONFIG',
+        parameter_file: str = 'PARAMETERS',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         lazy: bool = True,
@@ -59,7 +59,7 @@ class SimulationFromEXT(
         self._function_series = list(function_series)
         self._constant_series = list(constant_series)
         self._write_file = write_file
-        self._config_file = config_file
+        self._parameter_file = parameter_file
         self._checkpoint_file = checkpoint_file
         self._timing_file = timing_file
         
@@ -103,7 +103,7 @@ class SimulationFromEXT(
         elif name in self._constant_series:
             ld = self._load_constant_series(name)
         else:
-            ld = load_txt_dict(self._dir_path, self._config_file) #FIXME eval_locals
+            ld = load_txt_dict(self._dir_path, self._parameter_file) #FIXME eval_locals
             raise ValueError(name)
 
         self._loaded[name] = ld

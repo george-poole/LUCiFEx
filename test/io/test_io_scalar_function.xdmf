@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Xdmf Version="3.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="mesh" GridType="Uniform">
+      <Topology TopologyType="Quadrilateral" NumberOfElements="100" NodesPerElement="4">
+        <DataItem Dimensions="100 4" NumberType="Int" Format="HDF">test_io_scalar_function.h5:/Mesh/mesh/topology</DataItem>
+      </Topology>
+      <Geometry GeometryType="XY">
+        <DataItem Dimensions="121 2" Format="HDF">test_io_scalar_function.h5:/Mesh/mesh/geometry</DataItem>
+      </Geometry>
+    </Grid>
+    <Grid Name="uP2" GridType="Collection" CollectionType="Temporal">
+      <Grid Name="uP2" GridType="Uniform">
+        <xi:include xpointer="xpointer(/Xdmf/Domain/Grid[@GridType='Uniform'][1]/*[self::Topology or self::Geometry])" />
+        <Time Value="0" />
+        <Attribute Name="uP2" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="121 1" Format="HDF">test_io_scalar_function.h5:/Function/uP2/0</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>

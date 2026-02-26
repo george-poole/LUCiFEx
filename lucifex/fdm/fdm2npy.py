@@ -130,17 +130,20 @@ class GridFunctionSeries(
         cls: type['GridFunctionSeries'], 
         u: FunctionSeries | ExprSeries,
         slc: StrSlice = ':',
+        use_func_cache: bool = True,
+        elem: tuple[str, int] = ('P', 1),
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
-        use_mesh_map: bool = True,
+        use_mapping: bool = True,
         use_mesh_cache: bool = True,
-        use_func_cache: bool = True,
+        use_dof_coordinates: bool = False,
         mesh: Mesh | None = None,
     ) -> Self:
         convert_func = lambda u: (
             as_grid_function(use_cache=use_func_cache)(
-                u, strict, jit, mask, use_mesh_map, use_mesh_cache, mesh
+                u, elem, strict, jit, mask, 
+                use_mapping, use_mesh_cache, use_dof_coordinates, mesh
             )
         )
         return super().from_series(
@@ -158,8 +161,8 @@ class TriFunctionSeries(
         cls: type['TriFunctionSeries'], 
         u: FunctionSeries | ExprSeries,
         slc: StrSlice = ':',
-        use_mesh_cache: bool = True,
         use_func_cache: bool = True,
+        use_mesh_cache: bool = True,
         mesh: Mesh | None = None,
     ) -> Self:
         convert_func = lambda u: (
@@ -182,6 +185,9 @@ class QuadFunctionSeries(
         cls: type['QuadFunctionSeries'], 
         u: FunctionSeries | ExprSeries,
         slc: StrSlice = ':',
+        use_func_cache: bool = True,
+        use_mesh_cache: bool = True,
+        mesh: Mesh | None = None,
     )-> Self:
         raise NotImplementedError
         

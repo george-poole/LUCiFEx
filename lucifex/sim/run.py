@@ -34,6 +34,7 @@ def run(
     timing: bool | dict[Hashable, list[float]] = False,
     stoppers: Iterable[Stopper | Callable[[], bool] | CreateStopper] = (),
     writers: Iterable[Writer | Callable[[], None] | CreateWriter] = (),
+    show_progress: bool = False,
 ) -> None:    
     if isinstance(simulation, tuple):
         simulation = Simulation(*simulation)
@@ -64,16 +65,16 @@ def run(
     if overwrite and _writers:
         reset_directory(simulation.dir_path, ('*.h5', '*.xdmf'))
     if _writers and simulation.dir_path:
-        config_file_namespace = simulation.parameters.copy()
-        config_file_namespace.update(
+        _parameters = simulation.parameters.copy()
+        _parameters.update(
             n_stop=n_stop, 
             t_stop=t_stop, 
             dt_init=dt_init, 
             n_init=n_init, 
             resume=resume,
         )
-        config_file_namespace.update(write_delta={k: v for k, v in simulation.write_delta.items() if v is not None})
-        write(config_file_namespace, simulation.config_file, simulation.dir_path, mode='a')
+        _parameters.update(write_delta={k: v for k, v in simulation.write_delta.items() if v is not None})
+        write(_parameters, simulation.parameter_file, simulation.dir_path, mode='a')
 
     _n = 0
     _time_stoppers: list[Stopper] = []
@@ -89,6 +90,11 @@ def run(
         for w in _writers:
             w.write = log_timing(w.write, _timings, f'{w.name}_{w.write.__name__}')
         _timings[run.__name__] = []
+
+    prog = None
+    if show_progress and n_stop:
+        from tqdm import tqdm
+        prog = tqdm(total=n_stop)
 
     while all(not s.stop(t[0]) for s in _time_stoppers):
         if _n < n_init:
@@ -109,6 +115,8 @@ def run(
         if _timings:
             t_run_stop = time.perf_counter()
             _timings[run.__name__].append(t_run_stop - t_run_start)
+        if prog is not None:
+            prog.update()
 
     if _timings:
         simulation.set_timings(_timings)

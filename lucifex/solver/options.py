@@ -30,7 +30,7 @@ class Options:
         return repr(self._kwargs)
 
     def replace(self, **changes: Any) -> Self:
-        _kwargs = self._kwargs
+        _kwargs = self._kwargs.copy()
         _kwargs.update(**changes)
         return self.__class__(**_kwargs)
 

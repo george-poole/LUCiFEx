@@ -9,7 +9,7 @@ def interval_mesh(
     Lx: float | tuple[float, float],
     Nx: int,
     name: str | None = None,
-    comm: MPI.Comm | str = MPI.COMM_WORLD,
+    comm: MPI.Comm | str = 'COMM_WORLD',
     **kwargs,
 ) -> Mesh:
     if not isinstance(Lx, tuple):
@@ -32,7 +32,7 @@ def rectangle_mesh(
     Ny: int,
     cell: CellType | DiagonalType = CellType.QUADRILATERAL,
     name: str | None = None,
-    comm: MPI.Comm | str = MPI.COMM_WORLD,
+    comm: MPI.Comm | str = 'COMM_WORLD',
     **kwargs,
 ) -> Mesh:
     if not isinstance(Lx, tuple):
@@ -78,7 +78,7 @@ def box_mesh(
     Nz: int,
     cell: CellType = CellType.HEXAHEDRON,
     name: str | None = None,
-    comm: MPI.Comm | str = MPI.COMM_WORLD,
+    comm: MPI.Comm | str = 'COMM_WORLD',
     **kwargs,
 ) -> Mesh:
     if not isinstance(Lx, tuple):

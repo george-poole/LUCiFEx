@@ -139,8 +139,12 @@ def _function_space(
 
 
 def create_function(
-    fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] | tuple[str, int] | tuple[str, int, int],
-    value: Function | Constant | Expression | Expr | Callable[[np.ndarray], np.ndarray] | float | Iterable[float | Callable[[np.ndarray], np.ndarray]],
+    fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] 
+    | tuple[str, int] | tuple[str, int, int],
+    value: Function | Constant | Expression | Expr
+    | Callable[[np.ndarray], np.ndarray] | float 
+    | Iterable[float | Callable[[np.ndarray], np.ndarray]]
+    | None = None,
     subspace_index: int | None = None,
     dofs_indices: Iterable[int] | StrSlice | None = None,
     name: str | None = None,
@@ -167,7 +171,8 @@ def create_function(
         fs = get_subspace(fs, subspace_index)
         f = Function(fs, name=name)
     else:
-        fs = _as_function_space_tuple(fs, value)
+        if not isinstance(fs[0], Mesh):
+            fs = fs_from_elem(fs, value)
         if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
             return value
         if use_cache is True:
@@ -176,7 +181,9 @@ def create_function(
             fs = create_function_space(fs, subspace_index, bool(use_cache))
             f = Function(fs, name=name)
 
-    set_function(f, value, dofs_indices)
+    if value is not None:
+        set_function(f, value, dofs_indices)
+    
     return f
 
 
@@ -211,8 +218,8 @@ def get_component_functions(
     if not is_vector(u):
         raise NonVectorError(u)
     
-    if isinstance(fs, tuple):
-        fs = _as_function_space_tuple(fs, u)
+    if not isinstance(fs[0], Mesh):
+        fs = fs_from_elem(fs, u)
 
     dim = u.ufl_shape[0]
     
@@ -221,7 +228,7 @@ def get_component_functions(
             u_name = u.name
         except AttributeError:
             u_name = f'{u.__class__.__name__}{id(u)}'
-        names = tuple(f'{u_name}_{i}' for i in range(dim))
+        names = tuple(f'{u_name}{i}' for i in range(dim))
 
     if isinstance(u, Function) and is_component_space(u.function_space):
         # e.g. `u(𝐱) ∈ P₁⨯P₁`
@@ -269,26 +276,14 @@ def _(value: Iterable[float], mesh: Mesh):
         raise TypeError('Expected an iterable of numbers')
 
 
-def _as_function_space_tuple(
-    elem: tuple[str, int] 
-    | tuple[str, int, int] 
-    | tuple[Mesh, str, int] 
-    | tuple[Mesh, str, int, int], 
+def fs_from_elem(
+    elem: tuple[str, int] | tuple[str, int, int],
+    # | tuple[Mesh, str, int] 
+    # | tuple[Mesh, str, int, int], 
     u: Function | Expr,
 ) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
-    match elem:
-        case mesh, fam, deg, dim:
-            return mesh, fam, deg, dim
-        case mesh, fam, deg if isinstance(mesh, Mesh):
-            return mesh, fam, deg
-        case fam, deg, dim:
-            mesh = extract_mesh(u)
-            return mesh, fam, deg, dim
-        case fam, deg:
-            mesh = extract_mesh(u)
-            return mesh, fam, deg
-        case _:
-            raise TypeError
+    mesh = extract_mesh(u)
+    return mesh, *elem
 
 
 def set_function(

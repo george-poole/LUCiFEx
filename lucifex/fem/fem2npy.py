@@ -12,7 +12,7 @@ from ..mesh.mesh2npy import (
 )
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    dofs, grid_values, get_component_functions,
+    dofs, dofs_grid, get_component_functions,
     NonScalarVectorError, extract_mesh,
 )
 from .function import Function
@@ -200,14 +200,18 @@ class GridFunction(NPyFunction[GridMesh]):
     def from_function(
         cls: type['GridFunction'],
         u: Function | Expr,
+        elem: tuple[str, int] = ('P', 1),
         strict: bool = False,
         jit: bool = True,
         mask: float = np.nan,
-        use_mesh_map: bool = False,
+        use_mapping: bool = False,
         use_mesh_cache: bool = True,
+        use_dof_coordinates: bool = False,
         mesh: Mesh | None = None,
     ) -> Self:
-        get_values = lambda u: grid_values(u, strict, jit, mask, use_mesh_map, use_mesh_cache, mesh)
+        get_values = lambda u: (
+            dofs_grid(u, elem, strict, jit, mask, use_mapping, use_mesh_cache, use_dof_coordinates, mesh)
+        )
         convert_mesh = lambda m: as_grid_mesh(use_cache=use_mesh_cache)(m, strict)
         return super().from_function(
             u,

@@ -1,0 +1,11 @@
+*.npy
+*.npz
+*.csv
+*.h5
+*.xdmf
+*.xml
+*.vtk
+*.pickle
+*.pdf
+*.png
+*.mp4

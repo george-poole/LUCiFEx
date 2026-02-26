@@ -104,7 +104,7 @@ def dofs(
     u: Function | Expr,
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[str, int] | None = None,
     l2_norm: bool = False,
-    use_cache: bool | EllipsisType | tuple = False,
+    use_cache: bool | EllipsisType | tuple[bool, bool] = False,
     try_identity: bool = False,
 ) -> np.ndarray:
     """

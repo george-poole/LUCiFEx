@@ -20,7 +20,7 @@ These short notebooks are primarily for quick, inexpensive demonstration purpose
 
 ## What does LUCiFEx do?
 
-In addition to what can be achieved with FEniCSx, LUCiFEx provides abstractions and utilties for
+In addition to what can be achieved with FEniCSx, LUCiFEx provides abstractions and utilities for
 + [time-dependent functions, constants and expressions](demo/notebooks/P01_user_guide/U01_time_dependence.ipynb)
 + [finite differences in time for the discretization of time-dependent problems](demo/notebooks/P01_user_guide/U02_finite_differences.ipynb)
 + specifying initial conditions and (possibly time-dependent) boundary conditions
@@ -38,7 +38,7 @@ These features are outside the scope of current development, but could be of int
 + time-stepping with Runge-Kutta methods
 + nonlinear solvers
 
-## Installation (macOS)
+## Installation (macOS Intel)
 
 Please note that LUCiFEx is a research code still under active development.
 
