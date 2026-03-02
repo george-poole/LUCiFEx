@@ -278,8 +278,6 @@ def _(value: Iterable[float], mesh: Mesh):
 
 def fs_from_elem(
     elem: tuple[str, int] | tuple[str, int, int],
-    # | tuple[Mesh, str, int] 
-    # | tuple[Mesh, str, int, int], 
     u: Function | Expr,
 ) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
     mesh = extract_mesh(u)

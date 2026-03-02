@@ -73,7 +73,7 @@ def navier_stokes_thermosolutal_rectangle(
 ):
     """
     `∂c/∂t + 𝐮·∇c = Di∇²c` \\
-    `∂θ/∂t + 𝐮·∇θ = Di/Le ∇²θ` \\
+    `∂θ/∂t + 𝐮·∇θ = Le Di ∇²θ` \\
     `∇·𝐮 = 0` \\
     `∂𝐮/∂t + 𝐮·∇𝐮 = Vi(-∇p + ∇²𝐮) - Bu(c - βθ)𝐞ʸ`
     """
@@ -158,7 +158,7 @@ def navier_stokes_thermosolutal_rectangle(
         c, dt[0], u, Di, D_adv_ad, D_diff_ad,
     )
     theta_solver = ibvp(advection_diffusion, bcs=theta_bcs)(
-        theta, dt[0], u, Di/Le, D_adv_ad, D_diff_ad,
+        theta, dt[0], u, Le * Di, D_adv_ad, D_diff_ad,
     )
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
     auxiliary = [Le, Pr, Ra, beta, rho, Di, Vi, Bu]

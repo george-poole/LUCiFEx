@@ -151,6 +151,7 @@ class SpatialPerturbation:
         domain_lims: list[float | tuple[float, float]] | np.ndarray,
         amplitude: float | tuple[float, float],
         corrector: Callable[[np.ndarray], None] | None = None, #FIXME subspace case,
+        operator: Callable[[Any, Any], Any] = add,
         **rescale_kwargs,
     ) -> None:
         self._base = base
@@ -158,6 +159,7 @@ class SpatialPerturbation:
         if corrector is None:
             corrector = lambda _: None
         self._corrector = corrector
+        self._operator = operator
 
     def base(
         self,
@@ -179,10 +181,12 @@ class SpatialPerturbation:
         self,
         fs: FunctionSpace,
         base: Function | None = None,
-        operator: Callable[[Any, Any], Any] = add,
+        operator: Callable[[Any, Any], Any] | None = None,
         correct: bool = True,
         name: str | None = None,
-    ) -> Function:       
+    ) -> Function:   
+        if operator is None:
+            operator = self._operator
         if isfunction(self._base) and isfunction(self._noise):
             perturbed = lambda x: operator(self._base(x), self._noise(x))
         else:

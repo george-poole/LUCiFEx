@@ -32,7 +32,7 @@ def dofs_grid(
         raise NonScalarError(f)
     
     if not isinstance(f, Function):
-        if mesh is None:
+        if mesh is not None:
             elem = (mesh, *elem)
         f = create_function(elem, f)
 

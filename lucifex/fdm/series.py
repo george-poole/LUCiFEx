@@ -192,7 +192,7 @@ P = ParamSpec('P')
 class ExprSeries(
     Series[Expr],
 ):
-    _func_args = None
+    _factory_and_args: None | tuple[Callable, tuple, dict] = None
 
     @overload
     def __init__(
@@ -247,7 +247,7 @@ class ExprSeries(
     @classmethod
     def _from_expr(
         cls, 
-        func: Callable[P, Self], 
+        factory: Callable[P, Self], 
         /,
         *,
         name: str | None = None,
@@ -275,15 +275,15 @@ class ExprSeries(
         def _(f, *a, **k):
             expr = f(*a, **k)
             obj = cls(expr, name)
-            obj._func_args = (f, a, k)
+            obj._factory_and_args = (f, a, k)
             return obj
         
         if len(args) > 1:
-            *args, func = args
-            return _(func, *args)
+            *args, factory = args
+            return _(factory, *args)
         else:
-            func = args[0]
-            return lambda *a, **k: _(func, *a, **k)
+            factory = args[0]
+            return lambda *a, **k: _(factory, *a, **k)
         
     @classmethod
     def from_expr_factory(
@@ -296,7 +296,7 @@ class ExprSeries(
         return cls._from_expr(factory, name=name)
     
     @classmethod
-    def from_expr_factory_args(
+    def from_expr_factory_and_args(
         cls, 
         *args: Any | Callable[..., Self],
         name: str | None = None,
@@ -304,9 +304,9 @@ class ExprSeries(
         return cls._from_expr(*args, name=name)
     
     @property
-    def expression(self) -> tuple[Callable, tuple[Any, ...], dict[str, Any]] | None:
-        if self._func_args is not None:
-            return self._func_args
+    def factory_and_args(self) -> tuple[Callable, tuple[Any, ...], dict[str, Any]] | None:
+        if self._factory_and_args is not None:
+            return self._factory_and_args
         else:
             return None
 

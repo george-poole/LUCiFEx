@@ -451,7 +451,7 @@ class FiniteDifferenceArgwise:
             raise TypeError
         
         if len(args) > 1:
-            func, *args = args
+            factory, *args = args
             kws = {}
         else:
             u = args[0]
@@ -460,15 +460,20 @@ class FiniteDifferenceArgwise:
                     raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(u)}.")
                 else:
                     return u
-            if not u.expression:
+            if not u.factory_and_args:
                 raise ValueError(f"Expression and arguments must be deducable '{u.name}'.")
-            func, args, kws = u.expression
+            factory, args, kws = u.factory_and_args
 
-        _args = [fd(arg, trial) for fd, arg in zip(self._fd_args, args, strict=False)]
-        _kws = {k: fd(kws[k],trial) for k, fd in self._fd_kws.items()}
+        n_fd = len(self.finite_differences)
+        n_args = len(args)
+        if not n_fd == n_args:
+            raise ValueError(
+                f'Number of finite difference operators ({n_fd}) should match number of expression arguments ({n_args})'
+            )
         
-        return func(*_args, **_kws)
-    
+        _args = [fd(arg, trial) for fd, arg in zip(self._fd_args, args)]
+        _kws = {k: fd(kws[k], trial) for k, fd in self._fd_kws.items()}
+        return factory(*_args, **_kws)
     
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:

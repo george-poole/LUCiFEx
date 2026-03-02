@@ -93,7 +93,7 @@ $$
 &\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^{n},~p^{}~\text{such that}~\forall n\geq0 \\
 &\begin{cases}
 \frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=Di\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) \\
-\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=\frac{Di}{Le}\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) \\
+\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=LeDi\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) \\
 \nabla\cdot\textbf{u}^{n}=0 \\
 \textbf{0}= \nabla\cdot(-p^n\mathsf{I}+\tau^n) + Bu\,\rho^n\,\textbf{e}_g \\
 c^0=c_0 \\

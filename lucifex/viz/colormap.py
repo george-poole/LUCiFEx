@@ -168,6 +168,7 @@ def _(
 plot_colormap = optional_fig_ax(_plot_colormap)
 
 
+# TODO
 # @overload
 # def _plot_contours(
 #     ax: Axes,
@@ -257,7 +258,7 @@ def _(
 ) -> None:
     x, y, z = xyz
 
-    _plt_kwargs = dict(linestyles="solid", color="black", linewidths=LW)
+    _plt_kwargs = dict(linestyles="solid", colors="black", linewidths=LW)
     _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
     _axs_kwargs.update(x_lims=x, y_lims=y)
     _kwargs = _plt_kwargs | _axs_kwargs

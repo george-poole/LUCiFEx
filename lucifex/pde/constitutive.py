@@ -26,7 +26,7 @@ def permeability_cross_bedded(
     k: Function | Expr,
     kappa: Constant,
     vartheta: Constant,
-):
+) -> Expr:
     """
     `𝖪(ϕ) = K(ϕ) (
         (cos²ϑ + κsin²ϑ , (1 - κ)cosϑsinϑ), 

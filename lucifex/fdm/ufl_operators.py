@@ -144,3 +144,11 @@ def inner(): pass
 
 @binary_operator(ufl.dot)
 def dot(): pass
+
+
+@binary_operator(ufl.max_value)
+def max_value(): pass
+
+
+@binary_operator(ufl.min_value)
+def min_value(): pass
