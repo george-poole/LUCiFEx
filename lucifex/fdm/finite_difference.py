@@ -15,8 +15,6 @@ class FiniteDifference:
     Finite difference operator for time discretization
     """
 
-    trial_default = True
-
     def __init__(
         self,
         indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
@@ -24,7 +22,8 @@ class FiniteDifference:
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
         name: str | None = None,
-        index: str | None = None,
+        index: int | None = None,
+        use_repr: bool = True,
     ) -> None:
 
         if not isinstance(indices_coeffs, dict):
@@ -53,9 +52,8 @@ class FiniteDifference:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
         self._index = index
+        self._use_repr = use_repr
 
-        self._trial = self.trial_default
-    
     @property
     def coefficients(self) -> dict[int, float]:
         return self._coefficients
@@ -88,7 +86,15 @@ class FiniteDifference:
             return self._name
         
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.coefficients}, name={self.name}, index={self._index})'
+        if not self._use_repr:
+            return self.name
+        kws = dict(
+            initial=repr(self.initial),
+            name=self.name,
+            index=self._index,
+        )
+        kws_str = ', '.join([f'{k}={v}' for k, v in kws.items()])
+        return f'{self.__class__.__name__}({kws_str})'
     
     def __str__(self):
         if self._index is not None:
@@ -169,8 +175,9 @@ class FiniteDifferenceDerivative(FiniteDifference):
         = None,
         name: str | None = None,
         index: str | None = None,
+        use_repr: bool = True,
     ) -> None:
-        super().__init__(indices_coeffs, initial, name, index)
+        super().__init__(indices_coeffs, initial, name, index, use_repr)
         self._denominator = denominator
 
     def __call__(
@@ -200,14 +207,15 @@ CN = FiniteDifference(
         Series.FUTURE_INDEX: 0.5,
         Series.FUTURE_INDEX - 1: 0.5,
     },
-    name='CN'
+    name='CN',
+    use_repr=False,
 )
 """Crank-Nicolson"""
 
-FE = FiniteDifference({Series.FUTURE_INDEX - 1: 1.0}, name='FE')
+FE = FiniteDifference({Series.FUTURE_INDEX - 1: 1.0}, name='FE', use_repr=False)
 """Forward Euler explicit method"""
 
-BE = FiniteDifference({Series.FUTURE_INDEX: 1.0}, name='BE')
+BE = FiniteDifference({Series.FUTURE_INDEX: 1.0}, name='BE', use_repr=False)
 """Backward Euler implicit method"""
 
 DT = FiniteDifferenceDerivative(
@@ -216,7 +224,8 @@ DT = FiniteDifferenceDerivative(
         Series.FUTURE_INDEX: 1.0,
         Series.FUTURE_INDEX - 1: -1.0,
     },
-    name='DT'
+    name='DT',
+    use_repr=False,
 )
 """Forward first time derivative `(uⁿ⁺¹ - uⁿ) / Δtⁿ` """
 
@@ -227,7 +236,8 @@ DTLF = FiniteDifferenceDerivative(
         Series.FUTURE_INDEX - 2: -0.5,
     },
     DT,
-    name='LF'
+    name='LF',
+    use_repr=False,
 )
 """Centred (leapfrog) first time derivative `(uⁿ⁺¹ - uⁿ⁻¹) / 2Δtⁿ` """
 
@@ -239,7 +249,8 @@ DT2 = FiniteDifferenceDerivative(
         Series.FUTURE_INDEX - 2: 1.0,
     },
     DT,
-    name='DT2'
+    name='DT2',
+    use_repr=False,
 )
 """Centred second time derivative"""
 
@@ -276,7 +287,7 @@ def AB(n: int, initial: FiniteDifference | None = None) -> FiniteDifference:
     if initial is None:
         initial = FE
 
-    return FiniteDifference(d, initial, 'AB', n)
+    return FiniteDifference(d, initial, 'AB', n, use_repr=False)
 
 
 AB1 = AB(1)
@@ -316,7 +327,7 @@ def AM(
     if initial is None:
         initial = BE
 
-    return FiniteDifference(d, initial, 'AM', n)
+    return FiniteDifference(d, initial, 'AM', n, use_repr=False)
 
 
 AM1 = AM(1)
@@ -364,7 +375,7 @@ def BDF(
     if initial is None:
         initial = DT
 
-    return FiniteDifferenceDerivative(lambda dt: dt, d, initial, 'BDF', n)
+    return FiniteDifferenceDerivative(lambda dt: dt, d, initial, 'BDF', n, use_repr=False)
 
 
 BDF1 = BDF(1)
@@ -403,11 +414,13 @@ class FiniteDifferenceArgwise:
         self, 
         *args: FiniteDifference,
         name: str | None = None,
+        use_repr: bool = False,
         **kws: FiniteDifference,
     ):
         self._fd_args = tuple(args)
         self._fd_kws = kws.copy()
         self._name = name
+        self._use_repr = use_repr
 
     @overload
     def __call__(
@@ -497,11 +510,13 @@ class FiniteDifferenceArgwise:
     @property
     def name(self) -> str:
         if self._name is None:
-            return ' @ '.join([fd.name for fd in self.finite_differences])
+            return ' @ '.join([repr(fd) for fd in self.finite_differences])
         else:
             return self._name
     
     def __repr__(self):
+        if not self._use_repr:
+            return self.name
         return f'{self.__class__.__name__}({self._fd_args}, {self.name})'
     
     def __str__(self):

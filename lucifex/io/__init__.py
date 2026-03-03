@@ -13,4 +13,4 @@ from .load import (
     load_tri_function_series,
 )
 from .write import write
-from .utils import create_dir_path, file_path_ext, file_name_ext
+from .utils import create_dir_path, file_path_ext, file_name_ext, dir_path_exists

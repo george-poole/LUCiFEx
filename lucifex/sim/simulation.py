@@ -25,7 +25,7 @@ from ..fem import Function, Constant
 from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
     Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
-    EigenvalueProblem, Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc
+    EigenvalueProblem, Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc, OptionsSLEPc,
 )
 from ..io import create_dir_path, write
 from ..solver import IBVP, IVP, Evaluation
@@ -294,6 +294,7 @@ class Simulation(
 
 def configure_simulation(
     petsc: OptionsPETSc | dict | None = None,
+    slepc: OptionsSLEPc | dict | None = None,
     jit: OptionsJIT | dict | None = None,
     ffcx: OptionsFFCX | dict | None = None,
     store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
@@ -312,6 +313,8 @@ def configure_simulation(
 ):
     if petsc is None:
         petsc = OptionsPETSc.default()
+    if slepc is None:
+        slepc = OptionsSLEPc.default()
     if jit is None:
         jit = OptionsJIT.default()
     if ffcx is None:
@@ -353,6 +356,7 @@ def configure_simulation(
         def _(
             *,
             petsc: dict | OptionsPETSc = ...,
+            slepc: dict | OptionsSLEPc = ...,
             jit: dict | OptionsJIT = ...,
             store_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
             write_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
@@ -422,6 +426,7 @@ def configure_simulation(
                     raise TypeError(f'Unrecognised keyword arguments: {tuple(unrecognised)}.')
                 return _(
                     petsc=petsc, 
+                    slepc=slepc,
                     jit=jit, 
                     ffcx=ffcx, 
                     store_delta=store_delta, 

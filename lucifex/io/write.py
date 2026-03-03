@@ -396,6 +396,7 @@ def _(
     mode: str= 'a',
     preamble: Iterable[str] = (),
     file_ext: str | None = None,
+    use_repr: bool = True,
     **kwargs,
 ) -> None:
     
@@ -413,11 +414,12 @@ def _(
     if file_ext == TXT:
         _kwargs = {'sep': ' = '}
         _kwargs.update(kwargs)
+        str_func = repr if use_repr else str
         with open(file_path, mode) as f:
             for line in preamble:
                 print(line, **_kwargs, file=f)
             for k, v in namespace.items():
-                print(k, str(v), **_kwargs, file=f)
+                print(k, str_func(v), **_kwargs, file=f)
     elif file_ext == NPZ:
         array_dict = {}
         if mode == 'a' and os.path.isfile(file_path):

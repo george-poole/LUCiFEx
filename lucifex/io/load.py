@@ -220,7 +220,7 @@ def load_numeric_series(
 def load_txt_dict(
     dir_path: str,
     file_name: str,
-    eval_locals: Iterable[type] = (),
+    eval_locals: dict[str, Any] | None = None,
     sep: str = ' = ',
     skip: Iterable[int | str] = (),
 ) -> dict[str, Any]:
@@ -239,9 +239,7 @@ def load_txt_dict(
                 continue
             val_str = val_str.strip() 
             try:
-                for i in eval_locals:
-                    val_str = val_str.replace(str(i), repr(i))
-                val = eval(val_str, globals(), {i.__name__: i for i in eval_locals})
+                val = eval(val_str, globals(), eval_locals)
                 params[name] = val
             except Exception as ex:
                 params[name] = repr(ex)

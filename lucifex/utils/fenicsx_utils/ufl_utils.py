@@ -63,21 +63,33 @@ class ShapeError(ValueError):
         u: Function | Constant | Expr, 
         shape: str | tuple,
     ):
+        """
+        Error to raise if shape does not match
+        """
         super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
 
 
 class NonScalarError(ShapeError):
     def __init__(self, u):
+        """
+        Error to raise if non-scalar value provided
+        """
         super().__init__(u, "'scalar'")
 
 
 class NonVectorError(ShapeError):
     def __init__(self, u):
+        """
+        Error to raise if non-vector value provided
+        """
         super().__init__(u, "'vector'")
 
 
 class NonScalarVectorError(ShapeError):
     def __init__(self, u):
+        """
+        Error to raise if tensor value provided
+        """
         super().__init__(u, "'scalar or vector'")
 
 

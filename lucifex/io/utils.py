@@ -1,4 +1,5 @@
 import os
+import glob
 import pickle
 import hashlib
 import datetime
@@ -18,8 +19,8 @@ def create_dir_path(
     dir_params: Iterable[str] | str,
     dir_prefix: str | None,
     dir_suffix: str | None,
-    dir_datetime: bool | None,
-    dir_uid: bool = False,
+    dir_datetime: bool,
+    dir_uid: bool,
     dir_seps: tuple[str, str, str] = ('|', '__', '__'),
     mkdir: bool = False,
     slc: slice = slice(2, -4),
@@ -70,6 +71,33 @@ def create_uid(
     pickle_bytes = pickle.dumps(dict(sorted(namespace.items())))
     return hashlib.blake2b(pickle_bytes, digest_size=digest_size).hexdigest()
 
+
+def dir_path_exists(
+    dir_path: str,
+    glob_prefix: str | None = None,
+    glob_suffix: str | None = None,
+    unique: bool = True,
+    checkpoint: str | None = None,
+) -> bool:
+
+    if checkpoint is not None:
+        has_checkpoint = lambda p, c: os.path.exists(os.path.join(p, c))
+    else:
+        has_checkpoint = lambda *_: True
+
+    if unique and not glob_prefix and not glob_suffix:
+        return os.path.exists(dir_path) and has_checkpoint(dir_path, checkpoint)
+    else:
+        if glob_prefix is None:
+            glob_prefix = ''
+        if glob_suffix is None:
+            glob_suffix = ''
+        globbed = glob.glob(f'{glob_prefix}{dir_path}{glob_suffix}')
+        if unique:
+            return len(globbed) == 1 and has_checkpoint(globbed[0], checkpoint)
+        else:
+            return len(globbed) >= 1 and all(has_checkpoint(i, checkpoint) for i in globbed)
+        
 
 def file_name_ext(
     file_name: str,

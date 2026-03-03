@@ -69,6 +69,7 @@ def _xdmf_to_npz(arg, *_, **__):
 def _(
     sim: Simulation,
     lazy: bool = True,
+    use_cache: bool = True,
     load_args: dict[str, tuple] | None = None,
     *,
     delete_xdmf: bool = False,
@@ -80,7 +81,10 @@ def _(
     constant_series = [i.name for i in sim.solutions if isinstance(i, ConstantSeries)]
 
     if load_args is None:
-        load_args = {name: (xdmf_element(sim[name]), ) for name in function_series}
+        load_args = {
+            **{name: (xdmf_element(sim[name]), ) for name in function_series},
+            **{name: (sim[name].ufl_shape, ) for name in constant_series},
+        }
 
     return _xdmf_to_npz(
         sim.dir_path,
@@ -92,6 +96,7 @@ def _(
         sim.checkpoint_file,
         sim.timing_file,
         lazy,
+        use_cache,
         load_args,
         delete_xdmf=delete_xdmf,
         npz_write_file=npz_write_file,
@@ -111,6 +116,7 @@ def _(
     checkpoint_file: str = 'CHECKPOINT',
     timing_file: str = 'TIMING',
     lazy: bool = True,
+    use_cache: bool = True,
     load_args: dict[str, tuple] | None = None,
     *,
     delete_xdmf: bool = False,
@@ -126,7 +132,7 @@ def _(
     function_series = [i for i in function_series if _include(i)]
     constant_series = [i for i in constant_series if _include(i)]
     
-    sim_loader = SimulationFromXDMF(
+    sim_from_xdmf = SimulationFromXDMF(
         dir_path,
         mesh,
         function_series,
@@ -136,21 +142,22 @@ def _(
         checkpoint_file,
         timing_file,
         lazy,
+        use_cache,
         load_args,
     )
 
     for name in function_series:
-        u = sim_loader[name]
+        u = sim_from_xdmf[name]
         u_npy = as_npy_function_series(u)
         write(u_npy, dir_path=dir_path)
 
     for name in constant_series:
-        c = sim_loader[name]
+        c = sim_from_xdmf[name]
         c_npy = as_npy_constant_series(c)
         write(c_npy, dir_path=dir_path)
 
     if delete_xdmf:
-        file_names = set(sim_loader.write_file.values())
+        file_names = set(sim_from_xdmf.write_file.values())
         file_paths = [
             *(file_path_ext(dir_path, fn, 'h5', mkdir=False) for fn in file_names),
             *(file_path_ext(dir_path, fn, 'xdmf', mkdir=False) for fn in file_names),

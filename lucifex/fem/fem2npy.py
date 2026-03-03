@@ -12,7 +12,7 @@ from ..mesh.mesh2npy import (
 )
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    dofs, dofs_grid, get_component_functions,
+    dofs, dofs_grid, get_component_functions, NonScalarError,
     NonScalarVectorError, extract_mesh,
 )
 from .function import Function
@@ -127,6 +127,12 @@ class NPyConstant(NPyNameValueAttr[float | int | np.ndarray]):
             self._value[index], 
             self._create_subname(index) if name is None else name,
         )
+    
+    def __float__(self) -> float:
+        if self.ufl_shape == ():
+            return float(self.value)
+        else:
+            raise NonScalarError(self.value)
 
 
 M = TypeVar('M', bound=NPyMesh)

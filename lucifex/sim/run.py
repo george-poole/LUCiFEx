@@ -132,7 +132,7 @@ def run_from_cli(
     posthook: Callable[[Simulation], None] | None = None,
     stoppers: Iterable[CreateStopper | Callable[..., CreateStopper]] = (),
     writers: Iterable[CreateWriter | Callable[..., CreateWriter]] = (),
-    eval_locals: Iterable[object | tuple[str, object]] | None = None,
+    eval_locals: dict[str, Any] | None = None,
     description: str = 'Run a simulation from the command line',
 ) -> None:
     """
@@ -144,23 +144,7 @@ def run_from_cli(
     """
 
     if eval_locals is None:
-        eval_locals = []
-    if isinstance(eval_locals, list):
-        import lucifex
-        eval_locals.extend((
-            lucifex.solver.BoundaryConditions,
-            lucifex.solver.OptionsFFCX,
-            lucifex.solver.OptionsPETSc,
-            lucifex.solver.OptionsJIT,
-            lucifex.fdm.CN,
-            lucifex.fdm.AB1,
-            lucifex.fdm.AB2,
-            lucifex.fdm.AB,
-            lucifex.fdm.AM,
-            lucifex.fem.SpatialPerturbation,
-            lucifex.fem.DofsPerturbation,
-            )
-        )
+        eval_locals = locals_from_lucifex()
 
     stoppers_from_sim: list[CreateStopper] =  [s for s in stoppers if has_simulation_arg(s)]
     stoppers_from_cli: list[Callable[..., CreateStopper]] = [s for s in stoppers if not has_simulation_arg(s)]
@@ -182,7 +166,7 @@ def run_from_cli(
     else:
         params_config = signature(configure_simulation).parameters
     params_simulation = signature(simulation_func).parameters
-    params_run = {k: v for k, v in list(signature(run).parameters.items())[1:-2]}
+    params_run = {k: v for k, v in list(signature(run).parameters.items())[1:8]}
     params_stoppers = [signature(s).parameters for s in stoppers_from_cli]
     params_writers = [signature(w).parameters for w in writers_from_cli]
     if posthook is not None:
@@ -242,24 +226,14 @@ def run_from_cli(
 
 def cli_type_conversion(
     default: Any,
-    eval_locals: Iterable[object | tuple[str, object]],
+    eval_locals: dict[str, Any],
     ):
-
-    def _name(obj) -> str:
-        if hasattr(obj, '__name__'):
-            return getattr(obj, '__name__')
-        elif hasattr(obj, 'name'):
-            return getattr(obj, 'name')
-        else:
-            return str(obj)
-
-    eval_locals = [(_name(i), i) if not isinstance(i, tuple) else i for i in eval_locals]
 
     def _inner(source: str):
         if source == default:
             return source
         else:
-            return eval(source, globals(), dict(eval_locals))
+            return eval(source, globals(), eval_locals)
         
     return _inner
 
@@ -272,4 +246,34 @@ def cli_type_name(
     else:
         return type_annotation.__name__
     
+
+def locals_from_lucifex(
+    **extra: Any,
+) -> dict[str, Any]:
+    import lucifex
+    classes = [
+        lucifex.solver.BoundaryConditions,
+        lucifex.solver.OptionsFFCX,
+        lucifex.solver.OptionsPETSc,
+        lucifex.solver.OptionsSLEPc,
+        lucifex.solver.OptionsJIT,
+        lucifex.fem.SpatialPerturbation,
+        lucifex.fem.DofsPerturbation,
+        lucifex.utils.fenicsx_utils.BoundaryType,
+        lucifex.utils.fenicsx_utils.CellType,
+    ]
+    fdms = [
+        lucifex.fdm.CN,
+        lucifex.fdm.AB1,
+        lucifex.fdm.AB2,
+        lucifex.fdm.AB,
+        lucifex.fdm.AM,
+        lucifex.fdm.AM1,
+        lucifex.fdm.AM2,
+    ]
+    return {
+        **{cls.__name__: cls for cls in classes},
+        **{repr(fdm): fdm for fdm in fdms},
+        **extra,
+    }
     

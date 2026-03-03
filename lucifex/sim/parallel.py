@@ -3,7 +3,7 @@ from typing import ParamSpec, Callable, TypeVar, Iterable, Protocol, Generic
 
 from joblib import Parallel, delayed
 
-from .sim2npy import as_grid_simulation, as_tri_simulation
+from .sim2npy import as_npy_simulation
 from .run import run
 from .simulation import Simulation
 
@@ -16,16 +16,8 @@ def create_and_run(
     t_stop: float | None = None,
     dt_init: float | None = None,
     n_init: int | None = None,
-    serialize: Callable[[Simulation], T] | str = 'grid',
+    serialize: Callable[[Simulation], T] = as_npy_simulation,
 ) -> Callable[P, T]:
-    if not callable(serialize):
-        match serialize:
-            case 'grid':
-                serialize = as_grid_simulation
-            case 'tri':
-                serialize = as_tri_simulation
-            case _:
-                raise ValueError(serialize)
 
     def _inner(*args: P.args, **kwargs: P.kwargs):
         sim = factory(*args, **kwargs)
@@ -53,7 +45,7 @@ def parallel_run(
     t_stop: float | None = None,
     dt_init: float | None = None,
     n_init: int | None = None,
-    serialize: Callable[[Simulation], T] | str = 'grid',
+    serialize: Callable[[Simulation], T] = as_npy_simulation,
     link: bool = True,
     **joblib_kws,
 ):
