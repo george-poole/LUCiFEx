@@ -57,8 +57,69 @@ def moving_average(
     return ma 
 
 
+@overload
 def as_index(
-    arr: np.ndarray | Iterable[float],
+    arr: Iterable[float],
+    target: int | float,
+    fraction: bool = False,
+    condition: Callable[[float, float], bool] | str | None = None,
+    msg: str = 'Target validation condition not satisfied',
+) -> int:
+    ...
+
+
+@overload
+def as_index(
+    arr: Iterable[float],
+    target: Iterable[int | float] | range | StrSlice | int,
+    fraction: bool = False,
+    condition: Callable[[float, float], bool] | str | None = None,
+    msg: str = 'Target validation condition not satisfied',
+    window: bool = False,
+    int_as_range: bool = False,
+) -> Iterable[int]:
+    ...
+
+
+def as_index(
+    arr: Iterable[float],
+    target,
+    fraction: bool = False,
+    condition: Callable[[float, float], bool] | str | None = None,
+    msg: str = 'Target validation condition not satisfied',
+    window: bool = False,
+    int_as_range: bool = False,
+) -> Iterable[int]:
+    if isinstance(target, float):
+        return _as_index(arr, target, fraction, condition, msg)
+    
+    if not int_as_range and isinstance(target, int):
+        return _as_index(arr, target, fraction, condition, msg)
+
+    if isinstance(target, range):
+        return target
+    
+    if isinstance(target, StrSlice):
+        slc = as_slice(target)
+        return range(slc.start, slc.stop, slc.step)
+    
+    if int_as_range and isinstance(target, int):
+        stop = len(arr)
+        step = stop // target
+        return range(0, stop, step)
+    
+    indices = [as_index(arr, i, fraction, condition) for i in target]
+    if window:
+        if indices[0] < target[0]:
+            indices[0] += 1
+        if indices[1] > target[-1]:
+            indices[0] -= 1
+
+    return indices
+
+
+def _as_index(
+    arr: Iterable[float],
     target: int | float,
     fraction: bool = False,
     condition: Callable[[float, float], bool] | str | None = None,
@@ -87,29 +148,3 @@ def as_index(
             raise ValueError(f'{msg}. target={target}, approx={approx}')
 
     return target_index
-
-
-def as_indices(
-    arr: np.ndarray | Iterable[float],
-    targets: range | Iterable[int | float] | int | StrSlice,
-    fraction: bool = False,
-    condition: Callable[[float, float], bool] | str | None = None,
-    window: bool = False,
-) -> Iterable[int]:
-    if isinstance(targets, range):
-        indices = targets
-    elif isinstance(targets, StrSlice):
-        slc = as_slice(targets)
-        indices = range(slc.start, slc.stop, slc.step)
-    elif isinstance(targets, int):
-        stop = len(arr)
-        step = stop // targets
-        indices = range(0, stop, step)
-    else:
-        indices = [as_index(arr, i, fraction, condition) for i in targets]
-        if window:
-            if indices[0] < targets[0]:
-                indices[0] += 1
-            if indices[1] > targets[-1]:
-                indices[0] -= 1
-    return indices

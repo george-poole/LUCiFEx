@@ -1,4 +1,3 @@
-import os
 import glob
 from typing import Any, Generic, TypeVar
 from typing_extensions import Self
@@ -37,7 +36,7 @@ class SimulationFromEXT(
         timing_file: str = 'TIMING',
         lazy: bool = True,
         use_cache: bool = True,
-        load_args: dict[str, tuple] | None = None,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
     ):
         if write_file is None:
             write_file = {
@@ -61,6 +60,7 @@ class SimulationFromEXT(
 
         _load_args = {k: () for k in write_file}
         if load_args is not None:
+            load_args = {k: (v, ) if not isinstance(v, tuple) else v for k, v in load_args.items()}
             _load_args.update(load_args)
 
         self._load_args = _load_args
@@ -76,14 +76,26 @@ class SimulationFromEXT(
         function_series: Iterable[str],
         constant_series: Iterable[str],
         parameters: dict[str, Any] | None = None,
-        **kwargs,
+        write_file: str | dict[str, str] | None = None,
+        parameter_file: str = 'PARAMETERS',
+        checkpoint_file: str = 'CHECKPOINT',
+        timing_file: str = 'TIMING',
+        lazy: bool = True,
+        use_cache: bool = True,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
     ) -> list[Self]:
         return cls._from_dir_paths(
             dir_paths,
             parameters,
             function_series,
             constant_series,
-            **kwargs,
+            write_file=write_file,
+            parameter_file=parameter_file,
+            checkpoint_file=checkpoint_file,
+            timing_file=timing_file,
+            lazy=lazy,
+            use_cache=use_cache,
+            load_args=load_args,
         )
     
     @classmethod
@@ -127,10 +139,8 @@ class SimulationFromEXT(
         name: str,
         reload: bool = False,
     ) -> None:
-        
         if not reload and name in self._loaded:
             return
-
         if name in self._function_series:
             ld = self._load_function_series(name)
         elif name in self._constant_series:
@@ -140,8 +150,7 @@ class SimulationFromEXT(
                 self._dir_path, 
                 self._parameter_file, 
                 locals_from_lucifex(),
-            )[name]
-            
+            )[name]  
         self._loaded[name] = ld
 
     def _getitem(
@@ -165,21 +174,23 @@ class SimulationFromEXT(
     def include_function_series(
         self,
         name: str,
-        write_file: str | None,
-        *load_args,
+        write_file: str | None = None,
+        *load_args: Any,
+        lazy: bool = True,
     ) -> None:
         self._include_series(
-            name, write_file, self._function_series, *load_args,
+            name, write_file, self._function_series, *load_args, lazy=lazy,
         )
 
     def include_constant_series(
         self,
         name: str,
-        write_file: str | None,
-        *load_args,
+        write_file: str | None = None,
+        *load_args: Any,
+        lazy: bool = True,
     ) -> None:
         self._include_series(
-            name, write_file, self._constant_series, *load_args,
+            name, write_file, self._constant_series, *load_args, lazy=lazy,
         )
     
     def _include_series(
@@ -188,6 +199,7 @@ class SimulationFromEXT(
         write_file: str | None,
         lst: list[str],
         *load_args,
+        lazy: bool = True,
     ) -> None:
         if write_file is None:
             write_file = name
@@ -195,6 +207,10 @@ class SimulationFromEXT(
         self._write_file[name] = write_file
         if load_args:
             self._load_args[name] = load_args
+        else:
+            self._load_args[name] = ()
+        if not lazy:
+            self._load(name)
 
 
 class SimulationFromXDMF(
@@ -212,7 +228,7 @@ class SimulationFromXDMF(
         timing_file: str = 'TIMING',
         lazy: bool = True,
         use_cache: bool = True,
-        load_args: dict[str, tuple] | None = None,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
     ):
         super().__init__(
             dir_path,
@@ -239,7 +255,13 @@ class SimulationFromXDMF(
         function_series: Iterable[str],
         constant_series: Iterable[str],
         parameters: dict[str, Any] | None = None,
-        **kwargs,
+        write_file: str | dict[str, str] | None = None,
+        parameter_file: str = 'PARAMETERS',
+        checkpoint_file: str = 'CHECKPOINT',
+        timing_file: str = 'TIMING',
+        lazy: bool = True,
+        use_cache: bool = True,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
     ) -> list[Self]:
         return cls._from_dir_paths(
             dir_paths,
@@ -247,7 +269,13 @@ class SimulationFromXDMF(
             mesh,
             function_series,
             constant_series,
-            **kwargs,
+            write_file=write_file,
+            parameter_file=parameter_file,
+            checkpoint_file=checkpoint_file,
+            timing_file=timing_file,
+            lazy=lazy,
+            use_cache=use_cache,
+            load_args=load_args,
         )
 
     @property
@@ -281,7 +309,7 @@ class SimulationFromNPZ(
         name,
     ):
         return load_numeric_series(use_cache=self.use_cache)(
-            name, self._dir_path, self._write_file[name],
+            name, self._dir_path, self._write_file[name], *self._load_args[name]
         )
 
 
@@ -293,7 +321,7 @@ class GridSimulationFromNPZ(
         name,
     ):
         return load_grid_function_series(use_cache=self.use_cache)(
-            name, self._dir_path, self._write_file[name],
+            name, self._dir_path, self._write_file[name], *self._load_args[name]
         )
     
 
@@ -305,7 +333,7 @@ class TriSimulationFromNPZ(
         name,
     ):
         return load_tri_function_series(use_cache=self.use_cache)(
-            name, self._dir_path, self._write_file[name],
+            name, self._dir_path, self._write_file[name], *self._load_args[name]
         )
 
 

@@ -1,5 +1,0 @@
-title: LUCiFEx Benchmarks
-only_build_toc_files: true
-execute:
-  execute_notebooks: off
-  allow_errors: true

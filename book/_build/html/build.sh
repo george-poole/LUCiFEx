@@ -22,6 +22,7 @@ BUILD_ARGS=${3:-""}
 DIRS=("demo" "benchmarks")
 
 for dir in "${DIRS[@]}"; do
+    unlink $dir
     ln -s "../$dir" $dir 
     IPYNB=($(find . -name "$GLOB.ipynb" -path "../$dir/*"))
     for i in "${IPYNB[@]}"; do

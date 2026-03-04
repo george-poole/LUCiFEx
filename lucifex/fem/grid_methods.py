@@ -1,6 +1,7 @@
 from typing import Literal, Callable, overload
 from collections.abc import Iterable
 from functools import singledispatch
+from scipy.interpolate import RegularGridInterpolator
 
 from dolfinx.fem import Function
 import numpy as np
@@ -256,6 +257,37 @@ def _grid_average(
 ) -> np.ndarray | float:
 
     return np.mean(values[slc], axis)
+
+
+def refine_grid_function(
+    u: GridFunction,
+    factor: int | float | tuple[int | float, ...],
+    name: str | None = None,
+    **kwargs,
+) -> GridFunction:
+    """
+    `factor > 1` to refine and `factor < 1` to coarsen
+    """
+    if name is None:
+        name = u.name
+    
+    axes = u.mesh.axes
+
+    if isinstance(factor, (int, float)):
+        factor = tuple([factor] * len(axes))
+
+    axes_fine = tuple(
+        np.linspace(np.min(ax), np.max(ax), int(n * len(ax))) 
+        for ax, n in zip(axes, factor, strict=True)
+    )
+    interpolator = RegularGridInterpolator(axes, u.value, **kwargs)
+    u_fine_values = interpolator(tuple(np.meshgrid(*axes_fine))).T
+
+    return GridFunction(
+        u_fine_values,
+        GridMesh(axes_fine),
+        name,
+    )
 
 
 def where_on_grid(

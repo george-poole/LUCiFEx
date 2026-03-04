@@ -20,4 +20,5 @@ from .grid_methods import (
     where_on_grid, 
     grid_cross_section, 
     grid_average, 
+    refine_grid_function,
 )

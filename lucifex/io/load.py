@@ -1,3 +1,4 @@
+from itertools import islice
 from typing import Protocol, Any, TypeVar, Generic, Iterable, Callable, get_args
 from typing_extensions import Self
 from types import UnionType
@@ -10,7 +11,7 @@ from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
-from ..utils.py_utils import StrSlice, optional_lru_cache
+from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice
 from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
 from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
 from ..fdm import FunctionSeries, ConstantSeries
@@ -168,6 +169,7 @@ def load_grid_function_series(
     name: str,
     dir_path: str,
     file_name: str,
+    slc: StrSlice = ':',
     sep: str = GridFunctionSeries.SEPARATOR,
 ) -> GridFunctionSeries:
     try:
@@ -178,6 +180,7 @@ def load_grid_function_series(
             function_factory=GridFunction,
             series_factory=GridFunctionSeries,
             target_name=name,
+            slc=slc,
         )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
@@ -188,6 +191,7 @@ def load_tri_function_series(
     name: str,
     dir_path: str,
     file_name: str,
+    slc: StrSlice = ':',
     sep: str = TriFunctionSeries.SEPARATOR,
 ) -> TriFunctionSeries:
     try:
@@ -198,6 +202,7 @@ def load_tri_function_series(
             function_factory=TriFunction,
             series_factory=TriFunctionSeries,
             target_name=name,
+            slc=slc,
         )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
@@ -208,10 +213,17 @@ def load_numeric_series(
     name: str,
     dir_path: str,
     file_name: str,
+    slc: StrSlice = ':',
     sep: str = NumericSeries.SEPARATOR,
 ) -> NumericSeries:
     try:
-        return load_npz_dict(dir_path, file_name, sep, target_name=name)[name]
+        return load_npz_dict(
+            dir_path, 
+            file_name, 
+            sep, 
+            target_name=name,
+            slc=slc,
+        )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
 
@@ -258,6 +270,7 @@ def load_npz_dict(
     function_factory: Callable[..., NPyFunction] | None = None,
     series_factory: Callable[..., NPySeries] | None = None,
     target_name: str | None = None,
+    slc: StrSlice = ':',
 ) -> dict[str, float | np.ndarray | NPySeries]:
     file_path = file_path_ext(dir_path, file_name, 'npz', mkdir=False)
     npz_dict: dict[str, np.ndarray] = np.load(file_path)
@@ -289,12 +302,14 @@ def load_npz_dict(
         float | np.ndarray | NPySeries,
     ] = {}
 
+    slc = as_slice(slc)
+
     for name, value in dict_load.items():
         if isinstance(value, dict):
             time_series: list[float] = []
             series: list[np.ndarray] = []
             mesh_kwargs: dict[str, np.ndarray] = {}
-            for i, j in value.items():
+            for i, j in islice(value.items(), slc.start, slc.stop, slc.step):
                 if isinstance(i, float):
                    time_series.append(i)
                    series.append(j)
@@ -302,8 +317,8 @@ def load_npz_dict(
                     mesh_kwargs[i] = j
             if mesh_kwargs:
                 mesh = mesh_factory(**mesh_kwargs)
-                series = [function_factory(i, mesh) for i in series]
-                value = series_factory(series, time_series, name)
+                _series = [function_factory(i, mesh) for i in series]
+                value = series_factory(_series, time_series, name)
             else:
                 value = NumericSeries(series, time_series, name)
         dict_return[name] = value
