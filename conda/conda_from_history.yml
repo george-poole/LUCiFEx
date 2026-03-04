@@ -5,7 +5,7 @@ channels:
 dependencies:
   - bzip2=1.0.8=h0d85af4_4
   - c-ares=1.19.1=h0dc2134_0
-  - ca-certificates=2026.1.4
+  - ca-certificates=2026.2.25
   - dav1d=1.2.1=h0dc2134_0
   - fenics-ufcx=0.6.0=h56297ac_0
   - font-ttf-dejavu-sans-mono=2.37=hab24e00_0
@@ -120,7 +120,7 @@ dependencies:
   - brotli=1.0.9=hb7f2c08_9
   - brotli-python=1.0.9=py310h7a76584_9
   - cached_property=1.5.2=pyha770c72_1
-  - certifi=2026.1.4
+  - certifi=2026.2.25
   - charset-normalizer=3.2.0=pyhd8ed1ab_0
   - click=8.2.1=pyh707e725_0
   - colorama=0.4.6=pyhd8ed1ab_1
@@ -301,4 +301,6 @@ dependencies:
   - ghp-import
   - notebook
   - ipyparallel
+  - marimo
+  - ipywidgets
 prefix: /Users/George/miniconda3/envs/lucifex
