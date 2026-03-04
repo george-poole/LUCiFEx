@@ -1,0 +1,123 @@
+# Navier-Stokes convection equations
+
+Governing equations for thermosolutal convection coupled to Navier-Stokes flow, working in the Boussinesq approximation.
+
+## Dimensional equations
+
+$$
+\begin{align*}
+&\text{Find} \\
+&c(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}, \\
+&\theta(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}, \\
+&\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
+&p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
+&\text{such that} \\
+&\mathbb{IBVP}\begin{cases}
+\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\textbf{u})\cdot\nabla c) & \\
+\frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}(\textbf{u})\cdot\nabla\theta) & \\
+\nabla\cdot\textbf{u} = 0 & \\
+\rho_{\text{ref}}\left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \rho g\,\textbf{e}_g & \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
+c=c_0 & \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+\theta=\theta_0 & \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+\textbf{u}=\textbf{u}_0 & \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+p=p_0 & \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+c=c_{\text{D}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\
+\theta=\theta_{\text{D}} & \forall (\textbf{x}, t)\in\partial\Omega_{\text{D}, \theta} \times [0,\infty] \\
+\textbf{n}\cdot(\mathsf{G}\cdot\nabla \theta) = \theta_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, \theta}
+\times [0,\infty]~,~\partial\Omega_{\text{N}, \theta}=\partial\Omega/\partial\Omega_{\text{D}, \theta} \\
+\textbf{u} = \textbf{u}_{\text{E}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
+(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} & \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+\end{cases} \\
+&\text{given} \\
+&\mathbb{S}=
+\begin{cases}
+\Omega\subset\mathbb{R}^d & \text{domain}\\
+c_0(\textbf{x}) & \text{concentration initial condition}\\
+\theta_0(\textbf{x}) & \text{temperature initial condition}\\ 
+\textbf{u}_0(\textbf{x}) & \text{velocity initial condition}\\
+p_0(\textbf{x}) & \text{pressure initial condition}\\ 
+c_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},c} & \text{concentration Dirichlet boundary condition} \\
+\theta_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D},\theta} & \text{temperature Dirichlet boundary condition} \\
+c_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N},c} & \text{concentration Neumann boundary condition} \\
+\theta_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}, \theta} & \text{concentration Neumann boundary condition} \\
+\textbf{u}_{\text{E}}(\textbf{x}, t)~,~\partial\Omega_{\text{E}} & \text{velocity essential boundary condition} \\
+\boldsymbol{\tau}_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} & \text{traction natural boundary condition} \\
+\tau(\mu,\textbf{u}) & \text{deviatoric stress} \\
+\mathsf{D}(\textbf{u}) & \text{solutal dispersion}\\
+\mathsf{G}(\textbf{u}) & \text{thermal dispersion}\\
+\rho(c, \theta) & \text{density}\\
+\mu(c, \theta) & \text{viscosity}\\
+\end{cases}
+\end{align*}
+$$
+
+## Non-dimensionalization
+
+### Scalings
+
+| Quantity | $\vert\textbf{x}\vert$ | $\vert\textbf{u}\vert$ | $t$ | $c$ | $\theta$ | $\rho g$ | $p$ |
+| -------- | ------- | ------- | ------- | ------- | ------- |  ------- |  ------- | 
+| **Scaling** | $\mathcal{L}$ | $\mathcal{U}$ |$\mathcal{T}$ | $\Delta c$ | $\Delta\theta$ | $g \Delta\rho$ | $\mu_{\text{ref}}\,\mathcal{U}/\mathcal{L}$ |
+
+| $\mu$ | $\vert\tau\vert$  | $\vert\mathsf{D}\vert$ | $\vert\mathsf{G}\vert$ |
+| ------- | ------- | ------- | ------- |
+| $\mu_{\text{ref}}$ |  $\mu_{\text{ref}}\,\mathcal{U}/\mathcal{L}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ |
+
+
+### Abstract dimensionless numbers
+
+$$
+Ad=\frac{\mathcal{U}\mathcal{T}}{\mathcal{L}}~,~
+Di=\frac{D_{\text{ref}}\mathcal{T}}{\mathcal{L}^2}~,~
+Vi=\frac{\mu_{\text{ref}}\mathcal{T}}{\rho_{\text{ref}}\mathcal{L}^2}~,~
+Bu=\frac{\mathcal{T}g\Delta\rho}{\rho_{\text{ref}}\,\mathcal{U}}~,~
+X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}
+$$
+
+### Physical dimensionless numbers
+
+| Definition | Name | Physical interpretation | 
+| -------- | ------- | ------- |
+| $Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}$ | Prandtl | Ratio of kinematic viscosity to diffusivity, defined with respect to the transport of $c$ |
+| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
+| $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
+
+
+### Scaling choice
+
+| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, Vi, Bu, X\}$ | Examples | 
+| -------- | -------- | ------- | ------- | ------- | ------- |
+| advective | $\mathcal{L}_\Omega$  | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, Pr/Ra, Pr/Ra, 1\}$| ... |
+| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1, Pr, PrRa, 1\}$| ... |
+
+## Non-dimensional time-discretized equations
+
+### Strong form
+
+$$
+\begin{align*}
+&\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^{n+1},~p^{n+1}~\text{such that}~\forall n\geq0 \\
+&\begin{cases}
+\frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=Di\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) \\
+\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=LeDi\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) \\
+\nabla\cdot\textbf{u}^{n+1}=0 \\
+\frac{\textbf{u}^{n+1}-\textbf{u}^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u}}(\textbf{u}\cdot\nabla\textbf{u})= Vi\,\nabla\cdot\mathcal{D}_{\tau}(-p\mathsf{I}+\tau) + Bu\,\mathcal{D}_{\rho}(\rho)\,\textbf{e}_g \\
+c^0=c_0 \\
+\theta^0=\theta_0  \\
+c^n\vert_{\partial\Omega_{\text{D}, c}}=c^n_{\text{D}} \\
+\left(\textbf{n}\cdot(\mathsf{D}^n\cdot\nabla c^n)\right)\vert_{\partial\Omega_{\text{N}, c}} = c_{\text{N}}^n \\
+\theta^n\vert_{\partial\Omega_{\text{D}, \theta}}=\theta^n_{\text{D}} \\
+\left(\textbf{n}\cdot(\mathsf{G}^n\cdot\nabla\theta^n)\right)\vert_{\partial\Omega_{\text{N}, \theta}} = \theta_{\text{N}}^n \\
+\textbf{u}^n\vert_{\partial\Omega_{\text{E}}} = \textbf{u}^n_{\text{E}}\\
+p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
+\left(\textbf{n}\cdot(-p^n\mathsf{I}+\tau^n)\right)\vert_{\partial\Omega_{\text{N}, \theta}} = \boldsymbol{\tau}_{\text{N}}^n \\
+\end{cases}
+\end{align*}
+$$
+
+### Weak forms
+
+...
+
