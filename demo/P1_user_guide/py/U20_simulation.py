@@ -2,7 +2,7 @@ import numpy as np
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fem import Constant
 from lucifex.fdm import CN, FunctionSeries, ConstantSeries
-from lucifex.solver import ibvp, BoundaryConditions
+from lucifex.solver import ibvp, BoundaryConditions, OptionsJIT
 from lucifex.sim import Simulation, configure_simulation, parallel_run
 from lucifex.pde.diffusion import diffusion
 
@@ -10,6 +10,7 @@ from lucifex.pde.diffusion import diffusion
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def create_simulation(
     Nx: int = 10,

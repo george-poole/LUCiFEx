@@ -1,9 +1,0 @@
-title: LUCiFEx Demo
-only_build_toc_files: true
-execute:
-  execute_notebooks: off
-  allow_errors: true
-
-sphinx:
-  config:
-    html_extra_path: ['./']

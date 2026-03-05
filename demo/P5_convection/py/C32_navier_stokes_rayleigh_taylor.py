@@ -7,7 +7,7 @@ from lucifex.fdm import (
     FiniteDifferenceArgwise, ExprSeries, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, ibvp, evaluation,
+    BoundaryConditions, OptionsJIT, ibvp, evaluation,
 )
 from lucifex.sim import configure_simulation
 
@@ -15,12 +15,13 @@ from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.constitutive import newtonian_stress
 from lucifex.pde.advection_diffusion import advection_diffusion
 
-from .C031_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
+from .C31_navier_stokes_thermosolutal import NAVIER_STOKES_CONVECTION_SCALINGS
 
 
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def navier_stokes_rayleigh_taylor_rectangle(
     # domain

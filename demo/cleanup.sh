@@ -11,7 +11,7 @@ while [[ "$1" == --* ]]; do
 done
 
 GLOB=$1
-DIR_NAME=${2:-'notebooks/**'}
+DIR_NAME=${2:-'./**'}
 
 EXTS=("pdf" "png" "mp4" "h5" "xdmf" "npy" "npz" "txt")
 FILES=()

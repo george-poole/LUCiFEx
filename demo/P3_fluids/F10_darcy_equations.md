@@ -1,6 +1,6 @@
 # Darcy equations
 
-## Mixed formulation
+## Velocity-pressureity-pressure formulation
 
 ### Strong form
 

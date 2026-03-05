@@ -5,12 +5,12 @@ from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
 from lucifex.fdm.ufl_operators import exp
 from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
-from lucifex.solver import BoundaryConditions
+from lucifex.solver import BoundaryConditions, OptionsJIT
 from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType, BoundaryType
 from lucifex.pde.scaling import ScalingChoice
 
-from ...P05_convection.py.C010_darcy_convection import darcy_convection_generic
+from ...P5_convection.py.C10_darcy_convection_generic import darcy_convection_generic
 
 
 DARCY_FINGERING_SCALINGS = ScalingChoice(
@@ -37,6 +37,7 @@ and time scale `𝒯` in the non-dimensionalization.
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def darcy_fingering_rectangle(
     # domain

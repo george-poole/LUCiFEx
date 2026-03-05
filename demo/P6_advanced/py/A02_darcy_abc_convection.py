@@ -7,8 +7,8 @@ from lucifex.fdm import (
 )
 from lucifex.fem import Constant,  SpatialPerturbation, cubic_noise
 from lucifex.solver import(
-    BoundaryConditions, OptionsPETSc, interpolation,
-    ibvp, bvp, evaluation,
+    BoundaryConditions, OptionsPETSc, OptionsJIT, 
+    interpolation, ibvp, bvp, evaluation,
 )
 from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType
@@ -20,6 +20,7 @@ from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def darcy_abc_convection_rectangle(
     # domain

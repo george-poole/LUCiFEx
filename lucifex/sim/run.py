@@ -93,7 +93,7 @@ def run(
 
     prog = None
     if show_progress and n_stop:
-        from tqdm import tqdm
+        from tqdm.notebook import tqdm
         prog = tqdm(total=n_stop)
 
     while all(not s.stop(t[0]) for s in _time_stoppers):

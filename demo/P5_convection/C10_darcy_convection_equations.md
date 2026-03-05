@@ -120,7 +120,7 @@ $$
 
 ### Weak forms
 
-#### Mixed formulation
+#### Velocity-pressureity-pressure formulation
 
 $$
 \begin{align*}

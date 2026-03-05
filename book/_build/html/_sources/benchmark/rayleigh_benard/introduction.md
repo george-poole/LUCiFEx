@@ -1,1 +1,0 @@
-# Rayleigh-Bénard convection benchmark

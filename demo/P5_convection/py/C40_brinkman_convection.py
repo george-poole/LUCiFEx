@@ -8,7 +8,7 @@ from lucifex.fdm import (
     ExprSeries, finite_difference_order, advective_timestep,
 )
 from lucifex.solver import (
-    BoundaryConditions, ibvp, evaluation,
+    BoundaryConditions, OptionsJIT, ibvp, evaluation,
 )
 from lucifex.fem import SpatialPerturbation, cubic_noise
 from lucifex.sim import configure_simulation
@@ -21,6 +21,7 @@ from lucifex.pde.advection_diffusion import advection_diffusion
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def darcy_brinkman_rayleigh_benard_rectangle(    
     # domain
@@ -134,6 +135,7 @@ def darcy_brinkman_rayleigh_benard_rectangle(
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def darcy_brinkman_rayleigh_taylor_rectangle(    
     # domain

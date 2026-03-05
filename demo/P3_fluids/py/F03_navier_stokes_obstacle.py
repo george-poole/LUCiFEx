@@ -4,7 +4,7 @@ from lucifex.fdm import (
 )
 from lucifex.fem import Constant
 from lucifex.solver import (
-    BoundaryConditions, evaluation, bvp,
+    BoundaryConditions, OptionsJIT, evaluation, bvp,
 )
 from lucifex.mesh import rectangle_minus_ellipse_mesh, mesh_boundary
 from lucifex.sim import configure_simulation
@@ -17,6 +17,7 @@ from lucifex.pde.streamfunction_vorticity import streamfunction_from_velocity
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def navier_stokes_circle_obstacle(
     # domain

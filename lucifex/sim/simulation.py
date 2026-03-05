@@ -295,7 +295,7 @@ class Simulation(
 def configure_simulation(
     petsc: OptionsPETSc | dict | None = None,
     slepc: OptionsSLEPc | dict | None = None,
-    jit: OptionsJIT | dict | None = None,
+    jit: OptionsJIT | dict | EllipsisType | None = None,
     ffcx: OptionsFFCX | dict | None = None,
     store_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,

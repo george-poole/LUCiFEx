@@ -1,10 +1,20 @@
 import os
 from pathlib import Path
 from typing import Any
+from types import EllipsisType
 from typing_extensions import Self
 
 from petsc4py import PETSc
 from slepc4py import SLEPc
+
+
+DEFAULT_JIT_DIR = os.path.abspath(
+    os.path.join(
+        __file__,
+        '../../..',
+        '__jit__',
+    )
+)
 
 
 class Options:
@@ -111,7 +121,6 @@ class OptionsSLEPc(Options):
         )
     
 
-
 def set_from_options(
     solver: PETSc.KSP | SLEPc.EPS,
     options: dict | OptionsPETSc | OptionsSLEPc,
@@ -129,7 +138,7 @@ class OptionsJIT(Options):
     """See also `dolfinx.jit.DOLFINX_DEFAULT_JIT_OPTIONS`"""
     def __init__(
         self,
-        cache_dir: str | None = None,
+        cache_dir: str | EllipsisType | None = None,
         cffi_debug: bool = False,
         cffi_extra_compile_args: list[str] | None = None,
         cffi_verbose: bool = False,
@@ -137,6 +146,8 @@ class OptionsJIT(Options):
         timeout: int | float = 10,
         **kwargs: Any,
     ):
+        if cache_dir is Ellipsis:
+            cache_dir = DEFAULT_JIT_DIR
         if cache_dir is None:
             cache_dir = os.getenv("XDG_CACHE_HOME", default=Path.home().joinpath(".cache")) / Path("fenics")
         if cffi_extra_compile_args is None:

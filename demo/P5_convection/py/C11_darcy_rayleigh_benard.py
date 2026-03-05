@@ -4,7 +4,7 @@ from ufl import SpatialCoordinate, sqrt
 from lucifex.mesh import rectangle_mesh, annulus_mesh, circle_sector_mesh, mesh_boundary
 from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.fdm import FiniteDifference, FiniteDifferenceArgwise, AB2, CN
-from lucifex.solver import BoundaryConditions, OptionsPETSc
+from lucifex.solver import BoundaryConditions, OptionsPETSc, OptionsJIT
 from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType
 
@@ -14,6 +14,7 @@ from .C10_darcy_convection_generic import darcy_convection_generic, DARCY_CONVEC
 @configure_simulation(
     store_delta=1,
     write_delta=None,
+    jit=OptionsJIT(Ellipsis),
 )
 def darcy_rayleigh_benard_rectangle(
     # domain
