@@ -12,7 +12,7 @@ from ..fem.fem2npy import (
     NPyNameAttr, NPyNameValueAttr, NPyFunction, GridFunction, as_grid_function, 
     TriFunction, as_tri_function, NPyConstant, QuadFunction, as_npy_constant,
 )
-from ..utils.py_utils import replicate_callable, StrSlice, as_slice
+from ..utils.py_utils import replicate_callable, StrSlice, as_slice, ToDoError
 from .series import Series, FunctionSeries, ExprSeries, ConstantSeries
 
 
@@ -189,7 +189,7 @@ class QuadFunctionSeries(
         use_mesh_cache: bool = True,
         mesh: Mesh | None = None,
     )-> Self:
-        raise NotImplementedError
+        raise ToDoError
         
 
 @replicate_callable(NPyConstantSeries.from_series)

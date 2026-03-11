@@ -83,7 +83,7 @@ class FrozenDict(MultiKey[K, V], Generic[K, V]):
     
     def replace(self, **kwargs: Any) -> Self:
         _kwargs = self._dict.copy()
-        _kwargs.update(**kwargs)
+        _kwargs.update(kwargs)
         return self.__class__(**_kwargs)
     
     def keys(self):

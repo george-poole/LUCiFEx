@@ -49,7 +49,7 @@ def _plot_colormap(
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
-    xyz: tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[Triangulation, np.ndarray],
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
     **kwargs,
@@ -140,7 +140,7 @@ def _(
     _plt_kwargs = dict(cmap="hot", shading="gouraud")
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs = _plt_kwargs | _axs_kwargs
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_kwargs)
 
     if isinstance(colorbar, tuple):
@@ -172,27 +172,40 @@ def _(
 plot_colormap = optional_fig_ax(_plot_colormap)
 
 
-# TODO
-# @overload
-# def _plot_contours(
-#     ax: Axes,
-#     f: Function,
-#     levels: Iterable[float] | int | None = None,
-#     use_cache: bool | tuple[bool, bool] = True,
-#     **kwargs,
-# ) -> None:
-#     ...
+@overload
+def _plot_contours(
+    ax: Axes,
+    u: Function | Expr,
+    levels: Iterable[float] | int | None = None,
+    grid: bool | None = None,
+    use_cache: bool | tuple[bool, bool] = True,
+    mesh: Mesh | None = None,
+    **kwargs,
+) -> None:
+    ...
 
 
-# @overload
-# def _plot_contours(
-#     ax: Axes,
-#     f: Expr,
-#     levels: Iterable[float] | int | None = None,
-#     use_cache: bool | tuple[bool, bool] = True,
-#     **kwargs,
-# ) -> None:
-#     ...
+@overload
+def _plot_contours(
+    ax: Axes,
+    u: GridFunction | TriFunction,
+    levels: Iterable[float] | int | None = None,
+    grid: bool | None = None,
+    **kwargs,
+) -> None:
+    ...
+
+
+@overload
+def _plot_contours(
+    ax: Axes,
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
+    levels: Iterable[float] | int | None,
+    grid: bool | None = None,
+    triang: Triangulation | None = None,
+    **kwargs,
+) -> None:
+    ...
 
 
 @singledispatch
@@ -266,7 +279,7 @@ def _(
     _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
     _axs_kwargs.update(x_lims=x, y_lims=y)
     _kwargs = _plt_kwargs | _axs_kwargs
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_kwargs)
 
     if triang is not None:

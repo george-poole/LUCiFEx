@@ -11,7 +11,7 @@ from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
-from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice
+from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice, ToDoError
 from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
 from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
 from ..fdm import FunctionSeries, ConstantSeries
@@ -206,6 +206,15 @@ def load_tri_function_series(
         )[name]
     except KeyError:
         raise ValueError(f"'{name}' not found in {file_name}.")
+    
+
+@optional_lru_cache
+def load_tri_function_series(
+    name: str,
+    dir_path: str,
+    file_name: str,
+):
+    raise ToDoError
 
 
 @optional_lru_cache

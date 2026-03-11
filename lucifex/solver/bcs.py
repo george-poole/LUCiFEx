@@ -14,6 +14,7 @@ from dolfinx.fem import (
 
 from ..fdm import FunctionSeries
 from ..fem import Function, Constant
+from ..utils.py_utils import ToDoError
 from ..utils.fenicsx_utils import (
     BoundaryType, 
     create_tagged_measure,
@@ -142,7 +143,7 @@ class BoundaryConditions:
         for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
             if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
                 if i is not None:
-                    raise NotImplementedError
+                    raise ToDoError
                 scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
                 mpc.create_periodic_constraint_geometrical(
                     fs, 

@@ -21,6 +21,7 @@ from ..utils.fenicsx_utils import (
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
+from ..utils.fenicsx_utils import NonScalarVectorError, is_tensor, is_vector
 from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
 from ..fem import Function, Constant
 
@@ -61,7 +62,7 @@ def write(
     comm: MPI.Comm | None = None,
     *,
     mesh: Mesh | None = None,
-    fs: tuple[str, int] = ("P", 1),
+    elem: tuple[str, int] = ("P", 1),
     name: str = 'expression',
 ) -> None:
     ...
@@ -287,6 +288,39 @@ def _(
     return _write(dp0_function, file_name, dir_path, t, mode, comm, xdmf=xdmf)
 
 
+@_write.register(Expr)
+def _(
+    u: Expr,
+    file_name,
+    dir_path,
+    t=None,
+    mode='a',
+    comm=None,
+    *,
+    mesh=None,
+    elem=("P", 1),
+    name='expression',
+):
+    if is_tensor(u):
+        raise NonScalarVectorError(u)
+
+    if mesh is None:
+        mesh = extract_mesh(u)
+
+    if comm is None:
+        comm = mesh.comm
+
+    if is_vector(u):
+        dim = u.ufl_shape[0]
+        elem = (*elem, dim)
+
+    fs = create_function_space((mesh, *elem), use_cache=True)
+    func = Function(fs, name=name)
+    func.name = name
+    set_function(func, u)
+    return write(func, file_name, dir_path, t, mode, comm)
+
+
 @_write.register(FunctionSeries)
 @_write.register(ConstantSeries)
 def _(
@@ -351,41 +385,6 @@ def _(
 
 def _create_npz_key(name: str, t: float | str, sep: str) -> str:
     return f'{name}{sep}{str(t)}'
-
-
-@_write.register(Expr)
-def _(
-    u: Expr,
-    file_name,
-    dir_path,
-    t=None,
-    mode='a',
-    comm=None,
-    *,
-    mesh=None,
-    fam_deg=("P", 1),
-    name='expression',
-):
-    if mesh is None:
-        mesh = extract_mesh(u)
-
-    if comm is None:
-        comm = mesh.comm
-
-    shape = u.ufl_shape
-    if shape == ():
-        elem = fam_deg
-    else:
-        if len(shape) > 1:
-            raise NotImplementedError
-        dim = shape[0]
-        elem = (*fam_deg, dim)
-
-    fs = create_function_space((mesh, *elem), use_cache=True)
-    func = Function(fs, name=name)
-    func.name = name
-    set_function(func, u)
-    return write(func, file_name, dir_path, t, mode, comm)
 
 
 @_write.register(dict)

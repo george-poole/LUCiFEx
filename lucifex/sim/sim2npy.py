@@ -18,7 +18,10 @@ from ..fdm.fdm2npy import (
     NPyFunctionSeries, GridFunctionSeries, QuadFunctionSeries, as_grid_function_series,
     as_tri_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
 )
-from ..utils.py_utils import MultiKey, MultipleDispatchTypeError, replicate_callable, StrSlice, as_slice
+from ..utils.py_utils import (
+    MultiKey, MultipleDispatchTypeError, ToDoError,
+    replicate_callable, StrSlice, as_slice,
+)
 from .simulation import Simulation
 
 
@@ -224,7 +227,7 @@ class QuadSimulation(NPySimulation[QuadMesh, QuadFunction, QuadFunctionSeries]):
         exclude: Iterable[str] = (),
         include: Iterable[str] = (),
     ) -> Self:
-        raise NotImplementedError
+        raise ToDoError
     
 
 @replicate_callable(GridSimulation.from_simulation)

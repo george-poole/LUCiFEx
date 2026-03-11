@@ -8,7 +8,7 @@ from matplotlib.collections import PolyCollection
 from matplotlib.tri.triangulation import Triangulation
 from dolfinx.mesh import Mesh
 
-from ..utils.py_utils import optional_lru_cache, replicate_callable
+from ..utils.py_utils import optional_lru_cache, replicate_callable, ToDoError
 from ..utils.fenicsx_utils import (
     is_simplicial, mesh_coordinates,
     mesh_axes, is_grid,
@@ -79,20 +79,44 @@ class GridMesh(NPyMesh):
             return self._axes[index]
         except IndexError:
             return None 
-    
+        
 
-class TriMesh(NPyMesh):
+class NPy2DMesh(NPyMesh):
     def __init__(
         self, 
         x_coordinates: np.ndarray, 
         y_coordinates: np.ndarray, 
-        triangles: list[np.ndarray], # TODO type hint dtypeint and shape
+        cells: list[np.ndarray], # TODO type hint dtypeint and shape
         name: str | None = None,
     ):
         super().__init__(name)
         self._x_coordinates = x_coordinates
         self._y_coordinates = y_coordinates
-        self._triangles = triangles
+        self._cells = cells
+
+    @property
+    def x_coordinates(self) -> np.ndarray:
+        return self._x_coordinates
+
+    @property
+    def y_coordinates(self) -> np.ndarray:
+        return self._y_coordinates
+    
+    @cached_property
+    def xy_coordinates(self) -> np.ndarray:
+        return np.column_stack((self.x_coordinates, self.y_coordinates))
+    
+    @property
+    def cells(self) -> list[np.ndarray]:
+        return self._cells
+    
+    @property
+    @abstractmethod
+    def vertices(self) -> np.ndarray:
+        ... 
+    
+
+class TriMesh(NPy2DMesh):
     
     @classmethod
     def from_mesh(
@@ -122,42 +146,19 @@ class TriMesh(NPyMesh):
         return cls(x_coordinates, y_coordinates, triangles, mesh.name)
     
     @property
-    def x_coordinates(self) -> np.ndarray:
-        return self._x_coordinates
-
-    @property
-    def y_coordinates(self) -> np.ndarray:
-        return self._y_coordinates
-
-    @property
-    def triangles(self) -> list[np.ndarray]:
-        return self._triangles
-    
-    @property
     def vertices(self) -> np.ndarray:
-        return np.array((self.x_coordinates, self.y_coordinates))[self.triangles]
+        return np.array((self.x_coordinates, self.y_coordinates))[self.cells]
     
     @cached_property
     def triangulation(self) -> Triangulation:
         return Triangulation(
             self._x_coordinates,
             self._y_coordinates,
-            self._triangles,
+            self._cells,
         )
     
 
-class QuadMesh(NPyMesh):
-    def __init__(
-        self, 
-        x_coordinates: np.ndarray, 
-        y_coordinates: np.ndarray, 
-        quadrilaterals: list[np.ndarray],
-        name: str | None = None,
-    ):
-        super().__init__(name)
-        self._x_coordinates = x_coordinates
-        self._y_coordinates = y_coordinates
-        self._quadrilaterals = quadrilaterals
+class QuadMesh(NPy2DMesh):
 
     @classmethod
     def from_mesh(
@@ -183,35 +184,21 @@ class QuadMesh(NPyMesh):
 
         connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
         n_cells = connec.num_nodes
-        quads = [
+        cells = [
             _reorder_quad_vertices(connec.links(i), **reorder_kws) for i in range(n_cells)
         ]
 
-        return cls(x_coordinates, y_coordinates, quads, mesh.name)
-    
-    @property
-    def x_coordinates(self) -> np.ndarray:
-        return self._x_coordinates
-
-    @property
-    def y_coordinates(self) -> np.ndarray:
-        return self._y_coordinates
-
-    @property
-    def quadrilaterals(self) -> list[np.ndarray]:
-        return self._quadrilaterals
+        return cls(x_coordinates, y_coordinates, cells, mesh.name)
     
     @property
     def vertices(self) -> np.ndarray:
-        return np.array((self.x_coordinates, self.y_coordinates))[self.quadrilaterals]
+        return self.xy_coordinates[self.cells]
     
     def polycollection(
         self,
-        facecolor='white', 
-        edgecolor='black',
         **kwargs,
     ) -> PolyCollection:
-        return PolyCollection(self.vertices, facecolor=facecolor, edgecolor=edgecolor, **kwargs)
+        return PolyCollection(self.vertices, **kwargs)
 
 
 as_grid_mesh = optional_lru_cache(
@@ -321,7 +308,7 @@ def _reorder_quad_vertices(
             raise ValueError(f'{final_ordering} not recognised')
         
     elif initial_ordering == 'Z':
-        raise NotImplementedError
+        raise ToDoError
     
     else:
         raise ValueError(f'{initial_ordering} not recognised')

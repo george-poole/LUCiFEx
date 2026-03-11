@@ -28,6 +28,7 @@ from dolfinx_mpc import (
     create_sparsity_pattern,
 )
 
+from ..utils.py_utils import ToDoError
 from ..fem import Constant
 
 
@@ -175,7 +176,7 @@ def sum_vector(
     scalings: list[float],
     bcs_fs: tuple[list[DirichletBCMetaClass], FunctionSpace] = None,
 ) -> None:
-    raise NotImplementedError # TODO bcs_fs
+    raise ToDoError
     # v_sum.zeroEntries()
 
     # if not v_sum.isAssembled():

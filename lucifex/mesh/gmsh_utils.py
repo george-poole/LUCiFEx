@@ -28,13 +28,15 @@ def create_gmsh_mesh_factory(
     DEFAULT_NAME = default_name
 
     def _inner(
-        h: float | tuple[float, float],
+        h: float | tuple[float, float] | None = None,
         cell: CellType = DEFAULT_CELL,
         name: str = DEFAULT_NAME,
         comm: MPI.Comm | str = 'COMM_WORLD',
         rank: int = 0,
-        markers: Iterable[tuple[str, int, Callable[[gmsh.model], tuple]]] = (('cells', 1, partial(get_entity_tags, dim=dim)), ),
-        meshtags: bool = False,
+        group_getters: Iterable[
+            Callable | tuple[Callable, int] | tuple[Callable, int, str]
+        ] | None = None,
+        return_meshtags: bool = False,
         gmsh_set_number: dict | None = None,
         **gmsh_set_mesh,
     ) -> Callable[P, Mesh | tuple[Mesh, MeshTags_int32, MeshTagsMetaClass]]:  
@@ -48,7 +50,11 @@ def create_gmsh_mesh_factory(
                 model = model_func(*args, **kwargs)
                 gmsh.model.occ.synchronize()
                 gmsh.model.geo.synchronize()
-                set_model_groups(gmsh.model, markers)
+                if group_getters is None and not model.getPhysicalGroups():
+                    _group_getters = [partial(get_entity_tags, dim=dim)]
+                else:
+                    _group_getters = []
+                add_model_groups(gmsh.model, _group_getters)
                 set_model_options(h, cell, gmsh_set_number, gmsh_set_mesh)
                 gmsh.model.occ.synchronize()
                 gmsh.model.geo.synchronize()
@@ -56,7 +62,7 @@ def create_gmsh_mesh_factory(
                 mesh, cell_meshtags, facet_meshtags = model_to_mesh(model, comm, rank, dim)
                 gmsh.finalize()
                 mesh.name = name
-                if meshtags:
+                if return_meshtags:
                     return mesh, cell_meshtags, facet_meshtags  
                 else:
                     return mesh
@@ -82,19 +88,24 @@ def initialize_model(
     model.add(name)
 
 
-def set_model_groups(
+def add_model_groups(
     model: gmsh.model,
-    markers: Iterable[tuple[str, int, Callable]],
+    group_getters: Iterable[Callable | tuple[Callable, int] | tuple[Callable, int, str]],
 ) -> None:
-    for name, tag, get_tags in markers:
-        dim, tags = get_tags(model)
+    for i in group_getters:
+        if callable(i):
+            get_dim_tags = i
+            tag_name = ()
+        else:
+            get_dim_tags, *tag_name = i
+        dim, tags = get_dim_tags(model)
         model.addPhysicalGroup(
-            dim, tags, tag, name,
+            dim, tags, *tag_name,
         )
 
 
 def set_model_options(
-    h: float | tuple[float, float],  
+    h: float | tuple[float, float] | None,  
     cell: str,
     gmsh_set_number: dict[str, Any], 
     gmsh_set_mesh: dict[str, Any],
@@ -102,13 +113,16 @@ def set_model_options(
     if cell in (CellType.HEXAHEDRON,  CellType.QUADRILATERAL):
         gmsh.option.setNumber("Mesh.RecombineAll", 1)
 
-    if not isinstance(h, tuple):
-        h = (h, h)
+    if h is not None:
+        if not isinstance(h, tuple):
+            h = (h, h)
+        _gmsh_set_mesh = {
+            "CharacteristicLengthMin": h[0],
+            "CharacteristicLengthMax": h[1],
+        }
+    else:
+        _gmsh_set_mesh = {}
 
-    _gmsh_set_mesh = {
-        "CharacteristicLengthMin": h[0],
-        "CharacteristicLengthMax": h[1],
-    }
     _gmsh_set_mesh.update(gmsh_set_mesh)
     for name, value in _gmsh_set_mesh.items():
         gmsh.option.setNumber(f'Mesh.{name}', value)

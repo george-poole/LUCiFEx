@@ -41,7 +41,7 @@ class Options:
 
     def replace(self, **changes: Any) -> Self:
         _kwargs = self._kwargs.copy()
-        _kwargs.update(**changes)
+        _kwargs.update(changes)
         return self.__class__(**_kwargs)
 
     def __iter__(self):

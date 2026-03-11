@@ -112,13 +112,13 @@ def _(
         x, y = y, x
 
     _kwargs = dict(x_lims=x)
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_kwargs)
     if cyc is Ellipsis:
         pass
     elif cyc is None:
         __kwargs = dict(linewidth=LW, color='black', linestyle="-")
-        __kwargs.update(**_kwargs)
+        __kwargs.update(_kwargs)
         _kwargs = __kwargs
     else:
         ax.set_prop_cycle(cyc)
@@ -142,8 +142,8 @@ def plot_twin_lines(
     _plt_kwargs_right = _plt_kwargs | {'linestyle': 'dashed'}
     if twin_kwargs is None:
         twin_kwargs = ({}, {})
-    _plt_kwargs_left.update(**twin_kwargs[0], **kwargs)
-    _plt_kwargs_right.update(**twin_kwargs[1], **kwargs)
+    _plt_kwargs_left.update(twin_kwargs[0], **kwargs)
+    _plt_kwargs_right.update(twin_kwargs[1], **kwargs)
 
     y_label_left, y_label_right = twin_labels
     line_left, line_right = twin_lines

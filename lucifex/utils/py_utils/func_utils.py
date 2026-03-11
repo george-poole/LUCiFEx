@@ -171,7 +171,9 @@ def filter_kwargs(
     strict: bool = False,
 ) -> Callable[P, R] | Callable[..., R]:
     def _(*args, **kwargs):
-        get_names = lambda f: [n for n, p in signature(f).parameters.items() if p.kind not in (p.VAR_KEYWORD, p.VAR_POSITIONAL)]
+        get_names = lambda f: [
+            n for n, p in signature(f).parameters.items() if p.kind not in (p.VAR_KEYWORD, p.VAR_POSITIONAL)
+        ]
         
         if callable(include):
             included_names = get_names(include)

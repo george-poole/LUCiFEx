@@ -10,7 +10,7 @@ from ..mesh.mesh2npy import (
     NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh,
     as_npy_object,
 )
-from ..utils.py_utils import optional_lru_cache, replicate_callable
+from ..utils.py_utils import optional_lru_cache, replicate_callable, ToDoError
 from ..utils.fenicsx_utils import (
     dofs, dofs_grid, get_component_functions, NonScalarError,
     NonScalarVectorError, extract_mesh,
@@ -255,7 +255,7 @@ class QuadFunction(NPyFunction[QuadMesh]):
         use_mesh_cache: bool = True,
         mesh: Mesh | None = None,
     ) -> Self:
-        raise NotImplementedError
+        raise ToDoError
 
 
 as_npy_constant = replicate_callable(NPyConstant.from_constant)(lambda: None)

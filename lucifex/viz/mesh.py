@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
+from matplotlib.collections import Collection
 from dolfinx.mesh import Mesh
 
 from ..utils.fenicsx_utils import (
@@ -12,7 +13,7 @@ from ..utils.fenicsx_utils import (
 )
 from ..utils.py_utils import filter_kwargs
 from ..mesh import as_grid_mesh, as_tri_mesh, as_quad_mesh
-from .utils import optional_ax, set_axes
+from .utils import optional_ax, set_axes, LW
 
 
 @optional_ax
@@ -24,9 +25,9 @@ def plot_mesh(
 ) -> None:
     
     _axs_kwargs = dict(x_label="$x$", aspect='equal')
-    _plt_kwargs = dict(color='black', linewidth=0.75)
+    _plt_kwargs = dict(color='black', linewidth=LW)
     _kwargs = _axs_kwargs | _plt_kwargs
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
 
     dim = mesh.geometry.dim
     match dim:
@@ -57,7 +58,7 @@ def _plot_interval_mesh(
         markerfacecolor="black",
         markeredgecolor="black",
     )
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
 
     filter_kwargs(set_axes)(
         ax,
@@ -97,8 +98,6 @@ def _plot_triangulation(
     use_cache: bool,
     **kwargs,
 ) -> None:
-    """Suitable for Cartesian and unstructured meshes"""
-
     tri_mesh = as_tri_mesh(use_cache=use_cache)(mesh)
     filter_kwargs(set_axes)(
         ax,
@@ -115,30 +114,22 @@ def _plot_quadrangulation(
     use_cache: bool,
     **kwargs,
 ) -> None:
-    """Suitable for Cartesian and unstructured meshes"""
-
-    _axs_kwargs = dict(x_label="$x$", y_label="$y$",aspect='equal')
-    _poly_kwargs = dict(facecolor='white', edgecolor='black', linewidth=0.75)
+    _axs_kwargs = dict(x_label="$x$", y_label="$y$", aspect='equal')
+    _poly_kwargs = dict(facecolors='white', edgecolors='black', linewidths=LW)
     _kwargs = _poly_kwargs | _axs_kwargs
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
 
-    quad = as_quad_mesh(use_cache=use_cache)(mesh)
-    # quadl = filter_kwargs(quadrangulation, Collection)(mesh, **_kwargs)
-    quadl = ... # FIXME
+    quad_mesh = as_quad_mesh(use_cache=use_cache)(mesh)
 
-    for attr, value in _kwargs.items():
-        setter = f'set_{attr}'
-        if hasattr(quadl, setter):
-            getattr(quadl, setter)(value)
+    quad_poly = filter_kwargs(quad_mesh.polycollection, Collection)(**_kwargs)
 
-    x_coordinates, y_coordinates = mesh_coordinates(mesh)
     filter_kwargs(set_axes)(
         ax,
-        x_lims=x_coordinates,
-        y_lims=y_coordinates,
+        x_lims=quad_mesh.x_coordinates,
+        y_lims=quad_mesh.y_coordinates,
         **_kwargs,
     )
-    ax.add_collection(quadl)
+    ax.add_collection(quad_poly)
 
 
 def _plot_grid(
@@ -147,7 +138,8 @@ def _plot_grid(
     use_cache: bool,
     **kwargs,
 ) -> None:
-    """Suitable only for Cartesian meshes"""
+    _kwargs = dict(linewidths=LW, colors="black")
+    _kwargs.update(kwargs)
 
     grid = as_grid_mesh(use_cache=use_cache)(mesh)
     x, y = grid.axes
@@ -158,7 +150,7 @@ def _plot_grid(
         ax,
         x_lims=x, 
         y_lims=y, 
-        **kwargs,
+        **_kwargs,
     )
-    filter_kwargs(ax.vlines)(x, *ylim, **kwargs)
-    filter_kwargs(ax.hlines)(y, *xlim, **kwargs)
+    filter_kwargs(ax.vlines, Collection)(x, *ylim, **_kwargs)
+    filter_kwargs(ax.hlines, Collection)(y, *xlim, **_kwargs)

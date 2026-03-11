@@ -49,7 +49,7 @@ def _plot_quiver(
     
     x, y, fx, fy = f
     _kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
-    _kwargs.update(**kwargs)
+    _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_kwargs)
 
     if len(np.shape(x)) ==  2:
@@ -117,7 +117,7 @@ def _plot_streamlines(
         color, color_func = color
 
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
-    _axs_kwargs.update(**kwargs)
+    _axs_kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_axs_kwargs)
 
     if color in list(mpl_colormaps):
@@ -159,7 +159,7 @@ def _x_y_fx_fy_arrays(
     fy_np = as_npy_function(fy, use_cache=use_cache)
     
     if isinstance(fx_np, TriFunction):
-        triangles = fx_np.mesh.triangles
+        triangles = fx_np.mesh.cells
         x = fx_np.mesh.x_coordinates[triangles]
         y = fx_np.mesh.y_coordinates[triangles]
         fx_new = fx_np.value[triangles]
