@@ -15,7 +15,7 @@ from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice
 from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
 from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fdm.fdm2npy import GridFunctionSeries, NumericSeries, TriFunctionSeries, NPySeries
+from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries, NPySeries
 from .read import read
 from .utils import file_path_ext
 
@@ -209,13 +209,13 @@ def load_tri_function_series(
 
 
 @optional_lru_cache
-def load_numeric_series(
+def load_npy_constant_series(
     name: str,
     dir_path: str,
     file_name: str,
     slc: StrSlice = ':',
-    sep: str = NumericSeries.SEPARATOR,
-) -> NumericSeries:
+    sep: str = NPyConstantSeries.SEPARATOR,
+) -> NPyConstantSeries:
     try:
         return load_npz_dict(
             dir_path, 
@@ -320,7 +320,7 @@ def load_npz_dict(
                 _series = [function_factory(i, mesh) for i in series]
                 value = series_factory(_series, time_series, name)
             else:
-                value = NumericSeries(series, time_series, name)
+                value = NPyConstantSeries(series, time_series, name)
         dict_return[name] = value
 
     return dict_return
@@ -355,7 +355,7 @@ LoadObject.register(load_mesh)
 LoadObject.register(load_function_series)
 LoadObject.register(load_constant_series)
 LoadObject.register(load_grid_function_series)
-LoadObject.register(load_numeric_series)
+LoadObject.register(load_npy_constant_series)
 LoadObject.register(load_value, str, int, float, np.ndarray)
 
 T = TypeVar('T')

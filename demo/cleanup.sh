@@ -10,15 +10,15 @@ while [[ "$1" == --* ]]; do
     esac
 done
 
-GLOB=$1
-DIR_NAME=${2:-'./**'}
+GLOB_FILE=$1
+GLOB_DIR=${2:-'./**'}
 
 EXTS=("pdf" "png" "mp4" "h5" "xdmf" "npy" "npz" "txt")
 FILES=()
 
 for ext in "${EXTS[@]}"
     do 
-        FOUND=($(find . -name "$GLOB.$ext" -path "./$DIR_NAME"))
+        FOUND=($(find . -name "$GLOB_FILE.$ext" -path "./$GLOB_DIR"))
         FILES=("${FILES[@]}" "${FOUND[@]}")
     done
 

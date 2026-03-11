@@ -13,7 +13,7 @@ from .utils import optional_fig_ax, set_axes
 def plot_scatter(
     fig: Figure,
     ax: Axes,
-    xyz_data: tuple[np.ndarray, np.ndarray, np.ndarray],
+    xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
     cmap: str | tuple[str, str] = "viridis",
     s: float | Callable[[np.ndarray], np.ndarray] = 36.0,
     **kwargs,
@@ -24,14 +24,18 @@ def plot_scatter(
 
     filter_kwargs(set_axes)(ax, **_kwargs)
 
-    x_data, y_data, z_data = xyz_data
+    x_data, y_data, z_data = xyz
 
     match cmap:
         case true_marker, false_marker:
             i_true = [i for i, j in enumerate(z_data) if bool(j) is True]
             i_false = [i for i, j in enumerate(z_data) if bool(j) is False]
-            filter_kwargs(ax.scatter)(x_data[i_true], y_data[i_true], c=z_data[i_true], marker=true_marker, **_kwargs)
-            filter_kwargs(ax.scatter)(x_data[i_false], y_data[i_false], c=z_data[i_false], marker=false_marker, **_kwargs)
+            filter_kwargs(ax.scatter)(
+                x_data[i_true], y_data[i_true], c=z_data[i_true], marker=true_marker, **_kwargs,
+            )
+            filter_kwargs(ax.scatter)(
+                x_data[i_false], y_data[i_false], c=z_data[i_false], marker=false_marker, **_kwargs,
+            )
         case cmap:
             if callable(s):
                 s = s(z_data)
@@ -44,7 +48,10 @@ def plot_scatter(
 
 
 def marker_size_func(
-    z_data: np.ndarray, s_min: float = 10.0, s_max: float = 400.0, n: int = 1,
+    z_data: np.ndarray, 
+    s_min: float = 10.0, 
+    s_max: float = 400.0, 
+    n: int = 1,
 ) -> np.ndarray:
     """
     Defining a marker size based on the point's z-value

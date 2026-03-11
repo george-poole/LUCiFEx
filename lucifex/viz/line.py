@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import Literal, Iterable, Any
+from typing import Literal, Iterable, Any, Callable
 from types import EllipsisType
 
 import numpy as np
@@ -14,7 +14,7 @@ from cycler import Cycler
 
 from ..fem import as_grid_function, GridFunction
 from ..utils.py_utils import MultipleDispatchTypeError, filter_kwargs
-from .utils import LW, set_legend, optional_ax, optional_fig_ax, set_axes, create_cycler, optional_fig_axs
+from .utils import LW, set_legend, optional_fig_ax, set_axes, create_cycler, optional_multifig_ax
 
 
 @optional_fig_ax
@@ -29,6 +29,8 @@ def plot_line(
     legend_title: str | None = None,
     cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None = None,
     flip: bool = False,
+    ax_cbar: Axes | None = None,
+    cax: bool = True,
     **kwargs,
 ) -> None:
     
@@ -38,11 +40,18 @@ def plot_line(
         _plot_line(f, ax, cyc, flip, **kwargs)
     else:
         if isinstance(legend_labels, tuple):
-            assert len(legend_labels) == 2
-            mappable = ScalarMappable(cmap=cyc, norm=plt.Normalize(vmin=min(legend_labels), vmax=max(legend_labels)))
-            divider = make_axes_locatable(ax)
-            ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
-            cbar = fig.colorbar(mappable, ax_cbar, shrink=0.5)
+            if not len(legend_labels) == 2:
+                raise TypeError('Legend label must be a two-tuple containing colorbar bounds.')
+            mappable = ScalarMappable(
+                cmap=cyc, norm=plt.Normalize(vmin=min(legend_labels), vmax=max(legend_labels)),
+            )
+            if ax_cbar is None:
+                divider = make_axes_locatable(ax)
+                ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
+            if cax:
+                cbar = fig.colorbar(mappable, cax=ax_cbar, shrink=0.5)
+            else:
+                cbar = fig.colorbar(mappable, ax=ax_cbar)
             if legend_title:
                 fontsize = kwargs.get('legend_fontsizes', 14)
                 cbar.set_label(legend_title, rotation=360, ha='left', fontsize=fontsize)
@@ -169,15 +178,61 @@ def plot_stacked_lines(
     return fig, list(ax)
 
 
-@optional_fig_axs
+@optional_multifig_ax
 def plot_line_multifigure(
     fig: Figure,
     axs_main: list[Axes],
-    axs_cbar: list[Axes | None],
-    u: Iterable[Function | tuple[Iterable[float], Iterable[float]] | Iterable],
+    axs_cbar: list[Axes] | list[tuple[float, float] | None],
+    u: Iterable[Function | GridFunction | tuple[Iterable[float], Iterable[float]] | Iterable],
+    cyc: Iterable[str] | str | None = None,
+    title: Iterable[str] | None = None,
+    legend_labels: list[list[str | float | int] | tuple[float, float]] | tuple[float, float] | None = None,
+    legend_title: str | None = None,
+    *,
+    posthook: Callable[[Figure, Axes], None] | None = None,
+    **kwargs,
 ) -> None:
-    for ui, ax_main, ax_cbar in zip(u, axs_main, axs_main):
+
+    if isinstance(cyc, str) or cyc is None:
+        cyc = [cyc] * len(u)
+
+    if title is None:
+        title = [title] * len(u)
+
+    if legend_labels is None or isinstance(legend_labels, tuple):
+        legend_labels = [legend_labels] * len(u)
+
+    if isinstance(legend_title, str) or legend_title is None:
+        legend_title = [legend_title] * len(u)
+
+    for ui, cy, ttl, leg_lbl, leg_ttl, ax_m, ax_cb in zip(
+        u, cyc, title, legend_labels, legend_title, axs_main, axs_cbar
+    ):
+        if isinstance(ax_cb, tuple):
+            _legend_labels = ax_cb
+            _legend_title = leg_ttl
+            _ax_cbar = ax_m
+            _cax = False
+        elif isinstance(ax_cb, Axes):
+            _legend_labels = leg_lbl
+            _legend_title = leg_ttl
+            _ax_cbar = ax_cb
+            _cax = True
+        else:
+            _legend_labels = None
+            _legend_title = None
+            _ax_cbar = None
+            _cax = True
+
         plot_line(
-            fig, ax_main, ui,
+            fig, ax_m, ui,
+            title=ttl,
+            cyc=cy,
+            legend_labels=_legend_labels,
+            legend_title=_legend_title,
+            ax_cbar=_ax_cbar,
+            cax=_cax,
+            **kwargs,
         )
-        # TODO colorbar
+        if posthook is not None:
+            posthook(fig, ax_m)

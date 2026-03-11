@@ -435,7 +435,7 @@ class FiniteDifferenceArgwise:
     @overload
     def __call__(
         self, 
-        expr_func: Callable[..., Expr],
+        expr_factory: Callable[..., Expr],
         *args: Any,
         trial: FunctionSeries | None = None,
         strict: bool = False,

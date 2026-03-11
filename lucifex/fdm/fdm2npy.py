@@ -71,7 +71,7 @@ class NPySeries(NPyNameAttr, Generic[F]):
         ...
 
 
-class NumericSeries(
+class NPyConstantSeries(
     NPySeries[NPyConstant]
 ):
     def __init__(
@@ -192,7 +192,7 @@ class QuadFunctionSeries(
         raise NotImplementedError
         
 
-@replicate_callable(NumericSeries.from_series)
+@replicate_callable(NPyConstantSeries.from_series)
 def as_npy_constant_series():
     pass
 

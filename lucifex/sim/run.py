@@ -1,7 +1,7 @@
 import argparse 
 from collections.abc import Iterable
 from types import GenericAlias, UnionType
-from typing import Callable, Any, Hashable, TypeAlias
+from typing import Callable, Any, Hashable, TypeAlias, Protocol
 import time
 from inspect import signature, Parameter, Signature
 
@@ -127,9 +127,20 @@ def run(
             write_timing(_timings, simulation.dir_path, simulation.timing_file)
 
 
+class SimulationHook(Protocol):
+    def __call__(
+        self, 
+        simulation: Simulation, 
+        *args: Any, 
+        **kwargs: Any,
+    ) -> None:
+        ...
+
+
 def run_from_cli(
     simulation_func: Callable[..., Simulation] | Callable[..., Callable[..., Simulation]],
-    posthook: Callable[[Simulation], None] | None = None,
+    prehook: Callable[[Simulation], None] | SimulationHook | None = None,
+    posthook: Callable[[Simulation], None] | SimulationHook | None = None,
     stoppers: Iterable[CreateStopper | Callable[..., CreateStopper]] = (),
     writers: Iterable[CreateWriter | Callable[..., CreateWriter]] = (),
     eval_locals: dict[str, Any] | None = None,
@@ -169,10 +180,14 @@ def run_from_cli(
     params_run = {k: v for k, v in list(signature(run).parameters.items())[1:8]}
     params_stoppers = [signature(s).parameters for s in stoppers_from_cli]
     params_writers = [signature(w).parameters for w in writers_from_cli]
-    if posthook is not None:
-        params_hook = {k: v for k, v in list(signature(posthook).parameters.items())[1:]}
+    if prehook is not None:
+        params_prehook = {k: v for k, v in list(signature(prehook).parameters.items())[1:]}
     else:
-        params_hook = {}
+        params_prehook = {}
+    if posthook is not None:
+        params_posthook = {k: v for k, v in list(signature(posthook).parameters.items())[1:]}
+    else:
+        params_posthook = {}
 
     params_cli: dict[str, Parameter] = {}
     for p in (
@@ -181,7 +196,8 @@ def run_from_cli(
         params_run, 
         *params_stoppers, 
         *params_writers, 
-        params_hook,
+        params_prehook,
+        params_posthook,
     ):
         params_cli.update(p)
 
@@ -206,7 +222,8 @@ def run_from_cli(
     kwargs_run = get_subset(params_run)
     kwargs_stop = [get_subset(i) for i in params_stoppers]
     kwargs_write = [get_subset(i) for i in params_writers]
-    kwargs_hook = get_subset(params_hook)
+    kwargs_prehook = get_subset(params_prehook)
+    kwargs_posthook = get_subset(params_posthook)
 
     if kwargs_config:
         simulation = simulation_func(**kwargs_config)(**kwargs_simulation)
@@ -218,10 +235,13 @@ def run_from_cli(
     writers: list[CreateWriter] = [s(**k) for s, k in zip(writers_from_cli, kwargs_write)]
     writers.extend([w(simulation) for w in writers_from_sim])
 
+    if prehook is not None:
+        prehook(simulation, **kwargs_prehook)
+
     run(simulation, **kwargs_run, stoppers=stoppers, writers=writers)
 
     if posthook is not None:
-        posthook(simulation, **kwargs_hook)
+        posthook(simulation, **kwargs_posthook)
 
 
 def cli_type_conversion(

@@ -5,7 +5,7 @@ from .load import (
     load_mesh, 
     load_constant_series, 
     load_grid_function_series, 
-    load_numeric_series, 
+    load_npy_constant_series, 
     load_value, 
     load_figure,
     load_txt_dict,
@@ -13,4 +13,11 @@ from .load import (
     load_tri_function_series,
 )
 from .write import write
-from .utils import create_dir_path, file_path_ext, file_name_ext, dir_path_exists
+from .utils import (
+    create_dir_path, 
+    file_path_ext, 
+    file_name_ext, 
+    dir_path_exists, 
+    find_dir_paths,
+    dir_path_is_running, 
+)

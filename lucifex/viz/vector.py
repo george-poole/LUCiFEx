@@ -121,13 +121,11 @@ def _plot_streamlines(
     filter_kwargs(set_axes)(ax, **_axs_kwargs)
 
     if color in list(mpl_colormaps):
-        # line colour varying according to vector magnitude |f(x,y)|
         norm = color_func(fx.T, f.T)
         ax.streamplot(
             x, y, fx.T, fy.T, density=density, color=norm, cmap=color
         )
     else:
-        # fixed line colour
         ax.streamplot(x, y, fx.T, fy.T, density=density, color=color)
 
 

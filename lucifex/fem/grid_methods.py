@@ -7,7 +7,10 @@ from dolfinx.fem import Function
 import numpy as np
 
 from ..utils.array_utils import as_index
-from ..utils.py_utils import as_slice, StrSlice, MultipleDispatchTypeError
+from ..utils.py_utils import (
+    as_slice, StrSlice, MultipleDispatchTypeError, 
+    optional_lru_cache,
+)
 from ..mesh.mesh2npy import GridMesh
 from .fem2npy import as_grid_function, GridFunction
 
@@ -197,41 +200,40 @@ def _cross_section_colormap(
 
 
 @overload
-def grid_average(
+def _grid_average(
     u: Function | GridFunction,
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_cache: bool = True,
+    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> GridFunction | float:
     ...
 
 
 @overload
-def grid_average(
+def _grid_average(
     u: Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_cache: bool = True,
+    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> list[GridFunction] | list[float]:
     ...
 
 
-
-def grid_average(
+def _grid_average(
     u: Function | GridFunction | Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_cache: bool = True,
+    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ):
     
     if not isinstance(u, (Function, GridFunction)):
-        return [grid_average(i, axis, slc, use_cache, axis_names) for i in u]
+        return [_grid_average(i, axis, slc, use_func_cache, axis_names) for i in u]
     
     if isinstance(u, Function):
-        u = as_grid_function(use_cache=use_cache)(u)
+        u = as_grid_function(use_cache=use_func_cache)(u)
     
     if not isinstance(axis, tuple):
         axis = (axis, )
@@ -241,7 +243,7 @@ def grid_average(
         slc = [slc] * len(u.mesh.axes)
     _slc = tuple(as_slice(i) for i in slc)
 
-    avg = _grid_average(u.value, _axis, *_slc)
+    avg = _array_average(u.value, _axis, *_slc)
 
     if isinstance(avg, float):
         return avg
@@ -250,7 +252,7 @@ def grid_average(
         return GridFunction(avg, GridMesh(avg_axes))
 
 
-def _grid_average(
+def _array_average(
     values: np.ndarray,
     axis: int | tuple[int, ...] | None,
     *slc: slice,
@@ -259,6 +261,10 @@ def _grid_average(
     return np.mean(values[slc], axis)
 
 
+grid_average = optional_lru_cache(_grid_average)
+
+
+@optional_lru_cache
 def refine_grid_function(
     u: GridFunction,
     factor: int | float | tuple[int | float, ...],

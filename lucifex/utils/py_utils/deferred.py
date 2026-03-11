@@ -155,38 +155,6 @@ def inject_time_arg(
         if not n_args == 1:
             raise TypeError('Expected callable with at most one argument.')
         return lambda t: condition(t)
-    
 
-
-# P = ParamSpec('P')
-# class DeferredCondition(Generic[P]):
-#     def __init__(
-#         self,
-#         condition: Callable[P, bool],
-#     ):        
-#         self._condition = condition
-    
-#     def evaluate(self, *args: P.args, **kwargs: P.kwargs) -> bool:
-#         return self._condition(*args, **kwargs)
-
-    
-# Q = ParamSpec('Q')
-# P = ParamSpec('P')
-# class DeferredRoutine(DeferredCondition[P], Generic[Q, P]):
-#     def __init__(
-#         self,
-#         routine: Callable[Q, None],
-#         condition: Callable[P, bool],
-#     ):
-#         super().__init__(condition)
-#         self._routine = routine
-
-#     def execute(
-#         self, 
-#         *args: Q.args, 
-#         **kwargs: Q.kwargs,
-#     ) -> Callable[P, None]:
-#         return  lambda *a, **k: self._routine(*args, **kwargs) if self.evaluate(*a, **k) else None
-    
 
 

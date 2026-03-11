@@ -1,6 +1,5 @@
-from inspect import signature
 from typing import (
-    Callable, Iterable, ParamSpec, TypeVar, Concatenate, 
+    Callable, Iterable, ParamSpec, Concatenate, 
     Literal, Any, overload,
 )
 
@@ -15,8 +14,16 @@ plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
 
 LW = 0.75
+"""
+Default linewidth
+"""
+
 MS = 4.0
-STYLES = ["-", "--", ":", "-.", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
+"""
+Default marker size
+"""
+
+LINESTYLES = ["-", "--", ":", "-.", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
 MARKERS = ["o", "x", "^", "d", "*"]
 COLORS = ["black", "blue", "limegreen", "red", "darkorange", "fuchsia"]
 
@@ -89,14 +96,21 @@ def create_cycler(
 
 @overload
 def create_cycler(
-    **kwargs: Any,
+    **kwargs: Any | list[Any] | tuple[Any, ...],
 ) -> Cycler:
     ...
 
 
 def create_cycler(*args, **kwargs):
     if not args:
-        return cycler(**kwargs)
+        iter_types = (list, tuple)
+        ncyc = [len(v) for v in kwargs.values() if isinstance(v, iter_types)]
+        if not ncyc:
+            ncyc = 1
+        else:
+            ncyc = min(ncyc)
+        _kwargs = {k: v if isinstance(v, iter_types) else [v] * ncyc for k, v in kwargs.items()}
+        return cycler(**_kwargs)
     else:
         return _create_cycler(*args, **kwargs)
 
@@ -112,8 +126,8 @@ def _create_cycler(
         cyc = 'black'
 
     if cyc == 'black':
-        ncyc = len(STYLES)
-        cyc = cycler(linestyle=STYLES, color=["black"] * ncyc, linewidth=[LW] * ncyc)
+        ncyc = len(LINESTYLES)
+        cyc = cycler(linestyle=LINESTYLES, color=["black"] * ncyc, linewidth=[LW] * ncyc)
     elif cyc == "color":
         ncyc = len(COLORS)
         cyc = cycler(color=COLORS, linestyle=["-"] * ncyc, linewidth=[LW] * ncyc)
@@ -201,12 +215,12 @@ def create_multifigure(
     n_rows: int,
     n_cols: int,
     suptitle: str | None = None,
-    colorbar: bool | tuple[float, float] = False,
+    cbars: bool | tuple[float, float] = False,
     figscale: float = 1.0,
     width_ratio: float = 0.025,
     **kwargs,
-) -> tuple[Figure, list[Axes], list[Axes | None] | list[tuple[float, float] | None]]:
-    if colorbar is True:
+) -> tuple[Figure, list[Axes], list[Axes] | list[tuple[float, float] | None]]:
+    if cbars is True:
         kwargs.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
         n_cols = 2 * n_cols
 
@@ -222,40 +236,40 @@ def create_multifigure(
         ax: Axes = fig.axes[n_cols - 1]
         ax.text(1.0, 1.25, suptitle, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
 
-    if colorbar is True:
+    if cbars is True:
         axs_main = fig.axes[0::2]
         axs_cbar = fig.axes[1::2]
     else:
         axs_main = fig.axes
         axs_cbar = [None] * len(axs_main)
-        if isinstance(colorbar, tuple):
-            axs_cbar[n_cols - 1] = colorbar
+        if isinstance(cbars, tuple):
+            axs_cbar[n_cols - 1] = cbars
 
     return fig, axs_main, axs_cbar
 
 
 P = ParamSpec('P')
-def optional_fig_axs(
-    plot_func: Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], None],
+def optional_multifig_ax(
+    plot_func: Callable[Concatenate[Figure, list[Axes], list[Axes | tuple[float, float] | None], P], None],
 ):
 
     @overload
     def _(
         **multifig_kwargs: dict,
-    ) -> Callable[P, tuple[Figure, list[Axes], list[Axes | None]]]:
+    ) -> Callable[P, tuple[Figure, list[Axes], list[Axes | tuple[float, float] | None]]]:
         ...
 
     @overload
     def _(
         **multifig_kwargs: dict,
-    ) -> Callable[Concatenate[Figure, list[Axes], list[Axes | None], P], None]:
+    ) -> Callable[Concatenate[Figure, list[Axes], list[Axes | tuple[float, float] | None], P], None]:
         ...
     
     @overload
     def _(
         fig: Figure,
         axs_main: list[Axes],
-        axs_cbar: list[Axes | None],
+        axs_cbar: list[Axes | tuple[float, float] | None],
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:

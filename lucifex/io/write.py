@@ -21,7 +21,7 @@ from ..utils.fenicsx_utils import (
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
-from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, NumericSeries, TriFunctionSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim
@@ -94,12 +94,12 @@ def write(
 
 @overload
 def write(
-    u: NumericSeries,
+    u: NPyConstantSeries,
     file_name: str | None = None,
     dir_path: str | None = None,
     slc: StrSlice = ':',
     mode: Literal["a", "w"] = "a",
-    sep: str = NumericSeries.SEPARATOR,
+    sep: str = NPyConstantSeries.SEPARATOR,
 ) -> None:
     ...
 
@@ -317,9 +317,9 @@ def _(
 
 @_write.register(GridFunctionSeries)
 @_write.register(TriFunctionSeries)
-@_write.register(NumericSeries)
+@_write.register(NPyConstantSeries)
 def _(
-    u: GridFunctionSeries | TriFunctionSeries | NumericSeries,
+    u: GridFunctionSeries | TriFunctionSeries | NPyConstantSeries,
     file_name: str,
     dir_path,
     slc=':', 

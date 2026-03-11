@@ -16,7 +16,7 @@ from ..fem.fem2npy import (
 from ..fdm import FunctionSeries, ConstantSeries, ExprSeries
 from ..fdm.fdm2npy import (
     NPyFunctionSeries, GridFunctionSeries, QuadFunctionSeries, as_grid_function_series,
-    as_tri_function_series, TriFunctionSeries, NumericSeries, as_npy_constant_series,
+    as_tri_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
 )
 from ..utils.py_utils import MultiKey, MultipleDispatchTypeError, replicate_callable, StrSlice, as_slice
 from .simulation import Simulation
@@ -27,12 +27,12 @@ F = TypeVar('F', bound=NPyFunction)
 S = TypeVar('S', bound=NPyFunctionSeries)
 class NPySimulation(
     Generic[M, F, S],
-    MultiKey[str, S | F | NumericSeries | np.ndarray | float]
+    MultiKey[str, S | F | NPyConstantSeries | np.ndarray | float]
 ):
     def __init__(
         self,
-        solutions: Iterable[S | NumericSeries],
-        auxiliary: Iterable[S | F | NumericSeries | NPyConstant | tuple[str, float | int | np.ndarray]] = (),
+        solutions: Iterable[S | NPyConstantSeries],
+        auxiliary: Iterable[S | F | NPyConstantSeries | NPyConstant | tuple[str, float | int | np.ndarray]] = (),
         timings: dict | None = None,
     ):
         self._solutions = list(solutions)
@@ -46,15 +46,15 @@ class NPySimulation(
         return self.namespace[key]
 
     @property
-    def solutions(self) -> list[S| NumericSeries]:
+    def solutions(self) -> list[S| NPyConstantSeries]:
         return list(self._solutions)
     
     @property
-    def auxiliary(self) -> list[S| NumericSeries | NPyConstant]:
+    def auxiliary(self) -> list[S| NPyConstantSeries | NPyConstant]:
         return self._auxiliary
 
     @property
-    def namespace(self) -> dict[str, F | NumericSeries | float]:
+    def namespace(self) -> dict[str, F | NPyConstantSeries | float]:
         d = {i.name: i for i in self._solutions}
         d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})        
         d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
@@ -116,8 +116,8 @@ class NPySimulation(
                         continue
                     _aux = (name, _as_npy(value))
                 else:
-                    # if not _include(s.name): FIXME
-                    #     continue
+                    if hasattr(aux, 'name') and not _include(aux.name):
+                        continue
                     _aux = _as_npy(aux)
                 _auxiliary.append(_aux)
 

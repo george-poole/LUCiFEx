@@ -8,5 +8,4 @@ from .sim2io import (
     SimulationFromXDMF, 
     GridSimulationFromNPZ, 
     TriSimulationFromNPZ,
-    find_simulation_dir_paths,
 )

@@ -18,7 +18,7 @@ def dofs_grid(
     strict: bool = False,
     jit: bool = True,
     mask: float = np.nan,
-    use_mapping: bool = False,
+    use_mapping: bool = True,
     use_cache: bool = True,
     use_dof_coordinates: bool = False,
     mesh: Mesh | None = None,
@@ -40,8 +40,10 @@ def dofs_grid(
         vertex_values = dofs(f, try_identity=True)
     else:
         vertex_values = dofs(f, ('P', 1), try_identity=True)
+
+    f_or_mesh = f if use_dof_coordinates else f.function_space.mesh
     axes, vertices = _axes_vertices(use_cache=use_cache)(
-        f, strict, use_cache, use_dof_coordinates,
+        f_or_mesh, strict, use_cache, use_dof_coordinates,
     )
 
     n_vertices = len(vertices)
@@ -55,7 +57,7 @@ def dofs_grid(
 
     if use_mapping:
         mapping = vertex_to_grid_index_mapping(use_cache=use_cache)(
-            f, strict, jit, use_cache, use_dof_coordinates,
+            f_or_mesh, strict, jit, use_cache, use_dof_coordinates,
         )
         return _dofs_grid_from_mapping(mapping, vertex_values, axes, mask)
     else:
@@ -67,19 +69,26 @@ def dofs_grid(
 
 @optional_lru_cache
 def _axes_vertices(
-    f: Function,
-    strict,
-    use_cache,
-    use_dof_coordinates,
+    arg: Mesh | Function,
+    strict: bool,
+    use_cache: bool,
+    use_dof_coordinates: bool,
 ):
     if use_dof_coordinates:
-        dim = f.function_space.mesh.geometry.dim
+        if not isinstance(arg, Function):
+            raise TypeError('`Function` type required if `use_dof_coordinates = True`')
+        f = arg
+        mesh = arg.function_space.mesh
+        dim = mesh.geometry.dim
         tabulated = f.function_space.tabulate_dof_coordinates()
         dof_coordinates = tuple(tabulated[:, i] for i in range(dim))
         axes = tuple(np.sort(np.unique(i)) for i in dof_coordinates)
         vertices = [tuple(i[:dim]) for i in tabulated]
     else:
-        mesh = f.function_space.mesh
+        if not isinstance(arg, Mesh):
+            mesh = arg.function_space.mesh
+        else:
+            mesh = arg
         axes = mesh_axes(use_cache=use_cache)(mesh, strict)
         vertices = mesh_vertices(mesh)
     return axes, vertices
@@ -157,14 +166,14 @@ def _dofs_grid_from_mapping(
 
 @optional_lru_cache
 def vertex_to_grid_index_mapping(
-    f: Function,
+    arg: Mesh | Function,
     strict: bool = False,
     jit: bool = True,
     use_cache: bool = True,
     use_dof_coordinates: bool = False,
 ) -> dict[int, tuple[int, ...]]:
     axes, vertices = _axes_vertices(use_cache=use_cache)(
-        f, strict, use_cache, use_dof_coordinates,
+        arg, strict, use_cache, use_dof_coordinates,
     )
     if jit:
         mapping = _vertex_to_grid_index_mapping_jit(numba.typed.List(vertices), axes)

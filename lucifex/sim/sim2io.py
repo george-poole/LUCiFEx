@@ -1,17 +1,15 @@
-import glob
 from typing import Any, Generic, TypeVar
 from typing_extensions import Self
 from collections.abc import Iterable
 from abc import abstractmethod
 
-from natsort import natsorted
 from dolfinx.mesh import Mesh
 
 from ..utils.py_utils import MultiKey
-from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NumericSeries
+from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NPyConstantSeries
 from ..io.load import (
     load_txt_dict, load_mesh, 
-    load_function_series, load_constant_series, load_numeric_series,
+    load_function_series, load_constant_series, load_npy_constant_series,
     load_grid_function_series, load_tri_function_series,
 )
 from .run import locals_from_lucifex
@@ -67,7 +65,7 @@ class SimulationFromEXT(
         self.use_cache = use_cache
 
         if not lazy:
-            [self._load(i) for i in write_file]
+            self.load_all()
 
     @classmethod
     def from_dir_paths(
@@ -80,6 +78,7 @@ class SimulationFromEXT(
         parameter_file: str = 'PARAMETERS',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
+        *,
         lazy: bool = True,
         use_cache: bool = True,
         load_args: dict[str, Any | tuple[Any, ...]] | None = None,
@@ -109,17 +108,81 @@ class SimulationFromEXT(
         if parameters is None:
             parameters = {}
 
+        _lazy = kwargs.get('lazy', True)
+        _kwargs = kwargs.copy()
+        _kwargs.update(lazy=True)
+
         sims_from_ext = []
         for dp in dir_paths:
             sim = cls(
                 dp,
                 *args,
-                **kwargs,
+                **_kwargs,
             )
             if all(sim[k] == v for k, v in parameters.items()):
+                if not _lazy:
+                    sim.load_all()
                 sims_from_ext.append(sim)
 
         return sims_from_ext
+
+    @classmethod
+    def dict_from_dir_paths(
+        cls: type['Self'],
+        key: str | tuple[str, ...],
+        dir_paths: Iterable[str],
+        function_series: Iterable[str],
+        constant_series: Iterable[str],
+        parameters: dict[str, Any] | None = None,
+        write_file: str | dict[str, str] | None = None,
+        parameter_file: str = 'PARAMETERS',
+        checkpoint_file: str = 'CHECKPOINT',
+        timing_file: str = 'TIMING',
+        *,
+        lazy: bool = True,
+        use_cache: bool = True,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
+    ) -> dict[str | tuple[str, ...], Self]:
+
+        return cls._dict_from_dir_paths(
+            key,
+            dir_paths,
+            parameters,
+            function_series,
+            constant_series,
+            write_file,
+            parameter_file,
+            checkpoint_file,
+            timing_file,
+            lazy=lazy,
+            use_cache=use_cache,
+            load_args=load_args,
+        )
+
+    @classmethod
+    def _dict_from_dir_paths(
+        cls: type['Self'],
+        key: str | tuple[str, ...],
+        dir_paths: Iterable[str],
+        parameters: dict[str, Any] | None = None,
+        *args,
+        **kwargs,
+    ) -> dict[str | tuple[str, ...], Self]:
+        if parameters:
+            if isinstance(key, str):
+                _keys = (key, )
+            else:
+                _keys = key
+            parameters = {k: v for k, v in parameters.items() if not k in _keys}
+
+        sims_from_ext = cls._from_dir_paths(
+            dir_paths, 
+            parameters,
+            *args,
+            **kwargs,
+        )
+
+        return {sim[key]: sim for sim in sims_from_ext}
 
     @abstractmethod
     def _load_function_series(
@@ -134,7 +197,7 @@ class SimulationFromEXT(
     ) -> T:
         ...
 
-    def _load(
+    def load(
         self,
         name: str,
         reload: bool = False,
@@ -153,6 +216,12 @@ class SimulationFromEXT(
             )[name]  
         self._loaded[name] = ld
 
+    def load_all(
+        self,
+        reload: bool = False,
+    ) -> None:
+        [self.load(i, reload) for i in self.write_file]
+
     def _getitem(
         self, 
         key,
@@ -160,13 +229,17 @@ class SimulationFromEXT(
         try:
             return self._loaded[key]
         except KeyError:
-            self._load(key)
+            self.load(key)
             return self._loaded[key]
         
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | Any]:
         return self._loaded
-    
+
+    @property
+    def dir_path(self) -> str:
+        return self._dir_path
+
     @property
     def write_file(self):
         return self._write_file
@@ -210,7 +283,7 @@ class SimulationFromEXT(
         else:
             self._load_args[name] = ()
         if not lazy:
-            self._load(name)
+            self.load(name)
 
 
 class SimulationFromXDMF(
@@ -259,6 +332,7 @@ class SimulationFromXDMF(
         parameter_file: str = 'PARAMETERS',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
+        *,
         lazy: bool = True,
         use_cache: bool = True,
         load_args: dict[str, Any | tuple[Any, ...]] | None = None,
@@ -273,6 +347,41 @@ class SimulationFromXDMF(
             parameter_file=parameter_file,
             checkpoint_file=checkpoint_file,
             timing_file=timing_file,
+            lazy=lazy,
+            use_cache=use_cache,
+            load_args=load_args,
+        )
+
+    @classmethod
+    def dict_from_dir_paths(
+        cls: type['Self'],
+        key: str | tuple[str, ...],
+        dir_paths: Iterable[str],
+        mesh: Mesh | tuple[str, str],
+        function_series: Iterable[str],
+        constant_series: Iterable[str],
+        parameters: dict[str, Any] | None = None,
+        write_file: str | dict[str, str] | None = None,
+        parameter_file: str = 'PARAMETERS',
+        checkpoint_file: str = 'CHECKPOINT',
+        timing_file: str = 'TIMING',
+        *,
+        lazy: bool = True,
+        use_cache: bool = True,
+        load_args: dict[str, Any | tuple[Any, ...]] | None = None,
+    ) -> dict[str | tuple[str, ...], Self]:
+
+        return cls._dict_from_dir_paths(
+            key,
+            dir_paths,
+            parameters,
+            mesh,
+            function_series,
+            constant_series,
+            write_file,
+            parameter_file,
+            checkpoint_file,
+            timing_file,
             lazy=lazy,
             use_cache=use_cache,
             load_args=load_args,
@@ -301,14 +410,14 @@ class SimulationFromXDMF(
 
 T = TypeVar('T')
 class SimulationFromNPZ(
-    SimulationFromEXT[T | NumericSeries],
+    SimulationFromEXT[T | NPyConstantSeries],
     Generic[T],
 ):    
     def _load_constant_series(
         self,
         name,
     ):
-        return load_numeric_series(use_cache=self.use_cache)(
+        return load_npy_constant_series(use_cache=self.use_cache)(
             name, self._dir_path, self._write_file[name], *self._load_args[name]
         )
 
@@ -335,25 +444,3 @@ class TriSimulationFromNPZ(
         return load_tri_function_series(use_cache=self.use_cache)(
             name, self._dir_path, self._write_file[name], *self._load_args[name]
         )
-
-
-def find_simulation_dir_paths(
-    dir_root: str,
-    *,
-    include: str | Iterable[str] = '*',
-    exclude: str | Iterable[str] = (),
-) -> list[str]:
-
-    dir_paths = set()
-
-    include = [include] if isinstance(include, str) else include
-    for pattern in include:
-        dir_paths.update(glob.glob(f'{dir_root}/{pattern}/'))
-
-    exclude = [exclude] if isinstance(exclude, str) else exclude
-    for pattern in exclude:
-        [dir_paths.discard(i) for i in glob.glob(f'{dir_root}/{pattern}/')]
-
-    dir_paths = natsorted(dir_paths)
-
-    return dir_paths

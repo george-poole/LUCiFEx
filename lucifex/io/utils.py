@@ -2,9 +2,11 @@ import os
 import glob
 import pickle
 import hashlib
+import time
 import datetime
 from typing import Any
 from collections.abc import Iterable
+from natsort import natsorted
 
 from dolfinx.fem import Function, FunctionSpace
 
@@ -16,14 +18,13 @@ def create_dir_path(
     namespace: dict[str, Any],
     *,
     dir_root: str,
-    dir_params: Iterable[str] | str,
-    dir_prefix: str | None,
-    dir_suffix: str | None,
-    dir_datetime: bool,
-    dir_uid: bool,
+    dir_params: Iterable[str] | str = (),
+    dir_prefix: str | None = None,
+    dir_suffix: str | None = None,
+    dir_datetime: bool | slice = False,
+    dir_uid: bool = False,
     dir_seps: tuple[str, str, str] = ('|', '__', '__'),
     mkdir: bool = False,
-    slc: slice = slice(2, -4),
 ) -> str:
     
     dir_name = ''
@@ -41,6 +42,10 @@ def create_dir_path(
         dir_name = suffix_sep.join((dir_name, dir_suffix)) if dir_name else dir_suffix
 
     if dir_datetime:
+        if dir_datetime is True:
+            slc = slice(2, -4)
+        else:
+            slc = dir_datetime
         time = str(datetime.datetime.now())[slc]
         whitespace_delims = " ", "_"
         year_month_day_delims = "-", "-"
@@ -77,16 +82,16 @@ def dir_path_exists(
     glob_prefix: str | None = None,
     glob_suffix: str | None = None,
     unique: bool = True,
-    checkpoint: str | None = None,
+    contains: str | None = None,
 ) -> bool:
 
-    if checkpoint is not None:
-        has_checkpoint = lambda p, c: os.path.exists(os.path.join(p, c))
+    if contains is not None:
+        contains_file = dir_path_contains
     else:
-        has_checkpoint = lambda *_: True
+        contains_file = lambda *_: True
 
     if unique and not glob_prefix and not glob_suffix:
-        return os.path.exists(dir_path) and has_checkpoint(dir_path, checkpoint)
+        return os.path.exists(dir_path) and contains_file(dir_path, contains)
     else:
         if glob_prefix is None:
             glob_prefix = ''
@@ -94,10 +99,72 @@ def dir_path_exists(
             glob_suffix = ''
         globbed = glob.glob(f'{glob_prefix}{dir_path}{glob_suffix}')
         if unique:
-            return len(globbed) == 1 and has_checkpoint(globbed[0], checkpoint)
+            return len(globbed) == 1 and contains_file(globbed[0], contains)
         else:
-            return len(globbed) >= 1 and all(has_checkpoint(i, checkpoint) for i in globbed)
+            return len(globbed) >= 1 and all(contains_file(i, contains) for i in globbed)
+
+
+def dir_path_is_running(
+    dir_path: str,
+    dt_thresh: float,
+    file_name: str | Iterable[str] |  None = None,
+) -> bool:
+    if file_name is None:
+        file_paths = [os.path.join(dir_path, f) for f in os.listdir(dir_path)]
+
+    if isinstance(file_name, str):
+        file_name = [file_name]
+    if file_name is not None:
+        file_paths = [os.path.join(dir_path, f) for f in file_name]
+
+    file_paths = [fp for fp in file_paths if os.path.isfile(fp)]
+
+    if not file_paths:
+        raise ValueError(f'Not files found in {dir_path}')
+
+    t_now = time.time()
+    for fp in file_paths:
+        t_mod = os.path.getmtime(fp)
+        if t_now - t_mod < dt_thresh:
+            return True
+    return False
         
+
+def dir_path_contains(
+    dir_path: str,
+    file_name:  str,    
+) -> bool:
+    return os.path.exists(os.path.join(dir_path, file_name))
+    
+    
+def find_dir_paths(
+    dir_root: str,
+    *,
+    include: str | Iterable[str] = '*',
+    exclude: str | Iterable[str] = (),
+    contains: str | Iterable[str] | None = None,
+) -> list[str]:
+
+    dir_paths = set()
+
+    include = [include] if isinstance(include, str) else include
+    for pattern in include:
+        dir_paths.update(glob.glob(f'{dir_root}/{pattern}/'))
+
+    exclude = [exclude] if isinstance(exclude, str) else exclude
+    for pattern in exclude:
+        [dir_paths.discard(i) for i in glob.glob(f'{dir_root}/{pattern}/')]
+
+    dir_paths = natsorted(dir_paths)
+
+    if contains is not None:
+        if isinstance(contains, str):
+            contains = [contains]
+        for name in contains:
+            dir_paths = [i for i in dir_paths if dir_path_contains(i, name)]
+
+    return dir_paths
+
 
 def file_name_ext(
     file_name: str,

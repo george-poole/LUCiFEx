@@ -145,9 +145,9 @@ class Simulation(
             return {s.name: delta for s in self.solutions}
         
         if isinstance(delta, tuple) and len(delta) == 2:
-            obj_function, obj_constant = delta
-            function_dict = {s.name: obj_function for s in self.solutions if isinstance(s, FunctionSeries)}
-            constant_dict = {s.name: obj_constant for s in self.solutions if isinstance(s, ConstantSeries)}
+            delta_function, delta_constant = delta
+            function_dict = {s.name: delta_function for s in self.solutions if isinstance(s, FunctionSeries)}
+            constant_dict = {s.name: delta_constant for s in self.solutions if isinstance(s, ConstantSeries)}
             return function_dict | constant_dict
         
         if isinstance(delta, dict):
@@ -304,10 +304,10 @@ def configure_simulation(
     checkpoint_file: str = 'CHECKPOINT',
     timing_file: str = 'TIMING',
     dir_root: str = './',
-    dir_params: Iterable[str] | str = '',
+    dir_params: Iterable[str] | str = (),
     dir_prefix: str | None = None,
     dir_suffix: str | None = None,
-    dir_datetime: bool = False,
+    dir_datetime: bool | slice = False,
     dir_uid: bool = False,
     dir_seps: tuple[str, str] = ('|', '__', '__'),
 ):
@@ -368,7 +368,7 @@ def configure_simulation(
             dir_params: Iterable[str] | str = ...,
             dir_prefix: str | None = ...,   
             dir_suffix: str | None = ...,
-            dir_datetime: bool = ...,
+            dir_datetime: bool | slice = ...,
             dir_uid: bool = ...,
             dir_seps: tuple[str, str] = ...,
         ) -> Callable[P, Simulation]:

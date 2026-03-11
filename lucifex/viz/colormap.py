@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import overload, Iterable
+from typing import overload, Iterable, Callable
 
 import numpy as np
 from dolfinx.mesh import Mesh
@@ -10,16 +10,12 @@ from matplotlib.figure import Figure
 from matplotlib.contour import ContourSet 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.tri.triangulation import Triangulation
-from matplotlib.cm import ScalarMappable
 
 from ..fem import GridFunction, TriFunction, as_npy_function
-from ..utils.fenicsx_utils import (
-    is_scalar, create_function, 
-    is_grid, extract_mesh,
-)
+from ..utils.fenicsx_utils import is_scalar ,is_grid
 from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
 
-from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_fig_axs
+from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_multifig_ax
 
 
 @overload
@@ -135,6 +131,8 @@ def _(
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
     triang: Triangulation | None = None,
+    ax_cbar: Axes | None = None,
+    cax: bool = True,
     **kwargs,
 ):
     x, y, z = xyz
@@ -160,10 +158,16 @@ def _(
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
 
     if colorbar is not False:
-        divider = make_axes_locatable(ax)
-        ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
-        fig.colorbar(cmap, ax_cbar)
-
+        if ax_cbar is None:
+            divider = make_axes_locatable(ax)
+            ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
+        if cax:
+            fig.colorbar(cmap, cax=ax_cbar)
+        else:
+            fig.colorbar(cmap, ax=ax_cbar)
+        if isinstance(colorbar, tuple):
+            assert len(colorbar) == 2
+            cmap.set_clim(*colorbar)
 
 plot_colormap = optional_fig_ax(_plot_colormap)
 
@@ -258,7 +262,7 @@ def _(
 ) -> None:
     x, y, z = xyz
 
-    _plt_kwargs = dict(linestyles="solid", colors="black", linewidths=LW)
+    _plt_kwargs = dict(linestyles="solid", linewidths=LW)
     _axs_kwargs = dict(x_label='$x$', y_label='$y$', aspect='equal')
     _axs_kwargs.update(x_lims=x, y_lims=y)
     _kwargs = _plt_kwargs | _axs_kwargs
@@ -270,44 +274,55 @@ def _(
     else:
         if grid is None:
             grid = is_grid((x, y))
-        if not grid:
-            filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
-        else:
+        if grid:
             filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
-            
+        else:
+            filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
                 
 
 plot_contours = optional_ax(_plot_contours)
 
 
-@optional_fig_axs
+@optional_multifig_ax
 def plot_colormap_multifigure(
     fig: Figure,
     axs_main: list[Axes],
-    axs_cbar: list[Axes | None],
-    u: Iterable[Function | Expr],
-    cmaps: Iterable[str] | str = 'hot',
-    titles: Iterable[str] | None = None,
-    **plt_kwargs,
+    axs_cbar: list[Axes | tuple[float, float] | None],
+    u: Iterable[Function | GridFunction | Expr],
+    cmap: Iterable[str] | str = 'hot',
+    title: Iterable[str] | None = None,
+    *,
+    posthook: Callable[[Figure, Axes], None] | None = None,
+    **kwargs,
 ) -> None:
     
-    if titles is None:
-        titles = [None] * len(u)
+    if title is None:
+        title = [None] * len(u)
 
-    if isinstance(cmaps, str):
-        cmaps = [cmaps] * len(u)
+    if isinstance(cmap, str):
+        cmap = [cmap] * len(u)
 
-    for ui, cmap, title, ax_main, ax_cbar in zip(u, cmaps, titles, axs_main, axs_cbar):
+    for ui, cmp, ttl, ax_m, ax_cb in zip(u, cmap, title, axs_main, axs_cbar): 
+        if isinstance(ax_cb, tuple):
+            _colorbar = ax_cb
+            _ax_cbar = ax_m
+            _cax = False
+        elif isinstance(ax_cb, Axes):
+            _colorbar = True
+            _ax_cbar = ax_cb
+            _cax = True
+        else:
+            _colorbar = False
+            _ax_cbar = None
+            _cax = True
         plot_colormap(
-            fig, ax_main, ui, 
-            title=title, 
-            cmap=cmap, 
-            colorbar=False, 
-            **plt_kwargs,
-        ) 
-        if isinstance(ax_cbar, tuple):
-            cmap: ScalarMappable = ax_main.collections[0]
-            cmap.set_clim(*ax_cbar)
-            fig.colorbar(cmap, ax=ax_main)
-        if ax_cbar is not None:
-            fig.colorbar(ax_main.collections[0], ax_cbar)
+            fig, ax_m, ui, 
+            title=ttl, 
+            cmap=cmp, 
+            colorbar=_colorbar,
+            ax_cbar=_ax_cbar, 
+            cax=_cax,
+            **kwargs,
+        )
+        if posthook is not None:
+            posthook(fig, ax_m)

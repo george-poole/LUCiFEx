@@ -1,5 +1,5 @@
 import os
-from typing import Callable, ParamSpec, TypeVar, Concatenate
+from typing import Callable, ParamSpec, TypeVar, Concatenate, Any
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from functools import wraps
@@ -73,32 +73,38 @@ def _save_figure(
     def _(
         file_name: str,
         dir_path: str | None = './figures',
-        prefix_ipynb: bool = True,
+        prefix: bool | str = True,
         return_path: bool = False,
         mkdirs: bool = True,
         thumbnail: bool = False,
+        **defaults: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
         ipynb_name = get_ipynb_file_name()
-        if prefix_ipynb:
-            file_name = '_'.join((ipynb_name, file_name))
+        if prefix:
+            if isinstance(prefix, str):
+                _prefix = prefix
+            else:
+                _prefix = ipynb_name
+            file_name = '_'.join((_prefix, file_name))
         if dir_path is not None:
             file_name = os.path.join(dir_path, file_name)
         if mkdirs:
             os.makedirs(dir_path, exist_ok=True)
 
         @wraps(func)
-        def __(obj, **kwargs):
-            if isinstance(obj, Figure):
+        def __(fig_or_anim, **kwargs):
+            if isinstance(fig_or_anim, Figure):
                 _kwargs = dict(
                     file_ext=('pdf', 'png'), 
                     close=False,
                     pickle=False,
                 )
-                kwargs.update(_kwargs)
-            write(obj, file_name, **kwargs)
+                _kwargs.update(defaults)
+                _kwargs.update(kwargs)
+            write(fig_or_anim, file_name, **_kwargs)
             if thumbnail:
-                write(obj, os.path.join(dir_path, ipynb_name), **kwargs)
+                write(fig_or_anim, os.path.join(dir_path, ipynb_name), **_kwargs)
             if return_path:
                 return file_name
         return __
