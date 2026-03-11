@@ -85,14 +85,14 @@ def _plot_rectangle_mesh(
 
     match simplicial, grid:
         case True, _:
-            _plot_triangulation(ax, mesh, use_cache, **kwargs)
+            _plot_tri_mesh(ax, mesh, use_cache, **kwargs)
         case False, True:
-            _plot_grid(ax, mesh, use_cache, **kwargs)
+            _plot_grid_mesh(ax, mesh, use_cache, **kwargs)
         case False, False:
-            _plot_quadrangulation(ax, mesh, use_cache, **kwargs)
+            _plot_quad_mesh(ax, mesh, use_cache, **kwargs)
 
 
-def _plot_triangulation(
+def _plot_tri_mesh(
     ax: Axes, 
     mesh: Mesh,
     use_cache: bool,
@@ -108,7 +108,7 @@ def _plot_triangulation(
     filter_kwargs(ax.triplot, Line2D)(tri_mesh.triangulation, **kwargs)
 
 
-def _plot_quadrangulation(
+def _plot_quad_mesh(
     ax: Axes, 
     mesh: Mesh,
     use_cache: bool,
@@ -132,7 +132,7 @@ def _plot_quadrangulation(
     ax.add_collection(quad_poly)
 
 
-def _plot_grid(
+def _plot_grid_mesh(
     ax: Axes, 
     mesh: Mesh,
     use_cache: bool,

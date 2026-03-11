@@ -11,11 +11,14 @@ from mpi4py import MPI
 from dolfinx.mesh import Mesh
 from dolfinx.io import XDMFFile
 
-from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice, ToDoError
-from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh
-from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction
+from ..utils.py_utils import StrSlice, optional_lru_cache, as_slice
+from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh
+from ..fem.fem2npy import NPyFunction, GridFunction, TriFunction, QuadFunction
 from ..fdm import FunctionSeries, ConstantSeries
-from ..fdm.fdm2npy import GridFunctionSeries, NPyConstantSeries, TriFunctionSeries, NPySeries
+from ..fdm.fdm2npy import (
+    GridFunctionSeries, NPyConstantSeries, TriFunctionSeries, QuadFunctionSeries,
+    NPySeries,
+)
 from .read import read
 from .utils import file_path_ext
 
@@ -197,7 +200,7 @@ def load_tri_function_series(
     try:
         return load_npz_dict(
             dir_path, file_name, sep, 
-            mesh_kws=('x_coordinates', 'y_coordinates', 'triangles'),
+            mesh_kws=('x_coordinates', 'y_coordinates', 'cells'),
             mesh_factory=TriMesh,
             function_factory=TriFunction,
             series_factory=TriFunctionSeries,
@@ -209,12 +212,25 @@ def load_tri_function_series(
     
 
 @optional_lru_cache
-def load_tri_function_series(
+def load_quad_function_series(
     name: str,
     dir_path: str,
     file_name: str,
-):
-    raise ToDoError
+    slc: StrSlice = ':',
+    sep: str = QuadFunctionSeries.SEPARATOR,
+) -> QuadFunctionSeries:
+    try:
+        return load_npz_dict(
+            dir_path, file_name, sep, 
+            mesh_kws=('x_coordinates', 'y_coordinates', 'cells'),
+            mesh_factory=QuadMesh,
+            function_factory=QuadFunction,
+            series_factory=QuadFunctionSeries,
+            target_name=name,
+            slc=slc,
+        )[name]
+    except KeyError:
+        raise ValueError(f"'{name}' not found in {file_name}.")
 
 
 @optional_lru_cache

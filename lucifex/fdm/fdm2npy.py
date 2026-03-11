@@ -9,10 +9,10 @@ from dolfinx.mesh import Mesh
 from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, QuadMesh, as_npy_object
 from ..fem import Function
 from ..fem.fem2npy import (
-    NPyNameAttr, NPyNameValueAttr, NPyFunction, GridFunction, as_grid_function, 
+    NPyNameAttr, NPyNameValueAttr, NPyFunction, GridFunction, as_grid_function, as_quad_function,
     TriFunction, as_tri_function, NPyConstant, QuadFunction, as_npy_constant,
 )
-from ..utils.py_utils import replicate_callable, StrSlice, as_slice, ToDoError
+from ..utils.py_utils import replicate_callable, StrSlice, as_slice
 from .series import Series, FunctionSeries, ExprSeries, ConstantSeries
 
 
@@ -189,7 +189,16 @@ class QuadFunctionSeries(
         use_mesh_cache: bool = True,
         mesh: Mesh | None = None,
     )-> Self:
-        raise ToDoError
+        convert_func = lambda u: (
+            as_quad_function(use_cache=use_func_cache)(
+                u, use_mesh_cache, mesh,
+            )
+        )
+        return super().from_series(
+            u, 
+            convert_func,
+            slc,
+        )
         
 
 @replicate_callable(NPyConstantSeries.from_series)

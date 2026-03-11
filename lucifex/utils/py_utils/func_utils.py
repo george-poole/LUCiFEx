@@ -167,7 +167,7 @@ P = ParamSpec("P")
 R = TypeVar('R')
 def filter_kwargs(
     func: Callable[P, R],
-    include: Callable | Iterable[str] = (),
+    include: Callable | str | Iterable[str | Callable] = (),
     strict: bool = False,
 ) -> Callable[P, R] | Callable[..., R]:
     def _(*args, **kwargs):
@@ -175,15 +175,23 @@ def filter_kwargs(
             n for n, p in signature(f).parameters.items() if p.kind not in (p.VAR_KEYWORD, p.VAR_POSITIONAL)
         ]
         
-        if callable(include):
-            included_names = get_names(include)
+        if callable(include) or isinstance(include, str):
+            _include = (include, )
         else:
-            included_names = list(include)
+            _include = include
+
+        included_names = []
+        for i in _include:
+            if callable(i):
+                included_names.extend(get_names(i))
+            else:
+                included_names.append(i)
 
         if not strict:
             included_names.extend(get_names(func))
 
         _kwargs = {k: v for k, v in kwargs.items() if k in included_names}
+
         return func(*args, **_kwargs)
 
     return _

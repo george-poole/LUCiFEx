@@ -7,7 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.cm import ScalarMappable
+from matplotlib.colorbar import Colorbar
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler, cycler
+
+from ..utils.py_utils import filter_kwargs
 
 
 plt.rc("text", usetex=True)
@@ -209,6 +214,34 @@ def set_legend(
     )
     if legend_title_alignment is None:
         lgnd.get_title().set_multialignment("center")
+
+
+def create_colorbar(
+    fig: Figure,
+    ax: Axes,
+    mappable: ScalarMappable,
+    limits: tuple[float, float] | None,
+    ax_cbar: Axes | None,
+    cax: bool = True,
+    **kwargs,
+) -> Colorbar:
+    if ax_cbar is None:
+        _kwargs = dict(
+            position="right", size="5%", pad=0.1,
+        )
+        _kwargs.update(**kwargs)
+        divider = make_axes_locatable(ax)
+        ax_cbar = filter_kwargs(divider.append_axes)(**_kwargs)
+    if cax:
+        cbar = fig.colorbar(mappable, cax=ax_cbar, **kwargs)
+    else:
+        cbar = fig.colorbar(mappable, ax=ax_cbar, **kwargs)
+
+    if limits is not None:
+        assert len(limits) == 2
+        mappable.set_clim(*limits)
+
+    return cbar
 
 
 def create_multifigure(

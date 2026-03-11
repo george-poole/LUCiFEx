@@ -1,16 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Callable, Iterable
 from typing_extensions import Self
+from functools import cached_property
 
 import numpy as np
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
 from ..mesh.mesh2npy import (
-    NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh,
+    NPyMesh, GridMesh, TriMesh, QuadMesh, as_tri_mesh, as_grid_mesh, as_quad_mesh,
     as_npy_object,
 )
-from ..utils.py_utils import optional_lru_cache, replicate_callable, ToDoError
+from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
     dofs, dofs_grid, get_component_functions, NonScalarError,
     NonScalarVectorError, extract_mesh,
@@ -246,6 +247,10 @@ class TriFunction(NPyFunction[TriMesh]):
             convert_mesh,
         )
     
+    @cached_property
+    def cell_values(self) -> np.ndarray:
+        return np.array([self.value[tri].mean() for tri in self.mesh.cells])
+    
 
 class QuadFunction(NPyFunction[QuadMesh]):
     @classmethod
@@ -255,7 +260,21 @@ class QuadFunction(NPyFunction[QuadMesh]):
         use_mesh_cache: bool = True,
         mesh: Mesh | None = None,
     ) -> Self:
-        raise ToDoError
+        if mesh is None:
+            elem = ('P', 1)
+        else:
+            elem = (mesh, 'P', 1)
+        get_values = lambda u: dofs(u, elem, try_identity=True)
+        convert_mesh = lambda m: as_quad_mesh(use_cache=use_mesh_cache)(m)
+        return super().from_function(
+            u,
+            get_values,
+            convert_mesh,
+        )
+
+    @cached_property
+    def cell_values(self) -> np.ndarray:
+        return np.array([self.value[quad].mean() for quad in self.mesh.cells])
 
 
 as_npy_constant = replicate_callable(NPyConstant.from_constant)(lambda: None)

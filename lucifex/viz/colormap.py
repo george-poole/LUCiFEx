@@ -7,15 +7,18 @@ from dolfinx.fem import Function
 from ufl.core.expr import Expr
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.contour import ContourSet 
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.contour import ContourSet
+from matplotlib.collections import Collection 
 from matplotlib.tri.triangulation import Triangulation
 
-from ..fem import GridFunction, TriFunction, as_npy_function
-from ..utils.fenicsx_utils import is_scalar ,is_grid
+from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
+from ..utils.fenicsx_utils import is_scalar, is_grid, NonScalarError
 from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
 
-from .utils import LW, set_axes, optional_ax, set_axes, optional_fig_ax, optional_multifig_ax
+from .utils import (
+    LW, set_axes, optional_ax, set_axes, create_colorbar,
+    optional_fig_ax, optional_multifig_ax,
+)
 
 
 @overload
@@ -86,7 +89,7 @@ def _(
     **kwargs,
 ):
     if not is_scalar(u):
-        raise ValueError("Colormap plots must be of scalar-valued quantities.")
+        raise NonScalarError(u)
     u_npy = as_npy_function(u, grid, use_cache, mesh)
     return _plot_colormap(
         u_npy, fig, ax, colorbar, grid, **kwargs
@@ -121,6 +124,41 @@ def _(
     return _plot_colormap(
         xyz, fig, ax, colorbar, grid, triang=u.mesh.triangulation, **kwargs,
     )
+
+
+@_plot_colormap.register(QuadFunction)
+def _(
+    u: QuadFunction,
+    fig: Figure,
+    ax: Axes,
+    colorbar: bool | tuple[float, float] = True,
+    # grid: bool | None = None,
+    ax_cbar: Axes | None = None,
+    cax: bool = True,
+    **kwargs,
+):
+    _poly_kwargs = dict(cmap='hot', edgecolors='face')
+    _axs_kwargs = dict(
+        x_lims=u.mesh.x_coordinates, 
+        y_lims=u.mesh.y_coordinates, 
+        x_label='$x$',
+        y_label='$y$', 
+        aspect='equal',
+    )
+    _kwargs = _poly_kwargs | _axs_kwargs
+    _kwargs.update(kwargs)
+    filter_kwargs(set_axes)(ax, **_kwargs)
+
+    quad_poly = filter_kwargs(u.mesh.polycollection, ('array', Collection))(
+        array=u.cell_values, 
+        **_kwargs,
+    )
+    ax.add_collection(quad_poly)
+
+    if colorbar is not False:
+        limits = None if colorbar is True else colorbar
+        create_colorbar(fig, ax, quad_poly, limits, ax_cbar, cax)
+    
 
 
 @_plot_colormap.register(tuple)
@@ -158,16 +196,9 @@ def _(
             cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
 
     if colorbar is not False:
-        if ax_cbar is None:
-            divider = make_axes_locatable(ax)
-            ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
-        if cax:
-            fig.colorbar(cmap, cax=ax_cbar)
-        else:
-            fig.colorbar(cmap, ax=ax_cbar)
-        if isinstance(colorbar, tuple):
-            assert len(colorbar) == 2
-            cmap.set_clim(*colorbar)
+        limits = None if colorbar is True else colorbar
+        create_colorbar(fig, ax, cmap, limits, ax_cbar, cax)
+
 
 plot_colormap = optional_fig_ax(_plot_colormap)
 

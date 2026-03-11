@@ -13,8 +13,10 @@ class MeshBoundary(
 ):
     def __init__(
         self, 
-        boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias],
+        boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias] | None,
     ):
+        if boundaries is None:
+            boundaries = {}
         self._boundaries = boundaries
 
     def _getitem(
@@ -35,8 +37,11 @@ class MeshBoundary(
         """
         Union of defined sub-boundaries `∪ᵢ∂Ωᵢ`
         """
-        return as_spatial_marker(self.markers)
-    
+        if self.markers:
+            return as_spatial_marker(self.markers)
+        else:
+            return lambda x: np.logical_not(np.isfinite(x[0]))
+
     @property
     def complement(self) -> SpatialMarker:
         """
@@ -57,13 +62,16 @@ class MeshBoundary(
 
 def mesh_boundary(
     mesh: Mesh,
-    boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias],
+    boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias] | None = None,
     verify: bool = True,
     complete: bool = False,
 ) -> MeshBoundary:
     """
     `{∂Ωᵢ}ᵢ`
     """
+    if not boundaries:
+        return MeshBoundary(boundaries)
+    
     if verify or complete:
         if mesh.comm.Get_size() > 1:
             raise ParallelizationError

@@ -11,15 +11,15 @@ from ..mesh.mesh2npy import NPyMesh, GridMesh, TriMesh, as_npy_object, QuadMesh
 from ..fem import Function, Constant
 from ..fem.fem2npy import (
     NPyFunction, GridFunction, TriFunction, NPyConstant, QuadFunction,
-    as_grid_function, as_tri_function, as_npy_constant,
+    as_grid_function, as_tri_function, as_npy_constant, as_quad_function,
 )
 from ..fdm import FunctionSeries, ConstantSeries, ExprSeries
 from ..fdm.fdm2npy import (
     NPyFunctionSeries, GridFunctionSeries, QuadFunctionSeries, as_grid_function_series,
-    as_tri_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
+    as_tri_function_series, as_quad_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
 )
 from ..utils.py_utils import (
-    MultiKey, MultipleDispatchTypeError, ToDoError,
+    MultiKey, MultipleDispatchTypeError,
     replicate_callable, StrSlice, as_slice,
 )
 from .simulation import Simulation
@@ -223,11 +223,28 @@ class QuadSimulation(NPySimulation[QuadMesh, QuadFunction, QuadFunctionSeries]):
         sim: Simulation,
         slc_func: StrSlice = ':',
         slc_const: StrSlice = ':',
+        use_func_cache: bool = True,
+        auxiliary: bool = True,
+        use_mesh_cache: bool = True,
         *,
         exclude: Iterable[str] = (),
         include: Iterable[str] = (),
     ) -> Self:
-        raise ToDoError
+        convert_series = lambda u: (
+            as_quad_function_series(u, slc_func, use_func_cache, use_mesh_cache, sim.mesh),
+        )
+        convert_func = lambda u: (
+            as_quad_function(u, use_mesh_cache, sim.mesh),
+        )
+        return super().from_simulation(
+            sim,
+            convert_series,
+            convert_func,
+            slc_const,
+            auxiliary,
+            exclude=exclude,
+            include=include,
+        )
     
 
 @replicate_callable(GridSimulation.from_simulation)

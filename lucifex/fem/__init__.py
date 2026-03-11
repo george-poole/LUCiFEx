@@ -12,8 +12,10 @@ from .unsolved import Unsolved, UnsolvedType, is_unsolved
 from .fem2npy import ( 
     GridFunction, 
     TriFunction,
+    QuadFunction,
     as_grid_function,
     as_tri_function,
+    as_quad_function,
     as_npy_function,
 )
 from .grid_methods import (

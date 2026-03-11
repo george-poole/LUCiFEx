@@ -22,7 +22,10 @@ from ..utils.fenicsx_utils import (
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
 from ..utils.fenicsx_utils import NonScalarVectorError, is_tensor, is_vector
-from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, NPyConstantSeries, TriFunctionSeries
+from ..fdm import (
+    FunctionSeries, ConstantSeries, GridFunctionSeries, 
+    NPyConstantSeries, TriFunctionSeries, QuadFunctionSeries,
+)
 from ..fem import Function, Constant
 
 from .utils import file_path_ext, dofs_array_dim
@@ -351,6 +354,7 @@ def _(
 
 @_write.register(GridFunctionSeries)
 @_write.register(TriFunctionSeries)
+@_write.register(QuadFunctionSeries)
 @_write.register(NPyConstantSeries)
 def _(
     u: GridFunctionSeries | TriFunctionSeries | NPyConstantSeries,
@@ -369,8 +373,8 @@ def _(
 
     if isinstance(u, GridFunctionSeries):
         mesh_kws = ('axes', )
-    elif isinstance(u, TriFunctionSeries):
-        mesh_kws = ('x_coordinates', 'y_coordinates', 'triangles')
+    elif isinstance(u, (TriFunctionSeries, TriFunctionSeries)):
+        mesh_kws = ('x_coordinates', 'y_coordinates', 'cells')
     else:
         mesh_kws = ()
 

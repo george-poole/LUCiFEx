@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from ..utils.py_utils import filter_kwargs
-from .utils import optional_fig_ax, set_axes
+from .utils import optional_fig_ax, set_axes, create_colorbar
 
 
 @optional_fig_ax
@@ -16,6 +16,8 @@ def plot_scatter(
     xyz: tuple[np.ndarray, np.ndarray, np.ndarray],
     cmap: str | tuple[str, str] = "viridis",
     s: float | Callable[[np.ndarray], np.ndarray] = 36.0,
+    ax_cbar: Axes | None = None,
+    cax: bool = True,
     **kwargs,
 ) -> None:
     
@@ -39,12 +41,10 @@ def plot_scatter(
         case cmap:
             if callable(s):
                 s = s(z_data)
-            ax_scatter = filter_kwargs(ax.scatter)(
+            path_clc = filter_kwargs(ax.scatter)(
                 x_data, y_data, c=z_data, cmap=cmap, s=s, **_kwargs
             )
-            divider = make_axes_locatable(ax)
-            colorbar_ax = divider.append_axes("right", size="5%", pad=0.1)
-            fig.colorbar(ax_scatter, colorbar_ax)
+            create_colorbar(fig, ax, path_clc, limits=None, ax_cbar=ax_cbar, cax=cax)
 
 
 def marker_size_func(

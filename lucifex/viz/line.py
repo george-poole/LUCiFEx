@@ -14,7 +14,10 @@ from cycler import Cycler
 
 from ..fem import as_grid_function, GridFunction
 from ..utils.py_utils import MultipleDispatchTypeError, filter_kwargs
-from .utils import LW, set_legend, optional_fig_ax, set_axes, create_cycler, optional_multifig_ax
+from .utils import (
+    LW, set_legend, create_colorbar, optional_fig_ax, 
+    set_axes, create_cycler, optional_multifig_ax,
+)
 
 
 @optional_fig_ax
@@ -45,13 +48,13 @@ def plot_line(
             mappable = ScalarMappable(
                 cmap=cyc, norm=plt.Normalize(vmin=min(legend_labels), vmax=max(legend_labels)),
             )
-            if ax_cbar is None:
-                divider = make_axes_locatable(ax)
-                ax_cbar = divider.append_axes("right", size="5%", pad=0.1)
-            if cax:
-                cbar = fig.colorbar(mappable, cax=ax_cbar, shrink=0.5)
-            else:
-                cbar = fig.colorbar(mappable, ax=ax_cbar)
+            cbar = create_colorbar(
+                fig, ax, mappable, 
+                limits=None, 
+                ax_cbar=ax_cbar, 
+                cax=cax,
+                **dict(shrink=0.5) if cax else {},
+            )
             if legend_title:
                 fontsize = kwargs.get('legend_fontsizes', 14)
                 cbar.set_label(legend_title, rotation=360, ha='left', fontsize=fontsize)
