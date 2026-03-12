@@ -11,7 +11,7 @@ from ufl import Measure
 from ufl.core.expr import Expr
 
 from ..utils.fenicsx_utils import SpatialMarkerAlias
-from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError
+from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError, LazyEvaluator
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
 from .options import OptionsFFCX, OptionsJIT
@@ -124,7 +124,7 @@ class Evaluation(Solver[T, TS]):
     def __init__(
         self,
         solution: T | TS ,
-        evaluation: Callable[[], Any],
+        evaluator: LazyEvaluator[Any],
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
@@ -132,7 +132,7 @@ class Evaluation(Solver[T, TS]):
         overwrite: bool = False,
     ) -> None:
         super().__init__(solution, corrector, future, overwrite)
-        self._evaluation = evaluation
+        self._evaluation = evaluator
 
     @classmethod
     def from_expr_factory(

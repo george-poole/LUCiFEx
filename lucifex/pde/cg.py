@@ -5,7 +5,7 @@ from ufl import Form, Measure
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries,
+    FunctionSeries, ConstantSeries, ExprSeries,
     FiniteDifference, FiniteDifferenceArgwise, 
     FiniteDifferenceDerivative, DT, AB1,
 )
@@ -38,11 +38,13 @@ def advection_form(
     """
     `∫dx v(𝐚·∇u)`
     """
+
     expr = lambda a, u: inner(a, grad(u))
     if isinstance(D_adv, FiniteDifference):
         adv = D_adv(expr(a, u), trial=u)
     else:
-        adv = D_adv(expr, a, u, trial=u)
+        adv = D_adv(ExprSeries(expr)(a, u), trial=u)
+        # adv = D_adv(expr, a, u, trial=u)
     F_adv =  v * adv * dx
     return F_adv
 

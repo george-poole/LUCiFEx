@@ -1,14 +1,22 @@
-from typing import Callable, ParamSpec, TypeVar, ParamSpec, Generic, TypeVar
+from typing import (
+    Callable, ParamSpec, TypeVar, 
+    ParamSpec, Generic, TypeVar, TypeAlias,
+)
 from math import floor
-from inspect import signature
 
 import numpy as np
 from dolfinx.fem import Constant
 
+from .func_utils import arity
+
+
+T = TypeVar('T')
+LazyEvaluator: TypeAlias = Callable[[], T]
+
 
 P = ParamSpec("P")
 R = TypeVar('R')
-def defer(func: Callable[P, R]) -> Callable[P, Callable[[], R]]:
+def create_lazy_evaluator(func: Callable[P, R]) -> Callable[P, LazyEvaluator[R]]:
     def _(*args: P.args, **kwargs: P.kwargs):
         return lambda: func(*args, **kwargs)
     return _
@@ -28,7 +36,7 @@ class DeferredEvaluation(Generic[P, R]):
     
 
 P = ParamSpec('P')
-class DeferredCondition(DeferredEvaluation[P, bool], Generic[P]):
+class DeferredBoolean(DeferredEvaluation[P, bool], Generic[P]):
     pass
 
 
@@ -40,40 +48,33 @@ class DeferredRoutine(DeferredEvaluation[P, None], Generic[P]):
 P = ParamSpec('P')
 Q = ParamSpec('Q')
 R = TypeVar('R')
-class DeferredConditionalEvaluation(DeferredEvaluation[P, R], Generic[P, Q, R]):
+class DeferredConditional(DeferredEvaluation[P, R], Generic[P, Q, R]):
     def __init__(
         self,
         func: Callable[P, R],
         condition: Callable[Q, bool],
     ):
         super().__init__(func)
-        self._condition = DeferredCondition(condition)
+        self._condition = DeferredBoolean(condition)
 
-    def evaluate_conditional(
+    def evaluate_if_true(
         self, 
         *args: P.args, 
         **kwargs: P.kwargs,
     ) -> Callable[Q, R | None]:
         return lambda *a, **k: self._func(*args, **kwargs) if self._condition.evaluate(*a, **k) else None
     
-    def conditional_evaluate(
-        self, 
-        *args: Q.args, 
-        **kwargs: Q.kwargs,
-    ) -> Callable[P, R | None]:
-        return lambda *a, **k: self._func(*a, **k) if self._condition.evaluate(*args, **kwargs) else None
-    
 
 P = ParamSpec('P')
 Q = ParamSpec('Q')
-class DeferredConditionalRoutine(DeferredConditionalEvaluation[P, Q, None], Generic[P, Q]):
+class DeferredConditionalRoutine(DeferredConditional[P, Q, None], Generic[P, Q]):
     pass
     
 
-class Stopper(DeferredCondition[[float]]):
+class Stopper(DeferredBoolean[[float]]):
     def __init__(
         self, 
-        condition: Callable[[], bool] | Callable[[float], bool] | int | float,
+        condition: LazyEvaluator[bool] | Callable[[float], bool] | int | float,
     ):
         if isinstance(condition, int):
             n_stop = condition
@@ -91,7 +92,7 @@ class Stopper(DeferredCondition[[float]]):
             t_stop = condition
             condition = lambda t: t > t_stop
 
-        super().__init__(inject_time_arg(condition))
+        super().__init__(inject_float_arg(condition))
 
     def stop(self, t: float | Constant | np.ndarray) -> bool:
         return self.evaluate(float(t))
@@ -100,8 +101,8 @@ class Stopper(DeferredCondition[[float]]):
 class Writer(DeferredConditionalRoutine[[float], [float]]):
     def __init__(
         self,
-        routine: Callable[[], None] | Callable[[float], None],
-        condition: Callable[[], bool] | Callable[[float], bool] | int | float | None = None,
+        routine: LazyEvaluator[None] | Callable[[float], None],
+        condition: LazyEvaluator[bool] | Callable[[float], bool] | int | float | None = None,
         name: str | None = None,
     ):
         if condition is None:
@@ -131,7 +132,7 @@ class Writer(DeferredConditionalRoutine[[float], [float]]):
                 else:
                     return False  
 
-        super().__init__(inject_time_arg(routine), inject_time_arg(condition))
+        super().__init__(inject_float_arg(routine), inject_float_arg(condition))
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
@@ -142,13 +143,13 @@ class Writer(DeferredConditionalRoutine[[float], [float]]):
 
     def write(self, t: float | Constant | np.ndarray) -> None:
         t = float(t)
-        self.evaluate_conditional(t)(t)
+        self.evaluate_if_true(t)(t)
 
 
-def inject_time_arg(
-    condition: Callable[[], bool] | Callable[[float], bool],
+def inject_float_arg(
+    condition: LazyEvaluator[bool] | Callable[[float], bool],
 ) -> Callable[[float], bool]:
-    n_args = len(signature(condition).parameters)
+    n_args = arity(condition)
     if n_args == 0:
         return lambda _: condition()
     else:

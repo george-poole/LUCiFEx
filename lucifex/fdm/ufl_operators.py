@@ -39,10 +39,10 @@ R = TypeVar('R')
 def binary_operator(ufl_func: Callable[[T0, T1], R]):
 
     def _decorator(
-        target: Callable[[], None],
+        dummy: Callable[[], None],
     ) -> Callable[[T0, T1], R] | Callable[[Series, Series], ExprSeries] | Callable[[Series, Any], Series] | Callable[[Any, Series], ExprSeries] | Callable[[UnsolvedType, Any], UnsolvedType] | Callable[[Any, UnsolvedType], UnsolvedType]:
 
-        assert target() is None
+        assert dummy() is None
 
         # @functools.wraps(ufl_func) TODO __doc__ only?
         def _inner(u, v, *a, **k):

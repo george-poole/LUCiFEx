@@ -1,4 +1,4 @@
-from .deferred import defer, Writer, Stopper
+from .deferred import create_lazy_evaluator, Writer, Stopper, LazyEvaluator
 from .func_utils import (
     log_timing, optional_lru_cache, arity,
     MultipleDispatchTypeError, replicate_callable,

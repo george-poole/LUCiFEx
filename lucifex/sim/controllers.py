@@ -5,7 +5,7 @@ from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias
 from ..fem import Constant, Function
 from ..fdm import FunctionSeries, ConstantSeries
 from ..io import write
-from ..utils.py_utils.deferred import Stopper, Writer, defer
+from ..utils.py_utils.deferred import Stopper, Writer, create_lazy_evaluator, LazyEvaluator
 from .simulation import Simulation
 
 
@@ -27,6 +27,7 @@ def stopper(
 ) -> Callable[P, CreateStopper]:
     ...
 
+
 def stopper(
     u: str | T,
     condition: Callable[Concatenate[T, P], bool],
@@ -39,13 +40,13 @@ def stopper(
             return lambda sim: stopper(sim[u], condition)(*args, **kwargs)
         else:
             _.__signature__ = Signature(paramspec_params, return_annotation=Stopper)
-            return Stopper(defer(condition)(u, *args, **kwargs))
+            return Stopper(create_lazy_evaluator(condition)(u, *args, **kwargs))
 
     return _
             
 
 def as_stopper(
-    arg: Stopper | Callable[[], bool] | CreateStopper,
+    arg: Stopper | LazyEvaluator[bool] | CreateStopper,
     sim: Simulation,
 ) -> Stopper:
     if isinstance(arg, Stopper):
@@ -70,7 +71,6 @@ def writer(
 ) -> Callable[P, Writer]:
     ...
 
-
 @overload
 def writer(
     u: T,
@@ -80,7 +80,6 @@ def writer(
     file_name: str | None = None,
 ) -> Writer:
     ...
-
 
 @overload
 def writer(
@@ -148,12 +147,12 @@ def writer(
                     _routine = lambda t: write(u, file_name, dir_path, t, 'a', u.mesh.comm)
                 else:
                     _routine = lambda t: routine(t, u)
-                return Writer(_routine, defer(condition)(u, *args, **kwargs), u.name)
+                return Writer(_routine, create_lazy_evaluator(condition)(u, *args, **kwargs), u.name)
         return _
 
 
 def as_writer(
-    arg: Writer | Callable[[], bool] | CreateWriter,
+    arg: Writer | LazyEvaluator[bool] | CreateWriter,
     sim: Simulation,
 ) -> Writer:
     if isinstance(arg, Writer):

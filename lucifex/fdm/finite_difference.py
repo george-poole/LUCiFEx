@@ -1,6 +1,7 @@
 from typing import Iterable, Any, Callable, overload
 from types import EllipsisType
 from typing_extensions import Self
+from functools import partial
 
 from ufl.core.expr import Expr
 from ufl import TrialFunction, replace
@@ -421,72 +422,35 @@ class FiniteDifferenceArgwise:
         self._fd_kws = kws.copy()
         self._name = name
         self._use_repr = use_repr
-
-    @overload
-    def __call__(
-        self, 
-        u: ExprSeries, 
-        /,
-        trial: FunctionSeries | None = None,
-        strict: bool = False,
-    ) -> Expr:
-        ...
-
-    @overload
-    def __call__(
-        self, 
-        expr_factory: Callable[..., Expr],
-        *args: Any,
-        trial: FunctionSeries | None = None,
-        strict: bool = False,
-    ) -> Expr:
-        ...
-
-    @overload
-    def __call__(
-        self,
-        u: Expr | Function | Constant,
-        /,
-        **kwargs,
-    ) -> Expr | Function | Constant:
-        ...
     
     def __call__(
         self, 
-        *args,
-        trial=None,
-        strict=False,
-    ):
+        u: ExprSeries | Any, 
+        /,
+        trial: FunctionSeries | None = None,
+        strict: bool = False,
+    ) -> Expr | Any:
         """
         `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
         """
-        if not args:
-            raise TypeError
-        
-        if len(args) > 1:
-            factory, *args = args
-            kws = {}
-        else:
-            u = args[0]
-            if not isinstance(u, ExprSeries):
-                if strict:
-                    raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(u)}.")
-                else:
-                    return u
-            if not u.factory_and_args:
-                raise ValueError(f"Expression and arguments must be deducable '{u.name}'.")
-            factory, args, kws = u.factory_and_args
+        if not isinstance(u, ExprSeries):
+            if strict:
+                raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(u)}.")
+            else:
+                return u
 
-        n_fd = len(self.finite_differences)
-        n_args = len(args)
-        if not n_fd == n_args:
-            raise ValueError(
-                f'Number of finite difference operators ({n_fd}) should match number of expression arguments ({n_args})'
-            )
+        # TODO - remove ?
+        # n_fd = len(self.finite_differences)
+        # n_args = len(args)
+        # if not n_fd == n_args:
+        #     raise ValueError(
+        #         f'Number of finite difference operators ({n_fd}) should match number of expression arguments ({n_args})'
+        #     )
         
-        _args = [fd(arg, trial) for fd, arg in zip(self._fd_args, args)]
-        _kws = {k: fd(kws[k], trial) for k, fd in self._fd_kws.items()}
-        return factory(*_args, **_kws)
+        args_operators = [partial(fd, trial=trial) for fd in self._fd_args]
+        kwargs_operators = {k : partial(fd, trial=trial) for k, fd in self._fd_kws.items()}
+            
+        return u.reconstruct(*args_operators, **kwargs_operators)
     
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:

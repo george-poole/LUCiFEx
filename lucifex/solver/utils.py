@@ -27,15 +27,15 @@ class LinearFormError(FormError):
 
 class NonlinearFormError(FormError):
     """
-    Error to raise if a nonlinearform is found`.
+    Error to raise if a non-linear form is found`.
     """
     def __init__(self, cls, name):
-        super().__init__(cls, name, 'contains a nonlinear form. Check finite difference discretizations')
+        super().__init__(cls, name, 'contains a non-linear form. Check finite difference discretizations.')
 
 
 class EigenvalueFormError(FormError):
     """
-    Error to raise if linear form is found in the eigenvalue forms `F(u, v) = L(u, v) - λR(u,v).`
+    Error to raise if a linear form is found in the eigenvalue forms `F(u, v) = L(u, v) - λR(u,v).`
     """
     def __init__(self, cls, name):
         super().__init__(cls, name, 'cannot have a linear form. Check that this is not a boundary problem.')

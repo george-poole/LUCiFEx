@@ -6,7 +6,7 @@ from ufl import (Form, Argument, FacetNormal, CellDiameter,
 )
 from ufl.core.expr import Expr
 
-from lucifex.solver import BoundaryConditions
+from lucifex.solver import BoundaryConditions, BlockedForm
 from lucifex.fem import Function, Constant
 from lucifex.utils.fenicsx_utils import is_zero
 
@@ -15,8 +15,9 @@ def stokes_incompressible(
     up: Function,
     deviatoric_stress: Callable[[Function | Argument], Expr],
     f: Function | Constant | None = None,
-    bcs: BoundaryConditions | None = None
-) -> list[Form]:
+    bcs: BoundaryConditions | None = None,
+    blocked: bool = False,
+) -> list[Form] | BlockedForm:
     """
     `∇·𝐮 = 0` \\
     `𝟎 = -∇p + ∇·𝜏(𝐮) + 𝐟`
@@ -26,7 +27,7 @@ def stokes_incompressible(
     u, p = TrialFunctions(up.function_space) 
     tau = deviatoric_stress(u)
 
-    F_incomp = q * div(u) * dx
+    F_div = q * div(u) * dx
     F_pressure = -p * div(v) * dx
     F_stress = inner(grad(v), tau) * dx 
 
@@ -34,14 +35,21 @@ def stokes_incompressible(
         f = Constant(up.function_space.mesh, 0.0, shape=u.ufl_shape)
     F_force = -inner(v, f) * dx
 
-    forms = [F_incomp, F_pressure, F_stress, F_force]
-
+    F_bcs = 0
     if bcs is not None:
-        ds, natural =  bcs.boundary_data(up, 'natural')
-        F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in natural])
-        forms.append(F_bcs)
+        ds, tau_natural =  bcs.boundary_data(up, 'natural')
+        F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in tau_natural])
 
-    return forms
+    if blocked:
+        return BlockedForm(
+            [F_stress + F_force + F_bcs, F_pressure],
+            [F_div, None],
+        )
+    else:
+        forms = [F_div, F_pressure, F_stress, F_force]
+        if F_bcs:
+            forms.append(F_bcs)
+        return forms
 
 
 def stokes_streamfunction(

@@ -68,6 +68,5 @@ These features remain to be implemented as part of ongoing development:
 
 + update to latest version of `fenicsx` (currently on 0.6.0) and Python (currently on 3.10.12)
 + parallelisation with `mpi4py`
-+ nested and blocked solvers
-+ preconditioned solvers
-+ more documentation and unit testing
++ more documentation 
++ more unit testing

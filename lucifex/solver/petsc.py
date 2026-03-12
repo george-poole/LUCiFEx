@@ -15,9 +15,7 @@ from dolfinx.fem.petsc import (
     assemble_matrix as dolfinx_assemble_matrix,
     assemble_vector as dolfinx_assemble_vector,
     create_matrix as dolfinx_create_matrix,
-    # TODO
-    # assemble_matrix_block,
-    # assemble_matrix_nest,
+    assemble_matrix_block, # TODO
     apply_lifting,
     set_bc,
 )
@@ -246,10 +244,19 @@ class BlockedForm:
     def __init__(
         self, 
         *rows: Iterable[ufl.Form | None],
-        names: Iterable[str] | None,
+        names: Iterable[str] | None = None,
     ):
+        if not all(len(r) == len(rows[0]) for r in rows):
+            raise ValueError('Expected all rows to be of same length.')
+        if not len(rows) == len(rows[0]):
+            raise ValueError('Expected number of rows to match number of columns.')
+        
         self._rows = [list(r) for r in rows]
-        self._names = tuple(names)
+
+        if names is not None:
+            if not len(names) == len(rows[0]):
+                raise ValueError('Expected length of names to match number of rows or columns.')
+            self._names = tuple(names)
 
     def __getitem__(
         self, 
@@ -260,7 +267,7 @@ class BlockedForm:
         if isinstance(i, int) and isinstance(j, int):
             return self._rows[i][j]
         
-        if isinstance(i, int) and isinstance(j, str):
+        if isinstance(i, str) and isinstance(j, str):
             assert self._names is not None
             i = self._names.index(i)
             _ = self._names.index(j)

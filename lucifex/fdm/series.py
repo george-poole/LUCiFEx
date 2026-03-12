@@ -10,7 +10,7 @@ from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
 from ..utils.fenicsx_utils import set_constant, set_function, extract_mesh, create_function_space
-from ..utils.py_utils import MultipleDispatchTypeError, Writer
+from ..utils.py_utils import MultipleDispatchTypeError, Writer, LazyEvaluator
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 
@@ -189,15 +189,29 @@ class Series(ABC, Generic[T]):
 
 
 P = ParamSpec('P')
+R = TypeVar('R')
 class ExprSeries(
     Series[Expr],
+    Generic[P, R],
 ):
-    _factory_and_args: None | tuple[Callable, tuple, dict] = None
+    _factory: Callable[P, R] | None = None
+    _factory_args: tuple | None = None
+    _factory_kwargs: dict | None = None
 
     @overload
     def __init__(
         self,
-        arg: Self,
+        expr_series: Self,
+        /,
+        name: str | None = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Self[P, R],
+        factory: Callable[P, R],
+        /,
         name: str | None = None,
     ):
         ...
@@ -205,19 +219,21 @@ class ExprSeries(
     @overload
     def __init__(
         self,
-        arg: Iterable[Expr],
+        seq: Iterable[Expr],
+        /,
         name: str | None = None,
-        series: Callable[[], list[Expr]] | None = None,
-        time_series: Callable[[], list[float]] | None = None,
+        series: LazyEvaluator[list[Expr]] | None = None,
+        time_series: LazyEvaluator[list[float]] | None = None,
     ):
         ...
 
     def __init__(
         self,
         arg,
+        /,
         name: str | None = None,
-        series: Callable |  None = None,
-        time_series: Callable |  None = None,
+        series: LazyEvaluator[list[Expr]] | None = None,
+        time_series: LazyEvaluator[list[float]] | None = None,
     ):
         if isinstance(arg, ExprSeries):
             if name is None:
@@ -225,11 +241,41 @@ class ExprSeries(
             self.__init__(arg.sequence, name, arg._series, arg._time_series)
         elif isinstance(arg, Series):
             self.__init__(1.0 * arg, name)
+        elif callable(arg):
+            self._factory = arg
+            self._name = name
         else:
             order = len(arg) - 1
             super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
             self._series = series
             self._time_series = time_series
+            self._instantiated = True
+
+    def __call__(
+        self: Self[P, R], 
+        *args: P.args, 
+        **kwargs: P.kwargs,
+    ) -> Self[P, R]:
+        if self._instantiated:
+            raise RuntimeError('Can only `ExprSeries` instantiate once')
+        if not self.is_callable:
+            raise NoFactoryError
+        self._factory_args = args
+        self._factory_kwargs = kwargs
+        expr_series = self._factory(*args, **kwargs)
+        self.__init__(expr_series, self._name)
+        return self
+    
+    def reconstruct(
+        self: Self[P, R],
+        *args_operators: Callable,
+        **kws_operators: Callable,
+    ) -> Any:
+        if not self.is_callable:
+            raise NoFactoryError
+        _args = [op(arg) for op, arg in zip(args_operators, self._factory_args, strict=True)]
+        _kws = {k: op(self._factory_kwargs[k]) for k, op in kws_operators.items()}
+        return self._factory(*_args, **_kws)
 
     @property
     def series(self):
@@ -242,73 +288,10 @@ class ExprSeries(
         if self._time_series is None:
             return []
         return self._time_series()
-
-    @overload
-    @classmethod
-    def _from_expr(
-        cls, 
-        factory: Callable[P, Self], 
-        /,
-        *,
-        name: str | None = None,
-    ) -> Callable[P, Self]:
-        ...
-
-    @overload
-    @classmethod
-    def _from_expr(
-        cls, 
-        *args: Any | Callable[..., Self],
-        name: str | None = None,
-    ) -> Self:
-        ...
-
-    @classmethod
-    def _from_expr(
-        cls, 
-        *args,
-        name: str | None = None,
-    ):
-        if not args:
-            raise TypeError
-        
-        def _(f, *a, **k):
-            expr = f(*a, **k)
-            obj = cls(expr, name)
-            obj._factory_and_args = (f, a, k)
-            return obj
-        
-        if len(args) > 1:
-            *args, factory = args
-            return _(factory, *args)
-        else:
-            factory = args[0]
-            return lambda *a, **k: _(factory, *a, **k)
-        
-    @classmethod
-    def from_expr_factory(
-        cls, 
-        factory: Callable[P, Self], 
-        /,
-        *,
-        name: str | None = None,
-    ) -> Callable[P, Self]:
-        return cls._from_expr(factory, name=name)
-    
-    @classmethod
-    def from_expr_factory_and_args(
-        cls, 
-        *args: Any | Callable[..., Self],
-        name: str | None = None,
-    ) -> Self:
-        return cls._from_expr(*args, name=name)
     
     @property
-    def factory_and_args(self) -> tuple[Callable, tuple[Any, ...], dict[str, Any]] | None:
-        if self._factory_and_args is not None:
-            return self._factory_and_args
-        else:
-            return None
+    def is_callable(self) -> bool:
+        return self._factory is not None
 
     @property
     def mesh(self) -> Mesh | None:
@@ -320,6 +303,73 @@ class ExprSeries(
     @property
     def ufl_shape(self) -> tuple[int, ...]:
         return self.sequence[0].ufl_shape
+
+    # @overload
+    # @classmethod
+    # def _from_expr(
+    #     cls, 
+    #     factory: Callable[P, Self], 
+    #     /,
+    #     *,
+    #     name: str | None = None,
+    # ) -> Callable[P, Self]:
+    #     ...
+
+    # @overload
+    # @classmethod
+    # def _from_expr(
+    #     cls, 
+    #     *args: Any | Callable[..., Self],
+    #     name: str | None = None,
+    # ) -> Self:
+    #     ...
+
+    # @classmethod
+    # def _from_expr(
+    #     cls, 
+    #     *args,
+    #     name: str | None = None,
+    # ):
+    #     if not args:
+    #         raise TypeError
+        
+    #     def _(f, *a, **k):
+    #         expr = f(*a, **k)
+    #         obj = cls(expr, name)
+    #         obj._factory_and_args = (f, a, k)
+    #         return obj
+        
+    #     if len(args) > 1:
+    #         *args, factory = args
+    #         return _(factory, *args)
+    #     else:
+    #         factory = args[0]
+    #         return lambda *a, **k: _(factory, *a, **k)
+        
+    # @classmethod
+    # def from_expr_factory(
+    #     cls, 
+    #     factory: Callable[P, Self], 
+    #     /,
+    #     *,
+    #     name: str | None = None,
+    # ) -> Callable[P, Self]:
+    #     return cls._from_expr(factory, name=name)
+    
+    # @classmethod
+    # def from_expr_factory_and_args(
+    #     cls, 
+    #     *args: Any | Callable[..., Self],
+    #     name: str | None = None,
+    # ) -> Self:
+    #     return cls._from_expr(*args, name=name)
+    
+
+class NoFactoryError(TypeError):
+    def __init__(self):
+        super.__init__(
+            "`ExprSeries` should have been instantiated with a factory argument if it needs to be callable."
+        )
 
 
 class SolutionType(Protocol):
@@ -479,7 +529,7 @@ class FunctionSeries(
         | tuple[Mesh, str, int, int],
         name: str | tuple[str, Iterable[str]] | None = None,
         order: int = 1,
-        store: int | float | Callable[[], bool] | None = None,
+        store: int | float | LazyEvaluator[bool] | None = None,
         ics: Function | Perturbation| Callable[[np.ndarray], np.ndarray] | Expression | Expr | Constant | float | Iterable[float] | None = None,
     ):
         fs = create_function_space(fs)
@@ -595,7 +645,7 @@ class ConstantSeries(
         name: str | tuple[str, Iterable[str]] | None = None,
         order: int = 1,
         shape: tuple[int, ...] = (),
-        store: int | float | Callable[[], bool] | None = None,
+        store: int | float | LazyEvaluator[bool] | None = None,
         ics: Constant | float | Iterable[float] | None = None,
     ):
         super().__init__(lambda i: Constant(mesh, Unsolved, shape=shape, index=i), name, order, store, ics)

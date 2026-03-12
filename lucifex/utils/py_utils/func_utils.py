@@ -199,10 +199,10 @@ def filter_kwargs(
 
 def arity(
     func: Callable,
-    explicit: bool = True,
+    variadic: bool = False,
 ) -> int:
     params = signature(func).parameters
-    if explicit:
+    if not variadic:
         params = {k: v for k, v in params.items() if v.kind is not (v.VAR_KEYWORD, v.VAR_POSITIONAL)}
     return len(params)
 

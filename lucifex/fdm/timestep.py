@@ -11,7 +11,7 @@ from ufl.geometry import GeometricCellQuantity
 
 from ..fem import Constant
 from ..utils.fenicsx_utils import dofs, cell_size_quantity, extract_mesh, is_tensor
-from ..utils.py_utils import MultipleDispatchTypeError
+from ..utils.py_utils import MultipleDispatchTypeError, LazyEvaluator
 
 
 @overload
@@ -76,17 +76,17 @@ def advective_timestep(
 
 
 def advective_timestep(a, h, courant=1.0, dt_max=np.inf, dt_min=0.0, tol=1e-10, mesh=None):
-    _lambda = _advective_dt_evaluation(a, h, tol, mesh)
+    _lambda = _advective_dt_evaluator(a, h, tol, mesh)
     return _bounded_timestep(_lambda, dt_max, dt_min, courant)
 
 
 @singledispatch
-def _advective_dt_evaluation(velocity, *_, **__) -> Callable[[], float]:
-    raise MultipleDispatchTypeError(velocity, _advective_dt_evaluation)
+def _advective_dt_evaluator(velocity, *_, **__) -> LazyEvaluator[float]:
+    raise MultipleDispatchTypeError(velocity, _advective_dt_evaluator)
 
 
-@_advective_dt_evaluation.register(Function)
-@_advective_dt_evaluation.register(Expr)
+@_advective_dt_evaluator.register(Function)
+@_advective_dt_evaluator.register(Expr)
 def _(velocity, h, tol, mesh):
     if mesh is None:
         if isinstance(velocity, Function):
@@ -100,7 +100,7 @@ def _(velocity, h, tol, mesh):
     )
 
 
-@_advective_dt_evaluation.register(Constant)
+@_advective_dt_evaluator.register(Constant)
 def _(velocity: Constant, h, tol, mesh):
     if mesh is None:
         mesh = velocity.mesh
@@ -114,18 +114,18 @@ def _(velocity: Constant, h, tol, mesh):
         return lambda: h / max(np.linalg.norm(velocity.value, ord=2), tol)
 
 
-@_advective_dt_evaluation.register(float)
-@_advective_dt_evaluation.register(int)
+@_advective_dt_evaluator.register(float)
+@_advective_dt_evaluator.register(int)
 def _(velocity, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
     return lambda: h / max(velocity, tol)
 
 
-@_advective_dt_evaluation.register(Iterable)
+@_advective_dt_evaluator.register(Iterable)
 def _(velocity: Iterable[float], h, tol, mesh):
     norm = np.linalg.norm(velocity, 2)
-    return _advective_dt_evaluation(norm, h, tol, mesh)
+    return _advective_dt_evaluator(norm, h, tol, mesh)
 
 
 def diffusive_timestep(
@@ -142,17 +142,17 @@ def diffusive_timestep(
 
     If `D` is a tensor, then `|D| = tr(D) / dim(D)`.
     """
-    _lambda = _diffusive_dt_evaluation(d, h, tol, mesh)
+    _lambda = _diffusive_dt_evaluator(d, h, tol, mesh)
     return _bounded_timestep(_lambda, dt_max, dt_min, courant)
 
 
 @singledispatch
-def _diffusive_dt_evaluation(diffusion, *_, **__) -> Callable[[], float]:
-    raise MultipleDispatchTypeError(diffusion, _diffusive_dt_evaluation)
+def _diffusive_dt_evaluator(diffusion, *_, **__) -> LazyEvaluator[float]:
+    raise MultipleDispatchTypeError(diffusion, _diffusive_dt_evaluator)
 
 
-@_diffusive_dt_evaluation.register(Function)
-@_diffusive_dt_evaluation.register(Expr)
+@_diffusive_dt_evaluator.register(Function)
+@_diffusive_dt_evaluator.register(Expr)
 def _(diffusion, h, tol, mesh):
     if mesh is None:
         if isinstance(diffusion, Function):
@@ -168,7 +168,7 @@ def _(diffusion, h, tol, mesh):
     )
 
 
-@_diffusive_dt_evaluation.register(Constant)
+@_diffusive_dt_evaluator.register(Constant)
 def _(diffusion: Constant, h, tol, mesh):
     if mesh is None:
         mesh = diffusion.mesh
@@ -182,8 +182,8 @@ def _(diffusion: Constant, h, tol, mesh):
         return lambda: 0.5 * h**2 / max(np.max(diffusion.value), tol)
 
 
-@_diffusive_dt_evaluation.register(float)
-@_diffusive_dt_evaluation.register(int)
+@_diffusive_dt_evaluator.register(float)
+@_diffusive_dt_evaluator.register(int)
 def _(d, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
@@ -218,17 +218,17 @@ def reactive_timestep(
 
 
 def reactive_timestep(r, courant = 1.0, dt_max = np.inf, dt_min = 0.0, tol = 1e-10, mesh=None): 
-    _lambda = _reactive_dt_evaluation(r, tol, mesh)
+    _lambda = _reactive_dt_evaluator(r, tol, mesh)
     return _bounded_timestep(_lambda, dt_max, dt_min, courant)
 
 
 @singledispatch
-def _reactive_dt_evaluation(reaction, *_, **__) -> Callable[[], float]:
+def _reactive_dt_evaluator(reaction, *_, **__) -> LazyEvaluator[float]:
     raise MultipleDispatchTypeError(reaction)
 
 
-@_reactive_dt_evaluation.register(Function)
-@_reactive_dt_evaluation.register(Expr)
+@_reactive_dt_evaluator.register(Function)
+@_reactive_dt_evaluator.register(Expr)
 def _(reaction, tol, mesh):
     if mesh is None:
         if isinstance(reaction, Function):
@@ -240,7 +240,7 @@ def _(reaction, tol, mesh):
     )
 
 
-@_reactive_dt_evaluation.register(Constant)
+@_reactive_dt_evaluator.register(Constant)
 def _(reaction: Constant, tol, _):
     if reaction.ufl_shape == ():
         return lambda: 1.0 / max(reaction.value, tol)
@@ -248,8 +248,8 @@ def _(reaction: Constant, tol, _):
         raise ValueError('Expected a scalar reaction')
 
 
-@_reactive_dt_evaluation.register(float)
-@_reactive_dt_evaluation.register(int)
+@_reactive_dt_evaluator.register(float)
+@_reactive_dt_evaluator.register(int)
 def _(reaction, tol, _):
     return lambda: 1.0 / max(reaction, tol)
 
@@ -272,8 +272,8 @@ def diffusive_reactive_timestep(
     if d_courant is None and r_courant is None:
         return dt_max
     
-    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
-    _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluator(d, h, tol, mesh)
+    _lambda_r = _reactive_dt_evaluator(r, tol, mesh)
     _lambda_dr = lambda: min(
         d_courant * _lambda_d(), 
         r_courant * _lambda_r(), 
@@ -304,13 +304,13 @@ def advective_diffusive_timestep(
     if a_courant is None and d_courant is None:
         return dt_max
 
-    _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
-    _lambda_cfld = lambda: min(
-        a_courant * _lambda_cfl(),
+    _lambda_a = _advective_dt_evaluator(a, h, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluator(d, h, tol, mesh)
+    _lambda_ad = lambda: min(
+        a_courant * _lambda_a(),
         d_courant * _lambda_d(), 
     )
-    return _bounded_timestep(_lambda_cfld, dt_max, dt_min, 1.0)
+    return _bounded_timestep(_lambda_ad, dt_max, dt_min, 1.0)
 
 
 def advective_reactive_timestep(
@@ -336,12 +336,12 @@ def advective_reactive_timestep(
     if a_courant is None and r_courant is None:
         return dt_max
 
-    _lambda_cfl = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
-    _lambda_cflr = lambda: min(
-        r_courant * _lambda_r(), a_courant * _lambda_cfl()
+    _lambda_a = _advective_dt_evaluator(a, h, tol, mesh)
+    _lambda_r = _reactive_dt_evaluator(r, tol, mesh)
+    _lambda_ar = lambda: min(
+        r_courant * _lambda_r(), a_courant * _lambda_a()
     )
-    return _bounded_timestep(_lambda_cflr, dt_max, dt_min, 1.0)
+    return _bounded_timestep(_lambda_ar, dt_max, dt_min, 1.0)
 
 
 def adr_timestep(
@@ -374,19 +374,19 @@ def adr_timestep(
         case None, _, _:
             return diffusive_reactive_timestep(d, r, h, d_courant, r_courant, dt_max, dt_min, tol, mesh)
         
-    _lambda_a = _advective_dt_evaluation(a, h, tol, mesh)
-    _lambda_d = _diffusive_dt_evaluation(d, h, tol, mesh)
-    _lambda_r = _reactive_dt_evaluation(r, tol, mesh)
-    _lambda_cfldr = lambda: min(
+    _lambda_a = _advective_dt_evaluator(a, h, tol, mesh)
+    _lambda_d = _diffusive_dt_evaluator(d, h, tol, mesh)
+    _lambda_r = _reactive_dt_evaluator(r, tol, mesh)
+    _lambda_adr = lambda: min(
         a_courant * _lambda_a(),
         d_courant * _lambda_d(), 
         r_courant * _lambda_r(), 
     )
-    return _bounded_timestep(_lambda_cfldr, dt_max, dt_min, 1.0)
+    return _bounded_timestep(_lambda_adr, dt_max, dt_min, 1.0)
         
 
 def _bounded_timestep(
-    _lambda: Callable[[], float],
+    evaluator: LazyEvaluator[float],
     dt_max: float,
     dt_min: float,  
     courant: float | None,
@@ -395,7 +395,7 @@ def _bounded_timestep(
         return dt_max
     if np.isclose(dt_min, dt_max):
         return dt_min
-    return min(dt_max, max(dt_min, courant * _lambda()))
+    return min(dt_max, max(dt_min, courant * evaluator()))
 
 
 @overload

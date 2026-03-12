@@ -95,6 +95,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = False,
         overwrite: bool = False,
     ) -> None:
@@ -182,6 +183,10 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         # nontermwise vector attributes
         self._l_metaform_nontermwise = None
         self._vector_nontermwise = None
+        # preconditioner attributes
+        self._pc_form = pc_form
+        self._pc_metaform = None
+        self._pc_matrix = None
         # effective attributes
         self._matrix = None
         self._vector = None
@@ -263,6 +268,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = False,
         overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
@@ -288,6 +294,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
                 corrector,
                 cache_matrix, 
                 assemble_termwise,
+                pc_form,
                 future,
                 overwrite,
             )
@@ -505,6 +512,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = True,
         overwrite: bool = False,
     ) -> None:
@@ -521,6 +529,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             corrector, 
             cache_matrix, 
             assemble_termwise, 
+            pc_form,
             future,
             overwrite,
         )
@@ -536,6 +545,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                 corrector=corrector,
                 cache_matrix=cache_matrix, 
                 assemble_termwise=assemble_termwise,
+                pc_form=pc_form,
             )
             assert n_init is not None and n_init > 0
             self._n_init = n_init
@@ -558,6 +568,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 
@@ -609,6 +620,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
                 corrector, 
                 cache_matrix, 
                 assemble_termwise, 
+                pc_form,
                 future, 
                 overwrite,
             )
@@ -645,6 +657,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = True,
         overwrite: bool = False,
     ) -> None:
@@ -661,6 +674,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             corrector, 
             cache_matrix, 
             assemble_termwise, 
+            pc_form,
             future,
             overwrite,
         )
@@ -678,6 +692,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
+        pc_form: Form | BlockedForm | None = None,
         future: bool = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 
@@ -693,6 +708,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
             corrector,
             cache_matrix,
             assemble_termwise,
+            pc_form,
             future,
             solution,
             overwrite,

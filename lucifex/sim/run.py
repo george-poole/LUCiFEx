@@ -12,8 +12,8 @@ from ..fem import Constant
 from ..fdm import ConstantSeries
 from ..solver import Solver, IBVP, IVP
 from ..io import write, write_checkpoint, read_checkpoint, reset_directory
-from ..utils.py_utils import Writer, Stopper, log_timing
-from .deferred import (
+from ..utils.py_utils import Writer, Stopper, log_timing, LazyEvaluator
+from .controllers import (
     CreateStopper, CreateWriter, 
     as_stopper, as_writer, has_simulation_arg,
 )
@@ -32,8 +32,8 @@ def run(
     resume: bool = False, 
     overwrite: bool | None = None,
     timing: bool | dict[Hashable, list[float]] = False,
-    stoppers: Iterable[Stopper | Callable[[], bool] | CreateStopper] = (),
-    writers: Iterable[Writer | Callable[[], None] | CreateWriter] = (),
+    stoppers: Iterable[Stopper | LazyEvaluator[bool] | CreateStopper] = (),
+    writers: Iterable[Writer | LazyEvaluator[None] | CreateWriter] = (),
     show_progress: bool = False,
 ) -> None:    
     if isinstance(simulation, tuple):
