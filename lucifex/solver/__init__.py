@@ -21,6 +21,7 @@ from .eval import (
     interpolation,
     integration,
 )
+from .petsc import ScaledForm, BlockedForm
 from .norm import (
     l_norm,
     L_norm,

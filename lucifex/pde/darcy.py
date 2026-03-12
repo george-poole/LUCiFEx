@@ -6,7 +6,7 @@ from ufl import (
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import FunctionSeries
-from lucifex.solver import BoundaryConditions
+from lucifex.solver import BoundaryConditions, BlockedForm
 from lucifex.utils.fenicsx_utils import is_tensor, is_zero
 
 from .poisson import poisson
@@ -50,7 +50,8 @@ def darcy_incompressible(
     mu: Expr | Function | Constant,
     f: Expr | None = None,
     bcs: BoundaryConditions | None = None,
-) -> list[Form]:
+    blocked: bool = False,
+) -> list[Form] | BlockedForm:
     """
     `∇⋅𝐮 = 0` \\
     `𝐮 = -(K/μ)⋅(∇p - 𝐟)`
@@ -70,18 +71,27 @@ def darcy_incompressible(
         F_velocity = inner(v, mu * u / k) * dx
     F_pressure = -p * div(v) * dx
 
-    forms = [F_div, F_velocity, F_pressure]
-
+    F_force = 0
     if f is not None:
-        F_buoyancy = inner(v, f) * dx
-        forms.append(F_buoyancy)
+        F_force = -inner(v, f) * dx
 
+    F_bcs = 0
     if bcs is not None:
         ds, p_natural = bcs.boundary_data(up, 'natural')
         F_bcs = sum([inner(v, n) * pN * ds(i) for i, pN in p_natural])
-        forms.append(F_bcs)
 
-    return forms
+    if blocked:
+        return BlockedForm(
+            [F_velocity + F_force + F_bcs, F_pressure], 
+            [F_div, None],
+        )
+    else:
+        forms = [F_div, F_velocity, F_pressure]
+        if F_force:
+            forms.append(F_force)
+        if F_bcs:
+            forms.append(F_bcs)
+        return forms
 
 
 def darcy_pressure(

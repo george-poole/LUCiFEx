@@ -2,6 +2,7 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
+    TypeAlias,
     Any,
 )
 from collections.abc import Iterable
@@ -13,7 +14,7 @@ import numpy as np
 from ufl import Form, lhs, rhs, Measure, TestFunction, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
-from dolfinx.fem import FunctionSpace #Constant, Function
+from dolfinx.fem import FunctionSpace
 from dolfinx.fem.petsc import create_vector, DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
@@ -43,6 +44,9 @@ from .petsc import (
     array_vector,
     PETScMat,
     PETScVec,
+    BlockedForm,
+    ScaledForm,
+    is_scaled_form,
 )
 from .eval import Solver
 from .utils import BilinearFormError, LinearFormError, EigenvalueFormError, UnsolvedFormError
@@ -78,7 +82,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     def __init__(
         self,
         solution: Function | FunctionSeries,
-        forms: Form | Iterable[Form | tuple[Constant | float, Form]],
+        forms: Form | ScaledForm | BlockedForm | Iterable[Form | ScaledForm | BlockedForm],
         bcs: BoundaryConditions 
         | list[DirichletBCMetaClass] 
         | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
@@ -97,7 +101,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         super().__init__(solution, corrector, future, overwrite)
         
-        if isinstance(forms, Form):
+        if isinstance(forms, (Form, BlockedForm)) or is_scaled_form(forms):
             forms = (forms, )
 
         if petsc is None:
@@ -127,8 +131,8 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             self._mpc.finalize()
         
         # variational forms
-        self._scalings = [i[0] if isinstance(i, tuple) else 1.0 for i in forms]
-        self._forms = [i[1] if isinstance(i, tuple) else i for i in forms]
+        self._scalings: list[float | Constant] = [i[0] if is_scaled_form(i) else 1.0 for i in forms]
+        self._forms: list[Form] = [i[1] if is_scaled_form(i) else i for i in forms]
         # bilinear forms
         self._a_forms = [lhs(i) if len(i.arguments()) == 2 else None for i in self._forms]
         self._a_form_termwise: Form = sum([i for i in self._a_forms if i is not None])

@@ -1,4 +1,4 @@
-from typing import TypeAlias, Iterable, Literal
+from typing import TypeAlias, Iterable, Literal, Any
 from types import EllipsisType
 from functools import wraps
 
@@ -15,6 +15,9 @@ from dolfinx.fem.petsc import (
     assemble_matrix as dolfinx_assemble_matrix,
     assemble_vector as dolfinx_assemble_vector,
     create_matrix as dolfinx_create_matrix,
+    # TODO
+    # assemble_matrix_block,
+    # assemble_matrix_nest,
     apply_lifting,
     set_bc,
 )
@@ -68,17 +71,20 @@ def assemble_matrix(
     if bcs is None:
         bcs = []
 
-    _consts = m.getAttr(ATTR_CONSTANTS)
-    _coeffs = m.getAttr(ATTR_COEFFICIENTS)
+    _consts: list | None = m.getAttr(ATTR_CONSTANTS)
+    _coeffs: list | None = m.getAttr(ATTR_COEFFICIENTS)
     consts = None
     coeffs = None
-    if cache is Ellipsis or cache is True:
+    if cache is Ellipsis:
         consts = [i.value.copy() for i in a.ufl_form.constants()]
         coeffs = [i.x.array.copy() for i in a.ufl_form.coefficients()]
+    if cache is True:
+        consts = []
+        coeffs = []
 
     if (cache is False 
         or (cache is True and (_consts is None and _coeffs is None))
-        or cache is Ellipsis and (np.isclose(_consts, consts).all() and all(np.isclose(i, j).all() for i, j in zip(_coeffs, coeffs, strict=True)))
+        or (cache is Ellipsis and np.isclose(_consts, consts).all() and all(np.isclose(i, j).all() for i, j in zip(_coeffs, coeffs, strict=True)))
     ):
         _assemble_matrix(m, a, bcs, mpc, diag)
         m.setAttr(ATTR_CONSTANTS, consts)
@@ -95,7 +101,6 @@ def _assemble_matrix(
     mpc: MultiPointConstraint | None,
     diag: float,
 ) -> None:
-    # actually assembling the matrix
     if m.isAssembled():
         m.zeroEntries()
     if mpc is None:
@@ -122,7 +127,7 @@ def assemble_vector(
         dolfinx_assemble_vector(v, l)
     else:
         mpc_assemble_vector(l, mpc, v)
-    # modifying vector to apply essential boundary conditions
+    
     if bcs_a is not None:
         bcs, a = bcs_a
         if mpc is None:
@@ -154,9 +159,7 @@ def sum_matrix(
 
     if bcs_fs is not None:
         bcs, (fs_test, fs_trial) = bcs_fs
-        ## TODO why do comparison of function spaces??
         if fs_test is fs_trial:
-            # modifying matrix diagonal to apply essential boundary conditions
             m_sum.assemblyBegin(PETSc.Mat.AssemblyType.FLUSH)
             m_sum.assemblyEnd(PETSc.Mat.AssemblyType.FLUSH)
             diagonal = 1.0
@@ -237,3 +240,58 @@ def create_matrix(
         pattern = create_sparsity_pattern(a, mpc)
         pattern.assemble()
         return cpp_create_matrix(mpc.function_space.mesh.comm, pattern)
+
+
+class BlockedForm:
+    def __init__(
+        self, 
+        *rows: Iterable[ufl.Form | None],
+        names: Iterable[str] | None,
+    ):
+        self._rows = [list(r) for r in rows]
+        self._names = tuple(names)
+
+    def __getitem__(
+        self, 
+        key: tuple[int, int] | tuple[str, str],
+    ) -> ufl.Form:
+        i, j  = key
+
+        if isinstance(i, int) and isinstance(j, int):
+            return self._rows[i][j]
+        
+        if isinstance(i, int) and isinstance(j, str):
+            assert self._names is not None
+            i = self._names.index(i)
+            _ = self._names.index(j)
+            return self[i, j]
+        
+        raise TypeError(key)
+    
+    def __add__(self, other):
+        pass # TODO
+    
+
+ScaledForm: TypeAlias = tuple[Constant | float, ufl.Form | BlockedForm]
+
+
+def is_scaled_form(obj: Any) -> bool:
+    return isinstance(obj, tuple) and len(obj) == 2 and isinstance(obj[0], (float, Constant))
+
+
+def bilinear_form(
+    f: ufl.Form | BlockedForm,
+):
+    if isinstance(f, ufl.Form):
+        return ufl.lhs(f)
+    else:
+        ...
+
+
+def linear_form(
+    f: ufl.Form | BlockedForm,
+):
+    if isinstance(f, ufl.Form):
+        return ufl.rhs(f)
+    else:
+        ...
