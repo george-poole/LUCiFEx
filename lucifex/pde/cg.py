@@ -2,6 +2,7 @@ from typing import Literal
 
 from ufl.core.expr import Expr
 from ufl import Form, Measure
+from dolfinx.mesh import Mesh
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
@@ -68,7 +69,8 @@ def diffusion_forms(
         if isinstance(D_diff, FiniteDifference):
             diff = D_diff(expr(d, u), trial=u)
         else:
-            diff = D_diff(expr, d, u, trial=u)
+            diff = D_diff(ExprSeries(expr)(d, u), trial=u)
+            # diff = D_diff(expr, d, u, trial=u)
         F_diff = -inner(grad(v), diff) * dx    
    
     forms = [F_diff]
@@ -99,12 +101,13 @@ def reaction_forms(
     """
     forms = [] 
     if not is_zero(r):
-        _expr = lambda r, u: r * u
+        expr = lambda r, u: r * u
         if isinstance(D_reac, FiniteDifference):
-            expr = D_reac(_expr(r, u), trial=u)
+            reac = D_reac(expr(r, u), trial=u)
         else:
-            expr = D_reac(_expr, r, u, trial=u)
-        F_reac = v * expr * dx
+            reac = D_reac(ExprSeries(expr)(r, u), trial=u)
+            # expr = D_reac(expr, r, u, trial=u)
+        F_reac = v * reac * dx
         forms.append(F_reac)
     if not is_zero(j):
         F_src = v * D_src(j, trial=u) * dx
@@ -114,8 +117,8 @@ def reaction_forms(
 
 def zero_form(
     v,
-    mesh,
-    dx,
+    mesh: Mesh,
+    dx: Measure,
     shape: tuple[int, ...] = (),       
 ):
     return v * Constant(mesh, 0.0, shape=shape) * dx

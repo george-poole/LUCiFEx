@@ -44,6 +44,7 @@ from .mesh_utils import(
     QuadNonGridMeshError,
     NonGridMeshError,
     ParallelizationError,
+    NonSimplexMeshError,
 )
 from .fem_utils import (
     create_constant, 

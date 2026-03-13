@@ -30,7 +30,7 @@ def xdmf_to_npz(
     load_args: dict[str, tuple] | None = None,
     *,
     delete_xdmf: bool = False,
-    npz_write_file = None # TODO 
+    npz_write_file = None,
 ) -> None:
     ...
 

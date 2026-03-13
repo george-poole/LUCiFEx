@@ -153,6 +153,7 @@ def _(
         array=u.cell_values, 
         **_kwargs,
     )
+    filter_kwargs(quad_poly.set_clim)(**_kwargs)
     ax.add_collection(quad_poly)
 
     if colorbar is not False:
@@ -331,7 +332,7 @@ plot_contours = optional_ax(_plot_contours)
 def plot_colormap_multifigure(
     fig: Figure,
     axs_main: list[Axes],
-    axs_cbar: list[Axes | tuple[float, float] | None],
+    axs_cbar: list[Axes] | list[tuple[float, float] | None],
     u: Iterable[Function | GridFunction | Expr],
     cmap: Iterable[str] | str = 'hot',
     title: Iterable[str] | None = None,
@@ -345,6 +346,18 @@ def plot_colormap_multifigure(
 
     if isinstance(cmap, str):
         cmap = [cmap] * len(u)
+
+    vmin, vmax = None, None
+    for ax_cb in axs_cbar:
+        if isinstance(ax_cb, tuple):
+            vmin, vmax = ax_cb
+            break
+
+    _kwargs = kwargs.copy()
+    if vmin is not None:
+        _kwargs.update(vmin=vmin)
+    if vmax is not None:
+        _kwargs.update(vmax=vmax)
 
     for ui, cmp, ttl, ax_m, ax_cb in zip(u, cmap, title, axs_main, axs_cbar): 
         if isinstance(ax_cb, tuple):
@@ -366,7 +379,7 @@ def plot_colormap_multifigure(
             colorbar=_colorbar,
             ax_cbar=_ax_cbar, 
             cax=_cax,
-            **kwargs,
+            **_kwargs,
         )
         if posthook is not None:
             posthook(fig, ax_m)

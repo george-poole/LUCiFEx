@@ -2,7 +2,10 @@ from typing import Callable
 
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
-from ..utils.fenicsx_utils import as_spatial_marker, is_simplicial, SpatialMarker, SpatialMarkerAlias
+from ..utils.fenicsx_utils import (
+    as_spatial_marker, is_simplicial, NonSimplexMeshError,
+    SpatialMarker, SpatialMarkerAlias,
+)
 
 
 def refine(
@@ -13,11 +16,8 @@ def refine(
     redistribute: bool = True,
     name: str | None = None,
 ) -> Mesh:
-    """
-    For simplicial meshes only.
-    """
     if not is_simplicial(mesh):
-        raise ValueError('Only implemented for simplex meshes.')
+        raise NonSimplexMeshError('Refinement')
     
     marker = as_spatial_marker(marker)
 
@@ -43,10 +43,9 @@ def copy_mesh(
     mesh: Mesh, 
     name: str | None = None,
 ) -> Mesh:
-    """
-    For simplex meshes only
-    """
-    # TODO dolfinx 0.7.0+ features to handle non-simplex meshes
+    # TODO dolfinx0.7.0+ to copy quadrilateral meshes
+    if not is_simplicial(mesh):
+        raise NonSimplexMeshError('Copying')
     nothing_marker = lambda x: (x[0] > 0) & (x[0] < 0) 
     mesh_copied = refine(mesh, nothing_marker, name=name)
     return mesh_copied

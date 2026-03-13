@@ -38,7 +38,7 @@ class NPySeries(NPyNameAttr, Generic[F]):
         return self._time_series
     
     @property
-    def value_series(self): #FIXME type hinting
+    def value_series(self): # TODO type hinting
         return [i.value for i in self.series]
     
     @property

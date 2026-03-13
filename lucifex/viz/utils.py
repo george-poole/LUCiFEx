@@ -28,7 +28,7 @@ MS = 4.0
 Default marker size
 """
 
-LINESTYLES = ["-", "--", ":", "-.", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
+LINESTYLES = ["-", "--", "-.", ":", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
 MARKERS = ["o", "x", "^", "d", "*"]
 COLORS = ["black", "blue", "limegreen", "red", "darkorange", "fuchsia"]
 
@@ -302,7 +302,7 @@ def optional_multifig_ax(
     def _(
         fig: Figure,
         axs_main: list[Axes],
-        axs_cbar: list[Axes | tuple[float, float] | None],
+        axs_cbar: list[Axes] | list[tuple[float, float] | None],
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:

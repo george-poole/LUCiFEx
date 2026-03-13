@@ -344,7 +344,7 @@ def configure_simulation(
         if _collisions:
             raise ArgNameCollisionError(_collisions)
 
-        # TODO python 3.11+ typing.get_overloads a better way?
+        # TODO python3.11+ typing.get_overloads a better way?
         setattr(configure_simulation, simulation_factory.__name__, configure_simulation_sig_new)
         simulation_factory_params = signature(simulation_factory).parameters
 

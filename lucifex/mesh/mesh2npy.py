@@ -86,7 +86,7 @@ class NPy2DMesh(NPyMesh):
         self, 
         x_coordinates: np.ndarray, 
         y_coordinates: np.ndarray, 
-        cells: list[np.ndarray], # TODO type hint dtypeint and shape
+        cells: list[np.ndarray], # TODO dtype and shape type hinting
         name: str | None = None,
     ):
         super().__init__(name)

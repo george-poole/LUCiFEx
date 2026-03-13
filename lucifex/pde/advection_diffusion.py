@@ -124,7 +124,6 @@ def steady_advection_diffusion(
     return forms
 
 
-# TODO debug, debug, debug
 def dg_advection_diffusion(
     u: FunctionSeries,
     dt: Constant,

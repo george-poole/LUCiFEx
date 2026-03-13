@@ -49,11 +49,12 @@ def darcy_incompressible(
     k: Expr | Function | Constant,
     mu: Expr | Function | Constant,
     f: Expr | None = None,
+    s: Expr | None = None,
     bcs: BoundaryConditions | None = None,
     blocked: bool = False,
 ) -> list[Form] | BlockedForm:
     """
-    `∇⋅𝐮 = 0` \\
+    `∇⋅𝐮 = s` \\
     `𝐮 = -(K/μ)⋅(∇p - 𝐟)`
     
     `F(𝐮,p;𝐯,q) = ∫ q(∇·𝐮) dx ` \\
@@ -65,6 +66,11 @@ def darcy_incompressible(
     n = FacetNormal(up.function_space.mesh)
 
     F_div = q * div(u) * dx
+
+    F_src = 0
+    if s is not None:
+        F_src = -q * s * dx
+
     if is_tensor(k):
         F_velocity = inner(v, mu * inv(k) * u) * dx
     else:
@@ -83,10 +89,12 @@ def darcy_incompressible(
     if blocked:
         return BlockedForm(
             [F_velocity + F_force + F_bcs, F_pressure], 
-            [F_div, None],
+            [F_div + F_src, None],
         )
     else:
         forms = [F_div, F_velocity, F_pressure]
+        if F_src:
+            forms.append(F_src)
         if F_force:
             forms.append(F_force)
         if F_bcs:

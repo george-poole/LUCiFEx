@@ -189,12 +189,11 @@ class Series(ABC, Generic[T]):
 
 
 P = ParamSpec('P')
-R = TypeVar('R')
 class ExprSeries(
     Series[Expr],
-    Generic[P, R],
+    Generic[P],
 ):
-    _factory: Callable[P, R] | None = None
+    _factory: Callable[P, Expr | Any] | None = None
     _factory_args: tuple | None = None
     _factory_kwargs: dict | None = None
 
@@ -209,8 +208,8 @@ class ExprSeries(
 
     @overload
     def __init__(
-        self: Self[P, R],
-        factory: Callable[P, R],
+        self: 'Self[P]',
+        factory: Callable[P, Expr | Any],
         /,
         name: str | None = None,
     ):
@@ -244,6 +243,7 @@ class ExprSeries(
         elif callable(arg):
             self._factory = arg
             self._name = name
+            self._instantiated = False
         else:
             order = len(arg) - 1
             super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
@@ -252,12 +252,12 @@ class ExprSeries(
             self._instantiated = True
 
     def __call__(
-        self: Self[P, R], 
+        self: 'Self[P]', 
         *args: P.args, 
         **kwargs: P.kwargs,
-    ) -> Self[P, R]:
+    ) -> 'Self[P]':
         if self._instantiated:
-            raise RuntimeError('Can only `ExprSeries` instantiate once')
+            raise RuntimeError('Can only instantiate `ExprSeries` once.')
         if not self.is_callable:
             raise NoFactoryError
         self._factory_args = args
@@ -267,7 +267,7 @@ class ExprSeries(
         return self
     
     def reconstruct(
-        self: Self[P, R],
+        self: 'Self[P]',
         *args_operators: Callable,
         **kws_operators: Callable,
     ) -> Any:

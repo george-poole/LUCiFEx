@@ -40,7 +40,8 @@ class MeshBoundary(
         if self.markers:
             return as_spatial_marker(self.markers)
         else:
-            return lambda x: np.logical_not(np.isfinite(x[0]))
+            nothing_marker = lambda x: (x[0] > 0) & (x[0] < 0) 
+            return nothing_marker
 
     @property
     def complement(self) -> SpatialMarker:

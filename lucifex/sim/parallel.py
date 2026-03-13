@@ -18,7 +18,6 @@ def create_and_run(
     n_init: int | None = None,
     serialize: Callable[[Simulation], T] = as_npy_simulation,
 ) -> Callable[P, T]:
-
     def _inner(*args: P.args, **kwargs: P.kwargs):
         sim = factory(*args, **kwargs)
         if n_stop is not None or t_stop is not None:

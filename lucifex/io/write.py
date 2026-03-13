@@ -52,7 +52,7 @@ def write(
     mode: Literal["a", "w", "c"] = "a",
     comm: MPI.Comm | None = None,
 ) -> None:
-    ... # TODO what conditions for xdmf interpolation to P1 vs DP0?
+    ...
 
 
 @overload

@@ -231,7 +231,7 @@ def effective_velocity(
     if not isinstance(d, Series):
         a_eff -= grad(d)
     else:
-        # FIXME FIXME
+        # FIXME
         if isinstance(D_diff, FiniteDifferenceArgwise):
             D_diff_d, D_diff_u = D_diff
             a_eff -= grad(D_diff_d(d)) * D_diff_u.implicit_coeff

@@ -2,20 +2,19 @@ from typing import (
     Literal,
     Callable,
     ParamSpec,
-    TypeAlias,
     Any,
 )
 from collections.abc import Iterable
-from types import EllipsisType
+from types import EllipsisType, NoneType
 from typing_extensions import Self
 from functools import partial
 
 import numpy as np
-from ufl import Form, lhs, rhs, Measure, TestFunction, TrialFunction
+from ufl import Form, Measure, rhs, TestFunction, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 from dolfinx.fem import FunctionSpace
-from dolfinx.fem.petsc import create_vector, DirichletBCMetaClass
+from dolfinx.fem.petsc import DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
 from petsc4py import PETSc
 from slepc4py import SLEPc
@@ -34,19 +33,22 @@ from .options import (
     OptionsFFCX, OptionsJIT, set_from_options,
 )
 from .petsc import (
-    meta_form,
-    assemble_matrix,
-    assemble_vector,
-    create_matrix,
-    sum_matrix,
-    sum_vector,
-    array_matrix,
-    array_vector,
+    create_metaform,
+    assemble_petsc_matrix,
+    assemble_petsc_vector,
+    create_petsc_matrix,
+    create_petsc_vector,
+    sum_petsc_matrix,
+    sum_petsc_vector,
+    view_petsc_matrix,
+    view_petsc_vector,
     PETScMat,
     PETScVec,
     BlockedForm,
-    ScaledForm,
-    is_scaled_form,
+    Scaled,
+    is_scaled_type,
+    extract_bilinear_form,
+    extract_linear_form,
 )
 from .eval import Solver
 from .utils import BilinearFormError, LinearFormError, EigenvalueFormError, UnsolvedFormError
@@ -82,7 +84,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     def __init__(
         self,
         solution: Function | FunctionSeries,
-        forms: Form | ScaledForm | BlockedForm | Iterable[Form | ScaledForm | BlockedForm],
+        forms: Form | Scaled[Form | BlockedForm] | BlockedForm 
+        | Iterable[Form | Scaled[Form]] 
+        | Iterable[BlockedForm | Scaled[BlockedForm]],
         bcs: BoundaryConditions 
         | list[DirichletBCMetaClass] 
         | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
@@ -102,7 +106,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         super().__init__(solution, corrector, future, overwrite)
         
-        if isinstance(forms, (Form, BlockedForm)) or is_scaled_form(forms):
+        if isinstance(forms, (Form, BlockedForm)) or is_scaled_type(forms):
             forms = (forms, )
 
         if petsc is None:
@@ -132,35 +136,52 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             self._mpc.finalize()
         
         # variational forms
-        self._scalings: list[float | Constant] = [i[0] if is_scaled_form(i) else 1.0 for i in forms]
-        self._forms: list[Form] = [i[1] if is_scaled_form(i) else i for i in forms]
+        self._scalings: list[float | Constant] = [i[0] if is_scaled_type(i) else 1.0 for i in forms]
+        self._forms: list[Form] | list[BlockedForm] = [i[1] if is_scaled_type(i) else i for i in forms]
+
+        if all(isinstance(i, (Form, NoneType)) for i in self._forms):
+            self._blocked = False
+        elif all(isinstance(i, (BlockedForm, NoneType)) for i in self._forms):
+            self._blocked = True
+        else:
+            raise TypeError
+        
+        if pc_form is not None:
+            if self._blocked:
+                assert isinstance(pc_form, BlockedForm)
+            else:
+                assert isinstance(pc_form, Form)
+        
         # bilinear forms
-        self._a_forms = [lhs(i) if len(i.arguments()) == 2 else None for i in self._forms]
+        self._a_forms = [extract_bilinear_form(i) for i in self._forms]
         self._a_form_termwise: Form = sum([i for i in self._a_forms if i is not None])
         self._a_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._a_forms, strict=True) if j is not None]
         )
         if self._a_form_termwise == 0 or self._a_form_nontermwise == 0:
             raise BilinearFormError(self.__class__, solution.name)
+        
         # linear forms
-        self._l_forms = [rhs(i) if not rhs(i).empty() else None for i in self._forms]
+        self._l_forms = [extract_linear_form(i) for i in self._forms]
         self._l_form_termwise: Form = sum([i for i in self._l_forms if i is not None])
         self._l_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
         if self._l_form_termwise == 0 or self._l_form_nontermwise == 0:
             raise LinearFormError(self.__class__, solution.name)
+
         # setters
-        self._create_form = partial(
-            meta_form,
+        self._create_metaform = partial(
+            create_metaform,
             jit_options=jit,
             form_compiler_options=ffcx,
         )
-        self._create_matrix = partial(create_matrix, mpc=self._mpc)
+        self._create_matrix = partial(create_petsc_matrix, mpc=self._mpc)
         prefix = f"{self.__class__.__name__}_{id(self)}"
         self._set_solver = lambda solver: (solver.setOptionsPrefix(prefix), set_from_options(solver, petsc))
         self._set_matvec = lambda matvec: (matvec.setOptionsPrefix(prefix), matvec.setFromOptions())
         # initialization status
+        self._init_pc_matrix = False
         self._init_matrix_termwise = False
         self._init_matrix_nontermwise = False
         self._init_vector_termwise = False
@@ -187,7 +208,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._pc_form = pc_form
         self._pc_metaform = None
         self._pc_matrix = None
-        # effective attributes
+        # working attributes
         self._matrix = None
         self._vector = None
         self._solver = None
@@ -199,46 +220,58 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._jit = jit
         self._ffcx = ffcx
 
+    def _create_pc_matrix(self) -> None:
+        if self._init_pc_matrix:
+            return
+        assert self._pc_form is not None
+        self._pc_metaform = self._create_metaform(self._pc_form)
+        self._pc_matrix = self._create_matrix(self._pc_metaform)
+        self._init_pc_matrix = True
+
     def _create_matrix_termwise(self) -> None:
         if self._init_matrix_termwise:
             return
         self._a_metaforms = [
-            self._create_form(ai) if ai is not None else None for ai in self._a_forms]
-        self._a_metaform_termwise = self._create_form(self._a_form_termwise)
+            self._create_metaform(ai) if ai is not None else None for ai in self._a_forms]
+        self._a_metaform_termwise = self._create_metaform(self._a_form_termwise)
         self._matrices = [
             self._create_matrix(ai) if ai is not None else None
             for ai in self._a_metaforms
         ]
         self._matrix_termwise = self._create_matrix(self._a_metaform_termwise)
         self._solver_termwise = PETSc.KSP().create(self.solution.function_space.mesh.comm)
-        self._solver_termwise.setOperators(self._matrix_termwise)
+        self._solver_termwise.setOperators(self._matrix_termwise, self._pc_matrix)
         self._set_solver(self._solver_termwise)
         for mat in (*self._matrices, self._matrix_termwise):
             if mat is not None:
                 self._set_matvec(mat)
+        if self._pc_matrix is not None:
+            self._set_matvec(self._pc_matrix)
         self._init_matrix_termwise = True
 
     def _create_matrix_nontermwise(self) -> None:
         if self._init_matrix_nontermwise:
             return
-        self._a_metaform_nontermwise = self._create_form(self._a_form_nontermwise)
+        self._a_metaform_nontermwise = self._create_metaform(self._a_form_nontermwise)
         self._matrix_nontermwise = self._create_matrix(self._a_metaform_nontermwise)
         self._solver_nontermwise = PETSc.KSP().create(self.solution.function_space.mesh.comm)
-        self._solver_nontermwise.setOperators(self._matrix_nontermwise)
+        self._solver_nontermwise.setOperators(self._matrix_nontermwise, self._pc_matrix)
         self._set_solver(self._solver_nontermwise)
         self._set_matvec(self._matrix_nontermwise)
+        if self._pc_matrix is not None:
+            self._set_matvec(self._pc_matrix)
         self._init_matrix_nontermwise = True
 
     def _create_vector_termwise(self):
         if self._init_vector_termwise:
             return
-        self._l_metaforms = [self._create_form(i) if i is not None else None for i in self._l_forms]
-        self._l_metaform_termwise = self._create_form(self._l_form_termwise)
+        self._l_metaforms = [self._create_metaform(i) if i is not None else None for i in self._l_forms]
+        self._l_metaform_termwise = self._create_metaform(self._l_form_termwise)
         self._vectors = [
-            create_vector(i) if i is not None else None
+            create_petsc_vector(i) if i is not None else None
             for i in self._l_metaforms
         ]
-        self._vector_termwise = create_vector(self._l_metaform_termwise)
+        self._vector_termwise = create_petsc_vector(self._l_metaform_termwise)
         for vec in (*self._vectors, self._vector_termwise):
             if vec is not None:
                 self._set_matvec(vec)
@@ -247,8 +280,8 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     def _create_vector_nontermwise(self):
         if self._init_vector_nontermwise:
             return
-        self._l_metaform_nontermwise = self._create_form(self._l_form_nontermwise)
-        self._vector_nontermwise = create_vector(self._l_metaform_nontermwise)
+        self._l_metaform_nontermwise = self._create_metaform(self._l_form_nontermwise)
+        self._vector_nontermwise = create_petsc_vector(self._l_metaform_nontermwise)
         self._set_matvec(self._vector_nontermwise)    
         self._init_vector_nontermwise = True
 
@@ -306,16 +339,29 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] | None = None,
         assemble_termwise: tuple[bool, bool] | None = None,
+        cache_pc: bool = True,
         assert_solved: bool = False,
     ) -> None:
-        """Mutates the data structures `self.solution` and `self.series` containing the solution"""
+        """
+        Mutates `self.solution` and `self.series`
+        """
         if assert_solved:
-            if not all(not is_unsolved(i) for i in self.forms):
+            if any(is_unsolved(i) for i in self.forms):
                 raise UnsolvedFormError(self.__class__, self.solution.name)
         if cache_matrix is None:
             cache_matrix = self._cache_matrix
         if assemble_termwise is None:
             assemble_termwise = self._assemble_termwise
+
+        if self._pc_form is not None:
+            self._create_pc_matrix()
+            assemble_petsc_matrix(
+                self._pc_matrix, 
+                self._pc_metaform, 
+                self._bcs, 
+                self._mpc, 
+                cache=cache_pc,
+            )
 
         matrix_termwise, vector_termwise = assemble_termwise
 
@@ -324,11 +370,11 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             if not isinstance(cache_matrix, Iterable):
                 cache_matrix = [cache_matrix] * len(self._matrices)
             [
-                assemble_matrix(m, a, self._bcs, self._mpc, cache=c)
+                assemble_petsc_matrix(m, a, self._bcs, self._mpc, cache=c)
                 for m, a, c in zip(self._matrices, self._a_metaforms, cache_matrix, strict=True)
                 if (m, a) != (None, None)
             ]
-            sum_matrix(
+            sum_petsc_matrix(
                 self._matrix_termwise,
                 self._matrices,
                 self._scalings,
@@ -338,7 +384,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             self._solver = self._solver_termwise
         else:
             self._create_matrix_nontermwise()
-            assemble_matrix(
+            assemble_petsc_matrix(
                 self._matrix_nontermwise,
                 self._a_metaform_nontermwise,
                 self._bcs,
@@ -351,17 +397,20 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         if vector_termwise:
             self._create_vector_termwise()
             [
-                assemble_vector(v, l, (self._bcs, a), self._mpc)
+                assemble_petsc_vector(v, l, (self._bcs, a), self._mpc)
                 for v, l, a in zip(self._vectors, self._l_metaforms, self._a_metaforms, strict=True)
                 if (v, l, a) != (None, None, None)
             ]
-            sum_vector(
-                self._vector_termwise, self._vectors, self._scalings, (self._bcs, self._a_metaform_termwise)
+            sum_petsc_vector(
+                self._vector_termwise, 
+                self._vectors, 
+                self._scalings, 
+                (self._bcs, self._l_metaform_termwise.function_spaces),
             )
             self._vector = self._vector_termwise
         else:
             self._create_vector_nontermwise()
-            assemble_vector(
+            assemble_petsc_vector(
                 self._vector_nontermwise,
                 self._l_metaform_nontermwise,
                 (self._bcs, self._a_metaform_nontermwise),
@@ -383,7 +432,16 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     ) -> PETScMat | np.ndarray | None:
         if self._matrix is None:
             return None
-        return array_matrix(self._matrix, indices, copy)
+        return view_petsc_matrix(self._matrix, indices, copy)
+    
+    def get_pc_matrix(
+        self,
+        indices: tuple[Iterable[int], Iterable[int]] | Literal["dense"] | None = None,
+        copy: bool = False,
+    ) -> PETScMat | np.ndarray | None:
+        if self._pc_matrix is None:
+            return None
+        return view_petsc_matrix(self._pc_matrix, indices, copy)
 
     def get_vector(
         self,
@@ -392,7 +450,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     ) -> PETScVec | np.ndarray | None:
         if self._vector is None:
             return None
-        return array_vector(self._vector, indices, copy)
+        return view_petsc_vector(self._vector, indices, copy)
     
     def get_matrices(
         self,
@@ -401,7 +459,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     ) -> list[PETScMat | None] | None:
         if self._matrices is None:
             return
-        return [array_matrix(mat, indices, copy) if mat is not None else None for mat in self._matrices]
+        return [view_petsc_matrix(mat, indices, copy) if mat is not None else None for mat in self._matrices]
 
     def get_vectors(
         self,
@@ -410,7 +468,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     ) -> list[PETScVec | None] | None:
         if self._vectors is None:
             return
-        return [array_vector(vec, indices, copy) if vec is not None else None for vec in self._vectors]
+        return [view_petsc_vector(vec, indices, copy) if vec is not None else None for vec in self._vectors]
 
     @property 
     def solver(self) -> PETSc.KSP | None:
@@ -800,11 +858,11 @@ class EigenvalueProblem:
             self._mpc.finalize()
 
         _create_form = partial(
-            meta_form,
+            create_metaform,
             jit_options=jit,
             form_compiler_options=ffcx,
         )
-        _create_matrix = partial(create_matrix, mpc=self._mpc)
+        _create_matrix = partial(create_petsc_matrix, mpc=self._mpc)
 
         form_lhs, form_rhs = forms
         if forms_weak_bcs:
@@ -891,8 +949,8 @@ class EigenvalueProblem:
             cache_matrix = (cache_matrix, cache_matrix)
         cache_lhs, cache_rhs = cache_matrix
 
-        assemble_matrix(self._matrix_lhs, self._metaform_lhs, self._bcs, cache=cache_lhs)
-        assemble_matrix(self._matrix_rhs, self._metaform_rhs, self._bcs, cache=cache_rhs)
+        assemble_petsc_matrix(self._matrix_lhs, self._metaform_lhs, self._bcs, cache=cache_lhs)
+        assemble_petsc_matrix(self._matrix_rhs, self._metaform_rhs, self._bcs, cache=cache_rhs)
 
         self._solver.setOperators(self._matrix_lhs, self._matrix_rhs)
         self._solver.solve()
@@ -914,8 +972,8 @@ class EigenvalueProblem:
         copy: bool = False,
     ) -> tuple[PETScMat, PETScMat] | tuple[np.ndarray, np.ndarray]:
         return (
-            array_matrix(self._matrix_lhs, indices, copy), 
-            array_matrix(self._matrix_rhs, indices, copy), 
+            view_petsc_matrix(self._matrix_lhs, indices, copy), 
+            view_petsc_matrix(self._matrix_rhs, indices, copy), 
         )
 
     @property    

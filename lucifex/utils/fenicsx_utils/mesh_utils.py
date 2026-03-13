@@ -384,6 +384,18 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
         raise ValueError(f'Invalid cell size quantity {h}.')
     
 
+class NonSimplexMeshError(NotImplementedError):
+    def __init__(
+        self, 
+        unsupported: str | None = None,
+    ):
+        if unsupported is not None:
+            msg = f'{unsupported} is not supported'
+        else:
+            msg = 'Not supported'
+        super().__init__(f'{msg} on a non-simplicial mesh.')
+
+
 class NonGridMeshError(NotImplementedError):
     def __init__(
         self, 

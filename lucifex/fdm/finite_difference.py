@@ -439,7 +439,7 @@ class FiniteDifferenceArgwise:
             else:
                 return u
 
-        # TODO - remove ?
+        # TODO remove ?
         # n_fd = len(self.finite_differences)
         # n_args = len(args)
         # if not n_fd == n_args:

@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Callable
 from typing_extensions import Self
 from collections.abc import Iterable
 from abc import abstractmethod
@@ -142,12 +142,14 @@ class SimulationFromEXT(
         lazy: bool = True,
         use_cache: bool = True,
         load_args: dict[str, Any | tuple[Any, ...]] | None = None,
+        sorting: Callable[[dict], dict] | None = None,
     ) -> dict[str | tuple[str, ...], Self]:
 
         return cls._dict_from_dir_paths(
             key,
             dir_paths,
             parameters,
+            sorting,
             function_series,
             constant_series,
             write_file,
@@ -165,6 +167,7 @@ class SimulationFromEXT(
         key: str | tuple[str, ...],
         dir_paths: Iterable[str],
         parameters: dict[str, Any] | None = None,
+        sorting: Callable[[dict], dict] | None = None,
         *args,
         **kwargs,
     ) -> dict[str | tuple[str, ...], Self]:
@@ -182,7 +185,10 @@ class SimulationFromEXT(
             **kwargs,
         )
 
-        return {sim[key]: sim for sim in sims_from_ext}
+        if sorting is None:
+            sorting = lambda d: d
+
+        return sorting({sim[key]: sim for sim in sims_from_ext})
 
     @abstractmethod
     def _load_function_series(
@@ -369,12 +375,14 @@ class SimulationFromXDMF(
         lazy: bool = True,
         use_cache: bool = True,
         load_args: dict[str, Any | tuple[Any, ...]] | None = None,
+        sorting: Callable[[dict], dict] | None = None,
     ) -> dict[str | tuple[str, ...], Self]:
 
         return cls._dict_from_dir_paths(
             key,
             dir_paths,
             parameters,
+            sorting,
             mesh,
             function_series,
             constant_series,
