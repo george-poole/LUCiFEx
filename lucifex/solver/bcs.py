@@ -20,7 +20,7 @@ from ..utils.fenicsx_utils import (
     create_tagged_measure,
     as_boolean_marker,
     dofs_indices,
-    MarkerType,
+    Marker,
     BooleanMarker,
     DofsLocatorType,
     FacetLocatorType,
@@ -51,10 +51,10 @@ class BoundaryConditions:
     """
     def __init__(
         self,
-        *bcs: tuple[BoundaryType, MarkerType, Value]
-        | tuple[BoundaryType, MarkerType, Value, SubspaceIndex]
-        | tuple[MarkerType, Value]
-        | tuple[MarkerType, Value, SubspaceIndex],
+        *bcs: tuple[BoundaryType, Marker, Value]
+        | tuple[BoundaryType, Marker, Value, SubspaceIndex]
+        | tuple[Marker, Value]
+        | tuple[Marker, Value, SubspaceIndex],
         dofs_locator: DofsLocatorType | Iterable[DofsLocatorType] = DofsLocatorType.TOPOLOGICAL,
         rescale_weak: int | float | None = None, 
     ):

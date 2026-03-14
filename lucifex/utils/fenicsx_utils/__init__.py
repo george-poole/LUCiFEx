@@ -1,6 +1,6 @@
 from .dofs_grid import dofs_grid
 from .dofs_utils import (
-    MarkerType,
+    Marker,
     MarkerAlias,
     BooleanMarker, 
     dofs_indices,

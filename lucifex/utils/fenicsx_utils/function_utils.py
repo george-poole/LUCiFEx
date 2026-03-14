@@ -51,7 +51,7 @@ def create_function(
             pass
             
     if isinstance(fs, FunctionSpace):
-        fs = extract_subspace(fs, subspace_index)
+        fs = extract_subspace(fs, subspace_index, collapse=True)
         if try_identity and isinstance(value, Function) and value.function_space == fs:
             return value
         f = Function(fs, name=name)

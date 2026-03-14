@@ -20,7 +20,7 @@ from dolfinx.fem.petsc import DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
 
 from ..utils.fenicsx_utils import (
-    create_function_space, MarkerType, BlockedForm, Scaled,
+    create_function_space, Marker, BlockedForm, Scaled,
     is_scaled_type, is_none, extract_bilinear_form, extract_linear_form,
 )
 from ..utils.py_utils import replicate_callable
@@ -1077,7 +1077,7 @@ class Projection(BoundaryValueProblem):
         solution: Function | FunctionSeries,
         expression: Function | Expr,
         bcs: BoundaryConditions 
-        | Iterable[tuple[MarkerType, Value] | tuple[MarkerType, Value, SubspaceIndex]] 
+        | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] 
         | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -1118,7 +1118,7 @@ class Projection(BoundaryValueProblem):
         solution: Function | FunctionSeries, 
         expr_factory: Callable[P, Function | Expr],
         bcs: BoundaryConditions 
-        | Iterable[tuple[MarkerType, Value] | tuple[MarkerType, Value, SubspaceIndex]] 
+        | Iterable[tuple[Marker, Value] | tuple[Marker, Value, SubspaceIndex]] 
         | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,

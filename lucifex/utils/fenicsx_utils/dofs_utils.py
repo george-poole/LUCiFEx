@@ -38,7 +38,7 @@ e.g. `lambda x: np.isclose(x[1], Ly)` if a boundary is defined by `y = Ly`
 
 MarkerAlias: TypeAlias = ZeroMarker | Iterable[ZeroMarker | BooleanMarker]
 
-MarkerType: TypeAlias = BooleanMarker | MarkerAlias
+Marker: TypeAlias = BooleanMarker | MarkerAlias
 
 
 class DofsLocatorType(StrEnum):
@@ -92,7 +92,7 @@ def dofs_indices(
             fs_sub = fs.sub(subspace_index)
             fs_sub_collapsed, _ = fs_sub.collapse()
             dofs = locate_dofs_topological(
-                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub,
+                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub_collapsed,
                 edim,
                 facets,
             )
