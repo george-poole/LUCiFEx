@@ -3,14 +3,14 @@ from typing import Callable
 from dolfinx.mesh import Mesh, locate_entities, refine as dolfinx_refine
 
 from ..utils.fenicsx_utils import (
-    as_spatial_marker, is_simplicial, NonSimplexMeshError,
-    SpatialMarker, SpatialMarkerAlias,
+    as_boolean_marker, is_simplicial, NonSimplexMeshError,
+    BooleanMarker, MarkerAlias,
 )
 
 
 def refine(
     mesh: Mesh,
-    marker: SpatialMarker | SpatialMarkerAlias,
+    marker: BooleanMarker | MarkerAlias,
     n_stop: int = 1,
     condition: Callable[[Mesh], bool] = None,
     redistribute: bool = True,
@@ -19,7 +19,7 @@ def refine(
     if not is_simplicial(mesh):
         raise NonSimplexMeshError('Refinement')
     
-    marker = as_spatial_marker(marker)
+    marker = as_boolean_marker(marker)
 
     if condition is None:
         condition = lambda _: False

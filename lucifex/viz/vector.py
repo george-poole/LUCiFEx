@@ -12,7 +12,7 @@ from ..mesh import as_grid_mesh
 from ..fem import as_grid_function, TriFunction, GridFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
-    QuadNonGridMeshError, is_simplicial, get_component_functions, 
+    QuadNonGridMeshError, is_simplicial, extract_component_functions, 
     is_grid,
 )
 from ..utils.py_utils import filter_kwargs
@@ -142,7 +142,7 @@ def _xy_components(
         if not is_vector(f, dim=2):
             raise ShapeError(f, (2, ))
         
-        fx, fy = get_component_functions(('P', 1), f)
+        fx, fy = extract_component_functions(('P', 1), f)
     else:
         fx, fy = (create_function(('P', 1), i, try_identity=True) for i in f)
 

@@ -13,7 +13,7 @@ from ..mesh.mesh2npy import (
 )
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    dofs, dofs_grid, get_component_functions, NonScalarError,
+    dofs, dofs_grid, extract_component_functions, NonScalarError,
     NonScalarVectorError, extract_mesh,
 )
 from .function import Function
@@ -187,7 +187,7 @@ class NPyFunction(NPyNameValueAttr[np.ndarray | tuple[np.ndarray, ...]], Generic
         match u.ufl_shape:
             case (_, ):
                 values = tuple(
-                    get_values(ui) for ui in get_component_functions(('P', 1), u, use_cache=Ellipsis)
+                    get_values(ui) for ui in extract_component_functions(('P', 1), u, use_cache=Ellipsis)
                 )
             case ():
                 values = get_values(u)

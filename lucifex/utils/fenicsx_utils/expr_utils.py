@@ -1,27 +1,24 @@
 from enum import Enum
-from typing import Any, Iterable
+from typing import Any, TypeVar, TypeAlias
+from functools import reduce
 
 import numpy as np
 from basix.ufl_wrapper import BasixElement
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
-from ufl import Form, Argument
+from ufl import Argument
 from ufl.core.expr import Expr
 from ufl.finiteelement import FiniteElement
 from ufl.algorithms.analysis import extract_coefficients, extract_constants
 
 
-def is_zero(
-    expr: Expr | Form,
-    zero_aliases: Iterable = (0, None),
-) -> bool:
-    return expr in zero_aliases
+T = TypeVar('T')
+Scaled: TypeAlias = tuple[Constant | float, T]
 
 
 def is_scalar(
     f: Function | Constant | FunctionSpace | Expr,
 ) -> bool:
-    """Returns `True` if the function or function space is scalar-valued."""
     return is_shape(f, ())
 
 
@@ -29,7 +26,6 @@ def is_vector(
     f: Function | Constant | FunctionSpace | Expr,
     dim: int | None = None,
 ) -> bool:
-    """Returns `True` if the function or function space is vector-valued."""
     return is_shape(f, (dim,))
 
 
@@ -91,6 +87,56 @@ class NonScalarVectorError(ShapeError):
         Error to raise if tensor value provided
         """
         super().__init__(u, "'scalar or vector'")
+
+
+def extract_mesh(
+    expr: Expr | Expression | Function | Any,
+) -> Mesh:
+    if isinstance(expr, Function):
+        return expr.function_space.mesh
+
+    meshes = extract_meshes(expr)
+    if len(meshes) == 0:
+        raise ValueError(
+            "No mesh deduced from expression's operands."
+        )
+    if len(meshes) > 1:
+        raise ValueError(
+            "Multiple meshes deduced from expression's operands."
+        )
+    return list(meshes)[0]
+
+
+def extract_meshes(
+    expr: Expr | Expression | Any,
+) -> list[Mesh]:
+    if isinstance(expr, Expression):
+        return extract_meshes(expr.ufl_expression)
+
+    meshes = set()
+    coeffs_consts = (*extract_coefficients(expr), *extract_constants(expr))
+    for c in coeffs_consts:
+        if isinstance(c, Function):
+            meshes.add(c.function_space.mesh)
+        if hasattr(c, 'mesh'):
+            meshes.add(getattr(c, 'mesh'))
+
+    return meshes
+
+
+def extract_function_space(
+    arg: Function | Argument | FunctionSpace | Any,
+) -> FunctionSpace:
+    if isinstance(arg, Function):
+        fs = arg.function_space
+    elif isinstance(arg, Argument):
+        fs = arg.ufl_function_space()
+    elif isinstance(arg, FunctionSpace):
+        fs = arg
+    else:
+        fs = getattr(arg, 'function_space')
+
+    return fs
 
 
 class ElementFamilyType(set, Enum):
@@ -174,64 +220,3 @@ def is_discontinuous_family(family: str) -> bool:
         "Discontinuous"
     )
 
-
-def extract_mesh(
-    expr: Expr | Expression | Function | Any,
-) -> Mesh:
-    if isinstance(expr, Function):
-        return expr.function_space.mesh
-
-    meshes = extract_meshes(expr)
-    if len(meshes) == 0:
-        raise ValueError(
-            "No mesh deduced from expression's operands."
-        )
-    if len(meshes) > 1:
-        raise ValueError(
-            "Multiple meshes deduced from expression's operands."
-        )
-    return list(meshes)[0]
-
-
-def extract_meshes(
-    expr: Expr | Expression | Any,
-) -> list[Mesh]:
-    if isinstance(expr, Expression):
-        return extract_meshes(expr.ufl_expression)
-
-    meshes = set()
-    coeffs_consts = (*extract_coefficients(expr), *extract_constants(expr))
-    for c in coeffs_consts:
-        if isinstance(c, Function):
-            meshes.add(c.function_space.mesh)
-        if hasattr(c, 'mesh'):
-            meshes.add(getattr(c, 'mesh'))
-
-    return meshes
-
-
-def extract_integrands(
-    form: Form,
-) -> list[Expr]:
-    return [i.integrand() for i in form.integrals()]
-
-
-def extract_integrand(
-    form: Form,
-) -> Expr:
-    return sum(extract_integrands(form))
-
-
-def extract_function_space(
-    arg: Function | Argument | FunctionSpace | Any,
-) -> FunctionSpace:
-    if isinstance(arg, Function):
-        fs = arg.function_space
-    elif isinstance(arg, Argument):
-        fs = arg.ufl_function_space()
-    elif isinstance(arg, FunctionSpace):
-        fs = arg
-    else:
-        fs = getattr(arg, 'function_space')
-
-    return fs

@@ -21,7 +21,6 @@ from .eval import (
     interpolation,
     integration,
 )
-from .petsc import Scaled, BlockedForm
 from .norm import (
     l_norm,
     L_norm,
@@ -47,4 +46,4 @@ EVP = EigenvalueProblem
 
 from typing import TypeAlias
 PDE: TypeAlias = BVP | IBVP | IVP | EVP
-"""Alias to `BVP | IBVP | IVP`"""
+"""Alias to `BVP | IBVP | IVP | EVP`"""

@@ -18,12 +18,12 @@ from ..utils.py_utils import ToDoError
 from ..utils.fenicsx_utils import (
     BoundaryType, 
     create_tagged_measure,
-    as_spatial_marker,
+    as_boolean_marker,
     dofs_indices,
-    SpatialMarkerAlias,
-    SpatialMarker,
-    DofsMethodType,
-    FacetMethodType,
+    MarkerType,
+    BooleanMarker,
+    DofsLocatorType,
+    FacetLocatorType,
     is_scalar, is_vector, create_function, create_constant, extract_function_space,
     NonScalarVectorError,
 )
@@ -51,14 +51,14 @@ class BoundaryConditions:
     """
     def __init__(
         self,
-        *bcs: tuple[BoundaryType, SpatialMarker | SpatialMarkerAlias, Value]
-        | tuple[BoundaryType, SpatialMarker | SpatialMarkerAlias, Value, SubspaceIndex]
-        | tuple[SpatialMarker | SpatialMarkerAlias, Value]
-        | tuple[SpatialMarker | SpatialMarkerAlias, Value, SubspaceIndex],
-        dofs_method: DofsMethodType | Iterable[DofsMethodType] = DofsMethodType.TOPOLOGICAL,
+        *bcs: tuple[BoundaryType, MarkerType, Value]
+        | tuple[BoundaryType, MarkerType, Value, SubspaceIndex]
+        | tuple[MarkerType, Value]
+        | tuple[MarkerType, Value, SubspaceIndex],
+        dofs_method: DofsLocatorType | Iterable[DofsLocatorType] = DofsLocatorType.TOPOLOGICAL,
         rescale_weak: int | float | None = None, 
     ):
-        self._markers: list[SpatialMarker] = []
+        self._markers: list[BooleanMarker] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
@@ -67,7 +67,7 @@ class BoundaryConditions:
         if isinstance(dofs_method, str):
             dofs_method = [dofs_method] * len(bcs)
         assert len(dofs_method) == len(bcs)
-        self._dofs_method = [DofsMethodType(i) for i in dofs_method]
+        self._dofs_method = [DofsLocatorType(i) for i in dofs_method]
 
         for bc in bcs:
             match bc:
@@ -85,7 +85,7 @@ class BoundaryConditions:
                     btype, marker, value, subindex = bc
                 case _:
                     raise ValueError(f"{bc} not a valid boundary condition")
-            self._markers.append(as_spatial_marker(marker))
+            self._markers.append(as_boolean_marker(marker))
             self._values.append(value)
             self._btypes.append(BoundaryType(btype))
             self._subindices.append(subindex)
@@ -96,7 +96,8 @@ class BoundaryConditions:
         strong_types: Iterable[BoundaryType] = (
             BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL, BoundaryType.STRONG,
         ),
-        facet_method: FacetMethodType = FacetMethodType.BOUNDARY,
+        facet_locator: FacetLocatorType = FacetLocatorType.BOUNDARY,
+        blocked: bool = False,
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uE` on `∂Ω`
@@ -107,24 +108,41 @@ class BoundaryConditions:
             self._values, self._btypes, self._markers, self._subindices, self._dofs_method,
             strict=True,
         ):
-            if b in strong_types:
-                indices = dofs_indices(fs, m, i, d, facet_method=facet_method)
-                if isinstance(uD, Constant):
-                    if i is None:
-                        dbc = dirichletbc(uD, indices, fs)
-                    else:
-                        dbc = dirichletbc(uD, indices, fs.sub(i))
+            if b not in strong_types:
+                continue
+            if i is None:
+                _fs = fs
+            else:
+                if blocked:
+                    fs_sub, _ = fs.sub(i).collapse()
+                    _fs = fs_sub
                 else:
-                    uD = create_function(fs, uD, i, try_identity=True)
-                    if i is None:
-                        dbc = dirichletbc(uD, indices)
+                    fs_sub = fs.sub(i)
+                    _fs = fs
+
+            indices = dofs_indices(_fs, m, i, d, facet_locator=facet_locator)
+            if isinstance(uD, Constant):
+                if i is None:
+                    dbc = dirichletbc(uD, indices, _fs)
+                else:
+                    if blocked:
+                        raise NotImplementedError('TODO')
                     else:
-                        dbc = dirichletbc(uD, indices, fs.sub(i))
-                dirichlet.append(dbc)
+                        dbc = dirichletbc(uD, indices, fs_sub)
+            else:
+                uD = create_function(_fs, uD, i, try_identity=True)
+                if i is None:
+                    dbc = dirichletbc(uD, indices)
+                else:
+                    if blocked:
+                        dbc = dirichletbc(uD, indices, fs_sub)
+                    else:
+                        dbc = dirichletbc(uD, indices, fs_sub)
+            dirichlet.append(dbc)
                 
         return dirichlet
 
-    def create_periodic_bcs(
+    def create_periodic_mpc(
         self,
         fs: FunctionSpace,
         bcs: list[DirichletBCMetaClass] | None = None,
@@ -141,18 +159,19 @@ class BoundaryConditions:
         n_constraint = 0
 
         for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
-            if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
-                if i is not None:
-                    raise ToDoError
-                scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
-                mpc.create_periodic_constraint_geometrical(
-                    fs, 
-                    m,
-                    reln,
-                    bcs=bcs,
-                    scale=scale,
-                )
-                n_constraint += 1
+            if b not in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
+                continue
+            if i is not None:
+                raise ToDoError
+            scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
+            mpc.create_periodic_constraint_geometrical(
+                fs, 
+                m,
+                reln,
+                bcs=bcs,
+                scale=scale,
+            )
+            n_constraint += 1
 
         if n_constraint == 0:
             return None
@@ -198,6 +217,7 @@ class BoundaryConditions:
         self,
         solution: Function | FunctionSeries | FunctionSpace | Argument,
         *boundary_types: BoundaryType,
+        strict: bool = False,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
         Returns \\
@@ -213,6 +233,10 @@ class BoundaryConditions:
         """
         fs = extract_function_space(solution) 
         boundary_types = [BoundaryType(i) for i in boundary_types]
+
+        if strict and not all(b in boundary_types for b in self._btypes):
+            raise ValueError
+
         tag = 0
         tags = {b: [] for b in boundary_types}
         exprs = {b: [] for b in boundary_types}

@@ -8,12 +8,12 @@ from lucifex.fem import Constant, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import BoundaryConditions, OptionsJIT
 from lucifex.sim import configure_simulation
 from lucifex.utils.fenicsx_utils import CellType, BoundaryType
-from lucifex.pde.scaling import ScalingChoice
+from lucifex.pde.scaling import ScalingOptions
 
 from ...P5_convection.py.C10_darcy_convection_generic import darcy_convection_generic
 
 
-DARCY_FINGERING_SCALINGS = ScalingChoice(
+DARCY_FINGERING_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'In', 'X'),
     lambda Pe: {
         'advective': (1, 1/Pe, 1, 1),

@@ -7,9 +7,9 @@ from dolfinx.fem import Function
 
 from ..py_utils import optional_lru_cache
 from .dofs_utils import dofs
-from .fem_utils import create_function
+from .function_utils import create_function
 from .mesh_utils import mesh_vertices, mesh_axes
-from .ufl_utils import is_scalar, NonScalarError
+from .expr_utils import is_scalar, NonScalarError
 
 
 def dofs_grid(

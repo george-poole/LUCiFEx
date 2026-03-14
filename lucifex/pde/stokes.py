@@ -6,9 +6,9 @@ from ufl import (Form, Argument, FacetNormal, CellDiameter,
 )
 from ufl.core.expr import Expr
 
-from lucifex.solver import BoundaryConditions, BlockedForm
+from lucifex.solver import BoundaryConditions
 from lucifex.fem import Function, Constant
-from lucifex.utils.fenicsx_utils import is_zero
+from lucifex.utils.fenicsx_utils import is_none, BlockedForm
 
 
 def stokes_incompressible(
@@ -16,7 +16,9 @@ def stokes_incompressible(
     deviatoric_stress: Callable[[Function | Argument], Expr],
     f: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
+    *,
     blocked: bool = False,
+    add_zero: tuple[bool | None, bool | None] = (False, False),
 ) -> list[Form] | BlockedForm:
     """
     `∇·𝐮 = 0` \\
@@ -77,10 +79,10 @@ def stokes_streamfunction(
 
     forms = [F_dx, F_dS]
 
-    if not is_zero(fx):
+    if not is_none(fx):
         F_fx = v * Dx(fx, 1) * dx
         forms.append(F_fx)
-    if not is_zero(fy):
+    if not is_none(fy):
         F_fy = -v * Dx(fy, 0) * dx
         forms.append(F_fy)
 

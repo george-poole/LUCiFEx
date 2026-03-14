@@ -21,10 +21,10 @@ from .simulation import configure_simulation, Simulation
 from .utils import write_timing, arg_name_collisions, ArgNameCollisionError
 
 
-T: TypeAlias = ConstantSeries
-DT: TypeAlias = ConstantSeries | Constant
+TIME: TypeAlias = ConstantSeries
+TIMESTEP: TypeAlias = ConstantSeries | Constant
 def run(
-    simulation: Simulation | tuple[Iterable[Solver], T, DT],
+    simulation: Simulation | tuple[Solver | Iterable[Solver], TIME, TIMESTEP],
     n_stop: int | None = None,
     t_stop: float | None = None,
     dt_init: float | None = None,

@@ -10,7 +10,7 @@ from dolfinx.fem import Expression
 from ufl import Measure
 from ufl.core.expr import Expr
 
-from ..utils.fenicsx_utils import SpatialMarkerAlias
+from ..utils.fenicsx_utils import MarkerAlias
 from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError, LazyEvaluator
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
@@ -253,7 +253,7 @@ class Integration(Evaluation[Constant, ConstantSeries]):
         solution: Constant | ConstantSeries, 
         integrand_func: Callable[P, Expr | tuple[Expr, ...]],
         measure: Literal['dx', 'ds', 'dS'] | Measure | None = None, 
-        *markers: SpatialMarkerAlias,
+        *markers: MarkerAlias,
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,

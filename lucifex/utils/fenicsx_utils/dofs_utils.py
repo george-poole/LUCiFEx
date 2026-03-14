@@ -14,57 +14,56 @@ from dolfinx.fem import (
 from ufl.core.expr import Expr
 
 from ..py_utils import StrEnum
-from .fem_utils import (
+from .function_utils import (
     create_function, 
-    get_component_functions, 
+    extract_component_functions, 
     set_function_dofs,
 )
-from .ufl_utils import is_scalar, is_vector, NonScalarVectorError
+from .expr_utils import is_scalar, is_vector, NonScalarVectorError
 
 
-SpatialExpression: TypeAlias = Callable[[np.ndarray], np.ndarray]
+ZeroMarker: TypeAlias = Callable[[np.ndarray], np.ndarray]
 """
 Function of coordinates `x = (x₀, x₁, x₂)` returning an expression `f(x)`
 such that `f(x) = 0 ` defines the boundary.
 
 e.g. `lambda x: x[1] - Ly` if a boundary is defined by `y = Ly`
 """
-SpatialMarker: TypeAlias = Callable[[np.ndarray], bool]
+BooleanMarker: TypeAlias = Callable[[np.ndarray], bool]
 """
 Function of coordinates `x = (x₀, x₁, x₂)` returning `True` or `False`
 
 e.g. `lambda x: np.isclose(x[1], Ly)` if a boundary is defined by `y = Ly`
 """
 
-SpatialMarkerAlias: TypeAlias = SpatialExpression | Iterable[SpatialExpression | SpatialMarker]
-"""
-Alias types to `SpatialMarker`.
-"""
+MarkerAlias: TypeAlias = ZeroMarker | Iterable[ZeroMarker | BooleanMarker]
+
+MarkerType: TypeAlias = BooleanMarker | MarkerAlias
 
 
-class DofsMethodType(StrEnum):
+class DofsLocatorType(StrEnum):
     GEOMETRICAL = 'geometrical'
     TOPOLOGICAL = 'topological'
 
 
-class FacetMethodType(StrEnum):
+class FacetLocatorType(StrEnum):
     ANY = 'any'
     BOUNDARY = 'boundary'
 
 
 def dofs_indices(
     fs: FunctionSpace,
-    dofs_marker: SpatialMarker | SpatialMarkerAlias,
+    dofs_marker: BooleanMarker | MarkerAlias,
     subspace_index: int | None = None,
-    dofs_method: DofsMethodType = DofsMethodType.TOPOLOGICAL,
-    facet_method: FacetMethodType = FacetMethodType.ANY, 
+    dofs_locator: DofsLocatorType = DofsLocatorType.TOPOLOGICAL,
+    facet_locator: FacetLocatorType = FacetLocatorType.ANY, 
 ) -> np.ndarray | list[np.ndarray]:
     
-    dofs_method = DofsMethodType(dofs_method)
-    facet_method = FacetMethodType(facet_method)
-    _dofs_marker = as_spatial_marker(dofs_marker)
+    dofs_locator = DofsLocatorType(dofs_locator)
+    facet_locator = FacetLocatorType(facet_locator)
+    _dofs_marker = as_boolean_marker(dofs_marker)
 
-    if dofs_method == DofsMethodType.GEOMETRICAL:
+    if dofs_locator == DofsLocatorType.GEOMETRICAL:
         if subspace_index is None:
             return locate_dofs_geometrical(fs, _dofs_marker)
         else:
@@ -74,10 +73,10 @@ def dofs_indices(
                 _dofs_marker,
             )
         
-    if dofs_method == DofsMethodType.TOPOLOGICAL:
+    if dofs_locator == DofsLocatorType.TOPOLOGICAL:
         tdim = fs.mesh.topology.dim
         edim = tdim - 1
-        if facet_method == FacetMethodType.ANY:
+        if facet_locator == FacetLocatorType.ANY:
             facets = locate_entities(
                 fs.mesh, edim, _dofs_marker
             )
@@ -97,7 +96,7 @@ def dofs_indices(
             assert len(dofs) == 2
             return dofs
         
-    raise ValueError(f'{dofs_method} not recognised')
+    raise ValueError(f'{dofs_locator} not recognised')
 
         
 def dofs(
@@ -130,7 +129,7 @@ def dofs(
         component_dofs = np.stack(
             [
                 dofs(i, fs, use_cache=use_scalars_cache, try_identity=False) 
-                for i in get_component_functions(fs, u, use_cache=use_vector_cache)
+                for i in extract_component_functions(fs, u, use_cache=use_vector_cache)
             ], 
             axis=1,
         )
@@ -139,18 +138,18 @@ def dofs(
         raise NonScalarVectorError(u)
     
 
-def as_spatial_marker(
-    m: SpatialMarker | SpatialMarkerAlias,
+def as_boolean_marker(
+    m: BooleanMarker | MarkerAlias,
     rtol: float = 1e-5,
     atol: float = 1e-8,
-) -> SpatialMarker:
+) -> BooleanMarker:
     """
     Converts a function of coordinates `x = (x₀, x₁, x₂)` returning expression `f(x)`, 
     such that `f(x) = 0`, defines the boundary to a function returning `True` 
     if `x` is on the boundary and `False` otherwise.
     """
     
-    def _as_marker(m: SpatialMarker | SpatialMarkerAlias) -> SpatialMarker:
+    def _as_marker(m: BooleanMarker | MarkerAlias) -> BooleanMarker:
         x_test = np.array([0.0, 0.0, 0.0])
         if isinstance(m(x_test), (bool, np.bool_)):
             return m
@@ -198,8 +197,8 @@ def limits_corrector(
 
 def dirichlet_corrector(
     fs: FunctionSpace,
-    *markers_values: tuple[SpatialMarkerAlias, float | Constant | Function | Expr] 
-    | tuple[SpatialMarkerAlias, float | Constant | Function | Expr, int]
+    *markers_values: tuple[MarkerAlias, float | Constant | Function | Expr] 
+    | tuple[MarkerAlias, float | Constant | Function | Expr, int]
 ) -> Callable[[np.ndarray], None]:
 
     markers, values, subspace_indices = [], [], []

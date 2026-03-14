@@ -1,7 +1,7 @@
 from typing import Literal
 
 from ufl.core.expr import Expr
-from ufl import Form, Measure
+from ufl import Form, Measure, Argument
 from dolfinx.mesh import Mesh
 
 from lucifex.fem import Function, Constant
@@ -13,7 +13,7 @@ from lucifex.fdm import (
 from lucifex.fdm.ufl_operators import inner, grad, div
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
-from lucifex.utils.fenicsx_utils import is_zero
+from lucifex.utils.fenicsx_utils import is_none
 
 
 def derivative_form(
@@ -100,7 +100,7 @@ def reaction_forms(
     `vRu + vJ`
     """
     forms = [] 
-    if not is_zero(r):
+    if not is_none(r):
         expr = lambda r, u: r * u
         if isinstance(D_reac, FiniteDifference):
             reac = D_reac(expr(r, u), trial=u)
@@ -109,19 +109,10 @@ def reaction_forms(
             # expr = D_reac(expr, r, u, trial=u)
         F_reac = v * reac * dx
         forms.append(F_reac)
-    if not is_zero(j):
+    if not is_none(j):
         F_src = v * D_src(j, trial=u) * dx
         forms.append(F_src)
     return forms
-
-
-def zero_form(
-    v,
-    mesh: Mesh,
-    dx: Measure,
-    shape: tuple[int, ...] = (),       
-):
-    return v * Constant(mesh, 0.0, shape=shape) * dx
 
 
 class OptionError(ValueError):

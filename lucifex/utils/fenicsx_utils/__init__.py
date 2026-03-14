@@ -1,26 +1,37 @@
-from .ufl_utils import (
+from .dofs_grid import dofs_grid
+from .dofs_utils import (
+    MarkerType,
+    MarkerAlias,
+    BooleanMarker, 
+    dofs_indices,
+    dofs,
+    as_boolean_marker,
+    limits_corrector,
+    DofsLocatorType,
+    FacetLocatorType,
+)
+from .expr_utils import (
     is_scalar, 
     is_vector, is_tensor, extract_mesh, extract_meshes,
     is_shape, 
     is_continuous_lagrange, is_discontinuous_lagrange, 
-    is_same_element, is_family_alias, extract_integrands,
-    extract_integrand,
+    is_same_element, is_family_alias,
     NonVectorError,
     NonScalarError,
     NonScalarVectorError,
     ShapeError,
-    is_zero,
+    Scaled,
     extract_function_space,
 )
-from .dofs_utils import (
-    SpatialMarkerAlias,
-    SpatialMarker, 
-    dofs_indices,
-    dofs,
-    as_spatial_marker,
-    limits_corrector,
-    DofsMethodType,
-    FacetMethodType,
+from .form_utils import (
+    extract_integrands,
+    extract_integrand,
+    is_none,
+    is_scaled_type,
+    BlockedForm,
+    extract_bilinear_form,
+    extract_linear_form,
+    create_zero_form,
 )
 from .mesh_utils import(
     CellType,
@@ -46,16 +57,22 @@ from .mesh_utils import(
     ParallelizationError,
     NonSimplexMeshError,
 )
-from .fem_utils import (
+from .constant_utils import (
     create_constant, 
+    set_constant,
+)
+from .function_utils import (
     create_function, 
-    create_function_space, 
-    get_component_functions,
-    set_constant, 
     set_function, 
     set_function_interpolate,
-    is_mixed_space,
-    get_subspace,
-    get_subspaces,
+    set_function_dofs,
+    extract_component_functions,
+    extract_subfunctions,
 )
-from .dofs_grid import dofs_grid
+from .function_space_utils import (
+    create_function_space,     
+    is_mixed_space,
+    is_component_space,
+    extract_subspace,
+    extract_subspaces,
+)

@@ -5,7 +5,7 @@ from functools import lru_cache
 import numpy as np
 
 from ..utils.py_utils import replicate_callable
-from ..utils.fenicsx_utils import SpatialMarkerAlias, as_spatial_marker
+from ..utils.fenicsx_utils import MarkerAlias, as_boolean_marker
 from .gmsh_utils import create_gmsh_mesh_factory
 
 
@@ -43,7 +43,7 @@ def mesh_from_splines():
 def mesh_from_boundaries_model(
     x_bbox: np.ndarray,
     y_bbox: np.ndarray,
-    *ccw_boundaries: SpatialMarkerAlias,
+    *ccw_boundaries: MarkerAlias,
     method: str = 'addSpline',
     rtol: float = 1e-5,
     atol: float = 1e-8 ,    
@@ -54,7 +54,7 @@ def mesh_from_boundaries_model(
     X_bbox, Y_bbox = np.meshgrid(x_bbox, y_bbox, indexing="ij")
 
     n_boundaries = len(ccw_boundaries)
-    boundaries = [as_spatial_marker(i) for i in ccw_boundaries]
+    boundaries = [as_boolean_marker(i) for i in ccw_boundaries]
     masks = [bdry((X_bbox, Y_bbox)) for bdry in boundaries]
 
     intersections = []

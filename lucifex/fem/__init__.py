@@ -18,7 +18,7 @@ from .fem2npy import (
     as_quad_function,
     as_npy_function,
 )
-from .grid_methods import (
+from .grid_utils import (
     where_on_grid, 
     grid_cross_section, 
     grid_average, 

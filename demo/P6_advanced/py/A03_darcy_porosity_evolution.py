@@ -16,7 +16,7 @@ from lucifex.utils.fenicsx_utils import CellType
 from lucifex.sim import configure_simulation
 
 from lucifex.pde.advection_diffusion import advection_diffusion, advection_diffusion_reaction
-from lucifex.pde.darcy import darcy_incompressible
+from lucifex.pde.darcy import darcy
 from lucifex.pde.evolution import evolution_rhs
 
 
@@ -122,7 +122,7 @@ def darcy_plume_dissolution_rectangle(
     # solvers
     up_petsc = OptionsPETSc("gmres", "lu") if up_petsc is None else up_petsc
     up_petsc['pc_factor_mat_solver_type'] = 'mumps'
-    up_solver = bvp(darcy_incompressible, u_bcs, petsc=up_petsc)(
+    up_solver = bvp(darcy, u_bcs, petsc=up_petsc)(
         up, Bu * rho[0], k[0], 1, egx, egy,
     )
     dt_solver = evaluation(dt, advective_timestep)(

@@ -2,18 +2,18 @@ import numpy as np
 from dolfinx.mesh import Mesh, locate_entities_boundary
 
 from ..utils.py_utils import MultiKey
-from ..utils.fenicsx_utils import SpatialMarker, SpatialMarkerAlias, as_spatial_marker, ParallelizationError
+from ..utils.fenicsx_utils import BooleanMarker, MarkerAlias, as_boolean_marker, ParallelizationError
 
 
 class MeshBoundary(
     MultiKey[
         str | int,
-        SpatialMarker | SpatialMarkerAlias,
+        BooleanMarker | MarkerAlias,
     ]
 ):
     def __init__(
         self, 
-        boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias] | None,
+        boundaries: dict[str | int, BooleanMarker | MarkerAlias] | None,
     ):
         if boundaries is None:
             boundaries = {}
@@ -22,29 +22,29 @@ class MeshBoundary(
     def _getitem(
         self, 
         key
-    ) -> SpatialMarker | SpatialMarkerAlias:
+    ) -> BooleanMarker | MarkerAlias:
         return self._boundaries[key]
         
     @property
-    def markers(self) -> list[SpatialMarker | SpatialMarkerAlias]:
+    def markers(self) -> list[BooleanMarker | MarkerAlias]:
         """
         Markers for all defined sub-boundaries `{∂Ωᵢ}`
         """
         return list(self._boundaries.values())
 
     @property
-    def union(self) -> SpatialMarker:
+    def union(self) -> BooleanMarker:
         """
         Union of defined sub-boundaries `∪ᵢ∂Ωᵢ`
         """
         if self.markers:
-            return as_spatial_marker(self.markers)
+            return as_boolean_marker(self.markers)
         else:
             nothing_marker = lambda x: (x[0] > 0) & (x[0] < 0) 
             return nothing_marker
 
     @property
-    def complement(self) -> SpatialMarker:
+    def complement(self) -> BooleanMarker:
         """
         Complement of the union of defined sub-boundaries `∂Ω \ ∪ᵢ∂Ωᵢ`
 
@@ -57,13 +57,13 @@ class MeshBoundary(
         return tuple(self._boundaries.keys())
     
     @property
-    def markers(self) -> tuple[SpatialMarker | SpatialMarkerAlias, ...]:
+    def markers(self) -> tuple[BooleanMarker | MarkerAlias, ...]:
         return tuple(self._boundaries.values())
 
 
 def mesh_boundary(
     mesh: Mesh,
-    boundaries: dict[str | int, SpatialMarker | SpatialMarkerAlias] | None = None,
+    boundaries: dict[str | int, BooleanMarker | MarkerAlias] | None = None,
     verify: bool = True,
     complete: bool = False,
 ) -> MeshBoundary:
@@ -78,7 +78,7 @@ def mesh_boundary(
             raise ParallelizationError
         dim = mesh.geometry.dim - 1
         n_boundary_entities = [
-            len(locate_entities_boundary(mesh, dim, as_spatial_marker(v)))
+            len(locate_entities_boundary(mesh, dim, as_boolean_marker(v)))
             for v in boundaries.values()
         ]
         if verify:

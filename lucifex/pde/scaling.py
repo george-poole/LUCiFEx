@@ -1,4 +1,4 @@
-from typing import overload, Callable, ParamSpec, Generic
+from typing import Callable, ParamSpec, Generic
 from typing_extensions import Unpack
 
 from dolfinx.mesh import Mesh
@@ -6,6 +6,7 @@ from lucifex.fem import Constant
 from lucifex.utils.py_utils import MultiKey
 
 
+# FIXME overloaded __getitem__ type hints
 class ScalingMap(
     MultiKey[
         str | tuple[Mesh, str] | tuple[Mesh, Unpack[tuple[str, ...]]], 
@@ -49,21 +50,21 @@ class ScalingMap(
         
 
 P = ParamSpec('P')
-class ScalingChoice(Generic[P]):
+class ScalingOptions(Generic[P]):
     def __init__(
         self,
-        names: tuple[str, ...],
-        choices_factory: Callable[P, dict[str, tuple[float, ...]]],
+        keys: tuple[str, ...],
+        options_factory: Callable[P, dict[str, tuple[float, ...]]],
     ):
-        self._symbols = names
-        self._choices_factory = choices_factory
+        self._keys = keys
+        self._options_factory = options_factory
 
     def __getitem__(
         self, 
         option: str,
     ) -> Callable[P, ScalingMap]:
         def _(*args: P.args, **kwargs: P.kwargs) -> ScalingMap:
-            values = self._choices_factory(*args, **kwargs)[option]
-            return ScalingMap(dict(zip(self._symbols, values)), option)
+            values = self._options_factory(*args, **kwargs)[option]
+            return ScalingMap(dict(zip(self._keys, values)), option)
         return _
     

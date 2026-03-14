@@ -10,16 +10,19 @@ from typing_extensions import Self
 from functools import partial
 
 import numpy as np
+from petsc4py import PETSc
+from slepc4py import SLEPc
 from ufl import Form, Measure, rhs, TestFunction, TrialFunction
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 from dolfinx.fem import FunctionSpace
 from dolfinx.fem.petsc import DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
-from petsc4py import PETSc
-from slepc4py import SLEPc
 
-from ..utils.fenicsx_utils import create_function_space, SpatialMarkerAlias
+from ..utils.fenicsx_utils import (
+    create_function_space, MarkerType, BlockedForm, Scaled,
+    is_scaled_type, is_none, extract_bilinear_form, extract_linear_form,
+)
 from ..utils.py_utils import replicate_callable
 from ..fdm import (
     FiniteDifference, FiniteDifferenceArgwise, 
@@ -44,11 +47,6 @@ from .petsc import (
     view_petsc_vector,
     PETScMat,
     PETScVec,
-    BlockedForm,
-    Scaled,
-    is_scaled_type,
-    extract_bilinear_form,
-    extract_linear_form,
 )
 from .eval import Solver
 from .utils import BilinearFormError, LinearFormError, EigenvalueFormError, UnsolvedFormError
@@ -88,8 +86,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         | Iterable[Form | Scaled[Form]] 
         | Iterable[BlockedForm | Scaled[BlockedForm]],
         bcs: BoundaryConditions 
-        | list[DirichletBCMetaClass] 
-        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | Iterable[DirichletBCMetaClass | MultiPointConstraint] 
         | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -121,19 +118,20 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
 
         if bcs is None:
             bcs = []
-        if isinstance(bcs, list):
-            self._bcs = bcs
-            self._mpc = None
-        elif isinstance(bcs, tuple):
-            self._bcs, self._mpc = bcs
-        else:
+        if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(solution)
             forms = (*forms, *forms_weak_bcs)
             self._bcs = bcs.create_strong_bcs(solution.function_space)        
-            self._mpc = bcs.create_periodic_bcs(solution.function_space)
+            self._mpc = []
+            mpc = bcs.create_periodic_mpc(solution.function_space)
+            if mpc:
+                self._mpc.append(mpc)
+        else:
+            self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
+            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
 
-        if self._mpc is not None and not self._mpc.finalized:
-            self._mpc.finalize()
+        for mpc in self._mpc:
+            mpc.finalize()
         
         # variational forms
         self._scalings: list[float | Constant] = [i[0] if is_scaled_type(i) else 1.0 for i in forms]
@@ -144,21 +142,21 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         elif all(isinstance(i, (BlockedForm, NoneType)) for i in self._forms):
             self._blocked = True
         else:
-            raise TypeError
+            raise TypeError('Cannot have non-blocked and blocked forms together.')
         
         if pc_form is not None:
-            if self._blocked:
-                assert isinstance(pc_form, BlockedForm)
-            else:
-                assert isinstance(pc_form, Form)
+            if self._blocked and isinstance(pc_form, Form):
+                raise TypeError
+            if not self._blocked and isinstance(pc_form, BlockedForm):
+                raise TypeError
         
         # bilinear forms
         self._a_forms = [extract_bilinear_form(i) for i in self._forms]
-        self._a_form_termwise: Form = sum([i for i in self._a_forms if i is not None])
+        self._a_form_termwise = sum([i for i in self._a_forms if i is not None])
         self._a_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._a_forms, strict=True) if j is not None]
         )
-        if self._a_form_termwise == 0 or self._a_form_nontermwise == 0:
+        if is_none(self._a_form_termwise) or is_none(self._a_form_nontermwise):
             raise BilinearFormError(self.__class__, solution.name)
         
         # linear forms
@@ -167,14 +165,14 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._l_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
-        if self._l_form_termwise == 0 or self._l_form_nontermwise == 0:
+        if is_none(self._l_form_termwise, any) or is_none(self._l_form_nontermwise, any):
             raise LinearFormError(self.__class__, solution.name)
-
+        
         # setters
         self._create_metaform = partial(
             create_metaform,
             jit_options=jit,
-            form_compiler_options=ffcx,
+            ffcx_options=ffcx,
         )
         self._create_matrix = partial(create_petsc_matrix, mpc=self._mpc)
         prefix = f"{self.__class__.__name__}_{id(self)}"
@@ -211,7 +209,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         # working attributes
         self._matrix = None
         self._vector = None
+        self._solution_vector = None
         self._solver = None
+        self._dofmaps_slices = None
         # defaults
         self._assemble_termwise = assemble_termwise
         self._cache_matrix = cache_matrix
@@ -262,7 +262,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             self._set_matvec(self._pc_matrix)
         self._init_matrix_nontermwise = True
 
-    def _create_vector_termwise(self):
+    def _create_vector_termwise(self) -> None:
         if self._init_vector_termwise:
             return
         self._l_metaforms = [self._create_metaform(i) if i is not None else None for i in self._l_forms]
@@ -277,7 +277,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
                 self._set_matvec(vec)
         self._init_vector_termwise = True
 
-    def _create_vector_nontermwise(self):
+    def _create_vector_nontermwise(self) -> None:
         if self._init_vector_nontermwise:
             return
         self._l_metaform_nontermwise = self._create_metaform(self._l_form_nontermwise)
@@ -285,13 +285,20 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._set_matvec(self._vector_nontermwise)    
         self._init_vector_nontermwise = True
 
+    def _get_solution_vector(self) -> PETScVec:
+        if self._solution_vector is None:
+            if not self._blocked:
+                self._solution_vector = self._solution.vector
+            else:
+                self._solution_vector =  self._matrix.createVecLeft() # TODO Right()
+        return self._solution_vector
+    
     @classmethod
     def from_forms_factory(
         cls,
         forms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
         bcs: BoundaryConditions 
-        | list[DirichletBCMetaClass] 
-        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | Iterable[DirichletBCMetaClass | MultiPointConstraint] 
         | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -418,12 +425,45 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             )
             self._vector = self._vector_nontermwise
 
-        self._solver.solve(self._vector, self._solution.vector)
+        vec = self._get_solution_vector()
+        self._solver.solve(self._vector, vec)
+
+        if self._blocked:   
+            dofmaps, slices = self._get_blocked_dofmaps_slices()     
+            for dfmp, slc in zip(dofmaps, slices, strict=True):
+                self._solution.x.array[dfmp] = vec[slc]
+        
         self._solution.x.scatter_forward()
-        if self._mpc:
-            self._mpc.backsubstitution(self._solution.vector)
+        
+        for mpc in self._mpc:
+            mpc.backsubstitution(vec)
 
         super().solve(future, overwrite)
+
+    def _get_blocked_dofmaps_slices(
+        self,
+    ) -> tuple[list[np.ndarray], list[slice]]:
+        if self._dofmaps_slices is None:
+            _fs = self._solution.function_space
+            n_sub = _fs.num_sub_spaces
+
+            dofmaps: list[np.ndarray] = []
+            offsets: list[int | None] = [0]
+            for i in range(n_sub):
+                _fs_sub, dfmp = _fs.sub(i).collapse()
+                dofmaps.append(dfmp)
+                ofst = _fs_sub.dofmap.index_map.size_local * _fs_sub.dofmap.index_map_bs
+                offsets.append(ofst + offsets[-1])
+            offsets.append(None)
+
+            slices = []
+            for i in range(n_sub):
+                slc = slice(offsets[i], offsets[i + 1])
+                slices.append(slc)
+
+            self._dofmaps_slices = dofmaps, slices
+
+        return self._dofmaps_slices
 
     def get_matrix(
         self,
@@ -475,11 +515,15 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         return self._solver
     
     @property
+    def blocked(self) -> bool:
+        return self._blocked
+    
+    @property
     def bcs(self) -> list[DirichletBCMetaClass]:
         return self._bcs
     
     @property
-    def mpc(self) -> MultiPointConstraint | None:
+    def mpc(self) -> list[MultiPointConstraint]:
         return self._mpc
     
     def str_forms(
@@ -509,8 +553,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         """
         If `True`, matrix is assembled only in the first `solve` call and is subsequently cached.
         If `False`, matrix is reassembled in each `solve` call.
-        If `...`, arguments are compared to their value in the previous `solve` call, 
-        and matrix is reassembled if any argument value has changed.
+        If `Ellipsis`, `Function` and `Constant` objects used to create the original `Form` object
+        have their present values compared against their previous values, 
+        and the matrix is reassembled if any value has changed.
         """
         return self._cache_matrix
     
@@ -801,8 +846,7 @@ class EigenvalueProblem:
         solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int],
         forms: tuple[Form, Form],
         bcs: BoundaryConditions 
-        | list[DirichletBCMetaClass] 
-        | tuple[list[DirichletBCMetaClass], MultiPointConstraint] 
+        | Iterable[DirichletBCMetaClass | MultiPointConstraint] 
         | None = None,
         slepc: OptionsSLEPc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -841,26 +885,27 @@ class EigenvalueProblem:
             fs = create_function_space(solutions)
             eigenfunctions = [Function(fs) for _ in range(nev)]
             eigenseries = [FunctionSeries(fs) for _ in range(nev)]
-        
+
         if bcs is None:
             bcs = []
-        if isinstance(bcs, list):
-            self._bcs = bcs
-            self._mpc = None
-        elif isinstance(bcs, tuple):
-            self._bcs, self._mpc = bcs
-        else:
+        if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(fs)
             self._bcs = bcs.create_strong_bcs(fs)        
-            self._mpc = bcs.create_periodic_bcs(fs)
+            self._mpc = []
+            mpc = bcs.create_periodic_mpc(fs)
+            if mpc:
+                self._mpc.append(mpc)
+        else:
+            self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
+            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
 
-        if self._mpc is not None and not self._mpc.finalized:
-            self._mpc.finalize()
+        for mpc in self._mpc:
+            mpc.finalize()
 
         _create_form = partial(
             create_metaform,
             jit_options=jit,
-            form_compiler_options=ffcx,
+            ffcx_options=ffcx,
         )
         _create_matrix = partial(create_petsc_matrix, mpc=self._mpc)
 
@@ -1037,7 +1082,9 @@ class Projection(BoundaryValueProblem):
         self, 
         solution: Function | FunctionSeries,
         expression: Function | Expr,
-        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerAlias, Value] | tuple[SpatialMarkerAlias, Value, SubspaceIndex]] | None = None, 
+        bcs: BoundaryConditions 
+        | Iterable[tuple[MarkerType, Value] | tuple[MarkerType, Value, SubspaceIndex]] 
+        | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -1076,7 +1123,9 @@ class Projection(BoundaryValueProblem):
         cls,
         solution: Function | FunctionSeries, 
         expr_factory: Callable[P, Function | Expr],
-        bcs: BoundaryConditions | Iterable[tuple[SpatialMarkerAlias, Value] | tuple[SpatialMarkerAlias, Value, SubspaceIndex]] | None = None, 
+        bcs: BoundaryConditions 
+        | Iterable[tuple[MarkerType, Value] | tuple[MarkerType, Value, SubspaceIndex]] 
+        | None = None, 
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
@@ -1135,5 +1184,5 @@ def _deduce_from_args(
     if not args and isinstance(index, int):
         return list(kwargs.values())[index]
     if isinstance(index, str):
-        return kwargs[str]
+        return kwargs[index]
     raise TypeError

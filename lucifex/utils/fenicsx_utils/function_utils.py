@@ -1,5 +1,4 @@
 from collections.abc import Callable, Iterable
-from typing import overload
 from types import EllipsisType
 from functools import singledispatch, lru_cache
 
@@ -7,135 +6,21 @@ import numpy as np
 from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 from petsc4py import PETSc
-from dolfinx.fem import Function, FunctionSpace, Constant, Function, VectorFunctionSpace
+from dolfinx.fem import Function, FunctionSpace, Constant, Function
 from dolfinx.fem import Expression
-from ufl import FiniteElement, MixedElement, VectorElement
 
 from ..py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache, as_slice
-from .ufl_utils import (
-    is_same_element,
-    extract_mesh,     
+from .expr_utils import (
+    is_same_element, 
     is_scalar,
     is_vector, 
     NonVectorError,
     ShapeError
 )
-
-
-def is_mixed_space(fs: FunctionSpace) -> bool:
-    """e.g. Returns `True` if the function space is mixed.
-
-    `Pₖ × ... × Pₖ` -> `True` \\
-    `BDMₖ x DPₖ₋₁` -> `True`
-    """
-    return fs.num_sub_spaces > 0
-
-
-def is_component_space(fs: FunctionSpace) -> bool:
-    """Returns `True` if the function space is a mixed space 
-    in which all subspaces are identical and scalar-valued.
-    
-    `Pₖ × ... × Pₖ` -> `True` \\
-    `BDMₖ` -> `False`
-    """
-    if not is_mixed_space(fs):
-        return False
-    else:
-        subspaces = get_subspaces(fs)
-        sub0 = subspaces[0]
-        if not is_scalar(sub0):
-            return False
-        return all([sub.ufl_element() == sub0.ufl_element() for sub in subspaces])
-    
-
-def get_subspace(
-    fs: FunctionSpace,
-    subspace_index: int | None = None,
-    collapse: bool = True,
-) -> FunctionSpace:
-    if subspace_index is None:
-        return fs
-    fs_sub = fs.sub(subspace_index)
-    if collapse:
-        return fs_sub.collapse()[0]
-    else:
-        return fs_sub
-
-
-def get_subspaces(
-    fs: FunctionSpace,
-    collapse: bool = True,
-) -> tuple[FunctionSpace, ...]:
-    subspaces = []
-    n_sub = fs.num_sub_spaces
-    for n in range(n_sub):
-        subspaces.append(get_subspace(fs, n, collapse))
-    return tuple(subspaces)
-
-
-@overload
-def create_function_space(
-    fs: FunctionSpace,
-    subspace_index: int | None = None,
-) -> FunctionSpace:
-    ...
-
-
-@overload
-def create_function_space(
-    fs: tuple[Mesh, str, int]
-    | tuple[Mesh, str, int]
-    | tuple[Mesh, str, int, int]
-    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
-    subspace_index: int | None = None,
-    use_cache: bool = False,
-) -> FunctionSpace:
-    ...
-
-
-def create_function_space(
-    fs,
-    subspace_index=None,
-    use_cache=False,
-) -> FunctionSpace:
-    """
-    Typecast to `dolfinx.fem.FunctionSpace`.
-    """
-    if isinstance(fs, FunctionSpace):
-        return get_subspace(fs, subspace_index)
-    else:
-        return _function_space(use_cache=use_cache)(fs, subspace_index)
-    
-
-@optional_lru_cache
-def _function_space(
-    fs_hashable: tuple[Mesh, str, int]
-    | tuple[Mesh, str, int]
-    | tuple[Mesh, str, int, int]
-    | tuple[Mesh, Iterable[tuple[str, int] | tuple[str, int, int]]],
-    subspace_index: int | None = None,
-) -> FunctionSpace:
-    match fs_hashable:
-        case mesh, elements:
-            mixed_elements = []
-            for e in elements:
-                if len(e) == 2:
-                    fam, deg = e
-                    mixed_elements.append(FiniteElement(fam, mesh.ufl_cell(), deg))
-                elif len(e) == 3:
-                    fam, deg, dim = e
-                    mixed_elements.append(VectorElement(fam, mesh.ufl_cell(), deg, dim))
-                else:
-                    raise ValueError(f'{e}')
-            fs = FunctionSpace(mesh, MixedElement(*mixed_elements))
-        case mesh, fam, deg:
-            fs = FunctionSpace(mesh, (fam, deg))
-        case mesh, fam, deg, dim:
-            fs = VectorFunctionSpace(mesh, (fam, deg), dim)
-        case _:
-            raise ValueError(f'{fs_hashable}')
-
-    return get_subspace(fs, subspace_index)
+from .function_space_utils import (
+    extract_subspace, create_function_space,
+    is_component_space, fs_from_elem,
+)
 
 
 def create_function(
@@ -168,7 +53,7 @@ def create_function(
     if isinstance(fs, FunctionSpace):
         if try_identity and isinstance(value, Function) and value.function_space == fs:
             return value
-        fs = get_subspace(fs, subspace_index)
+        fs = extract_subspace(fs, subspace_index)
         f = Function(fs, name=name)
     else:
         if not isinstance(fs[0], Mesh):
@@ -193,12 +78,12 @@ def _create_function(
     subspace_index: int | None,
     name: str | None,
 ) -> Function:
-    fs = _function_space(use_cache=True)(fs_hashable, subspace_index)
+    fs = create_function_space(fs_hashable, subspace_index, use_cache=True)
     return Function(fs, name=name)
 
 
 @optional_lru_cache
-def get_subfunctions(
+def extract_subfunctions(
     u: Function,  
     collapse: bool = True,
 ) -> tuple[Function, ...]:
@@ -208,7 +93,7 @@ def get_subfunctions(
         return u.split()
 
 
-def get_component_functions(
+def extract_component_functions(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
@@ -239,49 +124,20 @@ def get_component_functions(
     else:
         # e.g. `u(𝐱) ∈ BDM`
         u = create_function((*fs, dim), u, use_cache=Ellipsis)
-        return get_component_functions(fs, u, names, use_cache)
+        return extract_component_functions(fs, u, names, use_cache)
 
 
-def create_constant(
-    mesh: Mesh,
-    value: float | Iterable[float] | Constant,
-    try_identity: bool = False,
-) -> Constant:
-    """
-    Typecast to `dolfinx.fem.Constant` 
-    """
-    if try_identity and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
-        return value
-    else:
-        return _create_constant(value, mesh)
-
-
-@singledispatch
-def _create_constant(value, _):
-    raise MultipleDispatchTypeError(value)
-
-
-@_create_constant.register(float)
-@_create_constant.register(int)
-def _(value, mesh: Mesh,):
-    return Constant(mesh, float(value))
-
-
-@_create_constant.register(Iterable)
-def _(value: Iterable[float], mesh: Mesh):
-    if all(isinstance(i, (float, int)) for i in value):
-        value = [float(i) for i in value]
-        return Constant(mesh, value)
-    else:
-        raise TypeError('Expected an iterable of numbers')
-
-
-def fs_from_elem(
-    elem: tuple[str, int] | tuple[str, int, int],
-    u: Function | Expr,
-) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
-    mesh = extract_mesh(u)
-    return mesh, *elem
+def extract_subdofs(
+    u: Function,
+) -> tuple[np.ndarray, ...]:
+    fs = u.function_space
+    subdofs = []
+    for i in range(fs.num_sub_spaces):
+        _, dofmap = fs.sub(i).collapse()
+        subdofs.append(
+            u.x.array[dofmap]
+        )
+    return tuple(subdofs)
 
 
 def set_function(
@@ -409,39 +265,3 @@ def _(value: Iterable[float | Constant | Callable], f: Function):
 @_set_function_interpolate.register(int)
 def _(value, f: Function):
     f.interpolate(lambda x: np.full_like(x[0], value, dtype=PETSc.ScalarType))
-
-
-def set_constant(
-    c: Constant,
-    value: Constant | float | np.ndarray | Iterable[float],
-) -> None:
-    """
-    Mutates `c` by setting its value array. Does not mutate `value`.
-    """
-    return _set_constant(value, c)
-
-
-@singledispatch
-def _set_constant(value, *_, **__):
-    raise MultipleDispatchTypeError(value)
-
-
-@_set_constant.register(Constant)
-def _(value: Constant, const: Constant):
-    const.value = value.value.copy()
-
-
-@_set_constant.register(float)
-@_set_constant.register(int)
-def _(value, const: Constant):
-    const.value = value
-
-@_set_constant.register(np.ndarray)
-def _(value: np.ndarray, const: Constant):
-    if not const.value.shape == value.shape:
-        raise ShapeError(const, value.shape)
-    const.value = value
-
-@_set_constant.register(Iterable)
-def _(value, const: Constant):
-    return _set_constant(np.array(value), const)

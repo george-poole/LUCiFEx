@@ -16,7 +16,7 @@ from lucifex.solver import (
     BoundaryConditions, BVP, IBVP,
     bvp, ibvp,
 )
-from lucifex.utils.fenicsx_utils import is_zero
+from lucifex.utils.fenicsx_utils import is_none
 
 from .advection_diffusion import advection_diffusion_reaction
 from .constitutive import strain
@@ -262,9 +262,9 @@ def navier_stokes_vorticity(
     """
     d = mu / rho
     j = 0
-    if not is_zero(fx):
+    if not is_none(fx):
         j -= Dx(fx, 1) / rho
-    if not is_zero(fy):
+    if not is_none(fy):
         j += Dx(fy, 0) / rho
     return advection_diffusion_reaction(
         omega, dt, u, d, 

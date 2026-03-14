@@ -14,11 +14,12 @@ from ufl.geometry import (GeometricCellQuantity, Circumradius,
                           CellDiameter, MaxCellEdgeLength, MinCellEdgeLength)
 
 from ..py_utils import optional_lru_cache, StrEnum
-from .fem_utils import extract_mesh, create_function
+from .expr_utils import extract_mesh
+from .function_utils import create_function
 from .dofs_utils import (
     dofs,
-    as_spatial_marker,
-    SpatialMarkerAlias,
+    as_boolean_marker,
+    MarkerAlias,
 )
 
 
@@ -66,7 +67,7 @@ class BoundaryType(StrEnum):
 def create_tagged_measure(
     measure: Literal['dx', 'ds', 'dS'],
     mesh: Mesh,
-    markers: Iterable[SpatialMarkerAlias] = (),
+    markers: Iterable[MarkerAlias] = (),
     tags: Iterable[int] | None = None,
     tag_unmarked: int | None = None,
     **measure_kwargs,
@@ -96,7 +97,7 @@ def create_tagged_measure(
     facet_tags = np.full(num_facets, tag_unmarked, dtype=np.intc)
 
     for t, m in zip(tags, markers, strict=True):
-        m = as_spatial_marker(m)
+        m = as_boolean_marker(m)
         facet_indices = locate_entities(mesh, fdim, m)
         facet_tags[facet_indices] = t
 
@@ -123,7 +124,7 @@ def mesh_integral(
     @overload
     def _(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
-        *markers: SpatialMarkerAlias,
+        *markers: MarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
         **measure_kwargs,
@@ -133,7 +134,7 @@ def mesh_integral(
 
     def _overload(
         measure: Literal['dx', 'ds', 'dS'] | Measure, 
-        *markers: SpatialMarkerAlias,
+        *markers: MarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
         **measure_kwargs,

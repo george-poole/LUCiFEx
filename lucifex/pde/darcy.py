@@ -6,70 +6,48 @@ from ufl import (
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import FunctionSeries
-from lucifex.solver import BoundaryConditions, BlockedForm
-from lucifex.utils.fenicsx_utils import is_tensor, is_zero
+from lucifex.solver import BoundaryConditions
+from lucifex.utils.fenicsx_utils import is_tensor, is_none, BlockedForm, create_zero_form
 
 from .poisson import poisson
 
 
-def darcy_streamfunction(
-    psi: Function | FunctionSeries,
-    k: Expr | Function | Constant | float,
-    mu: Expr | Function | Constant | float,
-    fx: Expr | Function | Constant | float | None = None,
-    fy: Expr | Function | Constant | float | None = None,
-    bcs: BoundaryConditions | None = None,
-) -> list[Form]:
-    """
-    `∇·(μKᵀ·∇ψ / det(K)) = - ∂fʸ/∂x + ∂fˣ/∂y`
-
-    for tensor-valued `K` or
-
-    `∇·(μ·∇ψ / K) = - ∂fʸ/∂x + ∂fˣ/∂y`
-
-    for scalar-valued `K`.
-    """
-
-    if is_tensor(k):
-        weight = (mu / det(k)) * transpose(k)
-    else:
-        weight = (mu / k)
-
-    rhs = 0
-    if not is_zero(fx):
-        rhs += Dx(fx, 1)
-    if not is_zero(fy):
-        rhs += -Dx(fy, 0)
-
-    return poisson(psi, rhs, weight, bcs)
-
-
-def darcy_incompressible(
+def darcy(
     up: FunctionSeries,
     k: Expr | Function | Constant,
     mu: Expr | Function | Constant,
     f: Expr | None = None,
     s: Expr | None = None,
     bcs: BoundaryConditions | None = None,
+    *,
     blocked: bool = False,
+    add_zero: tuple[bool | None, bool | None] = (False, False),
 ) -> list[Form] | BlockedForm:
     """
     `∇⋅𝐮 = s` \\
     `𝐮 = -(K/μ)⋅(∇p - 𝐟)`
     
-    `F(𝐮,p;𝐯,q) = ∫ q(∇·𝐮) dx ` \\
+    `F(𝐮,p;𝐯,q) = ∫ q(∇·𝐮)dx - ∫ qs dx ` \\
     `+ ∫ 𝐯·(μ K⁻¹⋅𝐮) dx - ∫ p(∇·𝐯) dx - ∫ 𝐯·𝐟 dx + ∫ p(𝐯·𝐧) ds`
     """
+    add_v_zero, add_q_zero = add_zero
+    if add_v_zero is None:
+        add_v_zero = f is None
+    if add_q_zero is None:
+        add_q_zero = s is None
+
     dx = Measure('dx', up.function_space.mesh)
+    n = FacetNormal(up.function_space.mesh)
     v, q = TestFunctions(up.function_space)
     u, p = TrialFunctions(up.function_space)
-    n = FacetNormal(up.function_space.mesh)
-
+    
     F_div = q * div(u) * dx
 
     F_src = 0
     if s is not None:
         F_src = -q * s * dx
+    if add_q_zero:
+        F_src = create_zero_form(q, up.function_space.mesh, dx)
 
     if is_tensor(k):
         F_velocity = inner(v, mu * inv(k) * u) * dx
@@ -80,6 +58,8 @@ def darcy_incompressible(
     F_force = 0
     if f is not None:
         F_force = -inner(v, f) * dx
+    if add_v_zero:
+        F_force = create_zero_form(v, up.function_space.mesh, dx, v.ufl_shape)
 
     F_bcs = 0
     if bcs is not None:
@@ -102,6 +82,38 @@ def darcy_incompressible(
         return forms
 
 
+def darcy_streamfunction(
+    psi: Function | FunctionSeries,
+    k: Expr | Function | Constant | float,
+    mu: Expr | Function | Constant | float,
+    fx: Expr | Function | Constant | float | None = None,
+    fy: Expr | Function | Constant | float | None = None,
+    bcs: BoundaryConditions | None = None,
+) -> list[Form]:
+    """
+    `∇·(μKᵀ·∇ψ / det(K)) = - ∂fʸ/∂x + ∂fˣ/∂y`
+
+    with tensor-valued `K` or
+
+    `∇·(μ·∇ψ / K) = - ∂fʸ/∂x + ∂fˣ/∂y`
+
+    with scalar-valued `K` for an incompressible flow  `∇⋅𝐮 = 0`.
+    """
+
+    if is_tensor(k):
+        weight = (mu / det(k)) * transpose(k)
+    else:
+        weight = (mu / k)
+
+    rhs = 0
+    if not is_none(fx):
+        rhs += Dx(fx, 1)
+    if not is_none(fy):
+        rhs += -Dx(fy, 0)
+
+    return poisson(psi, rhs, weight, bcs)
+
+
 def darcy_pressure(
     p: Function | FunctionSeries,
     k: Expr | Function | Constant | float,
@@ -110,7 +122,7 @@ def darcy_pressure(
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
-    `∇⋅((K/μ)⋅∇p) = ∇⋅((K/μ)⋅𝐟)`
+    `∇⋅((K/μ)⋅∇p) = ∇⋅((K/μ)⋅𝐟)` for an incompressible flow  `∇⋅𝐮 = 0`.
     """
     if f is not None:
         if isinstance(f, tuple):

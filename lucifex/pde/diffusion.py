@@ -9,8 +9,9 @@ from lucifex.fdm import (
 )
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
+from lucifex.utils.fenicsx_utils import create_zero_form
 
-from .cg import derivative_form, diffusion_forms, reaction_forms, zero_form
+from .cg import derivative_form, diffusion_forms, reaction_forms
 
 
 def diffusion(
@@ -66,7 +67,7 @@ def steady_diffusion_reaction(
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
-    zero: bool = True,
+    add_zero: bool | None = None,
 ) -> tuple[Form, Form]:
     """"
     `0 = ∇·(D·∇u) + Ru + J`
@@ -74,11 +75,14 @@ def steady_diffusion_reaction(
     v = TestFunction(u.function_space)
     u_trial = TrialFunction(u.function_space)
     dx = Measure('dx', u.function_space.mesh)
+
     forms = [
         *diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx),
         *reaction_forms(v, u_trial, r, j, dx=dx),
     ]
-    if zero:
-        forms.append(zero_form(v, u.function_space.mesh, dx))
+    if add_zero is None:
+        add_zero = j is None
+    if add_zero:
+        forms.append(create_zero_form(v, u.function_space.mesh, dx))
     return forms
 

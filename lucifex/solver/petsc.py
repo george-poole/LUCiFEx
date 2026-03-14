@@ -1,13 +1,10 @@
 from collections.abc import Iterable
-from typing import TypeAlias, Iterable, Literal, Any, TypeVar
-from typing_extensions import Self
-from types import EllipsisType, NoneType
-from functools import wraps, reduce
+from typing import TypeAlias, Iterable, Literal
+from types import EllipsisType
 
-import ufl
 import numpy as np
-from ufl.core.expr import Expr
 from petsc4py import PETSc
+from ufl import Form
 from dolfinx.fem import (
     form as dolfinx_form,
     DirichletBCMetaClass,
@@ -37,6 +34,7 @@ from dolfinx_mpc import (
 )
 
 from ..utils.py_utils import ToDoError
+from ..utils.fenicsx_utils import BlockedForm
 from ..fem import Constant
 
 
@@ -46,151 +44,37 @@ PETScVec: TypeAlias = PETSc.Vec
 """Alias to `PETSc.Vec`"""
 
 
-T = TypeVar('T')
-Scaled: TypeAlias = tuple[Constant | float, T]
-
-def is_scaled_type(
-    obj: Any,
-    tp: type | None = None
-) -> bool:
-    _bool = isinstance(obj, tuple) and len(obj) == 2 and isinstance(obj[0], (float, Constant))
-    if tp is None:
-        return _bool
-    else:
-        return _bool and isinstance(obj[1], tp)
-
-
-class BlockedForm:
-    def __init__(
-        self, 
-        *forms: Iterable[ufl.Form | None] | ufl.Form | None,
-        names: Iterable[str] | None = None,
-    ):
-        if not forms:
-            raise ValueError
-        
-        if all(isinstance(i, (ufl.Form, NoneType)) for i in forms):
-            self._forms = list(forms)
-            self._matrix_like = True
-        else:
-            if not all(len(r) == len(forms[0]) for r in forms):
-                raise ValueError('Expected all rows to be of same length.')
-            if not len(forms) == len(forms[0]):
-                raise ValueError('Expected number of rows to match number of columns.')
-            self._forms = [list(r) for r in forms]
-            self._matrix_like = True
-
-        if names is not None:
-            if not len(names) == len(forms[0]):
-                raise ValueError('Expected length of names to match number of rows or columns.')
-            self._names = tuple(names)
-
-    @property
-    def forms(self) -> list[list[ufl.Form | None]] | list[ufl.Form | None]:
-        return self._forms
-    
-    # @property
-    # def transpose(self) -> Self | None:
-    #     if self.is_matrix_like:
-    #         return BlockedForm(
-    #             *[list(r) for r in zip(self._forms)]
-    #         )
-    #     else:
-    #         return None
-    
-    @property
-    def is_matrix_like(self) -> bool:
-        return self._matrix_like
-    
-    @property
-    def is_vector_like(self) -> bool:
-        return not self.is_matrix_like
-
-    def __getitem__(
-        self, 
-        key: int | tuple[int, int] | str | tuple[str, str],
-    ) -> ufl.Form:
-        if isinstance(key, tuple):
-            if not self.is_matrix_like:
-                raise IndexError('`BlockedForm` instance is vector-like, not matrix-like.')
-            i, j  = key
-            if isinstance(i, int) and isinstance(j, int):
-                return self._forms[i][j]
-            if isinstance(i, str) and isinstance(j, str):
-                assert self._names is not None
-                return self[self._names.index(i), self._names.index(i)]
-        
-        if isinstance(key, int):
-            return self._forms[key]
-        
-        if isinstance(key, str):
-            assert self._names is not None
-            return self[self._names.index(key)]    
-            
-        raise TypeError(key)
-    
-    def __add__(
-        self, 
-        other: Self | Literal[0],
-    ) -> Self:
-        if self.is_matrix_like and isinstance(other, BlockedForm) and other.is_matrix_like:
-            summed = [
-                [add_forms(i, j) for i, j in zip(row, row_other)] for row, row_other in zip(self.forms, other.forms)
-            ]
-            return BlockedForm(*summed)
-        
-        if self.is_vector_like and isinstance(other, BlockedForm) and not other.is_vector_like:
-            summed = [
-                add_forms(i, j) for i, j in zip(self.forms, other.forms)
-            ]
-            return BlockedForm(*summed)
-        
-        if isinstance(other, int) and other == 0:
-            return self
-        
-        raise TypeError(other)
-    
-    def __radd__(self, other: Self) -> Self:
-        return self.__add__(other)
-
-    def __mul__(self, other: float | Expr):
-        if self.is_matrix_like:
-            multiplied = [
-                [other * i for i in row] for row in self.forms
-            ]
-        else:
-            multiplied = [
-                other * i for i in self.forms
-            ]
-        return BlockedForm(*multiplied)
-    
-    def __rmul__(self, other: float | Expr):
-        return self.__mul__(other)
-    
-
 class MetaForm(FormMetaClass):
     """
     `dolfinx.fem.FormMetaClass` with monkey-patched `ufl_form` attribute.
     """
-    ufl_form: ufl.Form
+    ufl_form: Form
 
 
-@wraps(dolfinx_form)
 def create_metaform(
-    *args, 
-    **kwargs,
+    form: Form | BlockedForm | None
+    | Iterable[Form | None] | Iterable[Iterable[Form | None]], 
+    dtype: np.dtype = PETSc.ScalarType,
+    ffcx_options: dict | None = None, 
+    jit_options: dict | None = None,
 ) -> MetaForm | list[MetaForm] | list[list[MetaForm]]:
-    _form = kwargs.get('form')
-    if _form is None:
-        _form = args[0]
-    if isinstance(_form, ufl.Form):
-        f = dolfinx_form(*args, **kwargs)
-        f.ufl_form = _form
-        return f
-    if isinstance(_form, BlockedForm):
-        return create_petsc_matrix(_form.forms)
+    
+    if form is None:
+        return None
+
+    if ffcx_options is None:
+        ffcx_options = {}
+    if jit_options is None:
+        jit_options = {}
+
+    if isinstance(form, Form):
+        metaform = dolfinx_form(form, dtype, ffcx_options, jit_options)
+        metaform.ufl_form = form
+        return metaform
+    elif isinstance(form, BlockedForm):
+        return create_metaform(form.forms)
     else:
-        return [create_metaform(i) for i in _form]
+        return [create_metaform(i) for i in form]
 
 
 ATTR_ASSEMBLY_COUNT = "assembly_count"
@@ -202,7 +86,7 @@ def assemble_petsc_matrix(
     m: PETScMat,
     a: MetaForm | Iterable[MetaForm],
     bcs: list[DirichletBCMetaClass] | None = None,
-    mpc: MultiPointConstraint | None = None,
+    mpc: MultiPointConstraint | list[MultiPointConstraint] | None = None,
     diag: float = 1.0,
     cache: bool | EllipsisType = False,
 ) -> None:
@@ -237,14 +121,14 @@ def _assemble_petsc_matrix(
     m: PETScMat,
     a: MetaForm | list[list[MetaForm]],
     bcs: list[DirichletBCMetaClass],
-    mpc: MultiPointConstraint | None,
+    mpc: MultiPointConstraint | list[MultiPointConstraint] | None,
     diag: float,
 ) -> None:
     if m.isAssembled():
         m.zeroEntries()
             
     if not isinstance(a, FormMetaClass):
-        if mpc is None:
+        if not mpc:
             assemble_matrix_block(
                 m,
                 a,
@@ -254,7 +138,7 @@ def _assemble_petsc_matrix(
         else:
             raise ToDoError
     else:
-        if mpc is None:
+        if not mpc:
             assemble_matrix(m, a, bcs, diag)
         else:
             mpc_assemble_matrix(a, mpc, bcs, diag, m)
@@ -271,7 +155,7 @@ def assemble_petsc_vector(
     v: PETScVec,
     l: MetaForm | list[MetaForm],
     bcs_a: tuple[list[DirichletBCMetaClass], MetaForm] = None,
-    mpc: MultiPointConstraint | None = None,
+    mpc: MultiPointConstraint | list[MultiPointConstraint] | None = None,
 ) -> None:
     with v.localForm() as local:
         local.set(0)
@@ -279,8 +163,8 @@ def assemble_petsc_vector(
     if not isinstance(l, FormMetaClass):
         if bcs_a is None:
             raise TypeError('Cannot be `None` when assembling a blocked vector.')
-        bcs, a = bcs
-        if mpc is None:
+        bcs, a = bcs_a
+        if not mpc:
             assemble_vector_block(
                 v, l, a, bcs,
             )
@@ -288,14 +172,14 @@ def assemble_petsc_vector(
         else:
             raise ToDoError
     else:
-        if mpc is None:
+        if not mpc:
             assemble_vector(v, l)
         else:
             mpc_assemble_vector(l, mpc, v)
         
         if bcs_a is not None:
             bcs, a = bcs_a
-            if mpc is None:
+            if not mpc:
                 apply_lifting(v, [a], [bcs])
             else:
                 mpc_apply_lifting(v, [a], [bcs], mpc)
@@ -307,16 +191,16 @@ def assemble_petsc_vector(
 
   
 def create_petsc_matrix(
-   a: MetaForm | list[MetaForm], 
-   mpc: MultiPointConstraint | None = None,  
+   a: MetaForm | list[list[MetaForm]], 
+   mpc: MultiPointConstraint | list[MultiPointConstraint] |  None = None,  
 ) -> PETScMat:
     if not isinstance(a, FormMetaClass):
-        if mpc is None:
+        if not mpc:
             return create_matrix_block(a)
         else:
             raise ToDoError
     else:
-        if mpc is None:
+        if not mpc:
             return create_matrix(a)
         else:
             pattern = create_sparsity_pattern(a, mpc)
@@ -428,53 +312,3 @@ def view_petsc_vector(
         return _v.getArray()
     else:
         return _v.getValues(indices)
-    
-
-def extract_bilinear_form(
-    form: ufl.Form | BlockedForm | None,
-    strict: bool = False
-) -> ufl.Form | BlockedForm |None:
-    if form is None:
-        return None
-    if isinstance(form, ufl.Form):
-        if len(form.arguments()) == 2:
-            return ufl.lhs(form)
-        if not strict:
-            return None
-        else:
-            raise ValueError
-    else:
-        mat_forms = [[extract_bilinear_form(f) for f in r] for r in form.forms]
-        return BlockedForm(*mat_forms)
-
-
-def extract_linear_form(
-    form: ufl.Form | BlockedForm | None,
-    strict: bool = False
-) -> ufl.Form | BlockedForm | None:
-    if form is None:
-        return None
-    if isinstance(form, ufl.Form):
-        if not ufl.rhs(form).empty():
-            return ufl.rhs(form)
-        if not strict:
-            return None
-        else:
-            raise ValueError
-    else:
-        mat_forms = [[extract_linear_form(f) for f in r] for r in form.forms]
-        vec_forms = [add_forms(i) for i in mat_forms]
-        return BlockedForm(*vec_forms)
-
-
-def add_forms(
-    i: ufl.Form | None, 
-    j: ufl.Form | None,
-) -> ufl.Form | None:
-    if i is None and j is None:
-        return None
-    if i is None:
-        return j
-    if j is None:
-        return i
-    return i + j

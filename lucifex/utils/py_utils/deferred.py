@@ -1,5 +1,5 @@
 from typing import (
-    Callable, ParamSpec, TypeVar, 
+    Callable, ParamSpec, TypeVar, Any,
     ParamSpec, Generic, TypeVar, TypeAlias,
 )
 from math import floor
@@ -92,7 +92,9 @@ class Stopper(DeferredBoolean[[float]]):
             t_stop = condition
             condition = lambda t: t > t_stop
 
-        super().__init__(inject_float_arg(condition))
+        super().__init__(
+            _insert_dummy_arg(condition) if not arity(condition) else condition
+        )
 
     def stop(self, t: float | Constant | np.ndarray) -> bool:
         return self.evaluate(float(t))
@@ -132,7 +134,10 @@ class Writer(DeferredConditionalRoutine[[float], [float]]):
                 else:
                     return False  
 
-        super().__init__(inject_float_arg(routine), inject_float_arg(condition))
+        super().__init__(
+            _insert_dummy_arg(routine) if not arity(routine) else routine, 
+            _insert_dummy_arg(condition) if not arity(condition) else condition, 
+        )
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
@@ -146,16 +151,12 @@ class Writer(DeferredConditionalRoutine[[float], [float]]):
         self.evaluate_if_true(t)(t)
 
 
-def inject_float_arg(
-    condition: LazyEvaluator[bool] | Callable[[float], bool],
-) -> Callable[[float], bool]:
-    n_args = arity(condition)
-    if n_args == 0:
-        return lambda _: condition()
-    else:
-        if not n_args == 1:
-            raise TypeError('Expected callable with at most one argument.')
-        return lambda t: condition(t)
+def _insert_dummy_arg(
+    condition: LazyEvaluator[bool],
+) -> Callable[[Any], bool]:
+    if arity(condition):
+        raise TypeError('Expected callable taking no arguments.')
+    return lambda _: condition()
 
 
 
