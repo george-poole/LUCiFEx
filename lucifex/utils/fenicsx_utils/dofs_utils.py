@@ -57,8 +57,9 @@ def dofs_indices(
     subspace_index: int | None = None,
     dofs_locator: DofsLocatorType = DofsLocatorType.TOPOLOGICAL,
     facet_locator: FacetLocatorType = FacetLocatorType.ANY, 
+    blocked: bool = False,
 ) -> np.ndarray | list[np.ndarray]:
-    
+
     dofs_locator = DofsLocatorType(dofs_locator)
     facet_locator = FacetLocatorType(facet_locator)
     _dofs_marker = as_boolean_marker(dofs_marker)
@@ -67,9 +68,10 @@ def dofs_indices(
         if subspace_index is None:
             return locate_dofs_geometrical(fs, _dofs_marker)
         else:
-            function_subspace, _ = fs.sub(subspace_index).collapse()
+            fs_sub = fs.sub(subspace_index)
+            fs_sub_collapsed, _ = fs_sub.collapse()
             return locate_dofs_geometrical(
-                [fs.sub(subspace_index), function_subspace],
+                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub_collapsed,
                 _dofs_marker,
             )
         
@@ -87,16 +89,14 @@ def dofs_indices(
         if subspace_index is None:
             return locate_dofs_topological(fs, edim, facets)
         else:
-            function_subspace, _ = fs.sub(subspace_index).collapse()
+            fs_sub = fs.sub(subspace_index)
+            fs_sub_collapsed, _ = fs_sub.collapse()
             dofs = locate_dofs_topological(
-                [fs.sub(subspace_index), function_subspace],
+                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub,
                 edim,
                 facets,
             )
-            assert len(dofs) == 2
             return dofs
-        
-    raise ValueError(f'{dofs_locator} not recognised')
 
         
 def dofs(

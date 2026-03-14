@@ -51,9 +51,9 @@ def create_function(
             pass
             
     if isinstance(fs, FunctionSpace):
+        fs = extract_subspace(fs, subspace_index)
         if try_identity and isinstance(value, Function) and value.function_space == fs:
             return value
-        fs = extract_subspace(fs, subspace_index)
         f = Function(fs, name=name)
     else:
         if not isinstance(fs[0], Mesh):

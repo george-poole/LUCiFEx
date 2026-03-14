@@ -47,7 +47,7 @@ class BoundaryConditions:
     where `v` is the test function.
 
     Weakly-enforced boundary conditions that cannnot be expressed by 
-    such a form should instead be specified in the forms function.
+    such a form should instead be specified in the forms factory.
     """
     def __init__(
         self,
@@ -55,7 +55,7 @@ class BoundaryConditions:
         | tuple[BoundaryType, MarkerType, Value, SubspaceIndex]
         | tuple[MarkerType, Value]
         | tuple[MarkerType, Value, SubspaceIndex],
-        dofs_method: DofsLocatorType | Iterable[DofsLocatorType] = DofsLocatorType.TOPOLOGICAL,
+        dofs_locator: DofsLocatorType | Iterable[DofsLocatorType] = DofsLocatorType.TOPOLOGICAL,
         rescale_weak: int | float | None = None, 
     ):
         self._markers: list[BooleanMarker] = []
@@ -64,10 +64,10 @@ class BoundaryConditions:
         self._subindices: list[int | None] = []
         self._rescale_weak = rescale_weak
 
-        if isinstance(dofs_method, str):
-            dofs_method = [dofs_method] * len(bcs)
-        assert len(dofs_method) == len(bcs)
-        self._dofs_method = [DofsLocatorType(i) for i in dofs_method]
+        if isinstance(dofs_locator, str):
+            dofs_locator = [dofs_locator] * len(bcs)
+        assert len(dofs_locator) == len(bcs)
+        self._dofs_locator = [DofsLocatorType(i) for i in dofs_locator]
 
         for bc in bcs:
             match bc:
@@ -105,40 +105,29 @@ class BoundaryConditions:
         dirichlet = []
 
         for uD, b, m, i, d in zip(
-            self._values, self._btypes, self._markers, self._subindices, self._dofs_method,
+            self._values, self._btypes, self._markers, self._subindices, self._dofs_locator,
             strict=True,
         ):
-            if b not in strong_types:
-                continue
-            if i is None:
-                _fs = fs
-            else:
-                if blocked:
-                    fs_sub, _ = fs.sub(i).collapse()
-                    _fs = fs_sub
-                else:
-                    fs_sub = fs.sub(i)
-                    _fs = fs
-
-            indices = dofs_indices(_fs, m, i, d, facet_locator=facet_locator)
-            if isinstance(uD, Constant):
-                if i is None:
-                    dbc = dirichletbc(uD, indices, _fs)
-                else:
-                    if blocked:
-                        raise NotImplementedError('TODO')
+            if b in strong_types:
+                dofs = dofs_indices(fs, m, i, d, facet_locator, blocked)
+                if isinstance(uD, Constant):
+                    if i is None:
+                        dbc = dirichletbc(uD, dofs, fs)
                     else:
-                        dbc = dirichletbc(uD, indices, fs_sub)
-            else:
-                uD = create_function(_fs, uD, i, try_identity=True)
-                if i is None:
-                    dbc = dirichletbc(uD, indices)
+                        if not blocked:
+                            dbc = dirichletbc(uD, dofs, fs.sub(i))
+                        else:
+                            raise ToDoError
                 else:
-                    if blocked:
-                        dbc = dirichletbc(uD, indices, fs_sub)
+                    uD = create_function(fs, uD, i, try_identity=True)
+                    if i is None:
+                        dbc = dirichletbc(uD, dofs)
                     else:
-                        dbc = dirichletbc(uD, indices, fs_sub)
-            dirichlet.append(dbc)
+                        if not blocked:
+                            dbc = dirichletbc(uD, dofs, fs.sub(i))
+                        else:
+                            dbc = dirichletbc(uD, dofs)
+                dirichlet.append(dbc)
                 
         return dirichlet
 
@@ -159,19 +148,18 @@ class BoundaryConditions:
         n_constraint = 0
 
         for reln, b, m, i in zip(self._values, self._btypes, self._markers, self._subindices):
-            if b not in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
-                continue
-            if i is not None:
-                raise ToDoError
-            scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
-            mpc.create_periodic_constraint_geometrical(
-                fs, 
-                m,
-                reln,
-                bcs=bcs,
-                scale=scale,
-            )
-            n_constraint += 1
+            if b in (BoundaryType.PERIODIC, BoundaryType.ANTIPERIODIC):
+                if i is not None:
+                    raise ToDoError
+                scale = 1.0 if b == BoundaryType.PERIODIC else -1.0
+                mpc.create_periodic_constraint_geometrical(
+                    fs, 
+                    m,
+                    reln,
+                    bcs=bcs,
+                    scale=scale,
+                )
+                n_constraint += 1
 
         if n_constraint == 0:
             return None

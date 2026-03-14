@@ -5,7 +5,7 @@ from typing import (
     Any,
 )
 from collections.abc import Iterable
-from types import EllipsisType, NoneType
+from types import EllipsisType
 from typing_extensions import Self
 from functools import partial
 
@@ -103,9 +103,6 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         super().__init__(solution, corrector, future, overwrite)
         
-        if isinstance(forms, (Form, BlockedForm)) or is_scaled_type(forms):
-            forms = (forms, )
-
         if petsc is None:
             petsc = self.petsc_default
         if jit is None:
@@ -115,13 +112,27 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         petsc = dict(petsc)
         jit = dict(jit)
         ffcx = dict(ffcx)
+        
+        # variational forms
+        if isinstance(forms, (Form, BlockedForm)) or is_scaled_type(forms):
+            forms = (forms, )
+        self._scalings: list[float | Constant] = [i[0] if is_scaled_type(i) else 1.0 for i in forms]
+        self._forms: list[Form] | list[BlockedForm] = [i[1] if is_scaled_type(i) else i for i in forms]
 
+        if all(isinstance(i, Form) or i is None for i in (*self._forms, pc_form)):
+            self._blocked = False
+        elif all(isinstance(i, BlockedForm) or i is None for i in (*self._forms, pc_form)):
+            self._blocked = True
+        else:
+            raise TypeError('Cannot have non-blocked and blocked forms together.')
+        
+        # boundary conditions
         if bcs is None:
             bcs = []
         if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(solution)
             forms = (*forms, *forms_weak_bcs)
-            self._bcs = bcs.create_strong_bcs(solution.function_space)        
+            self._bcs = bcs.create_strong_bcs(solution.function_space, blocked=self._blocked)        
             self._mpc = []
             mpc = bcs.create_periodic_mpc(solution.function_space)
             if mpc:
@@ -132,23 +143,6 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
 
         for mpc in self._mpc:
             mpc.finalize()
-        
-        # variational forms
-        self._scalings: list[float | Constant] = [i[0] if is_scaled_type(i) else 1.0 for i in forms]
-        self._forms: list[Form] | list[BlockedForm] = [i[1] if is_scaled_type(i) else i for i in forms]
-
-        if all(isinstance(i, (Form, NoneType)) for i in self._forms):
-            self._blocked = False
-        elif all(isinstance(i, (BlockedForm, NoneType)) for i in self._forms):
-            self._blocked = True
-        else:
-            raise TypeError('Cannot have non-blocked and blocked forms together.')
-        
-        if pc_form is not None:
-            if self._blocked and isinstance(pc_form, Form):
-                raise TypeError
-            if not self._blocked and isinstance(pc_form, BlockedForm):
-                raise TypeError
         
         # bilinear forms
         self._a_forms = [extract_bilinear_form(i) for i in self._forms]
