@@ -20,8 +20,8 @@ def darcy(
     s: Expr | None = None,
     bcs: BoundaryConditions | None = None,
     *,
-    blocked: bool = False,
     add_zero: tuple[bool | None, bool | None] = (False, False),
+    blocked: bool = False,
 ) -> list[Form] | BlockedForm:
     """
     `∇⋅𝐮 = s` \\

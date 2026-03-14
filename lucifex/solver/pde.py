@@ -155,7 +155,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         # linear forms
         self._l_forms = [extract_linear_form(i) for i in self._forms]
-        self._l_form_termwise: Form = sum([i for i in self._l_forms if i is not None])
+        self._l_form_termwise = sum([i for i in self._l_forms if i is not None])
         self._l_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
@@ -531,11 +531,11 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         return self._forms
     
     @property
-    def bilinear_forms(self) -> list[Form]:
+    def bilinear_forms(self) -> list[Form] | list[BlockedForm]:
         return self._a_forms
     
     @property
-    def linear_forms(self) -> list[Form]:
+    def linear_forms(self) -> list[Form] | list[BlockedForm]:
         return self._l_forms
     
     @property

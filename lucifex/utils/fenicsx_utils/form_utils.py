@@ -62,13 +62,7 @@ class BlockedForm:
     @property
     def is_vector_like(self) -> bool:
         return not self.is_matrix_like
-    
-    def __str__(self):
-        if self.is_matrix_like:
-            return str([[str(i) for i in row] for row in self.forms])
-        else:
-            return str([str(i) for i in self.forms])
-    
+        
     def __repr__(self):
         return repr(self.forms)
 
