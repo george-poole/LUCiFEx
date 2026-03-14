@@ -34,7 +34,7 @@ from dolfinx_mpc import (
 )
 
 from ..utils.py_utils import ToDoError
-from ..utils.fenicsx_utils import BlockedForm
+from ..utils.fenicsx_utils import BlockForm
 from ..fem import Constant
 
 
@@ -52,7 +52,7 @@ class MetaForm(FormMetaClass):
 
 
 def create_metaform(
-    form: Form | BlockedForm | None
+    form: Form | BlockForm | None
     | Iterable[Form | None] | Iterable[Iterable[Form | None]], 
     dtype: np.dtype = PETSc.ScalarType,
     ffcx_options: dict | None = None, 
@@ -71,7 +71,7 @@ def create_metaform(
         metaform = dolfinx_form(form, dtype, ffcx_options, jit_options)
         metaform.ufl_form = form
         return metaform
-    elif isinstance(form, BlockedForm):
+    elif isinstance(form, BlockForm):
         return create_metaform(form.forms)
     else:
         return [create_metaform(i) for i in form]

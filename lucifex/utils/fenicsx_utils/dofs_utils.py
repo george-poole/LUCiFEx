@@ -57,7 +57,7 @@ def dofs_indices(
     subspace_index: int | None = None,
     dofs_locator: DofsLocatorType = DofsLocatorType.TOPOLOGICAL,
     facet_locator: FacetLocatorType = FacetLocatorType.ANY, 
-    blocked: bool = False,
+    collapsed: bool = False,
 ) -> np.ndarray | list[np.ndarray]:
 
     dofs_locator = DofsLocatorType(dofs_locator)
@@ -71,7 +71,7 @@ def dofs_indices(
             fs_sub = fs.sub(subspace_index)
             fs_sub_collapsed, _ = fs_sub.collapse()
             return locate_dofs_geometrical(
-                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub_collapsed,
+                [fs_sub, fs_sub_collapsed] if not collapsed else fs_sub_collapsed,
                 _dofs_marker,
             )
         
@@ -91,12 +91,11 @@ def dofs_indices(
         else:
             fs_sub = fs.sub(subspace_index)
             fs_sub_collapsed, _ = fs_sub.collapse()
-            dofs = locate_dofs_topological(
-                [fs_sub, fs_sub_collapsed] if not blocked else fs_sub_collapsed,
+            return locate_dofs_topological(
+                [fs_sub, fs_sub_collapsed] if not collapsed else fs_sub_collapsed,
                 edim,
                 facets,
             )
-            return dofs
 
         
 def dofs(

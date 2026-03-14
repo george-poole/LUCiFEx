@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Any, TypeVar, TypeAlias
-from functools import reduce
 
 import numpy as np
 from basix.ufl_wrapper import BasixElement

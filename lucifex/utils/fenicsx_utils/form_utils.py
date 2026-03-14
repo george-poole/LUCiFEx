@@ -5,9 +5,11 @@ from functools import reduce
 
 import numpy as np
 from dolfinx.mesh import Mesh
-from dolfinx.fem import Constant
+from dolfinx.fem import Constant, FunctionSpace
 from ufl import Form, rhs, lhs, inner, Argument, Measure
 from ufl.core.expr import Expr
+
+from .expr_utils import extract_function_space
 
 
 T = TypeVar('T')
@@ -26,10 +28,10 @@ def is_scaled_type(
         return _bool and isinstance(obj[1], tp)
     
 
-class BlockedForm:
+class BlockForm:
     def __init__(
         self, 
-        *forms: Iterable[Form | None] | Form | None,
+        forms: Iterable[Form | None] | Iterable[Iterable[Form | None]],
         names: Iterable[str] | None = None,
     ):
         if not forms:
@@ -50,6 +52,21 @@ class BlockedForm:
             if not len(names) == len(forms[0]):
                 raise ValueError('Expected length of names to match number of rows or columns.')
             self._names = tuple(names)
+
+    @property
+    def function_spaces(self) -> list[list[FunctionSpace | None]] |  list[FunctionSpace | None]:
+        if self.is_matrix_like:
+            # FIXME think about mat structure
+            # FIXME [0] or loop over indices ?
+            return [
+                [extract_function_space(f.arguments()[0]) if f is not None else None for f in r] 
+                for r in self.forms
+            ]
+        else:
+            return [
+                extract_function_space(f.arguments()[0]) if f is not None else None 
+                for f in self.forms
+            ]
 
     @property
     def forms(self) -> list[list[Form | None]] | list[Form | None]:
@@ -93,22 +110,22 @@ class BlockedForm:
         self, 
         other: Self | Literal[0],
     ) -> Self:
-        if self.is_matrix_like and isinstance(other, BlockedForm) and other.is_matrix_like:
+        if self.is_matrix_like and isinstance(other, BlockForm) and other.is_matrix_like:
             summed = [
                 [add_forms(i, j) for i, j in zip(row, row_other)] for row, row_other in zip(self.forms, other.forms)
             ]
-            return BlockedForm(*summed)
+            return BlockForm(summed)
         
-        if self.is_vector_like and isinstance(other, BlockedForm) and not other.is_vector_like:
+        if self.is_vector_like and isinstance(other, BlockForm) and other.is_vector_like:
             summed = [
                 add_forms(i, j) for i, j in zip(self.forms, other.forms)
             ]
-            return BlockedForm(*summed)
+            return BlockForm(summed)
         
         if isinstance(other, int) and other == 0:
             return self
         
-        raise TypeError(other)
+        raise TypeError(f'Cannot add {type(self)} and {type(other)}.')
     
     def __radd__(self, other: Self) -> Self:
         return self.__add__(other)
@@ -122,10 +139,11 @@ class BlockedForm:
             multiplied = [
                 scale_form(other, i) for i in self.forms
             ]
-        return BlockedForm(*multiplied)
+        return BlockForm(multiplied)
     
     def __rmul__(self, other: float | Expr):
         return self.__mul__(other)
+    
     
 
 def add_forms(
@@ -152,7 +170,7 @@ def scale_form(
 
 
 def is_none(
-    expr: Expr | Form | Any | Iterable[Form | Any] | Iterable[Iterable[Form | Any]] | BlockedForm,
+    expr: Expr | Form | Any | Iterable[Form | Any] | Iterable[Iterable[Form | Any]] | BlockForm,
     iter_func: Callable[[Iterable[Form | Expr | None]], bool] = all,
     none_aliases: Iterable[Any] = (0, None),
 ) -> bool:
@@ -160,7 +178,7 @@ def is_none(
         return True
     if isinstance(expr, (Expr, Form)):
         return False
-    if isinstance(expr, BlockedForm):
+    if isinstance(expr, BlockForm):
         return is_none(expr.forms, iter_func, none_aliases)
     else:
         return iter_func(
@@ -170,9 +188,9 @@ def is_none(
 
 
 def extract_bilinear_form(
-    form: Form | BlockedForm | None,
+    form: Form | BlockForm | None,
     strict: bool = False
-) -> Form | BlockedForm |None:
+) -> Form | BlockForm |None:
     if form is None:
         return None
     if isinstance(form, Form):
@@ -183,14 +201,21 @@ def extract_bilinear_form(
         else:
             raise ValueError
     else:
-        mat_forms = [[extract_bilinear_form(f) for f in r] for r in form.forms]
-        return BlockedForm(*mat_forms)
+        if form.is_matrix_like:
+            mat_forms = [[extract_bilinear_form(f) for f in r] for r in form.forms]
+        else:
+            diag_forms = [extract_bilinear_form(f) for f in form.forms]
+            dim = len(diag_forms)
+            mat_forms = [[None] * dim] * dim
+            for i in range(dim):
+                mat_forms[i][i] = diag_forms[i]
+        return BlockForm(mat_forms)
 
 
 def extract_linear_form(
-    form: Form | BlockedForm | None,
+    form: Form | BlockForm | None,
     strict: bool = False
-) -> Form | BlockedForm | None:
+) -> Form | BlockForm | None:
     if form is None:
         return None
     if isinstance(form, Form):
@@ -201,9 +226,13 @@ def extract_linear_form(
         else:
             raise ValueError
     else:
-        mat_forms = [[extract_linear_form(f) for f in r] for r in form.forms]
-        vec_forms = [reduce(add_forms, row) for row in mat_forms]
-        return BlockedForm(*vec_forms)
+        if form.is_matrix_like:
+            mat_forms = [[extract_linear_form(f) for f in r] for r in form.forms]
+            vec_forms = [reduce(add_forms, row) for row in mat_forms]
+            return BlockForm(vec_forms)
+        else:
+            vec_forms = [extract_linear_form(f) for f  in form.forms]
+            return BlockForm(vec_forms)
     
 
 def create_zero_form(

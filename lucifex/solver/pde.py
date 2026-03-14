@@ -20,7 +20,7 @@ from dolfinx.fem.petsc import DirichletBCMetaClass
 from dolfinx_mpc import MultiPointConstraint
 
 from ..utils.fenicsx_utils import (
-    create_function_space, Marker, BlockedForm, Scaled,
+    create_function_space, Marker, BlockForm, Scaled,
     is_scaled_type, is_none, extract_bilinear_form, extract_linear_form,
 )
 from ..utils.py_utils import replicate_callable
@@ -82,9 +82,9 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     def __init__(
         self,
         solution: Function | FunctionSeries,
-        forms: Form | Scaled[Form | BlockedForm] | BlockedForm 
+        forms: Form | Scaled[Form | BlockForm] | BlockForm 
         | Iterable[Form | Scaled[Form]] 
-        | Iterable[BlockedForm | Scaled[BlockedForm]],
+        | Iterable[BlockForm | Scaled[BlockForm]],
         bcs: BoundaryConditions 
         | Iterable[DirichletBCMetaClass | MultiPointConstraint] 
         | None = None,
@@ -96,7 +96,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = False,
         overwrite: bool = False,
     ) -> None:
@@ -114,35 +114,17 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         ffcx = dict(ffcx)
         
         # variational forms
-        if isinstance(forms, (Form, BlockedForm)) or is_scaled_type(forms):
+        if isinstance(forms, (Form, BlockForm)) or is_scaled_type(forms):
             forms = (forms, )
         self._scalings: list[float | Constant] = [i[0] if is_scaled_type(i) else 1.0 for i in forms]
-        self._forms: list[Form] | list[BlockedForm] = [i[1] if is_scaled_type(i) else i for i in forms]
+        self._forms: list[Form] | list[BlockForm] = [i[1] if is_scaled_type(i) else i for i in forms]
 
         if all(isinstance(i, Form) or i is None for i in (*self._forms, pc_form)):
             self._blocked = False
-        elif all(isinstance(i, BlockedForm) or i is None for i in (*self._forms, pc_form)):
+        elif all(isinstance(i, BlockForm) or i is None for i in (*self._forms, pc_form)):
             self._blocked = True
         else:
             raise TypeError('Cannot have non-blocked and blocked forms together.')
-        
-        # boundary conditions
-        if bcs is None:
-            bcs = []
-        if isinstance(bcs, BoundaryConditions):
-            forms_weak_bcs = bcs.create_weak_bcs(solution)
-            forms = (*forms, *forms_weak_bcs)
-            self._bcs = bcs.create_strong_bcs(solution.function_space, blocked=self._blocked)        
-            self._mpc = []
-            mpc = bcs.create_periodic_mpc(solution.function_space)
-            if mpc:
-                self._mpc.append(mpc)
-        else:
-            self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
-            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
-
-        for mpc in self._mpc:
-            mpc.finalize()
         
         # bilinear forms
         self._a_forms = [extract_bilinear_form(i) for i in self._forms]
@@ -155,12 +137,34 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         # linear forms
         self._l_forms = [extract_linear_form(i) for i in self._forms]
-        self._l_form_termwise = sum([i for i in self._l_forms if i is not None])
+        self._l_form_termwise: Form | BlockForm = sum([i for i in self._l_forms if i is not None])
         self._l_form_nontermwise = sum(
             [i * j for i, j in zip(self._scalings, self._l_forms, strict=True) if j is not None]
         )
         if is_none(self._l_form_termwise, any) or is_none(self._l_form_nontermwise, any):
             raise LinearFormError(self.__class__, solution.name)
+        
+        # boundary conditions
+        if bcs is None:
+            bcs = []
+        if isinstance(bcs, BoundaryConditions):
+            forms_weak_bcs = bcs.create_weak_bcs(solution)
+            forms = (*forms, *forms_weak_bcs)
+            if self._blocked:
+                fs_sub = self._l_form_termwise.function_spaces
+            else: 
+                fs_sub = None
+            self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=fs_sub)   
+            self._mpc = []
+            mpc = bcs.create_periodic_mpc(solution.function_space)
+            if mpc:
+                self._mpc.append(mpc)
+        else:
+            self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
+            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
+
+        for mpc in self._mpc:
+            mpc.finalize()
         
         # setters
         self._create_metaform = partial(
@@ -302,7 +306,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = False,
         overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
@@ -527,15 +531,15 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         return [format(i) for i in self._forms]
     
     @property
-    def forms(self) -> list[Form]:
+    def forms(self) -> list[Form] | list[BlockForm]:
         return self._forms
     
     @property
-    def bilinear_forms(self) -> list[Form] | list[BlockedForm]:
+    def bilinear_forms(self) -> list[Form] | list[BlockForm]:
         return self._a_forms
     
     @property
-    def linear_forms(self) -> list[Form] | list[BlockedForm]:
+    def linear_forms(self) -> list[Form] | list[BlockForm]:
         return self._l_forms
     
     @property
@@ -609,7 +613,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = True,
         overwrite: bool = False,
     ) -> None:
@@ -665,7 +669,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 
@@ -754,7 +758,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = True,
         overwrite: bool = False,
     ) -> None:
@@ -789,7 +793,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
-        pc_form: Form | BlockedForm | None = None,
+        pc_form: Form | BlockForm | None = None,
         future: bool = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 

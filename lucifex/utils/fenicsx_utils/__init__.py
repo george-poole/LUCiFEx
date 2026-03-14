@@ -28,7 +28,7 @@ from .form_utils import (
     extract_integrand,
     is_none,
     is_scaled_type,
-    BlockedForm,
+    BlockForm,
     extract_bilinear_form,
     extract_linear_form,
     create_zero_form,

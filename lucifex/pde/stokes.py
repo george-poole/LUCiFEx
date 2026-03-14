@@ -8,7 +8,7 @@ from ufl.core.expr import Expr
 
 from lucifex.solver import BoundaryConditions
 from lucifex.fem import Function, Constant
-from lucifex.utils.fenicsx_utils import is_none, BlockedForm
+from lucifex.utils.fenicsx_utils import is_none, BlockForm
 
 
 def stokes_incompressible(
@@ -19,7 +19,7 @@ def stokes_incompressible(
     *,
     blocked: bool = False,
     add_zero: tuple[bool | None, bool | None] = (False, False),
-) -> list[Form] | BlockedForm:
+) -> list[Form] | BlockForm:
     """
     `∇·𝐮 = 0` \\
     `𝟎 = -∇p + ∇·𝜏(𝐮) + 𝐟`
@@ -43,7 +43,7 @@ def stokes_incompressible(
         F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in tau_natural])
 
     if blocked:
-        return BlockedForm(
+        return BlockForm(
             [F_stress + F_force + F_bcs, F_pressure],
             [F_div, None],
         )
