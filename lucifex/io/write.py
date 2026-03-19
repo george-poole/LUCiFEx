@@ -469,7 +469,9 @@ def _(
         
     if callable(file_name):
         file_name = file_name(fig)
-    assert file_name is not None
+        if file_name is None:
+            raise RuntimeError('Could not deduce `file_name` from `fig`.')
+
     file_path = file_path_ext(dir_path, file_name, file_ext)
     fig.savefig(file_path, bbox_inches=bbox_inches, dpi=dpi, **kwargs)
     if pickle:
