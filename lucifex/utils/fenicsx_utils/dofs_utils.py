@@ -147,19 +147,24 @@ def as_boolean_marker(
     such that `f(x) = 0`, defines the boundary to a function returning `True` 
     if `x` is on the boundary and `False` otherwise.
     """
-    
-    def _as_marker(m: BooleanMarker | MarkerAlias) -> BooleanMarker:
-        x_test = np.array([0.0, 0.0, 0.0])
-        if isinstance(m(x_test), (bool, np.bool_)):
+    if not isinstance(m, Iterable):
+        if is_boolean_marker(m):
             return m
         else:
             return lambda x: np.isclose(m(x), 0.0, rtol, atol)
-
-    if not isinstance(m, Iterable):
-        return _as_marker(m)
     else:
-        return lambda x: np.any([_as_marker(mi)(x) for mi in m], axis=0)
+        return lambda x: np.any(
+            [as_boolean_marker(mi, rtol, atol)(x) for mi in m], 
+            axis=0,
+        )
     
+
+def is_boolean_marker(
+    m: BooleanMarker | MarkerAlias,
+) -> bool:
+    x_test = np.array([0.0, 0.0, 0.0])
+    return isinstance(m(x_test), (bool, np.bool_))
+        
 
 def limits_corrector(
     lower: float | Constant | None = None,

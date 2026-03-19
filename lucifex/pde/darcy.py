@@ -66,7 +66,7 @@ def darcy(
     if f is not None:
         F_force = -inner(v, f) * dx
     if add_zero_f:
-        F_force += create_zero_form(v, up.function_space.mesh, dx, v.ufl_shape)
+        F_force += create_zero_form(v, up.function_space.mesh, dx)
 
     F_bcs = 0
     if bcs is not None:
@@ -81,14 +81,10 @@ def darcy(
             ],
         )
     else:
-        forms = [F_div, F_velocity, F_pressure]
-        if F_src:
-            forms.append(F_src)
-        if F_force:
-            forms.append(F_force)
-        if F_bcs:
-            forms.append(F_bcs)
-        return forms
+        return [
+            F_div, F_velocity, F_pressure,
+            *(f for f in (F_src, F_force, F_bcs) if f),
+        ]
 
 
 def darcy_streamfunction(

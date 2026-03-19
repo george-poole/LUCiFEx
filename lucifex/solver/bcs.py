@@ -97,37 +97,11 @@ class BoundaryConditions:
             BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL, BoundaryType.STRONG,
         ),
         facet_locator: FacetLocatorType = FacetLocatorType.BOUNDARY,
-        # blocked: bool = False,
         fs_sub: Iterable[FunctionSpace | None] | None = None,
     ) -> list[DirichletBCMetaClass]: 
         """
         Strongly enforced boundary condition `u = uE` on `∂Ω`
         """
-        dirichlet = []
-        for uD, b, m, i, d in zip(
-            self._values, self._btypes, self._markers, self._subindices, self._dofs_locator,
-            strict=True,
-        ):
-            if b in strong_types:
-                dofs = dofs_indices(fs, m, i, d, facet_locator=facet_locator)
-                if isinstance(uD, Constant):
-                    if i is None:
-                        dbc = dirichletbc(uD, dofs, fs)
-                    else:
-                        dbc = dirichletbc(uD, dofs, fs.sub(i))
-                else:
-                    uD = create_function(fs, uD, i, try_identity=True)
-                    if i is None:
-                        dbc = dirichletbc(uD, dofs)
-                    else:
-                        dbc = dirichletbc(uD, dofs, fs.sub(i))
-                dirichlet.append(dbc)
-                
-        return dirichlet
-
-
-
-
         dirichlet = []
 
         for uD, b, m, i, d in zip(
@@ -140,9 +114,6 @@ class BoundaryConditions:
                 else:
                     dofs = dofs_indices(fs_sub[i], m, dofs_locator=d, facet_locator=facet_locator, collapsed=True)
                 if isinstance(uD, Constant):
-                    # if i is None:
-                    #     dbc = dirichletbc(uD, dofs, fs)
-                    # else:
                     if fs_sub is None:
                         dbc = dirichletbc(uD, dofs, fs if i is None else fs.sub(i))
                     else:
@@ -150,17 +121,10 @@ class BoundaryConditions:
                 else:
                     if fs_sub is None:
                         uD = create_function(fs, uD, i, try_identity=True)
-                        dbc = dirichletbc(uD, dofs, fs if i is None else fs.sub(i))
+                        dbc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
                     else:
                         uD = create_function(fs_sub[i], uD, try_identity=True)
                         dbc = dirichletbc(uD, dofs)
-                    # if i is None:
-                    #     dbc = dirichletbc(uD, dofs)
-                    # else:
-                    #     if fs_sub is None:
-                    #         dbc = dirichletbc(uD, dofs, fs.sub(i))
-                    #     else:
-                    #         dbc = dirichletbc(uD, dofs)
                 dirichlet.append(dbc)
                 
         return dirichlet

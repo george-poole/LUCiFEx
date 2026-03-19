@@ -1,4 +1,4 @@
-from typing import Any, Iterable, TypeVar, TypeAlias, Literal, Callable
+from typing import Any, Iterable, TypeVar, TypeAlias, Literal, Callable, ParamSpec
 from types import NoneType
 from typing_extensions import Self
 from functools import reduce
@@ -27,7 +27,7 @@ def is_scaled_type(
     else:
         return _bool and isinstance(obj[1], tp)
     
-
+P = ParamSpec('P')
 class BlockForm:
     def __init__(
         self, 
@@ -41,11 +41,11 @@ class BlockForm:
             self._forms = list(forms)
             self._matrix_like = False
         else:
-            if not all(len(r) == len(forms[0]) for r in forms):
+            if not all(len(row) == len(forms[0]) for row in forms):
                 raise ValueError('Expected all rows to be of same length.')
             if not len(forms) == len(forms[0]):
                 raise ValueError('Expected number of rows to match number of columns.')
-            self._forms = [list(r) for r in forms]
+            self._forms = [list(row) for row in forms]
             self._matrix_like = True
 
         if names is not None:
@@ -56,11 +56,9 @@ class BlockForm:
     @property
     def function_spaces(self) -> list[list[FunctionSpace | None]] |  list[FunctionSpace | None]:
         if self.is_matrix_like:
-            # FIXME think about mat structure
-            # FIXME [0] or loop over indices ?
             return [
-                [extract_function_space(f.arguments()[0]) if f is not None else None for f in r] 
-                for r in self.forms
+                [extract_function_space(f.arguments()[0]) if f is not None else None for f in row] 
+                for row in self.forms
             ]
         else:
             return [
@@ -112,13 +110,14 @@ class BlockForm:
     ) -> Self:
         if self.is_matrix_like and isinstance(other, BlockForm) and other.is_matrix_like:
             summed = [
-                [add_forms(i, j) for i, j in zip(row, row_other)] for row, row_other in zip(self.forms, other.forms)
+                [_add_forms(i, j) for i, j in zip(row, row_other)] 
+                for row, row_other in zip(self.forms, other.forms)
             ]
             return BlockForm(summed)
         
         if self.is_vector_like and isinstance(other, BlockForm) and other.is_vector_like:
             summed = [
-                add_forms(i, j) for i, j in zip(self.forms, other.forms)
+                _add_forms(i, j) for i, j in zip(self.forms, other.forms)
             ]
             return BlockForm(summed)
         
@@ -133,20 +132,19 @@ class BlockForm:
     def __mul__(self, other: float | Expr):
         if self.is_matrix_like:
             multiplied = [
-                [scale_form(other, i) for i in row] for row in self.forms
+                [_mul_form(other, i) for i in row] for row in self.forms
             ]
         else:
             multiplied = [
-                scale_form(other, i) for i in self.forms
+                _mul_form(other, i) for i in self.forms
             ]
         return BlockForm(multiplied)
     
     def __rmul__(self, other: float | Expr):
         return self.__mul__(other)
     
-    
 
-def add_forms(
+def _add_forms(
     i: Form | None, 
     j: Form | None,
 ) -> Form | None:
@@ -159,7 +157,7 @@ def add_forms(
     return i + j
 
 
-def scale_form(
+def _mul_form(
     scale: float | Expr,
     f: Form | None,
 ) -> Form | None:
@@ -186,7 +184,6 @@ def is_none(
         )
     
 
-
 def extract_bilinear_form(
     form: Form | BlockForm | None,
     strict: bool = False
@@ -202,7 +199,7 @@ def extract_bilinear_form(
             raise ValueError
     else:
         if form.is_matrix_like:
-            mat_forms = [[extract_bilinear_form(f) for f in r] for r in form.forms]
+            mat_forms = [[extract_bilinear_form(f) for f in row] for row in form.forms]
         else:
             diag_forms = [extract_bilinear_form(f) for f in form.forms]
             dim = len(diag_forms)
@@ -227,8 +224,8 @@ def extract_linear_form(
             raise ValueError
     else:
         if form.is_matrix_like:
-            mat_forms = [[extract_linear_form(f) for f in r] for r in form.forms]
-            vec_forms = [reduce(add_forms, row) for row in mat_forms]
+            mat_forms = [[extract_linear_form(f) for f in row] for row in form.forms]
+            vec_forms = [reduce(_add_forms, row) for row in mat_forms]
             return BlockForm(vec_forms)
         else:
             vec_forms = [extract_linear_form(f) for f  in form.forms]
@@ -239,9 +236,13 @@ def create_zero_form(
     v: Argument,
     mesh: Mesh,
     dx: Measure,
-    shape: tuple[int, ...] = (),  
 ) -> Form:
-    return inner(v, Constant(mesh, np.full(shape, 0.0))) * dx
+    """
+    Linear form `∫ 𝐯·𝟎 dx` created as the inner product of the test function and zero.
+    Convenient for adding as  as extra term if the weak formulation `a(u,v) = l(v)` 
+    would otherwise lack a linear form `l(v)`.
+    """
+    return inner(v, Constant(mesh, np.full(v.ufl_shape, 0.0))) * dx
 
 
 def extract_integrands(

@@ -143,6 +143,11 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         )
         if is_none(self._l_form_termwise, any) or is_none(self._l_form_nontermwise, any):
             raise LinearFormError(self.__class__, solution.name)
+
+        if self._blocked:
+            self._blocked_subspaces = self._l_form_termwise.function_spaces
+        else:
+            self._blocked_subspaces = None
         
         # boundary conditions
         if bcs is None:
@@ -150,11 +155,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(solution)
             forms = (*forms, *forms_weak_bcs)
-            if self._blocked:
-                fs_sub = self._l_form_termwise.function_spaces
-            else: 
-                fs_sub = None
-            self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=fs_sub)   
+            self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=self._blocked_subspaces)   
             self._mpc = []
             mpc = bcs.create_periodic_mpc(solution.function_space)
             if mpc:
@@ -294,7 +295,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     @classmethod
     def from_forms_factory(
         cls,
-        forms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]] | Form],
+        forms_factory: Callable[P, Iterable[Form | Scaled[Form]] | Form],
         bcs: BoundaryConditions 
         | Iterable[DirichletBCMetaClass | MultiPointConstraint] 
         | None = None,
@@ -442,15 +443,15 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self,
     ) -> tuple[list[np.ndarray], list[slice]]:
         if self._dofmaps_slices is None:
-            _fs = self._solution.function_space
-            n_sub = _fs.num_sub_spaces
+            fs = self._solution.function_space
+            n_sub = fs.num_sub_spaces
 
             dofmaps: list[np.ndarray] = []
             offsets: list[int | None] = [0]
             for i in range(n_sub):
-                _fs_sub, dfmp = _fs.sub(i).collapse()
+                fs_sub, dfmp = fs.sub(i).collapse()
                 dofmaps.append(dfmp)
-                ofst = _fs_sub.dofmap.index_map.size_local * _fs_sub.dofmap.index_map_bs
+                ofst = fs_sub.dofmap.index_map.size_local * fs_sub.dofmap.index_map_bs
                 offsets.append(ofst + offsets[-1])
             offsets.append(None)
 
