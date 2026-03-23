@@ -614,22 +614,33 @@ class SubFunctionSeries(Series[Expr]):
         )
         self._mixed = mixed
         self._subspace_index = subspace_index
+        self._function_space = mixed.function_space.sub(self._subspace_index).collapse()[0]
+        self._series = None
     
     @property
-    def function_space(self, collapse: bool = True) -> FunctionSpace:
-        fs = self._mixed.function_space.sub(self._subspace_index)
-        if collapse:
-            return fs.collapse()
-        else:
-            return fs
+    def function_space(self) -> FunctionSpace:
+        return self._function_space 
+        
+    @property
+    def function_supspace(self) -> FunctionSpace:
+        return self._mixed.function_space
+    
+    @property
+    def ufl_shape(self):
+        return self._function_space.ufl_element().value_shape() 
     
     @property
     def mesh(self) -> Mesh:
         return self.function_space.mesh
 
     @property
-    def series(self, collapse: bool = True) -> list[Function]:
-        return [i.sub(self._subspace_index, self.name, collapse) for i in self._mixed.series]
+    def series(self) -> list[Function]:
+        if self._series is None:
+            self._series = [i.sub(self._subspace_index, self.name, collapse=True) for i in self._mixed.series]
+        return self._series
+    
+    def clear_series(self) -> None:
+        self._series = None
     
     @property
     def time_series(self) -> list[float | None]:

@@ -43,23 +43,30 @@ def vorticity_from_velocity(
 def streamfunction_from_vorticity(
     psi: Function,
     omega: Function,
-    bcs: BoundaryConditions | None = None
+    bcs: BoundaryConditions | None = None,
+    neg: bool = False,
 ) -> list[Form]:
     """
     `∇²ψ = ±ω` depending on sign convention
     for an incompressible flow `∇·𝐮 = 0`.
     """
-    return poisson(psi, omega, bcs=bcs)
+    rhs = omega
+    if neg:
+        rhs *= -1
+    return poisson(psi, rhs, bcs=bcs)
 
 
 def streamfunction_from_velocity(
     psi: Function,
     u: Function,
-    bcs: BoundaryConditions | None = None
+    bcs: BoundaryConditions | None = None,
+    neg: bool = False,
 ) -> list[Form]:
     """
     `∇²ψ = ±(∂uʸ/∂x - ∂uˣ/∂y)` depending on sign convention
     for an incompressible flow `∇·𝐮 = 0`.
     """
-    omega = vorticity_from_velocity(u, d2=True)
-    return poisson(psi, omega, bcs=bcs)
+    rhs = vorticity_from_velocity(u, d2=True)
+    if neg:
+        rhs *= -1
+    return poisson(psi, rhs, bcs=bcs)

@@ -7,6 +7,8 @@ from typing_extensions import Self
 from petsc4py import PETSc
 from slepc4py import SLEPc
 
+from lucifex.utils.py_utils import FrozenDict
+
 
 DEFAULT_JIT_DIR = os.path.abspath(
     os.path.join(
@@ -17,45 +19,22 @@ DEFAULT_JIT_DIR = os.path.abspath(
 )
 
 
-class Options:
+class Options(FrozenDict[str, Any]):
     def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-        self._kwargs = kwargs
+        super().__init__(**kwargs)
 
     @classmethod
     def default(cls) -> Self:
         try:
             return cls()
         except TypeError:
-            raise TypeError('Option attributes must all have default values.')
-
-    def __getitem__(self, key):
-        return self._kwargs[key]
+            raise TypeError('Arguments must all have default values.')
+        
+    def __getattr__(self, key: str) -> Any:
+        if key not in self._dict:
+            raise AttributeError(key)
+        return self._dict[key]
     
-    def __setitem__(self, *_):
-        raise RuntimeError(f'Cannot mutate a `{self.__class__.__name__}` object. Use `replace` method to create a copy.')
-    
-    def __repr__(self):
-        return repr(self._kwargs)
-
-    def replace(self, **changes: Any) -> Self:
-        _kwargs = self._kwargs.copy()
-        _kwargs.update(changes)
-        return self.__class__(**_kwargs)
-
-    def __iter__(self):
-        return iter(self.keys())
-
-    def items(self):
-        return self._kwargs.items()
-    
-    def keys(self):
-        return self._kwargs.keys()
-    
-    def values(self):
-        return self._kwargs.values()
-
 
 class OptionsPETSc(Options):
     ksp_type: str

@@ -43,6 +43,7 @@ class MultiKey(ABC, Generic[K, V]):
         ...
 
 
+
 K = TypeVar('K')
 V = TypeVar('V')
 class FrozenDict(MultiKey[K, V], Generic[K, V]):
@@ -61,7 +62,7 @@ class FrozenDict(MultiKey[K, V], Generic[K, V]):
     def __init__(self, *args: dict, **kwargs):
         if kwargs and args:
             raise TypeError
-        if kwargs and not args:
+        if not args:
             self._dict = kwargs
         if args and not kwargs:
             if len(args) > 1:
@@ -81,10 +82,35 @@ class FrozenDict(MultiKey[K, V], Generic[K, V]):
         kws = ', '.join([f'{k}={v}' for k, v in self._dict.items()])
         return f'{self.__class__.__name__}({kws})'
     
+    def __setitem__(self, *_):
+        raise RuntimeError(
+            f'`{self.__class__.__name__}` is an immutable type. Use  the `replace`, `insert` or `remove` methods to create another instance.'
+        )
+    
     def replace(self, **kwargs: Any) -> Self:
+        for k in kwargs:
+            if k not in self._dict:
+                raise KeyError(
+                    f"'{k}' is not a key defined in the original dictionary."
+                )
+        return self.insert(**kwargs)
+    
+    def insert(self, **kwargs: Any) -> Self:
         _kwargs = self._dict.copy()
         _kwargs.update(kwargs)
         return self.__class__(**_kwargs)
+    
+    def remove(self, *keys: str) -> Self:
+        for k in keys:
+            if k not in keys:
+                raise KeyError(
+                    f"'{k}' is not a key defined in the original dictionary."
+                )
+        _kwargs = {k: v for k, v in self._dict.items() if not k in keys}
+        return self.__class__(**_kwargs)
+    
+    def __iter__(self):
+        return iter(self.keys())
     
     def keys(self):
         return self._dict.keys()
@@ -94,7 +120,6 @@ class FrozenDict(MultiKey[K, V], Generic[K, V]):
     
     def items(self):
         return self._dict.items()
-        
 
 
 @overload

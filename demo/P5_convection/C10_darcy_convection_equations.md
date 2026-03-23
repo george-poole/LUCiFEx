@@ -14,7 +14,7 @@ $$
 &\text{such that} \\
 &\mathbb{IBVP}
 \begin{cases}
-\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}\cdot\nabla c) + R & \\
+\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}\cdot\nabla c) + \Sigma & \\
 \phi\frac{\partial\theta}{\partial t} + \textbf{u}\cdot\nabla\theta = \nabla\cdot(\mathsf{G}\cdot\nabla\theta) + H& \\
 \nabla\cdot\textbf{u} = 0 & \\
 \textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot(\nabla p - \rho g\,\textbf{e}_g) & \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
@@ -47,7 +47,7 @@ p_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} & \text{pressure natural
 \mathsf{G}(\phi, \textbf{u}) & \text{thermal dispersion}\\
 \rho(c, \theta) & \text{density}\\
 \mu(c, \theta) & \text{viscosity}\\
-R(c,\theta, \phi) & \text{solutal reaction}\\
+\Sigma(c,\theta, \phi) & \text{solutal reaction}\\
 H(c,\theta, \phi) & \text{thermal reaction}\\
 \end{cases}
 \end{align*}
@@ -61,9 +61,9 @@ $$
 | -------- | ------- | ------- | ------- | ------- | ------- |  ------- |  ------- |  ------- | 
 | **Scaling** | $\mathcal{L}$ | $\mathcal{U}$ |$\mathcal{T}$ | $\Delta c$ | $\Delta\theta$ | $g \Delta\rho$ | $\mu_{\text{ref}}\,\mathcal{U}\mathcal{L}/K_{\text{ref}}$ | $\mathcal{U}\mathcal{L}$ |
 
-| $\mu$ | $\phi$ | $K$ | $\vert\mathsf{D}\vert$ | $\vert\mathsf{G}\vert$ | $R$ | $H$ |
+| $\mu$ | $\phi$ | $K$ | $\vert\mathsf{D}\vert$ | $\vert\mathsf{G}\vert$ | $\Sigma$ | $H$ |
 | ------- | ------- | ------- | ------- | ------- |  ------- | ------- |  
-| $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ | $\Delta R$ | $\Delta H$ |
+| $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ | $\Delta \Sigma$ | $\Delta H$ |
 
 
 ### Abstract dimensionless numbers
@@ -71,7 +71,7 @@ $$
 $$
 Ad=\frac{\mathcal{U}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}}~,~
 Di=\frac{D_{\text{ref}}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}^2}~,~
-Ki=\frac{\mathcal{T}\Delta R}{\phi_{\text{ref}}\Delta c}~,~
+Ki=\frac{\mathcal{T}\Delta \Sigma}{\phi_{\text{ref}}\Delta c}~,~
 Bu=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}}~,~
 X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}
 $$
@@ -81,9 +81,9 @@ $$
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
 | $Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
-| $Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta R}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta R}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}$  |  Damköhler  | Ratio of reaction to convection rates, defined with respect to the transport of $c$ and domain length scale. |
+| $Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta \Sigma}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}$  |  Damköhler  | Ratio of reaction to convection rates, defined with respect to the transport of $c$ and domain length scale. |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
-| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta R} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta R}{\Delta c}}_{\text{solutal reaction rate}}$  |  Lewis-reaction  | Ratio of thermal to solutal reaction rates. |
+| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta \Sigma} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{solutal reaction rate}}$  |  Lewis-reaction  | Ratio of thermal to solutal reaction rates. |
 
 ### Scaling choice
 
@@ -92,7 +92,7 @@ $$
 | advective | $\mathcal{L}_\Omega$  |  $K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, Da, 1, 1\}$| [Hewitt et al. (2012)](https://link.aps.org/doi/10.1103/PhysRevLett.108.224503) |
 | diffusive | $\mathcal{L}_\Omega$  |  $D_{\text{ref}}/\mathcal{L}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, RaDa, Ra, 1\}$| [Ritchie \& Pritchard  (2011)](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/natural-convection-and-the-evolution-of-a-reactive-porous-medium/71E5FB557F61CB9125E5B4E4EE9D828F) | 
 | advective-diffusive | $D_{\text{ref}}/\mathcal{U}$  |  $K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, Da/Ra, 1, Ra\}$| [Slim (2014)](https://www.cambridge.org/core/product/identifier/S0022112013006733/type/journal_article) | 
-| reactive | $\sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}}$  |  $\phi_{\text{ref}}\mathcal{L}/\mathcal{T}$  | $\phi_{\text{ref}}\Delta c/\Delta R$  | $\{1, 1, 1, \sqrt{Ra/Da}, \sqrt{RaDa}\}$| [Kabbadj et al. (2025)](https://nlpc.ulb.be/pdf/25.Kabbadj_MATRIX.pdf) | 
+| reactive | $\sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}}$  |  $\phi_{\text{ref}}\mathcal{L}/\mathcal{T}$  | $\phi_{\text{ref}}\Delta c/\Delta \Sigma$  | $\{1, 1, 1, \sqrt{Ra/Da}, \sqrt{RaDa}\}$| [Kabbadj et al. (2025)](https://nlpc.ulb.be/pdf/25.Kabbadj_MATRIX.pdf) | 
 
 ## Non-dimensional time-discretized equations
 
@@ -102,7 +102,7 @@ $$
 \begin{align*}
 &\text{Find}~c^{n+1}, \theta^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\
 &\begin{cases}
-\phi\frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=Di\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) + Ki\,\mathcal{D}_R(R) \\
+\phi\frac{c^{n+1}-c^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},c}(\textbf{u}\cdot\nabla c)=Di\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}\cdot\nabla c) + Ki\,\mathcal{D}_\Sigma(\Sigma) \\
 \phi\frac{\theta^{n+1}-\theta^n}{\Delta t^n}+Ad\,\mathcal{D}_{\textbf{u},\theta}(\textbf{u}\cdot\nabla\theta)=LeDi\nabla\cdot\mathcal{D}_{\mathsf{G},\theta}(\mathsf{G}\cdot\nabla\theta) + LrKi\,\mathcal{D}_H(H) \\
 \nabla\cdot\textbf{u}^n=0 \\
 \textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n - Bu\,\rho^n\,\textbf{e}_g\right) \\

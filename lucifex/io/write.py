@@ -18,6 +18,8 @@ from ..utils.fenicsx_utils import (
     create_function, 
     create_function_space, 
     set_function, 
+    is_mixed_space,
+    is_component_space,
 
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
@@ -51,6 +53,8 @@ def write(
     t: float | Constant | None = None,
     mode: Literal["a", "w", "c"] = "a",
     comm: MPI.Comm | None = None,
+    *,
+    mixed: bool | None = False,
 ) -> None:
     ...
 
@@ -233,6 +237,7 @@ def _(
     comm=None,
     *,
     xdmf: XDMFFile | None = None,
+    mixed: bool | None = False,
 ):  
     file_path = file_path_ext(dir_path, file_name, 'xdmf')
 
@@ -258,12 +263,24 @@ def _(
         _write(u.function_space.mesh, file_name, dir_path, mode=mode)
     else:
         _cached_write_mesh(u.function_space.mesh, file_name, dir_path)
+
+    if mixed is None:
+        mixed = is_mixed_space(u.function_space) and not is_component_space(u.function_space)
     
-    if xdmf is None:
-        with XDMFFile(comm, file_path, 'a') as xdmf:
-            xdmf.write_function(u, t)
+    if mixed:
+        u_subs = [ui.collapse() for ui in u.split()]
+        if xdmf is None:
+            with XDMFFile(comm, file_path, 'a') as xdmf:
+                [xdmf.write_function(ui, t) for ui in u_subs]
+        else:
+            [xdmf.write_function(ui, t) for ui in u_subs]
+
     else:
-        xdmf.write_function(u, t)
+        if xdmf is None:
+            with XDMFFile(comm, file_path, 'a') as xdmf:
+                xdmf.write_function(u, t)
+        else:
+            xdmf.write_function(u, t)
 
 
 @_write.register(Constant)

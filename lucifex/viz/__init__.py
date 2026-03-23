@@ -3,7 +3,7 @@ from .bar import plot_bar
 from .colormap import plot_colormap, plot_contours, plot_colormap_multifigure
 from .line import plot_line, plot_twin_lines, plot_stacked_lines, plot_line_multifigure
 from .mesh import plot_mesh
-from .scatter import plot_scatter
+from .scatter import plot_scatter, scatter_size
 from .sparsity import plot_sparsity
 from .utils import create_multifigure, set_axes, create_cycler
 from .vector import plot_quiver, plot_streamlines

@@ -78,7 +78,7 @@ class NPyConstantSeries(
         self, 
         series: Iterable[NPyConstant | float | int | np.ndarray], 
         time_series, 
-        name,
+        name = None,
     ):
         _series = [
             NPyConstant(i) if not isinstance(i, NPyConstant) else i 

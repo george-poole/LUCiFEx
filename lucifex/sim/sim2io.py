@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar, Callable
+from typing import Any, Generic, TypeVar, Callable, Hashable
 from typing_extensions import Self
 from collections.abc import Iterable
 from abc import abstractmethod
@@ -143,7 +143,7 @@ class SimulationFromEXT(
         use_cache: bool = True,
         load_args: dict[str, Any | tuple[Any, ...]] | None = None,
         sorting: Callable[[dict], dict] | None = None,
-    ) -> dict[str | tuple[str, ...], Self]:
+    ) -> dict[Hashable | tuple[Hashable, ...], Self]:
 
         return cls._dict_from_dir_paths(
             key,
@@ -170,13 +170,17 @@ class SimulationFromEXT(
         sorting: Callable[[dict], dict] | None = None,
         *args,
         **kwargs,
-    ) -> dict[str | tuple[str, ...], Self]:
+    ) -> dict[Hashable | tuple[Hashable, ...], Self]:
         if parameters:
             if isinstance(key, str):
                 _keys = (key, )
             else:
                 _keys = key
-            parameters = {k: v for k, v in parameters.items() if not k in _keys}
+            for _k in _keys:
+                if _k in parameters.keys():
+                    raise ValueError(
+                        f"Cannot use values of '{_k}' as a key if it is a fixed parameter."
+                    )
 
         sims_from_ext = cls._from_dir_paths(
             dir_paths, 

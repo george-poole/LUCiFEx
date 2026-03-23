@@ -25,7 +25,7 @@ from .utils import (
 def _plot_colormap(
     fig: Figure,
     ax: Axes, 
-    f: Function | Expr,
+    u: Function | Expr,
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
     use_cache: bool | tuple[bool, bool] = True,

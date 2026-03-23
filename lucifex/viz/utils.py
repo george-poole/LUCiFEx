@@ -245,29 +245,45 @@ def create_colorbar(
 
 
 def create_multifigure(
-    n_rows: int,
-    n_cols: int,
-    suptitle: str | None = None,
+    n_rows: int = 1,
+    n_cols: int = 1,
     cbars: bool | tuple[float, float] = False,
     figscale: float = 1.0,
     width_ratio: float = 0.025,
-    **kwargs,
+    suptitle: str | None = None,
+    suptitle_dict: dict | None = None,
+    suptitle_index: int | None = None,
+    **subplots_kws,
 ) -> tuple[Figure, list[Axes], list[Axes] | list[tuple[float, float] | None]]:
-    if cbars is True:
-        kwargs.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
-        n_cols = 2 * n_cols
 
-    fig, _ = plt.subplots(
-        n_rows, 
-        n_cols,
+    _subplots_kws = dict(
         figsize=figscale * np.multiply((n_cols, n_rows), plt.rcParams["figure.figsize"]), 
         layout='compressed',
-        **kwargs,
     )
+    if cbars is True:
+        _subplots_kws.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
+        n_cols = 2 * n_cols
+
+    _subplots_kws.update(subplots_kws)
+
+    fig, _ = plt.subplots(n_rows, n_cols, **_subplots_kws)
 
     if suptitle:
-        ax: Axes = fig.axes[n_cols - 1]
-        ax.text(1.0, 1.25, suptitle, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+        if suptitle_dict is None:
+            suptitle_dict = {}
+        if suptitle_index is None:
+            suptitle_index = n_cols - 1
+        axs_sup: Axes = fig.axes[suptitle_index]
+        _suptitle_dict = dict(
+            x=1.0,
+            y=1.25,
+            horizontalalignment='right', 
+            verticalalignment='bottom', 
+            transform=axs_sup.transAxes,
+            fontsize=16,
+        )
+        _suptitle_dict.update(suptitle_dict)
+        axs_sup.text(s=suptitle, **_suptitle_dict)
 
     if cbars is True:
         axs_main = fig.axes[0::2]

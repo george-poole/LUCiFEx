@@ -76,6 +76,7 @@ def _save_figure(
         prefix: bool | str = True,
         return_path: bool = False,
         mkdirs: bool = True,
+        sep: str = '__',
         thumbnail: bool = False,
         **defaults: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
@@ -86,7 +87,7 @@ def _save_figure(
                 _prefix = prefix
             else:
                 _prefix = ipynb_name
-            file_name = '_'.join((_prefix, file_name))
+            file_name = sep.join((_prefix, file_name))
         if dir_path is not None:
             file_name = os.path.join(dir_path, file_name)
         if mkdirs:

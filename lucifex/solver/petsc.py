@@ -100,6 +100,8 @@ def assemble_petsc_matrix(
         assembly_count: int | None = m.getAttr(ATTR_ASSEMBLY_COUNT)
         if not assembly_count:
             return _assemble_petsc_matrix(m, a, bcs, mpc, diag)
+        else:
+            return
         
     if cache is Ellipsis:
         _consts: list | None = m.getAttr(ATTR_CONSTANTS)

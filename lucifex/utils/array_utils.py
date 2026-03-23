@@ -1,7 +1,8 @@
 import operator
-from typing import Callable, Iterable, overload
+from typing import Callable, Iterable, Any, overload
 
 import numpy as np
+from scipy.interpolate import PchipInterpolator
 
 from .py_utils import StrSlice, as_slice
 
@@ -11,7 +12,10 @@ def derivative(
     x: Iterable[float],
     order: int = 1,
     edge_order: int = 2,
-):
+) -> np.ndarray:
+    """
+    `dy/dx`
+    """
     _dydx = np.gradient(y, x, edge_order=edge_order)
     for _ in range(order - 1):
         _dydx = np.gradient(_dydx, x, edge_order=edge_order)
@@ -148,3 +152,15 @@ def _as_index(
             raise ValueError(f'{msg}. target={target}, approx={approx}')
 
     return target_index
+
+
+def resample(
+    y: Iterable[float],
+    x: Iterable[float],
+    x_new: Iterable[float],
+    interpolator: Callable | str = PchipInterpolator
+) -> np.ndarray:
+    if isinstance(interpolator, str):
+        import scipy.interpolate as spi
+        interpolator = getattr(spi, interpolator)
+    return interpolator(x, y)(x_new)

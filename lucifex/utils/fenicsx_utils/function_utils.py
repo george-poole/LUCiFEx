@@ -249,7 +249,9 @@ def _(value: Constant, f: Function):
 
 @_set_function_interpolate.register(Iterable)
 def _(value: Iterable[float | Constant | Callable], f: Function):
-    def _inner(u) -> Callable[[np.ndarray], np.ndarray]:
+    def _(u) -> Callable[[np.ndarray], np.ndarray]:
+        if isinstance(u, (Function, Expr)):
+            raise TypeError
         if isinstance(u, (int ,float)):
             return lambda x: np.full_like(x[0], u, dtype=PETSc.ScalarType)
         if isinstance(u, Constant):
@@ -258,7 +260,7 @@ def _(value: Iterable[float | Constant | Callable], f: Function):
         if isinstance(u, Callable):
             return u
         raise MultipleDispatchTypeError(u)
-    f.interpolate(lambda x: np.vstack([_inner(i)(x) for i in value]))
+    f.interpolate(lambda x: np.vstack([_(i)(x) for i in value]))
 
 
 @_set_function_interpolate.register(float)
