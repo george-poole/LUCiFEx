@@ -13,13 +13,19 @@ from .expr_utils import (
 )
 
 
-def is_mixed_space(fs: FunctionSpace) -> bool:
+def is_mixed_space(
+    fs: FunctionSpace,
+    strict: bool = False,
+) -> bool:
     """e.g. Returns `True` if the function space is mixed.
 
     `Pₖ × ... × Pₖ` -> `True` \\
     `BDMₖ x DPₖ₋₁` -> `True`
     """
-    return fs.num_sub_spaces > 0
+    if not strict:
+        return fs.num_sub_spaces > 0
+    else:
+        return is_mixed_space(fs, strict=False) and not is_component_space(fs)
 
 
 def is_component_space(fs: FunctionSpace) -> bool:
@@ -29,7 +35,7 @@ def is_component_space(fs: FunctionSpace) -> bool:
     `Pₖ × ... × Pₖ` -> `True` \\
     `BDMₖ` -> `False`
     """
-    if not is_mixed_space(fs):
+    if not is_mixed_space(fs, strict=False):
         return False
     else:
         subspaces = extract_subspaces(fs)

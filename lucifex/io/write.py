@@ -19,8 +19,6 @@ from ..utils.fenicsx_utils import (
     create_function_space, 
     set_function, 
     is_mixed_space,
-    is_component_space,
-
 )
 from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
 from ..utils.fenicsx_utils import NonScalarVectorError, is_tensor, is_vector
@@ -265,22 +263,18 @@ def _(
         _cached_write_mesh(u.function_space.mesh, file_name, dir_path)
 
     if mixed is None:
-        mixed = is_mixed_space(u.function_space) and not is_component_space(u.function_space)
+        mixed = is_mixed_space(u.function_space, strict=True)
     
     if mixed:
-        u_subs = [ui.collapse() for ui in u.split()]
-        if xdmf is None:
-            with XDMFFile(comm, file_path, 'a') as xdmf:
-                [xdmf.write_function(ui, t) for ui in u_subs]
-        else:
-            [xdmf.write_function(ui, t) for ui in u_subs]
-
+        u_subs = tuple(ui.collapse() for ui in u.split())
     else:
-        if xdmf is None:
-            with XDMFFile(comm, file_path, 'a') as xdmf:
-                xdmf.write_function(u, t)
-        else:
-            xdmf.write_function(u, t)
+        u_subs = (u, )
+
+    if xdmf is None:
+        with XDMFFile(comm, file_path, 'a') as xdmf:
+            [xdmf.write_function(ui, t) for ui in u_subs]
+    else:
+        [xdmf.write_function(ui, t) for ui in u_subs]
 
 
 @_write.register(Constant)

@@ -21,7 +21,7 @@ from ..utils.py_utils import (
     MultiKey, MultipleDispatchTypeError, filter_kwargs, 
     Writer, Stopper,
 )
-from ..utils.fenicsx_utils import is_mixed_space, is_component_space
+from ..utils.fenicsx_utils import is_mixed_space
 from ..fem import Function, Constant
 from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
 from ..solver import (
@@ -206,8 +206,8 @@ class Simulation(
     @property
     def writers(self) -> list[Writer]:
 
-        def writer_routine(u: FunctionSeries, file_name: str):
-            mixed = is_mixed_space(u.function_space) and not is_component_space(u.function_space)
+        def _routine(u: FunctionSeries, file_name: str):
+            mixed = is_mixed_space(u.function_space, strict=True)
             return lambda t: (
                 write(u[0], file_name, self.dir_path, t, 'a', u.mesh.comm, mixed=mixed)
             )
@@ -218,7 +218,7 @@ class Simulation(
             file_name = self.write_file.get(name)
             if file_name is None:
                 file_name = name
-            writer = Writer(writer_routine(self[name], file_name), step, name)
+            writer = Writer(_routine(self[name], file_name), step, name)
             _writers.append(writer)
 
         return _writers
