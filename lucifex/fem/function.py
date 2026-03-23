@@ -1,3 +1,4 @@
+from typing import Iterable
 from typing_extensions import Self
 from collections.abc import Callable
 
@@ -33,7 +34,7 @@ class Function(DOLFINxFunction):
             | UnsolvedType
             | None
         = None,
-        name: str | None = None,
+        name: str | tuple[str, Iterable[str]] | None = None,
         dtype: np.dtype = PETSc.ScalarType,
         index: int | None = None,
     ):
@@ -42,6 +43,11 @@ class Function(DOLFINxFunction):
         """
         fs = create_function_space(fs)
 
+        if isinstance(name, tuple):
+            name, subnames = name
+            subnames = tuple(subnames)
+        else:
+            subnames = None
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
 
@@ -68,6 +74,11 @@ class Function(DOLFINxFunction):
                 self.interpolate(x)
         else:
             super().__init__(fs, x, name, dtype)
+
+        self._subnames = subnames
+        self._create_subname = lambda i: (
+            self._subnames[i] if self._subnames else f'{self.name}{i}'
+        )
         
         self._index = index
 
@@ -98,7 +109,7 @@ class Function(DOLFINxFunction):
         collapse: bool = False,
     ) -> Self:
         if name is None:
-            name = f'{self.name}{subspace_index}'
+            name = self._create_subname(subspace_index)
         f = Function(
             self.function_space.sub(subspace_index), 
             self.x, 
@@ -118,9 +129,9 @@ class Function(DOLFINxFunction):
         num_sub_spaces = self.function_space.num_sub_spaces
         if num_sub_spaces == 1:
             raise RuntimeError("No subfunctions to extract")
-        subspace_indices = tuple(range(self.function_space.num_sub_spaces))
         if names is None:
-            names = [f'{self.name}{i}' for i in subspace_indices]
+            names = [None] * self.function_space.num_sub_spaces
+        subspace_indices = tuple(range(self.function_space.num_sub_spaces))
         return tuple(self.sub(i, n, collapse) for i, n in zip(subspace_indices, names, strict=True))
         
     def collapse(self) -> Self:

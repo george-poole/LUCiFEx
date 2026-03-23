@@ -39,9 +39,8 @@ class Series(ABC, Generic[T]):
             subnames = tuple(subnames)
         else:
             subnames = None
-
         if name is None:
-            name = self.__class__.__name__
+            name = f'{self.__class__.__name__}{id(self)}'
 
         self.name = name
         self._subnames = subnames

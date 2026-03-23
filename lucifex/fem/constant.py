@@ -24,9 +24,19 @@ class Constant(DOLFINxConstant):
         """
         self._mesh = mesh
 
+        if isinstance(name, tuple):
+            name, subnames = name
+            subnames = tuple(subnames)
+        else:
+            subnames = None
         if name is None:
             name =  f'{self.__class__.__name__}{id(self)}'
+
         self._name = name
+        self._subnames = subnames
+        self._create_subname = lambda i: (
+            self._subnames[i] if self._subnames else f'{self.name}{i}'
+        )
 
         if value is None:
             value = 0.0
@@ -57,6 +67,32 @@ class Constant(DOLFINxConstant):
         c = Constant(self.mesh, self.value.copy())
         c.name = self.name
         return c
+    
+    def sub(
+        self, 
+        index: int, 
+        name: str | None = None,
+    ) -> Self:
+        if name is None:
+            name = self._create_subname(index)
+
+        return Constant(
+            self.mesh,
+            self.value[index],
+            name,
+            index=self.index
+        )
+    
+    def split(
+        self,
+        names: tuple[str, ...] | None = None,
+    ) -> tuple[Self, ...]:
+        dim = self.ufl_shape[0]
+        if names is None:
+            names = [None] * self.ufl_shape[0]
+
+        return tuple(self.sub(i, n) for i, n in zip(range(dim), names, strict=True))
+        
     
     @property
     def time_index(self) -> int | None:

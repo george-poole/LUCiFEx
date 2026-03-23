@@ -48,7 +48,6 @@ class FiniteDifference:
         if self._initial is not None:
             assert self._initial.order in (0, 1)
 
-                
         if name is None:
             name = f'{self.__class__.__name__}{id(self)}'
         self._name = name
