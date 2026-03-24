@@ -11,7 +11,7 @@ from ufl import Measure
 from ufl.core.expr import Expr
 
 from ..utils.fenicsx_utils import MarkerAlias
-from ..utils.py_utils import replicate_callable, MultipleDispatchTypeError, LazyEvaluator
+from ..utils.py_utils import replicate_callable, OverloadTypeError, LazyEvaluator
 from ..fem import Constant, Function
 from ..fdm.series import ConstantSeries, FunctionSeries, set_solution
 from .options import OptionsFFCX, OptionsJIT
@@ -42,7 +42,7 @@ class Solver(ABC, Generic[T, TS]):
             sltn_series = sltn
             sltn = Constant(sltn_series.mesh, name=sltn_series.name, shape=sltn_series.ufl_shape)
         else:
-            raise MultipleDispatchTypeError(sltn)
+            raise OverloadTypeError(sltn)
 
         self._solution = sltn
         self._solution_series = sltn_series

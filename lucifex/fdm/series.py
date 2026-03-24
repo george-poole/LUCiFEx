@@ -10,7 +10,7 @@ from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
 from ..utils.fenicsx_utils import set_constant, set_function, extract_mesh, create_function_space
-from ..utils.py_utils import MultipleDispatchTypeError, Writer, LazyEvaluator
+from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 
@@ -384,7 +384,7 @@ def set_solution(solution: Function | Constant | Any, value: Any) -> None:
 
 @singledispatch
 def _set_solution(solution, _) -> None:
-    raise MultipleDispatchTypeError(solution, set_solution)
+    raise OverloadTypeError(solution, set_solution)
 
 @_set_solution.register(Function)
 def _(solution: Function, value):

@@ -62,6 +62,7 @@ from .constant_utils import (
     set_constant,
 )
 from .function_utils import (
+    as_function,
     create_function, 
     set_function, 
     set_function_interpolate,

@@ -53,7 +53,7 @@ def as_slice(s: str | slice| Iterable[int]) -> slice:
     if isinstance(s, Iterable):
         return slice(*s)
     
-    raise MultipleDispatchTypeError(s)
+    raise OverloadTypeError(s)
 
 
 def is_slice(s: str | slice | Iterable[int] | Any) -> bool:

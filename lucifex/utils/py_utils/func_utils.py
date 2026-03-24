@@ -207,15 +207,15 @@ def arity(
     return len(params)
 
 
-class MultipleDispatchTypeError(TypeError):
+class OverloadTypeError(TypeError):
     def __init__(
         self,
         arg: Any, 
-        sd_func: Callable | None = None
+        clbl: Callable | None = None
     ):
         msg = f"Unexpected argument type {type(arg)}."
-        if sd_func is not None:
-            registered_types = tuple(sd_func.registry)[1:]
+        if clbl is not None and hasattr(clbl, 'registry'):
+            registered_types = tuple(getattr(clbl, 'registry'))[1:]
             msg = f"{msg} Expected one of {registered_types}."
         super().__init__(msg)
 

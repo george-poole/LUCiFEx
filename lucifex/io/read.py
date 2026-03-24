@@ -7,7 +7,7 @@ import numpy as np
 from ..fem import Constant, Function, is_unsolved
 from ..fdm import FunctionSeries, ConstantSeries
 from ..utils.fenicsx_utils import is_continuous_lagrange, is_discontinuous_lagrange
-from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
+from ..utils.py_utils import OverloadTypeError, StrSlice, as_slice
 from .utils import file_path_ext, dofs_array_dim
 
 
@@ -69,7 +69,7 @@ def read(
 
 @singledispatch
 def _read(u, *_, **__):
-    raise MultipleDispatchTypeError(u, _read)
+    raise OverloadTypeError(u, _read)
 
 
 @_read.register(np.ndarray)
@@ -132,7 +132,7 @@ def _(
         assert is_continuous_lagrange(u.function_space, 1) or is_discontinuous_lagrange(u.function_space, 0)
         container = Function(u.function_space, name=u.name)
     else:
-        raise MultipleDispatchTypeError(u)
+        raise OverloadTypeError(u)
     dim = dofs_array_dim(container.ufl_shape)
 
     if is_unsolved(u[u.FUTURE_INDEX - 1]):

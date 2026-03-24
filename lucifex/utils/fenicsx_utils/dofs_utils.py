@@ -15,6 +15,7 @@ from ufl.core.expr import Expr
 
 from ..py_utils import StrEnum
 from .function_utils import (
+    as_function,
     create_function, 
     extract_component_functions, 
     set_function_dofs,
@@ -103,7 +104,7 @@ def dofs(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[str, int] | None = None,
     l2_norm: bool = False,
     use_cache: bool | EllipsisType | tuple[bool, bool] = False,
-    try_identity: bool = False,
+    create: bool = True,
 ) -> np.ndarray:
     """
     scalar `u(𝐱) = Σᵢ Uᵢϕᵢ(𝐱)` returns `{Uᵢ}`
@@ -119,7 +120,10 @@ def dofs(
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        u = create_function(fs, u, try_identity=try_identity, use_cache=use_cache)
+        if create:
+            u = create_function(fs, u, use_cache=use_cache)
+        else:
+            u = as_function(fs, u, use_cache=use_cache)
         return u.x.array[:]
     elif l2_norm and is_vector(u):
         if not isinstance(use_cache, tuple):
@@ -127,7 +131,7 @@ def dofs(
         use_scalars_cache, use_vector_cache= use_cache
         component_dofs = np.stack(
             [
-                dofs(i, fs, use_cache=use_scalars_cache, try_identity=False) 
+                dofs(i, fs, use_cache=use_scalars_cache, create=True) 
                 for i in extract_component_functions(fs, u, use_cache=use_vector_cache)
             ], 
             axis=1,

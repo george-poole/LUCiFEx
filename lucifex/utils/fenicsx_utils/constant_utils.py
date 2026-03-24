@@ -5,19 +5,33 @@ import numpy as np
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant
 
-from ..py_utils import MultipleDispatchTypeError
+from ..py_utils import OverloadTypeError
 from .expr_utils import ShapeError
+
+
+def as_constant(
+    mesh: Mesh,
+    value: float | Iterable[float] | Constant,
+) -> Constant:
+    return _as_or_create_constant(False, mesh, value)
 
 
 def create_constant(
     mesh: Mesh,
     value: float | Iterable[float] | Constant,
-    try_identity: bool = False,
 ) -> Constant:
     """
     Typecast to `dolfinx.fem.Constant` 
     """
-    if try_identity and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
+    return _as_or_create_constant(True, mesh, value)
+    
+
+def _as_or_create_constant(
+    force_new: bool,
+    mesh: Mesh,
+    value: float | Iterable[float] | Constant,
+) -> Constant:
+    if not force_new and isinstance(value, Constant) and value.ufl_domain() is mesh.ufl_domain():
         return value
     else:
         return _create_constant(value, mesh)
@@ -25,7 +39,7 @@ def create_constant(
 
 @singledispatch
 def _create_constant(value, _):
-    raise MultipleDispatchTypeError(value)
+    raise OverloadTypeError(value)
 
 
 @_create_constant.register(float)
@@ -55,7 +69,7 @@ def set_constant(
 
 @singledispatch
 def _set_constant(value, *_, **__):
-    raise MultipleDispatchTypeError(value)
+    raise OverloadTypeError(value)
 
 
 @_set_constant.register(Constant)

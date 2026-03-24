@@ -5,7 +5,7 @@ from functools import singledispatch
 
 from dolfinx.mesh import Mesh
 
-from ..utils.py_utils import MultipleDispatchTypeError
+from ..utils.py_utils import OverloadTypeError
 from ..fdm import ConstantSeries, FunctionSeries
 from ..fdm.fdm2npy import (
     as_npy_function_series, as_npy_constant_series,
@@ -60,7 +60,7 @@ def xdmf_to_npz(*args, **kwargs) -> None:
 
 @singledispatch
 def _xdmf_to_npz(arg, *_, **__):
-    raise MultipleDispatchTypeError(arg, _xdmf_to_npz)
+    raise OverloadTypeError(arg, _xdmf_to_npz)
 
 
 @_xdmf_to_npz.register(Simulation)

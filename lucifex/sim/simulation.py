@@ -18,7 +18,7 @@ from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
 from ..utils.py_utils import (
-    MultiKey, MultipleDispatchTypeError, filter_kwargs, 
+    MultiKey, OverloadTypeError, filter_kwargs, 
     Writer, Stopper,
 )
 from ..utils.fenicsx_utils import is_mixed_space
@@ -34,13 +34,13 @@ from .utils import arg_name_collisions, ArgNameCollisionError
 
 
 DeltaType: TypeAlias = int | float | None
-AuxiliaryType: TypeAlias = ExprSeries | Expr | Function | Constant
-
+AuxiliaryType: TypeAlias = ExprSeries | SubFunctionSeries | Expr | Function | Constant
+NumericType: TypeAlias = float | int | Iterable[float] | np.ndarray
 
 class Simulation(
     MultiKey[
-        str, 
-        FunctionSeries | ConstantSeries | ExprSeries | SubFunctionSeries | Expr | Function | Constant | float | int | np.ndarray
+        str,
+        FunctionSeries | ConstantSeries | AuxiliaryType | NumericType | Any
         ]
 ):
     def __init__(
@@ -48,7 +48,7 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | float | int | np.ndarray]] = (),
+        auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | NumericType | Any]] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         parameters: dict[str, Any] | None = None,
@@ -107,7 +107,7 @@ class Simulation(
         return self._auxiliary
     
     @property
-    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | ExprSeries | Function | Constant | Expr | Any]:
+    def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | AuxiliaryType | NumericType | Any]:
         d =  {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.name: s for s in self.solutions})
         d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
@@ -165,7 +165,7 @@ class Simulation(
                     raise TypeError
             return d
         
-        raise MultipleDispatchTypeError(delta)
+        raise OverloadTypeError(delta)
 
     @property
     def store_delta(self) -> dict[str, int | float | None]:

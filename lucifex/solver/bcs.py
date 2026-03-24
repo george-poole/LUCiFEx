@@ -24,7 +24,9 @@ from ..utils.fenicsx_utils import (
     BooleanMarker,
     DofsLocatorType,
     FacetLocatorType,
-    is_scalar, is_vector, create_function, create_constant, extract_function_space,
+    is_scalar, is_vector, as_function, 
+    create_function, create_constant, 
+    extract_function_space,
     NonScalarVectorError,
 )
 
@@ -120,10 +122,10 @@ class BoundaryConditions:
                         dbc = dirichletbc(uD, dofs, fs_sub[i]) # TODO check this
                 else:
                     if fs_sub is None:
-                        uD = create_function(fs, uD, i, try_identity=True)
+                        uD = as_function(fs, uD, i)
                         dbc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
                     else:
-                        uD = create_function(fs_sub[i], uD, try_identity=True)
+                        uD = as_function(fs_sub[i], uD)
                         dbc = dirichletbc(uD, dofs)
                 dirichlet.append(dbc)
                 

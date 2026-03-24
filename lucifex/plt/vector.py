@@ -33,20 +33,24 @@ def plot_quiver(
     if isinstance(u, tuple) and len(u) == 4:
         return _plot_quiver(ax, u, arrow_slc, **kwargs)
 
-    ux, uy = _xy_components(u, mesh)
-    x, y, ux_np, uy_np = _x_y_fx_fy_arrays(ux, uy, use_cache)
+    if isinstance(u, tuple) and len(u) == 2:
+        x_y_ux_uy = _extract_x_y_ux_uy_arrays(
+            u, use_cache, mesh,
+        )
+        return _plot_quiver(ax, x_y_ux_uy, arrow_slc, **kwargs)
     
-    return _plot_quiver(ax, (x, y, ux_np, uy_np), arrow_slc, **kwargs)
+    ux, uy = _extract_xy_functions(u, mesh)
+    return _plot_quiver(ax, (ux, uy), arrow_slc, **kwargs)
 
 
 def _plot_quiver(
     ax: Axes,
-    u: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    x_y_ux_uy: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     arrow_slc: int | tuple[int, int],
     **kwargs,
 ) -> None:
     
-    x, y, ux, uy = u
+    x, y, ux, uy = x_y_ux_uy
     _kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs.update(kwargs)
     filter_kwargs(set_axes)(ax, **_kwargs)
@@ -82,7 +86,8 @@ def _plot_quiver(
 @optional_ax
 def plot_streamlines(
     ax: Axes,
-    u: Function | Expr | tuple[Function, Function] 
+    u: Function | Expr 
+    | tuple[Function | GridFunction | TriFunction | Expr, Function | GridFunction | TriFunction | Expr] 
     | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     density: float = 1.0,
     color: str | tuple[str, Callable]= 'black',
@@ -96,20 +101,24 @@ def plot_streamlines(
     if isinstance(u, tuple) and len(u) == 4:
         return _plot_streamlines(ax, u, density, color, **kwargs)
     
-    ux, uy = _xy_components(u, mesh)
-    x, y, ux_np, uy_np = _x_y_fx_fy_arrays(ux, uy, use_cache)
-
-    return _plot_streamlines(ax, (x, y, ux_np, uy_np), density, color, **kwargs)
+    if isinstance(u, tuple) and len(u) == 2:
+        x_y_ux_uy = _extract_x_y_ux_uy_arrays(
+            u, use_cache, mesh,
+        )
+        return _plot_streamlines(ax, x_y_ux_uy, density, color, **kwargs)
+            
+    ux, uy = _extract_xy_functions(u, mesh)
+    return _plot_streamlines(ax, (ux, uy), density, color, **kwargs)
 
 
 def _plot_streamlines(
     ax: Axes,
-    u: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    x_y_ux_uy: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
     density,
     color: str | tuple[str, Callable],
     **kwargs,
 ) -> None:
-    x, y, ux, uy = u
+    x, y, ux, uy = x_y_ux_uy
 
     if isinstance(color, str):
         color_func = lambda fx, fy: np.sqrt((fx) ** 2 + (fy) ** 2)
@@ -121,7 +130,7 @@ def _plot_streamlines(
     filter_kwargs(set_axes)(ax, **_axs_kwargs)
 
     if color in list(mpl_colormaps):
-        norm = color_func(ux.T, u.T)
+        norm = color_func(ux.T, uy.T)
         ax.streamplot(
             x, y, ux.T, uy.T, density=density, color=norm, cmap=color
         )
@@ -129,46 +138,79 @@ def _plot_streamlines(
         ax.streamplot(x, y, ux.T, uy.T, density=density, color=color)
 
 
-def _xy_components(
-    f: Function | tuple[Function, Function] | Expr,
+def _extract_xy_functions(
+    u: Function | GridFunction | Expr,
     mesh: Mesh | None,
 ) -> tuple[Function, Function]:
-    if isinstance(f, Expr) and not isinstance(f, Function):
+    if isinstance(u, Expr) and not isinstance(u, Function):
         if mesh is None:
-            mesh = extract_mesh(f)
-        f = create_function((mesh, 'P', 1, 2), f)
+            mesh = extract_mesh(u)
+        u = create_function((mesh, 'P', 1, 2), u)
     
-    if isinstance(f, Function):
-        if not is_vector(f, dim=2):
-            raise ShapeError(f, (2, ))
-        
-        fx, fy = extract_component_functions(('P', 1), f)
-    else:
-        fx, fy = (create_function(('P', 1), i, try_identity=True) for i in f)
-
-    return fx, fy
+    if not is_vector(u, dim=2):
+        raise ShapeError(u, (2, ))
+    
+    return extract_component_functions(('P', 1), u)
 
 
-def _x_y_fx_fy_arrays(
-    fx: Function, 
-    fy: Function,
+def _extract_x_y_ux_uy_arrays(
+    u: tuple[
+        Function | GridFunction | TriFunction | Expr, 
+        Function | GridFunction | TriFunction | Expr,
+    ], 
     use_cache: bool | tuple[bool, bool],
+    mesh: Mesh | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-
-    fx_np = as_npy_function(fx, use_cache=use_cache)
-    fy_np = as_npy_function(fy, use_cache=use_cache)
     
-    if isinstance(fx_np, TriFunction):
-        triangles = fx_np.mesh.cells
-        x = fx_np.mesh.x_coordinates[triangles]
-        y = fx_np.mesh.y_coordinates[triangles]
-        fx_new = fx_np.value[triangles]
-        fy_new = fy_np.value[triangles]
-    
-    if isinstance(fx_np, GridFunction):
-        x, y = fx_np.mesh.axes
-        fx_new = fx_np.value
-        fy_new = fy_np.value
+    u_npy: list[GridFunction | TriFunction] = []
+    for ui in u:
+        if isinstance(ui, (Function, Expr)):
+            ui_p1 = create_function(('P', 1), ui, create=False)
+            ui_npy = as_npy_function(ui_p1, use_cache=use_cache, mesh=mesh)
+            u_npy.append(ui_npy)
+        else:
+            u_npy.append(ui)
 
-    return x, y, fx_new, fy_new
+    ux_npy, uy_npy = u_npy
+
+    if type(ux_npy) is not type(uy_npy):
+        raise TypeError('Vector components should both be of same type.') 
+    
+    if isinstance(ux_npy, TriFunction):
+        triangles = ux_npy.mesh.cells
+        x = ux_npy.mesh.x_coordinates[triangles]
+        y = ux_npy.mesh.y_coordinates[triangles]
+        ux_arr = ux_npy.value[triangles]
+        uy_arr = uy_npy.value[triangles]
+    
+    if isinstance(ux_npy, GridFunction):
+        x, y = ux_npy.mesh.axes
+        ux_arr = ux_npy.value
+        uy_arr = uy_npy.value
+
+    return x, y, ux_arr, uy_arr
+
+
+# def _x_y_fx_fy_arrays(
+#     fx: Function, 
+#     fy: Function,
+#     use_cache: bool | tuple[bool, bool],
+# ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+#     fx_np = as_npy_function(fx, use_cache=use_cache)
+#     fy_np = as_npy_function(fy, use_cache=use_cache)
+    
+#     if isinstance(fx_np, TriFunction):
+#         triangles = fx_np.mesh.cells
+#         x = fx_np.mesh.x_coordinates[triangles]
+#         y = fx_np.mesh.y_coordinates[triangles]
+#         fx_new = fx_np.value[triangles]
+#         fy_new = fy_np.value[triangles]
+    
+#     if isinstance(fx_np, GridFunction):
+#         x, y = fx_np.mesh.axes
+#         fx_new = fx_np.value
+#         fy_new = fy_np.value
+
+#     return x, y, fx_new, fy_new
 

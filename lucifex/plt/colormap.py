@@ -13,7 +13,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
 from ..utils.fenicsx_utils import is_scalar, is_grid, NonScalarError
-from ..utils.py_utils import filter_kwargs, MultipleDispatchTypeError
+from ..utils.py_utils import filter_kwargs, OverloadTypeError
 
 from .utils import (
     LW, set_axes, optional_ax, set_axes, create_colorbar,
@@ -62,7 +62,7 @@ def _plot_colormap(
 
 @singledispatch
 def _plot_colormap(arg, *_, **__):
-    raise MultipleDispatchTypeError(arg, _plot_colormap)
+    raise OverloadTypeError(arg, _plot_colormap)
 
 
 @_plot_colormap.register(Figure)
@@ -242,7 +242,7 @@ def _plot_contours(
 
 @singledispatch
 def _plot_contours(arg, *_, **__):
-    raise MultipleDispatchTypeError(arg, _plot_contours)
+    raise OverloadTypeError(arg, _plot_contours)
 
 
 @_plot_contours.register(Axes)

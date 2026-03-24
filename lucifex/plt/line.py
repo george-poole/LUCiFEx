@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler
 
 from ..fem import as_grid_function, GridFunction
-from ..utils.py_utils import MultipleDispatchTypeError, filter_kwargs
+from ..utils.py_utils import OverloadTypeError, filter_kwargs
 from .utils import (
     LW, set_legend, create_colorbar, optional_fig_ax, 
     set_axes, create_cycler, optional_multifig_ax,
@@ -74,7 +74,7 @@ def plot_line(
 
 @singledispatch
 def _plot_line(f, *_, **__):
-    raise MultipleDispatchTypeError(f)
+    raise OverloadTypeError(f)
 
 
 @_plot_line.register(Function)

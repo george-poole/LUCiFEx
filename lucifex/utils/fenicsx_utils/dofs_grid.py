@@ -37,9 +37,9 @@ def dofs_grid(
         f = create_function(elem, f)
 
     if use_dof_coordinates:
-        vertex_values = dofs(f, try_identity=True)
+        vertex_values = dofs(f, create=False)
     else:
-        vertex_values = dofs(f, ('P', 1), try_identity=True)
+        vertex_values = dofs(f, ('P', 1), create=False)
 
     f_or_mesh = f if use_dof_coordinates else f.function_space.mesh
     axes, vertices = _axes_vertices(use_cache=use_cache)(

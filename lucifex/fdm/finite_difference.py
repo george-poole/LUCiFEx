@@ -7,7 +7,7 @@ from ufl.core.expr import Expr
 from ufl import TrialFunction, replace
 from dolfinx.fem import Function, Constant
 
-from ..utils.py_utils import MultipleDispatchTypeError, str_indexed
+from ..utils.py_utils import OverloadTypeError, str_indexed
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 
@@ -43,7 +43,7 @@ class FiniteDifference:
         elif isinstance(initial, (dict, tuple)):
             self._initial = FiniteDifference(initial)
         else:
-            raise MultipleDispatchTypeError(initial)
+            raise OverloadTypeError(initial)
         
         if self._initial is not None:
             assert self._initial.order in (0, 1)

@@ -1,4 +1,4 @@
-from typing import Literal, Callable, overload
+from typing import Literal, Callable, overload, Any
 from collections.abc import Iterable
 from functools import singledispatch
 from scipy.interpolate import RegularGridInterpolator
@@ -8,16 +8,17 @@ import numpy as np
 
 from ..utils.array_utils import as_index
 from ..utils.py_utils import (
-    as_slice, StrSlice, MultipleDispatchTypeError, 
+    as_slice, StrSlice, OverloadTypeError, 
     optional_lru_cache,
 )
 from ..mesh.mesh2npy import GridMesh
 from .fem2npy import as_grid_function, GridFunction
 
 
+# TODO consistent overload with `Function | GridFunction -> GridFunction` and `tuple -> tuple`
 @overload
-def grid_cross_section(
-    fxyz: Function | GridFunction | tuple[np.ndarray, ...],
+def cross_section_grid(
+    u: Function | GridFunction | tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
     target: int | float,
     fraction: bool = False,
@@ -28,8 +29,8 @@ def grid_cross_section(
 
 
 @overload
-def grid_cross_section(
-    fxyz: Iterable[Function | GridFunction],
+def cross_section_grid(
+    u: Iterable[Function | GridFunction],
     axis: str | Literal[0, 1, 2],
     target: int | float,
     fraction: bool = False,
@@ -41,13 +42,13 @@ def grid_cross_section(
 
 
 @singledispatch
-def grid_cross_section(f, *_, **__):
-    raise MultipleDispatchTypeError(f)
+def cross_section_grid(f, *_, **__):
+    raise OverloadTypeError(f)
 
 
-@grid_cross_section.register(Function)
+@cross_section_grid.register(Function)
 def _(
-    fxyz: Function,
+    u: Function,
     axis: str | Literal[0, 1, 2],
     target: int | float,
     fraction: bool = False,
@@ -57,9 +58,9 @@ def _(
     if isinstance(use_cache, bool):
         use_cache = (use_cache, use_cache)
     use_mesh_cache, use_func_cache = use_cache
-    f_grid = as_grid_function(use_cache=use_func_cache)(fxyz, use_mesh_cache=use_mesh_cache)
-    return grid_cross_section(
-        f_grid,
+    u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+    return cross_section_grid(
+        u_grid,
         axis,
         target,
         fraction,
@@ -67,18 +68,18 @@ def _(
     )
 
 
-@grid_cross_section.register(tuple)
+@cross_section_grid.register(tuple)
 def _(
-    fxyz: tuple[np.ndarray, ...],
+    xyz: tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
     target: int | float,
     fraction: bool = False,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ): 
-    values, *axes = fxyz
-    f_grid = GridFunction(values, GridMesh(axes))
-    return grid_cross_section(
-        f_grid,
+    *axes, value = xyz
+    u_grid = GridFunction(value, GridMesh(axes))
+    return cross_section_grid(
+        u_grid,
         axis,
         target,
         fraction,
@@ -86,7 +87,7 @@ def _(
     )
 
 
-@grid_cross_section.register(GridFunction)
+@cross_section_grid.register(GridFunction)
 def _(
     f_grid: GridFunction,
     axis: str | Literal[0, 1, 2],
@@ -108,11 +109,11 @@ def _(
         raise ValueError(f'Cannot get a cross-section in d={dim}.')
 
 
-@grid_cross_section.register(Iterable)
+@cross_section_grid.register(Iterable)
 def _(
     u: list[Function | GridFunction],
     axis: str | Literal[0, 1, 2],
-    value: float | None = None,
+    target: float | None = None,
     fraction: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
@@ -120,17 +121,20 @@ def _(
 ): 
     _cross_sections = []
     _values = []
-    grid, value  = grid_cross_section(
-        u[0], axis, value, fraction, axis_names, use_cache,
+    pass_kws = lambda u: dict(use_cache=use_cache) if isinstance(u, Function) else dict()
+    grid, target  = cross_section_grid(
+        u[0], axis, target, fraction, axis_names, **pass_kws(u[0])
     )
     _cross_sections.append(grid)
-    _values.append(value)
+    _values.append(target)
 
     for _u in u[1:]:
-        _grid, _value  = grid_cross_section(_u, axis, value, fraction, axis_names, use_cache)
+        _grid, _value  = cross_section_grid(
+            _u, axis, target, fraction, axis_names, **pass_kws(_u),
+        )
         if strict:
-            assert np.isclose(value, _value)
-            assert np.all(np.isclose(grid.mesh.axes, _grid.mesh.axes))
+            assert np.isclose(target, _value)
+            assert np.all(np.isclose(grid.mesh.axes, _grid.mesh.axes)) # FIXME typing
         _cross_sections.append(_grid)
         _values.append(_value)
 
@@ -200,7 +204,7 @@ def _cross_section_colormap(
 
 
 @overload
-def _grid_average(
+def _average_grid(
     u: Function | GridFunction,
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
@@ -211,7 +215,7 @@ def _grid_average(
 
 
 @overload
-def _grid_average(
+def _average_grid(
     u: Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
@@ -221,7 +225,7 @@ def _grid_average(
     ...
 
 
-def _grid_average(
+def _average_grid(
     u: Function | GridFunction | Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
@@ -229,7 +233,7 @@ def _grid_average(
     use_cache: bool | tuple[bool, bool] = True,
 ):
     if not isinstance(u, (Function, GridFunction)):
-        return [_grid_average(i, axis, slc, use_func_cache, axis_names) for i in u]
+        return [_average_grid(i, axis, slc, use_func_cache, axis_names) for i in u]
     
     if isinstance(u, Function):
         if isinstance(use_cache, bool):
@@ -263,19 +267,26 @@ def _array_average(
     return np.mean(values[slc], axis)
 
 
-grid_average = optional_lru_cache(_grid_average)
+average_grid = optional_lru_cache(_average_grid)
 
 
 @optional_lru_cache
-def grid_resample(
-    u: GridFunction,
+def resample_grid(
+    u: GridFunction | Function,
     factor: int | float | tuple[int | float, ...],
     name: str | None = None,
-    **kwargs,
+    use_cache: bool | tuple[bool, bool] = True,
+    **interpolator_kws: Any,
 ) -> GridFunction:
     """
     `factor > 1` to refine and `factor < 1` to coarsen
     """
+    if isinstance(u, Function):
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
+        use_mesh_cache, use_func_cache = use_cache
+        u = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+
     if name is None:
         name = u.name
     
@@ -288,7 +299,7 @@ def grid_resample(
         np.linspace(np.min(ax), np.max(ax), int(n * len(ax))) 
         for ax, n in zip(axes, factor, strict=True)
     )
-    interpolator = RegularGridInterpolator(axes, u.value, **kwargs)
+    interpolator = RegularGridInterpolator(axes, u.value, **interpolator_kws)
     u_fine_values = interpolator(tuple(np.meshgrid(*axes_fine))).T
 
     return GridFunction(
@@ -298,18 +309,63 @@ def grid_resample(
     )
 
 
-def grid_mirror(
-    u: GridFunction | Function,
+@overload
+def mirror_grid(
+    u: Function,
     axis: str | Literal[0, 1, 2],
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
 ) -> GridFunction:
+    ...
+
+
+@overload
+def mirror_grid(
+    u: GridFunction,
+    axis: str | Literal[0, 1, 2],
+    name: str | None = None,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> GridFunction:
+    ...
+
+
+@overload
+def mirror_grid(
+    xyz: tuple[np.ndarray, ...],
+    axis: str | Literal[0, 1, 2],
+    name: str | None = None,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+) -> tuple[np.ndarray, ...]:
+    ...
+
+
+def mirror_grid(
+    u: GridFunction | Function | tuple[np.ndarray, ...],
+    axis: str | Literal[0, 1, 2],
+    name: str | None = None,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: bool | tuple[bool, bool] = True,
+) -> GridFunction:
+    
     if isinstance(u, Function):
         if isinstance(use_cache, bool):
             use_cache = (use_cache, use_cache)
         use_mesh_cache, use_func_cache = use_cache
-        u = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+        u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+        return mirror_grid(u_grid, axis, name, axis_names)
+    
+    if isinstance(u, GridFunction):
+        axes = u.mesh.axes
+        value = u.value
+        *axes_mirror, value_mirror = mirror_grid((*axes, value), axis, name, axis_names)
+        return GridFunction(
+            value_mirror,
+            GridMesh(axes_mirror),
+            name,
+        )
+
+    *axes, value = u
 
     if not isinstance(axis, int):
         axis_index = axis_names.index(axis)
@@ -317,45 +373,48 @@ def grid_mirror(
         axis_index = axis
 
     axes_mirror = []
-    for i, axis in enumerate(u.mesh.axes):
+    for i, ax in enumerate(axes):
         if i == axis_index:
-            if np.isclose(axis[0], 0.0):
+            if np.isclose(ax[0], 0.0):
                 pos_to_neg = True
-                axm = np.array([*axis[::-1], *axis])
-            elif np.isclose(axis[-1], 0.0):
+                axm = np.concatenate((-ax[::-1], ax[1:]))
+            elif np.isclose(ax[-1], 0.0):
                 pos_to_neg = False
-                axm = np.array([*axis, *axis[::-1]])
+                axm = np.concatenate((ax[:-1], -ax[::-1]))
             else:
                 raise ValueError('Can only mirror axes about the origin.')
         else:
-            axm = axis
+            axm = ax
         axes_mirror.append(axm)
 
-    u_mirror_shape = tuple(2 * n - 1 if i == axis_index else n for i, n in enumerate(u.npy_shape))
-    u_mirror_values = np.zeros(u_mirror_shape)
+    dim = len(axes_mirror)
 
-    # TODO
-    i_mid = ...
     if pos_to_neg:
-        slc_pos = tuple(slice(i_mid, None) if i == axis_index else slice(None) for i in ...)
-        slc_neg = tuple()
+        slc_pos = tuple(
+            slice(1, None) if i == axis_index else slice(None) for i in range(dim)
+        )
+        slc_neg = tuple(
+            slice(None, None, -1) if i == axis_index else slice(None) for i in range(dim)
+        )
     else:
-        ...
-    
-    u_mirror_values[slc_pos] = u.value
-    u_mirror_values[slc_neg] = u.value
+        slc_neg = tuple(
+            slice(0, -1) if i == axis_index else slice(None) for i in range(dim)
+        )
+        slc_pos = tuple(
+            slice(None, None, -1) if i == axis_index else slice(None) for i in range(dim)
+        )
 
-    return GridFunction(
-        u_mirror_values,
-        GridMesh(axes_mirror),
-        name,
+    value_mirror = np.concatenate(
+        (value[slc_neg], value[slc_pos]), 
+        axis=axis_index,
     )
 
+    return *axes_mirror, value_mirror
 
 
 def where_on_grid(
     u: GridFunction | Function,
-    condition: Callable[[np.ndarray], np.ndarray],
+    condition: Callable[[np.ndarray], np.ndarray] | Callable[[float], float],
     use_cache: bool | tuple[bool, bool] = True,
 ) -> tuple[np.ndarray, ...]:
     if isinstance(use_cache, bool):

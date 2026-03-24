@@ -8,7 +8,7 @@ from ufl.core.expr import Expr
 from ufl.algorithms.analysis import extract_coefficients, extract_constants
 from dolfinx.fem import Function, Constant
 
-from ..utils.py_utils import MultipleDispatchTypeError
+from ..utils.py_utils import OverloadTypeError
 
 
 class UnsolvedType:
@@ -60,7 +60,7 @@ def is_unsolved(
 
 @singledispatch
 def _is_unsolved(obj, _):
-    raise MultipleDispatchTypeError(obj)
+    raise OverloadTypeError(obj)
 
 
 @_is_unsolved.register(Function)

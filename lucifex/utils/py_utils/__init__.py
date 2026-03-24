@@ -1,8 +1,8 @@
 from .deferred import create_lazy_evaluator, Writer, Stopper, LazyEvaluator
 from .func_utils import (
     log_timing, optional_lru_cache, arity,
-    MultipleDispatchTypeError, replicate_callable,
-    filter_kwargs, canonicalize_args, MultipleDispatchTypeError,
+    OverloadTypeError, replicate_callable,
+    filter_kwargs, canonicalize_args, OverloadTypeError,
 )
 from .str_utils import (
     str_indexed, str_scientifc, 

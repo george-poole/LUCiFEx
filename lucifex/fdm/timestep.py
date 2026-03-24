@@ -11,7 +11,7 @@ from ufl.geometry import GeometricCellQuantity
 
 from ..fem import Constant
 from ..utils.fenicsx_utils import dofs, cell_size_quantity, extract_mesh, is_tensor
-from ..utils.py_utils import MultipleDispatchTypeError, LazyEvaluator
+from ..utils.py_utils import OverloadTypeError, LazyEvaluator
 
 
 @overload
@@ -82,7 +82,7 @@ def advective_timestep(a, h, courant=1.0, dt_max=np.inf, dt_min=0.0, tol=1e-10, 
 
 @singledispatch
 def _advective_dt_evaluator(velocity, *_, **__) -> LazyEvaluator[float]:
-    raise MultipleDispatchTypeError(velocity, _advective_dt_evaluator)
+    raise OverloadTypeError(velocity, _advective_dt_evaluator)
 
 
 @_advective_dt_evaluator.register(Function)
@@ -148,7 +148,7 @@ def diffusive_timestep(
 
 @singledispatch
 def _diffusive_dt_evaluator(diffusion, *_, **__) -> LazyEvaluator[float]:
-    raise MultipleDispatchTypeError(diffusion, _diffusive_dt_evaluator)
+    raise OverloadTypeError(diffusion, _diffusive_dt_evaluator)
 
 
 @_diffusive_dt_evaluator.register(Function)
@@ -224,7 +224,7 @@ def reactive_timestep(r, courant = 1.0, dt_max = np.inf, dt_min = 0.0, tol = 1e-
 
 @singledispatch
 def _reactive_dt_evaluator(reaction, *_, **__) -> LazyEvaluator[float]:
-    raise MultipleDispatchTypeError(reaction)
+    raise OverloadTypeError(reaction)
 
 
 @_reactive_dt_evaluator.register(Function)

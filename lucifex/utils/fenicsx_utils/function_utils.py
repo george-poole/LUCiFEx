@@ -9,7 +9,7 @@ from petsc4py import PETSc
 from dolfinx.fem import Function, FunctionSpace, Constant, Function
 from dolfinx.fem import Expression
 
-from ..py_utils import MultipleDispatchTypeError, StrSlice, optional_lru_cache, as_slice
+from ..py_utils import OverloadTypeError, StrSlice, optional_lru_cache, as_slice
 from .expr_utils import (
     is_same_element, 
     is_scalar,
@@ -23,6 +23,33 @@ from .function_space_utils import (
 )
 
 
+def as_function(
+    fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] 
+    | tuple[str, int] | tuple[str, int, int],
+    value: Function | Constant | Expression | Expr
+    | Callable[[np.ndarray], np.ndarray] | float 
+    | Iterable[float | Callable[[np.ndarray], np.ndarray]]
+    | None = None,
+    subspace_index: int | None = None,
+    dofs_indices: Iterable[int] | StrSlice | None = None,
+    name: str | None = None,
+    use_cache: bool | EllipsisType = False,
+) -> Function:
+    """
+    If `value` is of type `Function` and already belongs to the specified function space,
+    then it is returned unmutated. Otherwise a new `Function` is created.
+    """
+    return _as_or_create_function(
+        False,
+        fs,
+        value,
+        subspace_index,
+        dofs_indices,
+        name,
+        use_cache,
+    )
+
+
 def create_function(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] 
     | tuple[str, int] | tuple[str, int, int],
@@ -33,7 +60,6 @@ def create_function(
     subspace_index: int | None = None,
     dofs_indices: Iterable[int] | StrSlice | None = None,
     name: str | None = None,
-    try_identity: bool = False,
     use_cache: bool | EllipsisType = False,
 ) -> Function:
     """
@@ -42,8 +68,33 @@ def create_function(
     `use_cache = True` will try to fetch a `Function` from the cache, based on the tuple-valued `fs`, 
     `subspace_index` and `name` and then mutate that `Function`. \\
     `use_cache = Ellipsis` will try to fetch a `FunctionSpace` from the cache, but create a new `Function`. \\
-    `use_cache = False` will create a new `FunctionSpace` and a new `Function`.
+    `use_
     """
+    return _as_or_create_function(
+        True,
+        fs,
+        value,
+        subspace_index,
+        dofs_indices,
+        name,
+        use_cache,
+    )
+
+
+
+def _as_or_create_function(
+    force_new: bool,
+    fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] 
+    | tuple[str, int] | tuple[str, int, int],
+    value: Function | Constant | Expression | Expr
+    | Callable[[np.ndarray], np.ndarray] | float 
+    | Iterable[float | Callable[[np.ndarray], np.ndarray]]
+    | None = None,
+    subspace_index: int | None = None,
+    dofs_indices: Iterable[int] | StrSlice | None = None,
+    name: str | None = None,
+    use_cache: bool | EllipsisType = False,
+) -> Function:
     if name is None:
         try:
             name = value.name
@@ -52,13 +103,13 @@ def create_function(
             
     if isinstance(fs, FunctionSpace):
         fs = extract_subspace(fs, subspace_index, collapse=True)
-        if try_identity and isinstance(value, Function) and value.function_space == fs:
+        if not force_new and isinstance(value, Function) and value.function_space == fs:
             return value
         f = Function(fs, name=name)
     else:
         if not isinstance(fs[0], Mesh):
             fs = fs_from_elem(fs, value)
-        if try_identity and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
+        if not force_new and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
             return value
         if use_cache is True:
             f = _create_function(fs, subspace_index, name)
@@ -97,8 +148,14 @@ def extract_component_functions(
     fs: tuple[Mesh, str, int] | tuple[str, int],
     u: Function | Expr,
     names: Iterable[str | None] | None = None,
+    create: bool = True,
     use_cache: bool | EllipsisType = False,
 ) -> tuple[Function, ...]:
+    """
+    `u(𝐱) ∈ Pₖ ⨯ Pₖ ⨯ ... -> (uˣ(𝐱), u(𝐱)ʸ, ...)`
+
+    `u(𝐱) ∈ BDMₖ -> (uˣ(𝐱), u(𝐱)ʸ, ...)`
+    """
     
     if not is_vector(u):
         raise NonVectorError(u)
@@ -116,9 +173,12 @@ def extract_component_functions(
         names = tuple(f'{u_name}{i}' for i in range(dim))
 
     if isinstance(u, Function) and is_component_space(u.function_space):
-        # e.g. `u(𝐱) ∈ P₁⨯P₁`
+        if create:
+            _function = create_function
+        else:
+            _function = as_function
         return tuple(
-            create_function(fs, i.collapse(), name=n, use_cache=use_cache) 
+            _function(fs, i.collapse(), name=n, use_cache=use_cache) 
             for i, n in zip(u.split(), names, strict=True)
         )
     else:
@@ -188,7 +248,7 @@ def set_function_dofs(
 
 @singledispatch
 def _set_function_dofs(value, *_, **__):
-    raise MultipleDispatchTypeError(value)
+    raise OverloadTypeError(value)
 
 
 @_set_function_dofs.register(Function)
@@ -224,7 +284,7 @@ def set_function_interpolate(
 
 @singledispatch
 def _set_function_interpolate(u, *_, **__):
-    raise MultipleDispatchTypeError(u)
+    raise OverloadTypeError(u)
 
 
 @_set_function_interpolate.register(Expr)
@@ -259,7 +319,7 @@ def _(value: Iterable[float | Constant | Callable], f: Function):
             return _(u.value.item())
         if isinstance(u, Callable):
             return u
-        raise MultipleDispatchTypeError(u)
+        raise OverloadTypeError(u)
     f.interpolate(lambda x: np.vstack([_(i)(x) for i in value]))
 
 

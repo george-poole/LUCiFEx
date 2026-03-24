@@ -19,7 +19,7 @@ from ..fdm.fdm2npy import (
     as_tri_function_series, as_quad_function_series, TriFunctionSeries, NPyConstantSeries, as_npy_constant_series,
 )
 from ..utils.py_utils import (
-    MultiKey, MultipleDispatchTypeError,
+    MultiKey, OverloadTypeError,
     replicate_callable, StrSlice, as_slice,
 )
 from .simulation import Simulation
@@ -107,7 +107,7 @@ class NPySimulation(
             _solutions.append(_sltn)
 
         _as_npy = lambda arg: (
-            as_npy_or_numeric(arg, convert_series, convert_func)
+            as_npy_type(arg, convert_series, convert_func)
         )
 
         _auxiliary = []
@@ -129,10 +129,11 @@ class NPySimulation(
 
 F = TypeVar('F', bound=NPyFunction)
 S = TypeVar('S', bound=NPyFunctionSeries)
-def as_npy_or_numeric(
+def as_npy_type(
     obj,
     convert_series: Callable[[FunctionSeries | ExprSeries], S],
     convert_func: Callable[[Function | Expr], F],
+    strict: bool = False,
 ):
     if isinstance(obj, (float, int, np.ndarray)):
         return obj
@@ -142,8 +143,10 @@ def as_npy_or_numeric(
         return convert_func(obj)
     if isinstance(obj, ExprSeries):
         return convert_series(obj)
-    raise MultipleDispatchTypeError(obj)
-   
+    if strict:
+        raise OverloadTypeError(obj)
+    else:
+        return obj
 
 class GridSimulation(NPySimulation[GridMesh, GridFunction, GridFunctionSeries]):
     @classmethod

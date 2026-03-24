@@ -20,7 +20,7 @@ from ..utils.fenicsx_utils import (
     set_function, 
     is_mixed_space,
 )
-from ..utils.py_utils import MultipleDispatchTypeError, StrSlice, as_slice
+from ..utils.py_utils import OverloadTypeError, StrSlice, as_slice
 from ..utils.fenicsx_utils import NonScalarVectorError, is_tensor, is_vector
 from ..fdm import (
     FunctionSeries, ConstantSeries, GridFunctionSeries, 
@@ -196,7 +196,7 @@ def write(
 
 @singledispatch
 def _write(u, *_, **__) -> None:
-    raise MultipleDispatchTypeError(u, _write)
+    raise OverloadTypeError(u, _write)
 
 
 @_write.register(Mesh)

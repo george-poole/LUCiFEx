@@ -20,8 +20,8 @@ from .fem2npy import (
 )
 from .grid_utils import (
     where_on_grid, 
-    grid_cross_section, 
-    grid_average, 
-    grid_resample,
-    grid_mirror,
+    cross_section_grid, 
+    average_grid, 
+    resample_grid,
+    mirror_grid,
 )
