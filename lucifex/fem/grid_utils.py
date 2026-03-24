@@ -204,8 +204,8 @@ def _grid_average(
     u: Function | GridFunction,
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: bool | tuple[bool, bool] = True,
 ) -> GridFunction | float:
     ...
 
@@ -215,8 +215,8 @@ def _grid_average(
     u: Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: bool | tuple[bool, bool] = True,
 ) -> list[GridFunction] | list[float]:
     ...
 
@@ -225,15 +225,17 @@ def _grid_average(
     u: Function | GridFunction | Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
     slc: StrSlice | tuple[StrSlice, ...] = ':',
-    use_func_cache: bool = True,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: bool | tuple[bool, bool] = True,
 ):
-    
     if not isinstance(u, (Function, GridFunction)):
         return [_grid_average(i, axis, slc, use_func_cache, axis_names) for i in u]
     
     if isinstance(u, Function):
-        u = as_grid_function(use_cache=use_func_cache)(u)
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
+        use_mesh_cache, use_func_cache = use_cache
+        u = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
     
     if not isinstance(axis, tuple):
         axis = (axis, )
@@ -265,7 +267,7 @@ grid_average = optional_lru_cache(_grid_average)
 
 
 @optional_lru_cache
-def refine_grid_function(
+def grid_resample(
     u: GridFunction,
     factor: int | float | tuple[int | float, ...],
     name: str | None = None,
@@ -296,16 +298,71 @@ def refine_grid_function(
     )
 
 
+def grid_mirror(
+    u: GridFunction | Function,
+    axis: str | Literal[0, 1, 2],
+    name: str | None = None,
+    axis_names: tuple[str, ...] = ("x", "y", "z"),
+    use_cache: bool | tuple[bool, bool] = True,
+) -> GridFunction:
+    if isinstance(u, Function):
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
+        use_mesh_cache, use_func_cache = use_cache
+        u = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+
+    if not isinstance(axis, int):
+        axis_index = axis_names.index(axis)
+    else:
+        axis_index = axis
+
+    axes_mirror = []
+    for i, axis in enumerate(u.mesh.axes):
+        if i == axis_index:
+            if np.isclose(axis[0], 0.0):
+                pos_to_neg = True
+                axm = np.array([*axis[::-1], *axis])
+            elif np.isclose(axis[-1], 0.0):
+                pos_to_neg = False
+                axm = np.array([*axis, *axis[::-1]])
+            else:
+                raise ValueError('Can only mirror axes about the origin.')
+        else:
+            axm = axis
+        axes_mirror.append(axm)
+
+    u_mirror_shape = tuple(2 * n - 1 if i == axis_index else n for i, n in enumerate(u.npy_shape))
+    u_mirror_values = np.zeros(u_mirror_shape)
+
+    # TODO
+    i_mid = ...
+    if pos_to_neg:
+        slc_pos = tuple(slice(i_mid, None) if i == axis_index else slice(None) for i in ...)
+        slc_neg = tuple()
+    else:
+        ...
+    
+    u_mirror_values[slc_pos] = u.value
+    u_mirror_values[slc_neg] = u.value
+
+    return GridFunction(
+        u_mirror_values,
+        GridMesh(axes_mirror),
+        name,
+    )
+
+
+
 def where_on_grid(
-    f: GridFunction | Function,
+    u: GridFunction | Function,
     condition: Callable[[np.ndarray], np.ndarray],
     use_cache: bool | tuple[bool, bool] = True,
 ) -> tuple[np.ndarray, ...]:
     if isinstance(use_cache, bool):
         use_cache = (use_cache, use_cache)
     use_mesh_cache, use_func_cache = use_cache
-    f_grid = as_grid_function(use_cache=use_func_cache)(f, use_mesh_cache=use_mesh_cache)
-    axes = f_grid.mesh.axes
-    indices = np.where(condition(f_grid))
+    u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+    axes = u_grid.mesh.axes
+    indices = np.where(condition(u_grid))
     return tuple(x[i] for x, i in zip(axes, indices))
 

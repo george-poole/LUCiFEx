@@ -23,7 +23,7 @@ from ..utils.py_utils import (
 )
 from ..utils.fenicsx_utils import is_mixed_space
 from ..fem import Function, Constant
-from ..fdm import ExprSeries, ConstantSeries, FunctionSeries
+from ..fdm import ExprSeries, ConstantSeries, FunctionSeries, SubFunctionSeries
 from ..solver import (
     Solver, BoundaryValueProblem, InitialBoundaryValueProblem, InitialValueProblem, 
     EigenvalueProblem, Interpolation, Projection, OptionsFFCX, OptionsJIT, OptionsPETSc, OptionsSLEPc,
@@ -38,7 +38,10 @@ AuxiliaryType: TypeAlias = ExprSeries | Expr | Function | Constant
 
 
 class Simulation(
-    MultiKey[str, FunctionSeries | ConstantSeries | ExprSeries | Expr | Function | Constant | float | int | np.ndarray]
+    MultiKey[
+        str, 
+        FunctionSeries | ConstantSeries | ExprSeries | SubFunctionSeries | Expr | Function | Constant | float | int | np.ndarray
+        ]
 ):
     def __init__(
         self,

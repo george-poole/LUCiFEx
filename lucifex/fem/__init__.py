@@ -22,5 +22,6 @@ from .grid_utils import (
     where_on_grid, 
     grid_cross_section, 
     grid_average, 
-    refine_grid_function,
+    grid_resample,
+    grid_mirror,
 )

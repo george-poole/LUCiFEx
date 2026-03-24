@@ -222,8 +222,12 @@ def plot_line_multifigure(
             _ax_cbar = ax_cb
             _cax = True
         else:
-            _legend_labels = None
-            _legend_title = None
+            if isinstance(leg_lbl, tuple):
+                _legend_labels = None
+                _legend_title = None
+            else: 
+                _legend_labels = leg_lbl
+                _legend_title = leg_ttl
             _ax_cbar = None
             _cax = True
 

@@ -14,10 +14,12 @@ class MeshBoundary(
     def __init__(
         self, 
         boundaries: dict[str | int, BooleanMarker | MarkerAlias] | None,
+        name: str | None = None,
     ):
         if boundaries is None:
             boundaries = {}
         self._boundaries = boundaries
+        self._name = name
 
     def _getitem(
         self, 
@@ -53,6 +55,10 @@ class MeshBoundary(
         return lambda x: np.logical_not(self.union(x))
     
     @property
+    def name(self) -> str | None:
+        return self._name
+    
+    @property
     def names(self) -> tuple[str | int, ...]:
         return tuple(self._boundaries.keys())
     
@@ -66,6 +72,7 @@ def mesh_boundary(
     boundaries: dict[str | int, BooleanMarker | MarkerAlias] | None = None,
     verify: bool = True,
     complete: bool = False,
+    name: str | None = None,
 ) -> MeshBoundary:
     """
     `{∂Ωᵢ}ᵢ`
@@ -91,4 +98,4 @@ def mesh_boundary(
             if n_total != sum(n_boundary_entities):
                 raise ValueError('Boundaries do not cover the complete mesh boundary')
             
-    return MeshBoundary(boundaries)
+    return MeshBoundary(boundaries, name)

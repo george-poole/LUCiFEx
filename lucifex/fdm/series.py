@@ -635,11 +635,17 @@ class SubFunctionSeries(Series[Expr]):
     @property
     def series(self) -> list[Function]:
         if self._series is None:
-            self._series = [i.sub(self._subspace_index, self.name, collapse=True) for i in self._mixed.series]
+            self._series = [
+                i.sub(self._subspace_index, self.name, collapse=True) 
+                for i in self._mixed.series
+            ]
         return self._series
     
     def clear_series(self) -> None:
         self._series = None
+
+    def get_series_item(self, time_index: int) -> Function:
+        return self._mixed.series[time_index].sub(self._subspace_index, self.name, collapse=True)
     
     @property
     def time_series(self) -> list[float | None]:

@@ -75,7 +75,6 @@ class Constant(DOLFINxConstant):
     ) -> Self:
         if name is None:
             name = self._create_subname(index)
-
         return Constant(
             self.mesh,
             self.value[index],
@@ -89,8 +88,7 @@ class Constant(DOLFINxConstant):
     ) -> tuple[Self, ...]:
         dim = self.ufl_shape[0]
         if names is None:
-            names = [None] * self.ufl_shape[0]
-
+            names = [None] * dim
         return tuple(self.sub(i, n) for i, n in zip(range(dim), names, strict=True))
         
     
