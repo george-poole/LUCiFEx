@@ -1,7 +1,7 @@
 from typing import Literal
 
 from ufl.core.expr import Expr
-from ufl import Form, Measure, Argument
+from ufl import Form, Measure, conditional, gt, FacetNormal, Argument
 from dolfinx.mesh import Mesh
 
 from lucifex.fem import Function, Constant
@@ -17,8 +17,8 @@ from lucifex.utils.fenicsx_utils import is_none
 
 
 def derivative_form(
-    v,
-    u,
+    v: Argument,
+    u: Function | FunctionSeries,
     dt: ConstantSeries | Constant,
     D_dt: FiniteDifferenceDerivative = DT,
     dx: Measure | Expr | Literal[1] = 1,
@@ -29,40 +29,63 @@ def derivative_form(
     return v * D_dt(u, dt) * dx
 
 
-def advection_form(
-    v,
-    u,
+def advection_forms(
+    v: Argument,
+    u: Function | FunctionSeries,
     a,
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
+    bcs: BoundaryConditions | tuple | None = None,
     dx: Measure | Expr | Literal[1] = 1,
-) -> Form | Expr:
+    *,
+    by_parts: bool = False,
+) -> list[Form | Expr]:
     """
     `∫dx v(𝐚·∇u)`
     """
 
-    expr = lambda a, u: inner(a, grad(u))
+    forms = []
+
+    if not by_parts:
+        expr = lambda a, u: inner(a, grad(u))
+    else:
+        expr = lambda a, u: -inner(grad(v), a * u)
+
     if isinstance(D_adv, FiniteDifference):
         adv = D_adv(expr(a, u), trial=u)
     else:
         adv = D_adv(ExprSeries(expr)(a, u), trial=u)
-        # adv = D_adv(expr, a, u, trial=u)
+    
     F_adv =  v * adv * dx
-    return F_adv
+    forms.append(F_adv)
+
+    if by_parts and (bcs is not None):
+        ds, u_dirichlet = (
+            bcs.boundary_data(u, 'dirichlet') if isinstance(bcs, BoundaryConditions)
+            else bcs
+        )
+        n = FacetNormal(u.function_space.mesh)
+        lmbda = conditional(gt(inner(n, a), 0), 1, 0)
+        F_ds = v * lmbda * inner(n, a) * u * ds
+        F_ds += sum([v * (1 - lmbda) * inner(n, a) * uD * ds(i) for i, uD in u_dirichlet])
+        forms.append(F_ds)
+
+    return forms
 
 
 def diffusion_forms(
-    v,
+    v: Argument,
     u: Function | FunctionSeries,
     d,
     D_diff: FiniteDifference | FiniteDifferenceArgwise = AB1,
     bcs: BoundaryConditions | None = None,
     dx: Measure | Expr | Literal[1] = 1,
-    divergence: bool = False,
-) -> list[Form]:
+    *,
+    by_parts: bool = True,
+) -> list[Form | Expr]:
     """
     `∫dx v∇·(D·∇u) = - ∫dx ... + ∫dS ... `
     """
-    if divergence:
+    if not by_parts:
         F_diff = v * div(d * grad(D_diff(u))) * dx 
     else:
         expr = lambda d, u: d * grad(u)
@@ -70,7 +93,6 @@ def diffusion_forms(
             diff = D_diff(expr(d, u), trial=u)
         else:
             diff = D_diff(ExprSeries(expr)(d, u), trial=u)
-            # diff = D_diff(expr, d, u, trial=u)
         F_diff = -inner(grad(v), diff) * dx    
    
     forms = [F_diff]
@@ -88,8 +110,8 @@ def diffusion_forms(
 
 
 def reaction_forms(
-    v,
-    u: Function,
+    v: Argument,
+    u: Function | FunctionSeries,
     r: Function | Constant | Expr | None = None,
     j: Function | Constant | Expr | None = None,
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
@@ -106,7 +128,6 @@ def reaction_forms(
             reac = D_reac(expr(r, u), trial=u)
         else:
             reac = D_reac(ExprSeries(expr)(r, u), trial=u)
-            # expr = D_reac(expr, r, u, trial=u)
         F_reac = v * reac * dx
         forms.append(F_reac)
     if not is_none(j):

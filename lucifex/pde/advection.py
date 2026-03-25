@@ -15,8 +15,8 @@ from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 
 
-from .dg import dg_advection_forms
-from .cg import derivative_form, advection_form, reaction_forms
+from .dg_transport import dg_advection_forms
+from .cg_transport import derivative_form, advection_forms, reaction_forms
 
 
 def advection(
@@ -25,6 +25,7 @@ def advection(
     a: Expr | Function | Constant,
     D_adv: FiniteDifference | FiniteDifferenceArgwise,
     D_dt: FiniteDifferenceDerivative = DT,
+    bcs: BoundaryConditions | None = None,
 ) -> tuple[Form, Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
@@ -33,6 +34,7 @@ def advection(
         u, dt, a, 
         D_adv=D_adv, 
         D_dt=D_dt,
+        bcs=bcs,
     )
 
 
@@ -46,6 +48,7 @@ def advection_reaction(
     D_reac: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_dt: FiniteDifferenceDerivative = DT,
+    bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = Ru + J`
@@ -54,7 +57,7 @@ def advection_reaction(
     dx = Measure('dx', u.function_space.mesh)
     return [
         derivative_form(v, u, dt, D_dt, dx),
-        advection_form(v, u, a, D_adv, dx),
+        *advection_forms(v, u, a, D_adv, bcs, dx, by_parts=(bcs is not None)),
         *reaction_forms(-v, u, r, j, D_reac, D_src, dx)
     ]
 

@@ -15,9 +15,9 @@ from lucifex.fdm.ufl_operators import inner, grad
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import mesh_integral
 
-from .supg import supg_form
-from .cg import derivative_form, advection_form, diffusion_forms, reaction_forms
-from .dg import dg_advection_forms, dg_diffusion_forms
+from .stabilization import stabilization_form
+from .cg_transport import derivative_form, advection_forms, diffusion_forms, reaction_forms
+from .dg_transport import dg_advection_forms, dg_diffusion_forms
 
 
 def advection_diffusion(
@@ -31,7 +31,8 @@ def advection_diffusion(
     D_dt: FiniteDifferenceDerivative = DT,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    supg: str | Callable | None = None,
+    tau: str | Callable | None = None,
+    Pv: str | Callable | None = None,
     h: str = 'hdiam',
 ) -> list[Form]:
     """    
@@ -40,7 +41,7 @@ def advection_diffusion(
     return advection_diffusion_reaction(
         u, dt, a, d, 
         D_adv=D_adv, D_diff=D_diff, D_dt=D_dt, D_phi=D_phi,
-        phi=phi, bcs=bcs, supg=supg, h=h,
+        phi=phi, bcs=bcs, tau=tau, Pv=Pv, h=h,
     )
 
 
@@ -59,7 +60,8 @@ def advection_diffusion_reaction(
     D_dt: FiniteDifferenceDerivative = DT,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    supg: str | Callable | None = None,
+    tau: str | Callable | None = None,
+    Pv: str | Callable | None = None,
     h: str = 'hdiam',
 ) -> list[Form]:
     """
@@ -70,21 +72,22 @@ def advection_diffusion_reaction(
     phi = D_phi(phi)
     forms = [
         derivative_form(v, u, dt, D_dt, dx),
-        advection_form(v/phi, u, a, D_adv, dx),
-        *diffusion_forms(-v/phi, u, d, D_diff, bcs, dx),
+        *advection_forms(v/phi, u, a, D_adv, bcs, dx, by_parts=False),
+        *diffusion_forms(-v/phi, u, d, D_diff, bcs, dx, by_parts=True),
         *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx)
     ]
-    if supg is not None:
+    if tau is not None:
         terms = [
             derivative_form(1, u, dt, D_dt),
-            advection_form(1/phi, u, a, D_adv),
-            *diffusion_forms(-1/phi, u, d, D_diff, divergence=True),
+            *advection_forms(1/phi, u, a, D_adv, by_parts=False), #TODO bcs here?
+            *diffusion_forms(-1/phi, u, d, D_diff, by_parts=False), #TODO and/or here?
             *reaction_forms(-v/phi, u, r, j, D_reac, D_src),
         ]
         res = sum(terms)
-        F_supg = supg_form(
-            supg, v, res, h, a, d, r, dt, D_adv, D_diff, D_reac, D_dt, phi, dx=dx)
-        forms.append(F_supg)
+        F_stbl = stabilization_form(
+            tau, v, res, h, a, d, r, dt, D_adv, D_diff, D_reac, D_dt, phi, Pv, dx
+        )
+        forms.append(F_stbl)
 
     return forms
 
@@ -96,8 +99,8 @@ def steady_advection_diffusion(
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
-    supg: str | Callable | None = None,
-    petrov: str | Callable | None = None,
+    tau: str | Callable | None = None,
+    Pv: str | Callable | None = None,
     h: GeometricCellQuantity | str = 'hdiam',
 ) -> list[Form]:
     """
@@ -107,19 +110,19 @@ def steady_advection_diffusion(
     u_trial = TrialFunction(u.function_space)
     dx = Measure('dx', u.function_space.mesh)
     forms = [
-        advection_form(v, u_trial, a, dx=dx),
-        *diffusion_forms(-v, u_trial, d, bcs=bcs, dx=dx),
+        *advection_forms(v, u_trial, a, dx=dx, by_parts=False),
+        *diffusion_forms(-v, u_trial, d, bcs=bcs, dx=dx, by_parts=True),
         *reaction_forms(-v, u_trial, r, j, dx=dx)
     ]
-    if supg is not None:
+    if tau is not None:
         terms = [
-            advection_form(1, u_trial, a),
-            *diffusion_forms(-1, u_trial, d, divergence=True),
+            *advection_forms(1, u_trial, a, by_parts=False), #TODO bcs here?
+            *diffusion_forms(-1, u_trial, d, by_parts=False), #TODO and/or here?
             *reaction_forms(-1, u_trial, r, j),
         ]
         res = sum(terms)
-        F_supg = supg_form(supg, v, res, h, a, d, r, petrov_func=petrov, dx=dx)
-        forms.append(F_supg)
+        F_stbl = stabilization_form(tau, v, res, h, a, d, r, Pv=Pv, dx=dx)
+        forms.append(F_stbl)
 
     return forms
 

@@ -11,7 +11,10 @@ from lucifex.fdm import (
     ConstantSeries, ExplicitDiscretizationError, peclet,
 )
 from lucifex.fdm.ufl_operators import inner, grad
-from lucifex.utils.fenicsx_utils import is_tensor, is_vector, extract_mesh, cell_size_quantity
+from lucifex.utils.fenicsx_utils import (
+    is_tensor, is_vector, extract_mesh, 
+    MeshExtractionError, cell_size_quantity,
+)
 from lucifex.utils.py_utils import StrEnum
 
 
@@ -19,15 +22,15 @@ class TauType(StrEnum):
     CODINA = 'codina'
     SHAKIB = 'shakib'
     COTH = 'coth'
-    COTH_APPROX = 'coth_approx'
-    UPWIND = 'upwind'
+    COTH_PWL = 'coth_pwl'
+    COTH_INFTY = 'coth_infty'
     TRANSIENT = 'transient'
     NONE = 'none'
     UNSTABILIZED = 'unstabilized'
 
 
-def supg_form(
-    tau_func: str | Callable,
+def stabilization_form(
+    tau: str | Callable,
     v: Expr,
     res: Expr,
     h: str | GeometricCellQuantity,
@@ -40,13 +43,13 @@ def supg_form(
     D_reac: FiniteDifference = BE,
     D_dt: FiniteDifference = DT,
     phi: Expr = 1,
-    petrov_func: str | Callable | None = None,
+    Pv: str | Callable | None = None,
     dx: Measure = 1,
 ) -> Form:
     """
-    `𝜏 P(v, 𝐚ᵉᶠᶠ, Dᵉᶠᶠ, Rᵉᶠᶠ)ℛ`
-
-    Default value `petrov_func=None` returns `𝜏 (∇v·𝐚ᵉᶠᶠ)ℛ`.
+    Stabilisation term `𝜏 P(v; 𝐚ᵉᶠᶠ, Dᵉᶠᶠ, Rᵉᶠᶠ)ℛ` with stabilization
+    parameter `𝜏` given some function `P(v)` of the test function and the 
+    residual `ℛ`.
     """
     if isinstance(dt, ConstantSeries):
         dt = dt[0]
@@ -57,7 +60,7 @@ def supg_form(
     d_eff = (1 / phi) *  effective_diffusivity(d, D_diff)
     r_eff = (1 / phi) * effective_reaction(r, D_reac, dt, D_dt)
 
-    match tau_func:
+    match tau:
         case TauType.CODINA:
             tau = tau_codina(h, a_eff, d_eff, r_eff)
         case TauType.SHAKIB:
@@ -68,28 +71,35 @@ def supg_form(
             r_eff = (1 / phi) * effective_reaction(r, D_reac)
             tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
         case TauType.UPWIND:
-            tau = tau_upwind(h, a_eff)
+            tau = tau_coth_infty(h, a_eff)
         case TauType.NONE | TauType.UNSTABILIZED:
             tau = 0
-        case _ if callable(tau_func):
-            tau = tau_func(h, a_eff, d_eff, r_eff)
+        case _ if callable(tau):
+            tau = tau(h, a_eff, d_eff, r_eff)
         case _:
-            raise ValueError(f"'{tau_func}' tau-function method not implemented.")
+            raise ValueError(
+                f"Value '{tau}' for the stabilization parameter `𝜏` is not implemented."
+            )
             
-    match petrov_func:
-        case 'petrov' | None:
-            Pv = Pv_petrov(v, a_eff)
+    match Pv:
+        case 'supg' | None:
+            Pv = Pv_supg(v, a_eff)
         case 'gls':
             Pv = Pv_gls(v, a_eff, d_eff, r_eff)
-        case _ if callable(tau_func):
-            Pv = petrov_func(v, a_eff, d_eff, r_eff)
+        case _ if callable(tau):
+            Pv = Pv(v, a_eff, d_eff, r_eff)
         case _:
-            raise ValueError(f"'{tau_func}' Pv-function not implemented.")
+            raise ValueError(
+                f"Value '{Pv}' for the function `P` is not implemented."
+            )
 
     return tau * Pv * res * dx
 
 
-def Pv_petrov(v, a):
+def Pv_supg(v, a):
+    """
+    `P(v; 𝐚ᵉᶠᶠ) = ∇v·𝐚ᵉᶠᶠ`
+    """
     return inner(grad(v), a)
 
 
@@ -97,7 +107,11 @@ def Pv_gls(v, a, d, r):
     return inner(grad(v), a) - div(d * grad(v)) - v * (r if r is not None else 0)
 
 
-def tau_function(func):
+def tau_expr(func):
+    """
+    Decorator for functions returning an expression 
+    for the stabilization parameter `𝜏 = 𝜏(h, 𝐚ᵉᶠᶠ, Dᵉᶠᶠ, Rᵉᶠᶠ, Δt)`.
+    """
     @wraps(func)
     def _(
         h: GeometricCellQuantity | str, 
@@ -111,7 +125,7 @@ def tau_function(func):
                 if isinstance(i, Expr):
                     mesh = extract_mesh(i)
                     break
-            except:
+            except MeshExtractionError:
                 pass
 
         if isinstance(h, str):
@@ -131,7 +145,7 @@ def tau_function(func):
     return _
 
 
-@tau_function
+@tau_expr
 def tau_codina(h, a, d, r) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
@@ -140,7 +154,7 @@ def tau_codina(h, a, d, r) -> Expr:
     return ((2 * a / h) + (4 * d / h**2) - r) ** (-1) 
 
 
-@tau_function
+@tau_expr
 def tau_shakib(h, a, d, r) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
@@ -149,7 +163,7 @@ def tau_shakib(h, a, d, r) -> Expr:
     return ((2 * a / h)**2 + 9 * (4 * d / h**2)**2 + r**2) ** (-0.5) 
 
 
-@tau_function
+@tau_expr
 def tau_transient(h, a, d, r, dt) -> Expr:
     """
     `∂u/∂t + 𝐚·∇u = ∇·(D∇u) + Ru + s` \\
@@ -158,7 +172,7 @@ def tau_transient(h, a, d, r, dt) -> Expr:
     return ((2 / dt)**2 + (2 * a / h)**2 + (2 * d / h**2)**2 + r**2) ** (-0.5) 
 
 
-@tau_function
+@tau_expr
 def tau_coth(h, a, d) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
@@ -169,22 +183,25 @@ def tau_coth(h, a, d) -> Expr:
     return (0.5 * h / a) * xi(peclet(h, a, d))
 
 
-@tau_function
-def tau_coth_approx(h, a, d) -> Expr:
+@tau_expr
+def tau_coth_pwl(h, a, d) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
     `⟹ 𝜏 = h / 2|𝐚| ξ(Pe)`
 
-    where `Pe = |𝐚|h / 2D` and `ξ(Pe)` is approximated.
+    where `Pe = |𝐚|h / 2D` and the piecewise linear approximation of
+    `ξ(Pe) = coth(Pe) - 1/Pe` is used.
     """
-    return (0.5 * h / a) * xi_approx(peclet(h, a, d))
+    return (0.5 * h / a) * xi_pwl(peclet(h, a, d))
 
 
-@tau_function
-def tau_upwind(h, a) -> Expr:
+@tau_expr
+def tau_coth_infty(h, a) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
-    `⟹ 𝜏 = h / 2|𝐚|`
+    `⟹ 𝜏 = h / 2|𝐚|` 
+    
+    which is the `Pe -> ∞` limit of `𝜏 = h / 2|𝐚| ξ(Pe)`.
     """
     return (0.5 * h / a) 
         
@@ -196,7 +213,7 @@ def xi(Pe):
     return 1/tanh(Pe) - 1/Pe
 
 
-def xi_approx(Pe):
+def xi_pwl(Pe):
     """
     `ξ(Pe) = coth(Pe) - 1/Pe` \\
     `≈ Pe / 3` if `Pe < 3` \\

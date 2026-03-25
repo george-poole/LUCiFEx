@@ -11,7 +11,7 @@ from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import create_zero_form
 
-from .cg import derivative_form, diffusion_forms, reaction_forms
+from .cg_transport import derivative_form, diffusion_forms, reaction_forms
 
 
 def diffusion(

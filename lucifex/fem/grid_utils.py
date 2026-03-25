@@ -313,6 +313,7 @@ def resample_grid(
 def mirror_grid(
     u: Function,
     axis: str | Literal[0, 1, 2],
+    rescale: float = 1.0,
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
@@ -324,6 +325,7 @@ def mirror_grid(
 def mirror_grid(
     u: GridFunction,
     axis: str | Literal[0, 1, 2],
+    rescale: float = 1.0,
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> GridFunction:
@@ -334,6 +336,7 @@ def mirror_grid(
 def mirror_grid(
     xyz: tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
+    rescale: float = 1.0,
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
 ) -> tuple[np.ndarray, ...]:
@@ -343,6 +346,7 @@ def mirror_grid(
 def mirror_grid(
     u: GridFunction | Function | tuple[np.ndarray, ...],
     axis: str | Literal[0, 1, 2],
+    rescale: float = 1.0,
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
@@ -353,12 +357,12 @@ def mirror_grid(
             use_cache = (use_cache, use_cache)
         use_mesh_cache, use_func_cache = use_cache
         u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
-        return mirror_grid(u_grid, axis, name, axis_names)
+        return mirror_grid(u_grid, axis, rescale, name, axis_names)
     
     if isinstance(u, GridFunction):
         axes = u.mesh.axes
         value = u.value
-        *axes_mirror, value_mirror = mirror_grid((*axes, value), axis, name, axis_names)
+        *axes_mirror, value_mirror = mirror_grid((*axes, value), axis, rescale, name, axis_names)
         return GridFunction(
             value_mirror,
             GridMesh(axes_mirror),
@@ -396,6 +400,8 @@ def mirror_grid(
         slc_neg = tuple(
             slice(None, None, -1) if i == axis_index else slice(None) for i in range(dim)
         )
+        rsc_neg = rescale
+        rsc_pos = 1.0
     else:
         slc_neg = tuple(
             slice(0, -1) if i == axis_index else slice(None) for i in range(dim)
@@ -403,9 +409,11 @@ def mirror_grid(
         slc_pos = tuple(
             slice(None, None, -1) if i == axis_index else slice(None) for i in range(dim)
         )
+        rsc_neg = 1.0
+        rsc_pos = rescale
 
     value_mirror = np.concatenate(
-        (value[slc_neg], value[slc_pos]), 
+        (rsc_neg * value[slc_neg], rsc_pos * value[slc_pos]), 
         axis=axis_index,
     )
 

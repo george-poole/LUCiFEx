@@ -127,7 +127,7 @@ def str_indexed(
     return f'{name}{superscript}'
 
 
-def str_scientifc(
+def str_scientific(
     number: float | int,
     n_digits: int = 3,
     ignore: Iterable[int] = (-1, 0, 1, 2),
@@ -276,3 +276,29 @@ def str_plain(
         s = s.replace(' ', '')
 
     return s
+
+
+def as_int_if_close(
+    arg: float | int | Any,
+    strict: bool = False,
+    tol: float | None = None,
+) -> float | int | Any:
+    if not isinstance(arg, (float, int)):
+        if not strict:
+            return arg
+        else:
+            raise TypeError
+
+    if isinstance(arg, int):
+        return arg
+    
+    if tol is not None:
+        if np.isclose(arg, np.floor(arg), atol=tol):
+            return int(arg)
+        else:
+            return arg
+    else:
+        if float.is_integer(arg):
+            return float(arg)
+        else:
+            return arg

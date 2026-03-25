@@ -118,6 +118,7 @@ def write(
     mode: str= 'a',
     preamble: Iterable[str] = (),
     sep: str = ' = ',
+    **kwargs,
 ) -> None:
     ...
 
@@ -129,7 +130,7 @@ def write(
     dir_path: str,
     mode: str= 'a',
     preamble: Iterable[str] = (),
-    **np_savez_kwargs,
+    **kwargs,
 ) -> None:
     ...
 
@@ -409,6 +410,7 @@ def _(
     dir_path,
     mode: str= 'a',
     preamble: Iterable[str] = (),
+    *,
     file_ext: str | None = None,
     use_repr: bool = True,
     **kwargs,

@@ -20,6 +20,7 @@ from .expr_utils import (
     NonScalarError,
     NonScalarVectorError,
     ShapeError,
+    MeshExtractionError,
     Scaled,
     extract_function_space,
 )

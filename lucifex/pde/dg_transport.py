@@ -14,7 +14,7 @@ from lucifex.fdm import (
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 
-from .cg import OptionError
+from .cg_transport import OptionError
 
 
 def dg_advection_forms(
@@ -124,7 +124,7 @@ def dg_diffusion_forms(
 ) -> list[Form]:
     """
     `∫dx v ∇·(D·∇u)
-    = -∫dx ... + ∫dS ... + ∫ds ...`
+    = - ∫dx ... + ∫dS ... + ∫ds ...`
     """
     if isinstance(D_diff, FiniteDifference):
         D_diff = FE @ D_diff
@@ -137,7 +137,6 @@ def dg_diffusion_forms(
     if isinstance(alphaB, (float, int)):
         alphaB = Constant(u.function_space.mesh, alphaB)
 
-    fs = u
     D_diff_d, D_diff_u = D_diff
     d = D_diff_d(d, trial=u)
     u = D_diff_u(u, trial=u)

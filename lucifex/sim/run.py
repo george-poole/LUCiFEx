@@ -65,16 +65,18 @@ def run(
     if overwrite and _writers:
         reset_directory(simulation.dir_path, ('*.h5', '*.xdmf'))
     if _writers and simulation.dir_path:
-        _parameters = simulation.parameters.copy()
-        _parameters.update(
+        write(simulation.parameters, simulation.parameter_file, simulation.dir_path, mode='a', file_ext='txt')
+        run_parameters = dict(
             n_stop=n_stop, 
             t_stop=t_stop, 
             dt_init=dt_init, 
             n_init=n_init, 
             resume=resume,
+            write_delta={k: v for k, v in simulation.write_delta.items() if v is not None},
         )
-        _parameters.update(write_delta={k: v for k, v in simulation.write_delta.items() if v is not None})
-        write(_parameters, simulation.parameter_file, simulation.dir_path, mode='a')
+        write(simulation.auxiliary, simulation.auxiliary_file, simulation.dir_path, mode='a', file_ext='txt')
+        write(run_parameters, simulation.run_file, simulation.dir_path, mode='a', file_ext='txt')
+        simulation.auxiliary
 
     _n = 0
     _time_stoppers: list[Stopper] = []

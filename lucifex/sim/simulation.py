@@ -56,6 +56,8 @@ class Simulation(
         write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
         write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
         parameter_file: str | None = None,
+        auxiliary_file: str = None,
+        run_file: str | None = None,
         checkpoint_file: str | None = None,
         timing_file: str | None = None,
         **create_dir_path_kws,
@@ -72,6 +74,8 @@ class Simulation(
         self.write_delta = write_delta
         self.write_file = write_file
         self.parameter_file = parameter_file
+        self.auxiliary_file = auxiliary_file
+        self.run_file = run_file
         self.checkpoint_file = checkpoint_file
         self.timing_file = timing_file
         if create_dir_path_kws:
@@ -103,15 +107,16 @@ class Simulation(
         return _solutions
         
     @property
-    def auxiliary(self):
-        return self._auxiliary
+    def auxiliary(self) -> dict[str, Any]:
+        aux = {f.name: f for f in self._auxiliary if not isinstance(f, tuple)}
+        aux.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
+        return aux
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | AuxiliaryType | NumericType | Any]:
-        d =  {self.t.name: self.t, self.dt.name: self.dt}
+        d = {self.t.name: self.t, self.dt.name: self.dt}
         d.update({s.name: s for s in self.solutions})
-        d.update({f.name: f for f in self._auxiliary if not isinstance(f, tuple)})
-        d.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
+        d.update(self.auxiliary)
         return d
     
     @property
@@ -308,6 +313,8 @@ def configure_simulation(
     write_delta: DeltaType | tuple[DeltaType, DeltaType] | dict[str | Iterable[str], DeltaType] = None,
     write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = None,
     parameter_file: str = 'PARAMETERS',
+    auxiliary_file: str = 'AUXILIARY',
+    run_file: str = 'RUN',
     checkpoint_file: str = 'CHECKPOINT',
     timing_file: str = 'TIMING',
     dir_root: str = './',
@@ -369,6 +376,8 @@ def configure_simulation(
             write_delta: int | float | tuple[int | float | None, int | float | None] | dict[str | Iterable[str], int | float] | None = ...,
             write_file: str | tuple[str | None, str | None] | dict[str | Iterable[str], str] | None = ...,
             parameter_file: str = ...,
+            auxiliary_file: str = ...,
+            run_file: str = ...,
             checkpoint_file: str = ...,
             timing_file: str = ...,
             dir_root: str = ...,
@@ -447,6 +456,8 @@ def configure_simulation(
                     dir_seps=dir_seps,
                     write_file=write_file, 
                     parameter_file=parameter_file, 
+                    auxiliary_file=auxiliary_file,
+                    run_file=run_file,
                     checkpoint_file=checkpoint_file, 
                     timing_file=timing_file,
                 )(*args, **kwargs)

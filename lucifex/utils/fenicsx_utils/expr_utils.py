@@ -59,7 +59,7 @@ class ShapeError(ValueError):
         shape: str | tuple,
     ):
         """
-        Error to raise if shape does not match
+        Error to raise if shape does not match.
         """
         super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
 
@@ -67,7 +67,7 @@ class ShapeError(ValueError):
 class NonScalarError(ShapeError):
     def __init__(self, u):
         """
-        Error to raise if non-scalar value provided
+        Error to raise if non-scalar provided.
         """
         super().__init__(u, "'scalar'")
 
@@ -75,7 +75,7 @@ class NonScalarError(ShapeError):
 class NonVectorError(ShapeError):
     def __init__(self, u):
         """
-        Error to raise if non-vector value provided
+        Error to raise if non-vector provided.
         """
         super().__init__(u, "'vector'")
 
@@ -83,9 +83,18 @@ class NonVectorError(ShapeError):
 class NonScalarVectorError(ShapeError):
     def __init__(self, u):
         """
-        Error to raise if tensor value provided
+        Error to raise if tensor provided.
         """
         super().__init__(u, "'scalar or vector'")
+
+
+class MeshExtractionError(ValueError):
+    def __init__(self, u, unique: bool = False):
+        """
+        Error to raise if no mesh could be extracted.
+        """
+        msg = ' a unique 'if unique else ' '
+        super().__init__(f'Could not extract{msg}mesh from {u}.')
 
 
 def extract_mesh(
@@ -93,16 +102,11 @@ def extract_mesh(
 ) -> Mesh:
     if isinstance(expr, Function):
         return expr.function_space.mesh
-
     meshes = extract_meshes(expr)
     if len(meshes) == 0:
-        raise ValueError(
-            "No mesh deduced from expression's operands."
-        )
+        raise MeshExtractionError(expr)
     if len(meshes) > 1:
-        raise ValueError(
-            "Multiple meshes deduced from expression's operands."
-        )
+        raise MeshExtractionError(expr, unique=True)
     return list(meshes)[0]
 
 

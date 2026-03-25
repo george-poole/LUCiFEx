@@ -30,6 +30,8 @@ class SimulationFromEXT(
         constant_series: Iterable[str],
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         lazy: bool = True,
@@ -52,6 +54,8 @@ class SimulationFromEXT(
         self._constant_series = list(constant_series)
         self._write_file = write_file
         self._parameter_file = parameter_file
+        self._auxiliary_file = auxiliary_file
+        self._run_file = run_file
         self._checkpoint_file = checkpoint_file
         self._timing_file = timing_file
         self._loaded = {}
@@ -76,6 +80,8 @@ class SimulationFromEXT(
         parameters: dict[str, Any] | None = None,
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         *,
@@ -90,6 +96,8 @@ class SimulationFromEXT(
             constant_series,
             write_file=write_file,
             parameter_file=parameter_file,
+            auxiliary_file=auxiliary_file,
+            run_file=run_file,
             checkpoint_file=checkpoint_file,
             timing_file=timing_file,
             lazy=lazy,
@@ -136,6 +144,8 @@ class SimulationFromEXT(
         parameters: dict[str, Any] | None = None,
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         *,
@@ -154,6 +164,8 @@ class SimulationFromEXT(
             constant_series,
             write_file,
             parameter_file,
+            auxiliary_file,
+            run_file,
             checkpoint_file,
             timing_file,
             lazy=lazy,
@@ -215,16 +227,24 @@ class SimulationFromEXT(
         if not reload and name in self._loaded:
             return
         if name in self._function_series:
-            ld = self._load_function_series(name)
+            self._loaded[name] = self._load_function_series(name)
         elif name in self._constant_series:
-            ld = self._load_constant_series(name)
+            self._loaded[name] = self._load_constant_series(name)
         else:
-            ld = load_txt_dict(
-                self._dir_path, 
-                self._parameter_file, 
-                locals_from_lucifex(),
-            )[name]  
-        self._loaded[name] = ld
+            for file_name in (
+                self._parameter_file,
+                self._auxiliary_file,
+                self._run_file,
+            ):
+                ld_dict = load_txt_dict(use_cache=self.use_cache)(
+                    self._dir_path, 
+                    file_name, 
+                    locals_from_lucifex(),
+                )
+                if name in ld_dict:
+                    self._loaded[name] = ld_dict[name]
+                    return
+            raise KeyError(name)
 
     def load_all(
         self,
@@ -307,6 +327,8 @@ class SimulationFromXDMF(
         constant_series: Iterable[str],
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         lazy: bool = True,
@@ -319,6 +341,8 @@ class SimulationFromXDMF(
             constant_series,
             write_file,
             parameter_file,
+            auxiliary_file,
+            run_file,
             checkpoint_file,
             timing_file,
             lazy,
@@ -340,6 +364,8 @@ class SimulationFromXDMF(
         parameters: dict[str, Any] | None = None,
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         *,
@@ -355,6 +381,8 @@ class SimulationFromXDMF(
             constant_series,
             write_file=write_file,
             parameter_file=parameter_file,
+            auxiliary_file=auxiliary_file,
+            run_file=run_file,
             checkpoint_file=checkpoint_file,
             timing_file=timing_file,
             lazy=lazy,
@@ -373,6 +401,8 @@ class SimulationFromXDMF(
         parameters: dict[str, Any] | None = None,
         write_file: str | dict[str, str] | None = None,
         parameter_file: str = 'PARAMETERS',
+        auxiliary_file: str = 'AUXILIARY',
+        run_file: str = 'RUN',
         checkpoint_file: str = 'CHECKPOINT',
         timing_file: str = 'TIMING',
         *,
@@ -392,6 +422,8 @@ class SimulationFromXDMF(
             constant_series,
             write_file,
             parameter_file,
+            auxiliary_file,
+            run_file,
             checkpoint_file,
             timing_file,
             lazy=lazy,
