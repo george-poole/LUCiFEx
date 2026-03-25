@@ -227,7 +227,6 @@ class Interpolation(Evaluation[Function, FunctionSeries]):
         future: bool = False,
         overwrite: bool = False,
     ):
-        """from function"""
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,

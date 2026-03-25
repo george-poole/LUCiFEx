@@ -6,7 +6,8 @@ from ufl.core.expr import Expr
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, Series, 
-    FiniteDifferenceArgwise, ImplicitDiscretizationError
+    FiniteDifferenceArgwise, FiniteDifferenceDerivative,
+    ImplicitDiscretizationError
 )
 
 
@@ -16,6 +17,7 @@ def evolution(
     r: Function | Expr | Series | tuple[Callable, tuple],
     D_rhs: FiniteDifference | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
+    D_dt: FiniteDifferenceDerivative = DT,
     phi: Series | Function | Expr | float = 1,
 ) -> tuple[Form, Form]:
     """
@@ -24,7 +26,7 @@ def evolution(
     phi = D_phi(phi)
     dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(u.function_space)
-    F_dsdt = v * DT(u, dt) * dx
+    F_dsdt = v * D_dt(u, dt) * dx
     r = D_rhs(r, trial=u)
     F_reac = -v * (1/phi) * r * dx
     return F_dsdt, F_reac

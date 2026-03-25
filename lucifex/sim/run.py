@@ -36,7 +36,7 @@ def run(
     writers: Iterable[Writer | LazyEvaluator[None] | CreateWriter] = (),
     show_progress: bool = False,
 ) -> None:    
-    if isinstance(simulation, tuple):
+    if not isinstance(simulation, Simulation):
         simulation = Simulation(*simulation)
     
     if (n_stop, t_stop).count(None) == 2:
@@ -47,7 +47,10 @@ def run(
     _writers: list[Writer] = [as_writer(w, simulation) for w in writers]
     _writers.extend(simulation.writers)
 
-    n_init_min = max(s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP)))
+    n_init_min = max(
+        (s.n_init for s in simulation.solvers if isinstance(s, (IBVP, IVP))), 
+        default=0,
+    )
     if n_init is not None:
         if n_init < n_init_min:
             raise ValueError("`n_init` must be greater than or equal to the highest finite difference discretization order.")

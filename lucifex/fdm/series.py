@@ -486,7 +486,9 @@ class SolutionSeries(Series[T], Generic[T, U, I]):
 
         if not overwrite:
             if not is_unsolved(container):
-                raise RuntimeError('Cannot overwrite the solution if `overwrite=False`.')
+                raise RuntimeError(
+                    f'Cannot overwrite the solution for {self.name} if `overwrite=False`.'
+                )
         self.set_solution(container, value)
 
     def forward(

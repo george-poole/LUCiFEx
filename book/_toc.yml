@@ -84,6 +84,9 @@ parts:
         sections: 
           - file: demo/P4_transport/T51_supg_advection_diffusion_interval
           - file: demo/P4_transport/T52_supg_advection_diffusion_rectangle
+      - file: demo/P4_transport/T60_splitting
+        sections: 
+          - file: demo/P4_transport/T61_splitting_advection_reaction
 
   - caption: Convection 
     chapters:

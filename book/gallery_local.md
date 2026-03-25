@@ -14,7 +14,7 @@
     </td>
 <td>
     <img src="./demo/P5_convection/figures/C13_darcy_rayleigh_benard_semicircle.png" width="400"/>
-    <a href="./demo/P5_convection/C13_darcy_rayleigh_benard_semicircle.ipynb">Rayleigh-Bénard convection in a porous semicircle</a> 
+    <a href="./demo/P5_convection/C13_darcy_rayleigh_benard_semicircle.ipynb">Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle</a> 
     </td>
     </tr>
 <tr>
@@ -86,6 +86,10 @@
     </tr>
 <tr>
     <td>
+    <img src="./demo/P3_fluids/figures/F14_darcy_injected.png" width="400"/>
+    <a href="./demo/P3_fluids/F14_darcy_injected.ipynb">Flow of a Darcy fluid injected and extracted in a porous rectangle</a> 
+    </td>
+<td>
     <img src="./demo/P3_fluids/figures/F21_stokes_channel.png" width="400"/>
     <a href="./demo/P3_fluids/F21_stokes_channel.ipynb">Flow of a Stokes fluid in a pressure-driven channel</a> 
     </td>
@@ -93,13 +97,13 @@
     <img src="./demo/P3_fluids/figures/F22_stokes_cavity.png" width="400"/>
     <a href="./demo/P3_fluids/F22_stokes_cavity.ipynb">Flow of a Stokes fluid in a lid-driven cavity</a> 
     </td>
-<td>
-    <img src="./demo/P3_fluids/figures/F23_stokes_forced.png" width="400"/>
-    <a href="./demo/P3_fluids/F23_stokes_forced.ipynb">Flow of a Stokes fluid with vertical forcing</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P3_fluids/figures/F23_stokes_forced.png" width="400"/>
+    <a href="./demo/P3_fluids/F23_stokes_forced.ipynb">Flow of a Stokes fluid with vertical forcing</a> 
+    </td>
+<td>
     <img src="./demo/P3_fluids/figures/F24_stokes_corrugated.png" width="400"/>
     <a href="./demo/P3_fluids/F24_stokes_corrugated.ipynb">Flow of a Stokes fluid in a corrugated channel</a> 
     </td>
@@ -107,7 +111,9 @@
     <img src="./demo/P3_fluids/figures/F31_navier_stokes_obstacle.png" width="400"/>
     <a href="./demo/P3_fluids/F31_navier_stokes_obstacle.ipynb">Flow of Navier-Stokes fluid past a circular obstacle</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P3_fluids/figures/F32_navier_stokes_forced.png" width="400"/>
     <a href="./demo/P3_fluids/F32_navier_stokes_forced.ipynb">Flow of a Navier-Stokes fluid with vertical forcing</a> 
     </td>
@@ -177,6 +183,10 @@
     <td>
     <img src="./demo/P4_transport/figures/T52_supg_advection_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P4_transport/T52_supg_advection_diffusion_rectangle.ipynb">SUPG advection-diffusion of a rotating pulse in a rectangle</a> 
+    </td>
+<td>
+    <img src="./demo/P4_transport/figures/T61_splitting_advection_reaction.png" width="400"/>
+    <a href="./demo/P4_transport/T61_splitting_advection_reaction.ipynb">Operator splitting of the advection-reaction equation</a> 
     </td>
     </tr>
     </table>
