@@ -1,14 +1,15 @@
 from enum import Enum
-from typing import Any, TypeVar, TypeAlias
+from typing import Any, TypeVar, TypeAlias, Callable, Iterable
+from inspect import Signature, Parameter
 
 import numpy as np
 from basix.ufl_wrapper import BasixElement
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function, Constant, FunctionSpace, Expression
-from ufl import Argument
+from ufl import Argument, replace
 from ufl.core.expr import Expr
 from ufl.finiteelement import FiniteElement
-from ufl.algorithms.analysis import extract_coefficients, extract_constants
+from ufl.algorithms.analysis import extract_coefficients, extract_constants, extract_arguments
 
 
 T = TypeVar('T')
@@ -117,7 +118,10 @@ def extract_meshes(
         return extract_meshes(expr.ufl_expression)
 
     meshes = set()
-    coeffs_consts = (*extract_coefficients(expr), *extract_constants(expr))
+    coeffs_consts = (
+        *extract_coefficients(expr), 
+        *extract_constants(expr),
+    )
     for c in coeffs_consts:
         if isinstance(c, Function):
             meshes.add(c.function_space.mesh)
@@ -140,6 +144,41 @@ def extract_function_space(
         fs = getattr(arg, 'function_space')
 
     return fs
+
+
+def extract_expr_factory(
+    expr: Expr,
+    strict: bool = True,
+    forge: bool | Iterable[str] = False,
+    extractors: Iterable[Callable[[Expr], Iterable]] = (
+        extract_arguments,
+        extract_coefficients,
+        extract_constants,
+    )
+) -> Callable[..., Expr | Any]:
+    extracted = []
+    for ext in extractors:
+        extracted.extend(ext(expr))
+
+    def _(*args):
+        mapping = dict(zip(extracted, args, strict=strict))
+        return replace(expr, mapping)
+    
+    if forge:
+        if forge is True:
+            names = [getattr(c, 'name') for c in extracted]
+        else:
+            names = forge
+        paramspec_params = [
+            Parameter(n, Parameter.POSITIONAL_OR_KEYWORD, annotation=type(c)) 
+            for n, c in zip(names, extracted, strict=True)
+        ]
+        _.__signature__ = Signature(
+            paramspec_params, 
+            return_annotation=bool,
+        )
+
+    return _
 
 
 class ElementFamilyType(set, Enum):

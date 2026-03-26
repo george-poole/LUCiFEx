@@ -1,8 +1,9 @@
 from typing import Callable, TypeVar, Any
 
 import ufl
+from ufl.core.expr import Expr
 
-from .series import Series, ExprSeries, UnsolvedType, Unsolved
+from .series import Series, ExprSeries, UnsolvedType, Unsolved, extract_args_from_series
 
 
 T = TypeVar('T')
@@ -11,7 +12,7 @@ def unary_operator(ufl_func: Callable[[T], R]):
 
     def _decorator(
         dummy: Callable[[], None],
-    ) -> Callable[[T], R] | Callable[[Series], ExprSeries] | Callable[[UnsolvedType], UnsolvedType]:
+    ) -> Callable[[Expr], Expr] | Callable[[Series], ExprSeries] | Callable[[UnsolvedType], UnsolvedType]:
 
         assert dummy() is None
 
@@ -25,7 +26,7 @@ def unary_operator(ufl_func: Callable[[T], R]):
                     name = f'{ufl_func.__name__}({getattr(u, NAME)})'
                 else:
                     name = None
-                return ExprSeries([ufl_func(ui) for ui in u], name)
+                return ExprSeries([ufl_func(ui) for ui in u], name, args=extract_args_from_series(u))
             else:
                 return ufl_func(u, *a, **k)
         return _inner
@@ -55,15 +56,17 @@ def binary_operator(ufl_func: Callable[[T0, T1], R]):
             else:
                 name = None
 
+            args = extract_args_from_series(u, v)
+
             match isinstance(u, Series), isinstance(v, Series):
                 case False, False:
                     return ufl_func(u, v)
                 case False, True:
-                    return ExprSeries([ufl_func(u, i, *a, **k) for i in v], name)
+                    return ExprSeries([ufl_func(u, i, *a, **k) for i in v], name, args=args)
                 case True, False:
-                    return ExprSeries([ufl_func(ui, v, *a, **k) for ui in u], name)
+                    return ExprSeries([ufl_func(ui, v, *a, **k) for ui in u], name, args=args)
                 case True, True:
-                    return ExprSeries([ufl_func(ui, vi, *a, **k) for ui, vi in zip(u, v)], name)
+                    return ExprSeries([ufl_func(ui, vi, *a, **k) for ui, vi in zip(u, v)], name, args=args)
 
         return _inner
 

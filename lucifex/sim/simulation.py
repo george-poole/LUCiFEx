@@ -48,7 +48,8 @@ class Simulation(
         solvers: Iterable[Solver] | Solver,
         t: ConstantSeries,
         dt: ConstantSeries | Constant,
-        auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | NumericType | Any]] = (),
+        auxiliary: Iterable[AuxiliaryType | tuple[str, AuxiliaryType | NumericType | Any]] 
+        | dict[str | AuxiliaryType | NumericType | Any] = (),
         stoppers: Iterable[Stopper] = (),
         *,
         parameters: dict[str, Any] | None = None,
@@ -67,7 +68,12 @@ class Simulation(
         self.solvers = list(solvers)
         self.t = t 
         self.dt = dt
-        self._auxiliary = list(auxiliary)
+        if not isinstance(auxiliary, dict):
+            aux = {f.name: f for f in auxiliary if not isinstance(f, tuple)}
+            aux.update({f[0]: f[1] for f in auxiliary if isinstance(f, tuple)})
+            self._auxiliary = aux
+        else:
+            self._auxiliary = auxiliary
         self.stoppers = list(stoppers)
         self._parameters = parameters
         self.store_delta = store_delta
@@ -108,9 +114,7 @@ class Simulation(
         
     @property
     def auxiliary(self) -> dict[str, Any]:
-        aux = {f.name: f for f in self._auxiliary if not isinstance(f, tuple)}
-        aux.update({f[0]: f[1] for f in self._auxiliary if isinstance(f, tuple)})
-        return aux
+        return self._auxiliary
     
     @property
     def namespace(self) -> dict[str, FunctionSeries | ConstantSeries | AuxiliaryType | NumericType | Any]:

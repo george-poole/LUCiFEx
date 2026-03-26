@@ -15,9 +15,6 @@ from cycler import Cycler, cycler
 from ..utils.py_utils import filter_kwargs
 
 
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
-
 LW = 0.75
 """
 Default linewidth
@@ -31,6 +28,28 @@ Default marker size
 LINESTYLES = ["-", "--", "-.", ":", (0, (3, 5, 1, 5, 1, 5)), (0, (3, 10, 1, 10, 1, 10))]
 MARKERS = ["o", "x", "^", "d", "*"]
 COLORS = ["black", "blue", "limegreen", "red", "darkorange", "fuchsia"]
+
+
+def configure_matplotlib(
+    *groups_kws: tuple[str, dict[str, Any]],
+    **rcParams: Any,
+) -> None:
+    """
+    Pass `backend='Agg'` for faster plotting without immediate display 
+    in an interactive notebook. Saved figures can subsequently be 
+    displayed by calling `display_figure`.
+
+    The default backend is `'module://matplotlib_inline.backend_inline'`.
+    """
+    for grp, kws in groups_kws:
+        plt.rc(grp, **kws)
+    for k, v in rcParams.items():
+        plt.rcParams[k] = v
+
+
+def reset_matplotlib() -> None:
+    import matplotlib
+    matplotlib.rcdefaults()
 
 
 P = ParamSpec('P')

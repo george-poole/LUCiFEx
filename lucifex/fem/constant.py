@@ -93,7 +93,7 @@ class Constant(DOLFINxConstant):
         
     
     @property
-    def time_index(self) -> int | None:
+    def index(self) -> int | None:
         return self._index
 
     def __str__(self) -> str:

@@ -5,7 +5,7 @@ from ufl.core.expr import Expr
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    DT, AB1, FiniteDifference, FunctionSeries, ConstantSeries, Series, 
+    DT, AB1, FiniteDifference, ExplicitFiniteDifference, FunctionSeries, ConstantSeries, Series, 
     FiniteDifferenceArgwise, FiniteDifferenceDerivative,
     ImplicitDiscretizationError
 )
@@ -37,7 +37,8 @@ def evolution_rhs(
     u: FunctionSeries,
     dt: Constant | ConstantSeries,
     r: Series | Expr | Function,
-    D_rhs: FiniteDifference | FiniteDifferenceArgwise,
+    D_rhs: ExplicitFiniteDifference 
+    | FiniteDifferenceArgwise,
     D_phi: FiniteDifference = AB1,
     phi: Series | Function | Expr | float = 1,
     argwise_index: int | None = None,

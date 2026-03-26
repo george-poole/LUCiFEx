@@ -1,15 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, ParamSpec, overload
+from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, overload
 from typing_extensions import Self
 from functools import singledispatch
 
 import numpy as np
 from ufl import split
+from ufl.algorithms.analysis import extract_coefficients, extract_constants
 from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
-from ..utils.fenicsx_utils import set_constant, set_function, extract_mesh, create_function_space
+from ..utils.fenicsx_utils import (
+    set_constant, set_function, extract_mesh,
+    create_function_space, extract_expr_factory,
+)
 from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
@@ -184,42 +188,43 @@ class Series(ABC, Generic[T]):
             time_series = lambda: self.time_series
             series = lambda: [getattr(i, method)(other) for i in self.series]
 
-        return ExprSeries(seq, series=series, time_series=time_series)
+        args = extract_args_from_series(self, other)
+
+        return ExprSeries(seq, args=args, series=series, time_series=time_series)
+    
+
+def extract_args_from_series(
+    *objs: Series | Any,
+) -> list[Expr | Any]:
+    args = []
+    for obj in objs:
+        if isinstance(obj, ExprSeries):
+            args.extend((i for i in obj.args if not i in args))
+        else:
+            if obj not in args:
+                args.append(obj)
+    return args
 
 
-P = ParamSpec('P')
-class ExprSeries(
-    Series[Expr],
-    Generic[P],
-):
-    _factory: Callable[P, Expr | Any] | None = None
-    _factory_args: tuple | None = None
-    _factory_kwargs: dict | None = None
+class ExprSeries(Series[Expr]):
 
     @overload
     def __init__(
         self,
         expr_series: Self,
-        /,
         name: str | None = None,
-    ):
-        ...
-
-    @overload
-    def __init__(
-        self: 'Self[P]',
-        factory: Callable[P, Expr | Any],
-        /,
-        name: str | None = None,
+        *,
+        args: Iterable[Series | Expr] = (),
     ):
         ...
 
     @overload
     def __init__(
         self,
-        seq: Iterable[Expr],
-        /,
+        expr_series: Iterable[Expr],
         name: str | None = None,
+        *,
+        args: Iterable[Series | Expr] = (),
         series: LazyEvaluator[list[Expr]] | None = None,
         time_series: LazyEvaluator[list[float]] | None = None,
     ):
@@ -227,54 +232,63 @@ class ExprSeries(
 
     def __init__(
         self,
-        arg,
-        /,
+        expr_series: Self | Iterable[Expr],
         name: str | None = None,
+        *,
+        args: Iterable[Series | Expr] = (),
         series: LazyEvaluator[list[Expr]] | None = None,
         time_series: LazyEvaluator[list[float]] | None = None,
     ):
-        if isinstance(arg, ExprSeries):
+        if isinstance(expr_series, ExprSeries):
             if name is None:
-                name = arg.name
-            self.__init__(arg.sequence, name, arg._series, arg._time_series)
-        elif isinstance(arg, Series):
-            self.__init__(1.0 * arg, name)
-        elif callable(arg):
-            self._factory = arg
-            self._name = name
-            self._instantiated = False
+                name = expr_series.name
+            if not args:
+                args = expr_series.args
+            self.__init__(
+                expr_series.sequence, 
+                name, 
+                series=expr_series._series, 
+                time_series=expr_series._time_series,
+                args=args,
+            )
+        elif isinstance(expr_series, Series):
+            self.__init__(1.0 * expr_series, name, args=args)
         else:
-            order = len(arg) - 1
-            super().__init__(lambda i: arg[i - self.FUTURE_INDEX - 1], name, order)
+            order = len(expr_series) - 1
+            super().__init__(
+                lambda i: expr_series[i - self.FUTURE_INDEX - 1], 
+                name, 
+                order,
+            )
             self._series = series
             self._time_series = time_series
-            self._instantiated = True
+            self._expr_factory = extract_expr_factory(
+                self._present,
+                strict=True,
+                forge=True,
+                extractors=(
+                    extract_coefficients, 
+                    extract_constants,
+                )
+            )
+            self._args = tuple(args)
 
-    def __call__(
-        self: 'Self[P]', 
-        *args: P.args, 
-        **kwargs: P.kwargs,
-    ) -> 'Self[P]':
-        if self._instantiated:
-            raise RuntimeError('Can only instantiate `ExprSeries` once.')
-        if not self.is_callable:
-            raise NoFactoryError
-        self._factory_args = args
-        self._factory_kwargs = kwargs
-        expr_series = self._factory(*args, **kwargs)
-        self.__init__(expr_series, self._name)
-        return self
+    def create_expr(
+        self, 
+        *args: Expr,
+    ) -> Expr | Any:
+        return self._expr_factory(*args)
+
+    def reconstruct_expr(
+        self,
+        *operators: Callable[[Series | Expr], Expr],
+    ) -> Expr | Any:
+        _args = [op(arg) for op, arg in zip(operators, self._args, strict=True)]
+        return self.create_expr(*_args)
     
-    def reconstruct(
-        self: 'Self[P]',
-        *args_operators: Callable,
-        **kws_operators: Callable,
-    ) -> Any:
-        if not self.is_callable:
-            raise NoFactoryError
-        _args = [op(arg) for op, arg in zip(args_operators, self._factory_args, strict=True)]
-        _kws = {k: op(self._factory_kwargs[k]) for k, op in kws_operators.items()}
-        return self._factory(*_args, **_kws)
+    @property
+    def args(self) -> tuple[Series | Expr | Any]:
+        return self._args
 
     @property
     def series(self):
@@ -287,10 +301,6 @@ class ExprSeries(
         if self._time_series is None:
             return []
         return self._time_series()
-    
-    @property
-    def is_callable(self) -> bool:
-        return self._factory is not None
 
     @property
     def mesh(self) -> Mesh | None:
@@ -302,74 +312,7 @@ class ExprSeries(
     @property
     def ufl_shape(self) -> tuple[int, ...]:
         return self.sequence[0].ufl_shape
-
-    # @overload
-    # @classmethod
-    # def _from_expr(
-    #     cls, 
-    #     factory: Callable[P, Self], 
-    #     /,
-    #     *,
-    #     name: str | None = None,
-    # ) -> Callable[P, Self]:
-    #     ...
-
-    # @overload
-    # @classmethod
-    # def _from_expr(
-    #     cls, 
-    #     *args: Any | Callable[..., Self],
-    #     name: str | None = None,
-    # ) -> Self:
-    #     ...
-
-    # @classmethod
-    # def _from_expr(
-    #     cls, 
-    #     *args,
-    #     name: str | None = None,
-    # ):
-    #     if not args:
-    #         raise TypeError
-        
-    #     def _(f, *a, **k):
-    #         expr = f(*a, **k)
-    #         obj = cls(expr, name)
-    #         obj._factory_and_args = (f, a, k)
-    #         return obj
-        
-    #     if len(args) > 1:
-    #         *args, factory = args
-    #         return _(factory, *args)
-    #     else:
-    #         factory = args[0]
-    #         return lambda *a, **k: _(factory, *a, **k)
-        
-    # @classmethod
-    # def from_expr_factory(
-    #     cls, 
-    #     factory: Callable[P, Self], 
-    #     /,
-    #     *,
-    #     name: str | None = None,
-    # ) -> Callable[P, Self]:
-    #     return cls._from_expr(factory, name=name)
     
-    # @classmethod
-    # def from_expr_factory_and_args(
-    #     cls, 
-    #     *args: Any | Callable[..., Self],
-    #     name: str | None = None,
-    # ) -> Self:
-    #     return cls._from_expr(*args, name=name)
-    
-
-class NoFactoryError(TypeError):
-    def __init__(self):
-        super.__init__(
-            "`ExprSeries` should have been instantiated with a factory argument if it needs to be callable."
-        )
-
 
 class SolutionType(Protocol):
     @property

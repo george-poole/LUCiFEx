@@ -1,6 +1,10 @@
-from typing import Iterable, Any, Callable, overload
+from typing import (
+    Iterable, Any, Callable,
+    TypeAlias, Generic,
+    TypeVar, overload,
+)
 from types import EllipsisType
-from typing_extensions import Self
+from typing_extensions import Self, Unpack, TypeVarTuple
 from functools import partial
 
 from ufl.core.expr import Expr
@@ -163,7 +167,7 @@ class FiniteDifference:
     # def __rmatmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
     #     return other.__matmul__(self)
         
-        
+   
 class FiniteDifferenceDerivative(FiniteDifference):
 
     def __init__(
@@ -400,7 +404,19 @@ def THETA(theta: float) -> FiniteDifference:
     )
 
 
-class FiniteDifferenceArgwise:
+ExplicitFiniteDifference: TypeAlias = FiniteDifference
+"""
+Type alias to any `FiniteDifference` that is explicit.
+"""
+
+ImplicitFiniteDifference: TypeAlias = FiniteDifference
+"""
+Type alias to any `FiniteDifference` that is implicit.
+"""    
+
+
+FDS = TypeVarTuple('FDS')  
+class FiniteDifferenceArgwise(Generic[Unpack[FDS]]):
     """
     Argument-wise application of finite difference operators to time-dependent
     arguments of an expression.
@@ -415,10 +431,8 @@ class FiniteDifferenceArgwise:
         *args: FiniteDifference,
         name: str | None = None,
         use_repr: bool = False,
-        **kws: FiniteDifference,
     ):
         self._fd_args = tuple(args)
-        self._fd_kws = kws.copy()
         self._name = name
         self._use_repr = use_repr
     
@@ -438,22 +452,12 @@ class FiniteDifferenceArgwise:
             else:
                 return u
 
-        # TODO remove ?
-        # n_fd = len(self.finite_differences)
-        # n_args = len(args)
-        # if not n_fd == n_args:
-        #     raise ValueError(
-        #         f'Number of finite difference operators ({n_fd}) should match number of expression arguments ({n_args})'
-        #     )
-        
-        args_operators = [partial(fd, trial=trial) for fd in self._fd_args]
-        kwargs_operators = {k : partial(fd, trial=trial) for k, fd in self._fd_kws.items()}
-            
-        return u.reconstruct(*args_operators, **kwargs_operators)
+        operators = [partial(fd, trial=trial) for fd in self._fd_args]
+        return u.reconstruct_expr(*operators)
     
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:
-        return tuple((*self._fd_args, *self._fd_kws.values()))
+        return self._fd_args
     
     @property
     def order(self) -> int:
@@ -464,8 +468,7 @@ class FiniteDifferenceArgwise:
         if self.order <= 1:
             return None
         fd_args_init = [fd.initial if fd.initial is not None else fd for fd in self._fd_args]
-        fs_kws_init = {k: v.initial if v.initial is not None else v for k, v in self._fd_kws.items()}
-        return FiniteDifferenceArgwise(*fd_args_init, **fs_kws_init)
+        return FiniteDifferenceArgwise(*fd_args_init)
 
     def __iter__(self):
         return iter(self.finite_differences)
@@ -493,13 +496,11 @@ class FiniteDifferenceArgwise:
         other: Self | FiniteDifference,
     ) -> 'FiniteDifferenceArgwise':
         if isinstance(other, FiniteDifference):
-            return FiniteDifferenceArgwise(*self._fd_args, other, **self._fd_kws)
+            return FiniteDifferenceArgwise(*self._fd_args, other)
         if isinstance(other, FiniteDifferenceArgwise):
             return FiniteDifferenceArgwise(
                 *self._fd_args,
                 *other._fd_args, 
-                **self._fd_kws,
-                **other._fd_kws,
             )
         raise NotImplementedError
         
@@ -508,7 +509,7 @@ class FiniteDifferenceArgwise:
         other: Self | FiniteDifference,
     ) -> 'FiniteDifferenceArgwise':
         if isinstance(other, FiniteDifference):
-            return FiniteDifferenceArgwise(other, *self._fd_args, other, **self._fd_kws)
+            return FiniteDifferenceArgwise(other, *self._fd_args, other)
         if isinstance(other, FiniteDifferenceArgwise):
             return other.__matmul__(self)
         raise NotImplementedError
@@ -523,7 +524,7 @@ def finite_difference_order(
         return max(minimum, max(orders))
     else:
         return None
-        
+ 
 
 class DiscretizationError(RuntimeError):
     def __init__(
@@ -552,3 +553,16 @@ class ImplicitDiscretizationError(DiscretizationError):
     ):
         super().__init__('Explicit', fd, msg)
 
+
+
+from typing import Generic
+from typing_extensions import TypeVarTuple, Unpack
+
+Shape = TypeVarTuple("Shape")
+
+class Array(Generic[Unpack[Shape]]):
+    ...
+
+
+def func(x: Array[int]) -> None:
+    ...

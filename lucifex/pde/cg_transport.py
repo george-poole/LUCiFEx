@@ -46,16 +46,12 @@ def advection_forms(
     forms = []
 
     if not by_parts:
-        expr = lambda a, u: inner(a, grad(u))
+        # TODO or simply `v * inner(a, grad(u))`
+        adv = v * ExprSeries(inner(a, grad(u)), args=(a, u)) 
     else:
-        expr = lambda a, u: -inner(grad(v), a * u)
-
-    if isinstance(D_adv, FiniteDifference):
-        adv = D_adv(expr(a, u), trial=u)
-    else:
-        adv = D_adv(ExprSeries(expr)(a, u), trial=u)
+        adv = ExprSeries(-inner(grad(v), a * u), args=(a, u))
     
-    F_adv =  v * adv * dx
+    F_adv = D_adv(adv, trial=u) * dx
     forms.append(F_adv)
 
     if by_parts and (bcs is not None):
@@ -86,18 +82,14 @@ def diffusion_forms(
     `∫dx v∇·(D·∇u) = - ∫dx ... + ∫dS ... `
     """
     if not by_parts:
-        F_diff = v * div(d * grad(D_diff(u))) * dx 
+        diff = v * ExprSeries(div(d * grad(u)), args=(d, u)) 
     else:
-        expr = lambda d, u: d * grad(u)
-        if isinstance(D_diff, FiniteDifference):
-            diff = D_diff(expr(d, u), trial=u)
-        else:
-            diff = D_diff(ExprSeries(expr)(d, u), trial=u)
-        F_diff = -inner(grad(v), diff) * dx    
-   
-    forms = [F_diff]
+        diff = -inner(grad(v), ExprSeries(d * grad(u), args=(d, u)))
 
-    if bcs is not None:
+    F_diff = D_diff(diff, trial=u) * dx 
+    forms = [F_diff]  
+
+    if by_parts and (bcs is not None):
         ds, u_neumann, u_robin = bcs.boundary_data(u, 'neumann', 'robin')
         if u_neumann:
             F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
@@ -123,12 +115,9 @@ def reaction_forms(
     """
     forms = [] 
     if not is_none(r):
-        expr = lambda r, u: r * u
-        if isinstance(D_reac, FiniteDifference):
-            reac = D_reac(expr(r, u), trial=u)
-        else:
-            reac = D_reac(ExprSeries(expr)(r, u), trial=u)
-        F_reac = v * reac * dx
+        # TODO or simply `r * u` with args deduced
+        reac = ExprSeries(r * u, args=(r, u))
+        F_reac = v * D_reac(reac, trial=u) * dx
         forms.append(F_reac)
     if not is_none(j):
         F_src = v * D_src(j, trial=u) * dx

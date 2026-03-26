@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from functools import wraps
 
-from IPython.display import Video
+from IPython.display import Image, Video, display
 
 from ..io.write import write
 from ..utils.py_utils import replicate_callable
@@ -78,7 +78,7 @@ def _save_figure(
         mkdirs: bool = True,
         sep: str = '__',
         thumbnail: bool = False,
-        **defaults: Any,
+        **overwrite_kws: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
         ipynb_name = get_ipynb_file_name()
@@ -101,7 +101,7 @@ def _save_figure(
                     close=False,
                     pickle=False,
                 )
-                _kwargs.update(defaults)
+                _kwargs.update(overwrite_kws)
                 _kwargs.update(kwargs)
             write(fig_or_anim, file_name, **_kwargs)
             if thumbnail:
@@ -118,9 +118,24 @@ def save_figure():
     For interactive use in a `.ipynb` file. \\
     See `lucifex.io.write` for the general purpose `write` function. \\
     Default argument values from `write` are overridden. \\
-    File name dynamically created from notebook name can be returned with `return_path=True`.
+    Dynamically-created file path can be returned with `return_path=True`.
     """
     pass
+
+
+def display_figure(
+    fig_path: str,
+    ext: str | None = '.png',
+    call: bool = True,
+    **kwargs,
+) -> Image | Any:
+    if ext and fig_path[:-4] != len(ext):
+        fig_path = f'{fig_path}{ext}'
+    img = Image(fig_path, **kwargs)
+    if call:
+        return display(img)
+    else:
+        return img
 
 
 def display_animation(
@@ -128,13 +143,18 @@ def display_animation(
     embed: bool = True, 
     loop: bool = True,
     width: int = 600,
-    ext: str = '.mp4',
+    ext: str | None = '.mp4',
+    call: bool = False,
     **kwargs,
-):
+) -> Video | Any:
     _kwargs = {}
-    if anim_path[:-4] != len(ext):
+    if ext and anim_path[:-4] != len(ext):
         anim_path = f'{anim_path}{ext}'
     if loop:
         _kwargs.update(html_attributes="controls loop")
     _kwargs.update(kwargs)
-    return Video(anim_path, embed=embed, width=width, **_kwargs)
+    vid = Video(anim_path, embed=embed, width=width, **_kwargs)
+    if call:
+        return display(vid)
+    else:
+        return vid
