@@ -123,7 +123,7 @@ class Series(ABC, Generic[T]):
         return f
 
     def __setitem__(self, _):
-        raise RuntimeError(f"Setting items on a {type(self)} is not permitted.")
+        raise RuntimeError(f"Setting a previous, present or future value in a {type(self)} is not permitted.")
 
     def __str__(self) -> str:
         seq = [i if not is_unsolved(i) else Unsolved for i in self.sequence]
