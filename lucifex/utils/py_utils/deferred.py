@@ -7,7 +7,7 @@ from math import floor
 import numpy as np
 from dolfinx.fem import Constant
 
-from .func_utils import arity
+from .clbl_utils import arity
 
 
 T = TypeVar('T')

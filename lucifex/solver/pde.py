@@ -97,7 +97,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
     ) -> None:
         
@@ -308,7 +308,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
         solution: Function | FunctionSeries | None = None, 
     ):
@@ -341,7 +341,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
 
     def solve(
         self,
-        future: bool | None = None,
+        future: bool | int | None = None,
         overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] | None = None,
         assemble_termwise: tuple[bool, bool] | None = None,
@@ -525,12 +525,6 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
     def mpc(self) -> list[MultiPointConstraint]:
         return self._mpc
     
-    def str_forms(
-        self, 
-        format: Callable[[Form], str] = str,
-    ) -> list[str]:
-        return [format(i) for i in self._forms]
-    
     @property
     def forms(self) -> list[Form] | list[BlockForm]:
         return self._forms
@@ -615,7 +609,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = True,
+        future: bool | int = True,
         overwrite: bool = False,
     ) -> None:
         if ics is not None:
@@ -671,7 +665,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = True,
+        future: bool | int = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 
     ):
@@ -760,7 +754,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = True,
+        future: bool | int = True,
         overwrite: bool = False,
     ) -> None:
         bcs = None
@@ -795,7 +789,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         cache_matrix: bool | EllipsisType | Iterable[bool | EllipsisType] = False,
         assemble_termwise: tuple[bool, bool] = (False, False),
         pc_form: Form | BlockForm | None = None,
-        future: bool = True,
+        future: bool | int = True,
         overwrite: bool = False,
         solution: FunctionSeries | None = None, 
     ):
@@ -851,7 +845,7 @@ class EigenvalueProblem:
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
     ) -> None:
         
@@ -950,7 +944,7 @@ class EigenvalueProblem:
         jit: OptionsJIT | dict | None = None,
         ffcx: OptionsFFCX | dict | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] = False,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
         solutions: list[Function] | list[FunctionSeries] | FunctionSpace | tuple[Mesh, str, int] | None = None,
     ):
@@ -979,7 +973,7 @@ class EigenvalueProblem:
 
     def solve(
         self,
-        future: bool | None = None,
+        future: bool | int | None = None,
         overwrite: bool | None = None,
         cache_matrix: bool | EllipsisType | tuple[bool | EllipsisType, bool | EllipsisType] | None = None,
     ) -> None:
@@ -1090,7 +1084,7 @@ class Projection(BoundaryValueProblem):
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
     ):
         v = TestFunction(solution.function_space)
@@ -1131,7 +1125,7 @@ class Projection(BoundaryValueProblem):
         corrector: Callable[[np.ndarray], None] 
         | tuple[str, Callable[[np.ndarray], None]] 
         | None = None,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
     ):
         def _create(

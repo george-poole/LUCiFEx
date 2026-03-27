@@ -23,7 +23,6 @@ from .expr_utils import (
     MeshExtractionError,
     Scaled,
     extract_function_space,
-    extract_expr_factory,
 )
 from .form_utils import (
     extract_integrands,

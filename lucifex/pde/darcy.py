@@ -106,9 +106,9 @@ def darcy_streamfunction(
     """
 
     if is_tensor(k):
-        weight = (mu / det(k)) * transpose(k)
+        w = (mu / det(k)) * transpose(k)
     else:
-        weight = (mu / k)
+        w = (mu / k)
 
     rhs = 0
     if not is_none(fx):
@@ -116,7 +116,7 @@ def darcy_streamfunction(
     if not is_none(fy):
         rhs += -Dx(fy, 0)
 
-    return poisson(psi, rhs, weight, bcs)
+    return poisson(psi, rhs, w, bcs)
 
 
 def darcy_pressure(
@@ -136,8 +136,7 @@ def darcy_pressure(
     else:
         rhs = None
 
-    weight = (k / mu)
-    return poisson(p, rhs, weight, bcs)
+    return poisson(p, rhs, k / mu, bcs)
 
 
 def darcy_velocity_from_pressure(

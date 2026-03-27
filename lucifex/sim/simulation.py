@@ -18,7 +18,7 @@ from ufl.core.expr import Expr
 from dolfinx.mesh import Mesh
 
 from ..utils.py_utils import (
-    MultiKey, OverloadTypeError, filter_kwargs, 
+    MultiKey, OverloadTypeError, create_kws_filterer, 
     Writer, Stopper,
 )
 from ..utils.fenicsx_utils import is_mixed_space
@@ -410,7 +410,7 @@ def configure_simulation(
                         Projection, 
                         Interpolation,
                     )
-                    [filter_kwargs(cls.set_defaults)(**kwargs_complete) for cls in solver_classes]
+                    [create_kws_filterer(cls.set_defaults)(**kwargs_complete) for cls in solver_classes]
                     sim_return = simulation_factory(*sim_func_args, **sim_func_kwargs)
                     [cls.set_defaults() for cls in solver_classes]
     
@@ -430,7 +430,7 @@ def configure_simulation(
                         )
                     else:
                         simulation_args = sim_return
-                    simulation = filter_kwargs(Simulation, include=create_dir_path)(
+                    simulation = create_kws_filterer(Simulation, include=create_dir_path)(
                         *simulation_args,
                         parameters=sim_parameters,  
                         **kwargs_complete,

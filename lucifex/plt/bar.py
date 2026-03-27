@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 
-from ..utils.py_utils import filter_kwargs
+from ..utils.py_utils import create_kws_filterer
 from .utils import optional_fig_ax, set_legend, set_axes
 
 
@@ -23,7 +23,7 @@ def plot_bar(
     legend_title: str | None = None,
     **kwargs,
 ) -> tuple[Figure, Axes]:
-    filter_kwargs(set_axes)(ax, **kwargs)
+    create_kws_filterer(set_axes)(ax, **kwargs)
 
     y_data = [[y] if not isinstance(y, Iterable) else y for y in y_data]
 

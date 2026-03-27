@@ -13,7 +13,7 @@ from matplotlib.tri.triangulation import Triangulation
 
 from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
 from ..utils.fenicsx_utils import is_scalar, is_grid, NonScalarError
-from ..utils.py_utils import filter_kwargs, OverloadTypeError
+from ..utils.py_utils import create_kws_filterer, OverloadTypeError
 
 from .utils import (
     LW, set_axes, optional_ax, set_axes, create_colorbar,
@@ -147,13 +147,13 @@ def _(
     )
     _kwargs = _poly_kwargs | _axs_kwargs
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
 
-    quad_poly = filter_kwargs(u.mesh.polycollection, ('array', Collection))(
+    quad_poly = create_kws_filterer(u.mesh.polycollection, ('array', Collection))(
         array=u.cell_values, 
         **_kwargs,
     )
-    filter_kwargs(quad_poly.set_clim)(**_kwargs)
+    create_kws_filterer(quad_poly.set_clim)(**_kwargs)
     ax.add_collection(quad_poly)
 
     if colorbar is not False:
@@ -180,21 +180,21 @@ def _(
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
 
     if isinstance(colorbar, tuple):
         vmin, vmax = colorbar
         _kwargs.update(vmin=vmin, vmax=vmax)
 
     if triang is not None:
-        cmap = filter_kwargs(ax.tripcolor)(triang, z, **_kwargs)
+        cmap = create_kws_filterer(ax.tripcolor)(triang, z, **_kwargs)
     else:
         if grid is None:
             grid = is_grid((x, y))
         if grid:
-            cmap = filter_kwargs(ax.pcolormesh)(x, y, z.T, **_kwargs)
+            cmap = create_kws_filterer(ax.pcolormesh)(x, y, z.T, **_kwargs)
         else:
-            cmap = filter_kwargs(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
+            cmap = create_kws_filterer(ax.tripcolor, ('triangles', 'mask'))(x, y, z, **_kwargs)
 
     if colorbar is not False:
         limits = None if colorbar is True else colorbar
@@ -312,17 +312,17 @@ def _(
     _axs_kwargs.update(x_lims=x, y_lims=y)
     _kwargs = _plt_kwargs | _axs_kwargs
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
 
     if triang is not None:
-        filter_kwargs(ax.tricontour, ContourSet)(triang, z, levels=levels, **_kwargs)
+        create_kws_filterer(ax.tricontour, ContourSet)(triang, z, levels=levels, **_kwargs)
     else:
         if grid is None:
             grid = is_grid((x, y))
         if grid:
-            filter_kwargs(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
+            create_kws_filterer(ax.contour, ContourSet)(x, y, z.T, levels=levels, **_kwargs)
         else:
-            filter_kwargs(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
+            create_kws_filterer(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
                 
 
 plot_contours = optional_ax(_plot_contours)

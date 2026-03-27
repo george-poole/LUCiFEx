@@ -4,15 +4,15 @@ from typing_extensions import Self
 from functools import singledispatch
 
 import numpy as np
-from ufl import split
-from ufl.algorithms.analysis import extract_coefficients, extract_constants
+from ufl import split, replace
+from ufl.algorithms.analysis import extract_coefficients, extract_constants, extract_arguments
 from ufl.core.expr import Expr
 from dolfinx.fem import FunctionSpace, Expression
 from dolfinx.mesh import Mesh
 
 from ..utils.fenicsx_utils import (
     set_constant, set_function, extract_mesh,
-    create_function_space, extract_expr_factory,
+    create_function_space,
 )
 from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator
 from ..fem.perturbation import Perturbation
@@ -123,7 +123,7 @@ class Series(ABC, Generic[T]):
         return f
 
     def __setitem__(self, _):
-        raise RuntimeError("Not permitted")
+        raise RuntimeError(f"Setting items on a {type(self)} is not permitted.")
 
     def __str__(self) -> str:
         seq = [i if not is_unsolved(i) else Unsolved for i in self.sequence]
@@ -149,7 +149,9 @@ class Series(ABC, Generic[T]):
         return self.__arithmetic(other, "__add__")
     
     def __radd__(self, other: Any):
-        return self.__arithmetic(other, "__add__")
+        series = self.__arithmetic(other, "__add__")
+        series._args = series._args[::-1]
+        return series
 
     def __sub__(self, other: Any):
         return self.__arithmetic(other, "__sub__")
@@ -161,7 +163,9 @@ class Series(ABC, Generic[T]):
         return self.__arithmetic(other, "__mul__")
 
     def __rmul__(self, other: Any):
-        return self.__arithmetic(other, "__mul__")
+        series = self.__arithmetic(other, "__mul__")
+        series._args = series._args[::-1]
+        return series
 
     def __truediv__(self, other: Any):
         return self.__arithmetic(other, "__truediv__")
@@ -181,8 +185,13 @@ class Series(ABC, Generic[T]):
                 getattr(i, method)(j) for i, j in zip(reversed(self), reversed(other))
             ]
             seq = seq_reversed[::-1]
-            time_series = lambda: [i for i, j in zip(self.time_series, other.time_series) if np.isclose(i, j)]
-            series = lambda: [getattr(i, method)(j) for i, j, t in zip(self.series, other.series, self.time_series) if t in time_series()]
+            time_series = lambda: [
+                i for i, j in zip(self.time_series, other.time_series) if np.isclose(i, j)
+            ]
+            series = lambda: [
+                getattr(i, method)(j) for i, j, t in zip(self.series, other.series, self.time_series) 
+                if t in time_series()
+            ]
         else:
             seq = [getattr(i, method)(other) for i in self]
             time_series = lambda: self.time_series
@@ -195,11 +204,21 @@ class Series(ABC, Generic[T]):
 
 def extract_args_from_series(
     *objs: Series | Any,
+    extractors: Iterable[Callable[[Expr], Iterable]] = (
+        extract_arguments,
+        extract_coefficients,
+        extract_constants,
+    )
 ) -> list[Expr | Any]:
     args = []
     for obj in objs:
         if isinstance(obj, ExprSeries):
             args.extend((i for i in obj.args if not i in args))
+        if isinstance(obj, Expr):
+            extracted = []
+            for ext in extractors:
+                extracted.extend(ext(obj))
+            args.extend((i for i in extracted if not i in args))
         else:
             if obj not in args:
                 args.append(obj)
@@ -214,7 +233,7 @@ class ExprSeries(Series[Expr]):
         expr_series: Self,
         name: str | None = None,
         *,
-        args: Iterable[Series | Expr] = (),
+        args: Iterable[Series | Expr] | None = None,
     ):
         ...
 
@@ -224,7 +243,7 @@ class ExprSeries(Series[Expr]):
         expr_series: Iterable[Expr],
         name: str | None = None,
         *,
-        args: Iterable[Series | Expr] = (),
+        args: Iterable[Series | Expr] | None = None,
         series: LazyEvaluator[list[Expr]] | None = None,
         time_series: LazyEvaluator[list[float]] | None = None,
     ):
@@ -235,14 +254,14 @@ class ExprSeries(Series[Expr]):
         expr_series: Self | Iterable[Expr],
         name: str | None = None,
         *,
-        args: Iterable[Series | Expr] = (),
+        args: Iterable[Series | Expr] | None = None,
         series: LazyEvaluator[list[Expr]] | None = None,
         time_series: LazyEvaluator[list[float]] | None = None,
     ):
         if isinstance(expr_series, ExprSeries):
             if name is None:
                 name = expr_series.name
-            if not args:
+            if args is None:
                 args = expr_series.args
             self.__init__(
                 expr_series.sequence, 
@@ -262,33 +281,48 @@ class ExprSeries(Series[Expr]):
             )
             self._series = series
             self._time_series = time_series
-            self._expr_factory = extract_expr_factory(
-                self._present,
-                strict=True,
-                forge=True,
-                extractors=(
-                    extract_coefficients, 
-                    extract_constants,
-                )
-            )
             self._args = tuple(args)
 
-    def create_expr(
-        self, 
-        *args: Expr,
-    ) -> Expr | Any:
-        return self._expr_factory(*args)
+    # def create_expr(
+    #     self, 
+    #     *args: Expr,
+    # ) -> Expr | Any:
+        
+    #     print('sol')
+    #     for i in args:
+    #         print(i)
+    #     print('eol')
+    #     print(self._expr_factory)
+    #     print(self._expr_factory(*args))
+    #     return self._expr_factory(*args)
 
-    def reconstruct_expr(
-        self,
-        *operators: Callable[[Series | Expr], Expr],
-    ) -> Expr | Any:
-        _args = [op(arg) for op, arg in zip(operators, self._args, strict=True)]
-        return self.create_expr(*_args)
+    # def reconstruct_expr(
+    #     self,
+    #     *operators: Callable[[Series | Expr], Expr],
+    #     args: Iterable[Any] | None = None,
+    # ) -> Expr | Any:
+    #     if args is None:
+    #         args = self.args
+    #     op_args = [op(arg) for op, arg in zip(operators, args, strict=True)]
+    #     return self.create_expr(*op_args)
     
     @property
     def args(self) -> tuple[Series | Expr | Any]:
         return self._args
+
+    def get_args(
+        self,
+        *,
+        include: Iterable[type] = (),
+        exclude: Iterable[type] = (),
+    ) -> list[Series | Expr | Any]:
+        
+        if include:
+            _include = lambda a: any(isinstance(a, tp) for tp in include)
+        else:
+            _include = lambda a: not(any(isinstance(a, tp) for tp in exclude))
+
+        return [a for a in self._args if _include(a)]
 
     @property
     def series(self):
@@ -419,13 +453,15 @@ class SolutionSeries(Series[T], Generic[T, U, I]):
     def update(
         self,
         value: T | U,
-        future: bool = False,
+        future: bool | int = False,
         overwrite: bool = False,
     ):
-        if future:
+        if future is True:
             container = self._future
-        else:
+        elif future is False:
             container = self._present
+        else:
+            container = self[future]
 
         if not overwrite:
             if not is_unsolved(container):

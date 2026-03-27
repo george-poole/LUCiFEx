@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ..utils.py_utils import filter_kwargs
+from ..utils.py_utils import create_kws_filterer
 from .utils import optional_fig_ax, set_axes, create_colorbar
 
 
@@ -28,7 +28,7 @@ def plot_scatter(
     
     _kwargs = dict()
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
 
 
     match cmap:
@@ -37,10 +37,10 @@ def plot_scatter(
                 indicator = bool
             i_true = [i for i, z in enumerate(z_data) if indicator(z)]
             i_false = [i for i, z in enumerate(z_data) if not indicator(z)]
-            filter_kwargs(ax.scatter)(
+            create_kws_filterer(ax.scatter)(
                 xs[i_true], ys[i_true], c=z_data[i_true], marker=true_marker, **_kwargs,
             )
-            filter_kwargs(ax.scatter)(
+            create_kws_filterer(ax.scatter)(
                 xs[i_false], ys[i_false], c=z_data[i_false], marker=false_marker, **_kwargs,
             )
         case markers if not isinstance(markers, str):
@@ -48,13 +48,13 @@ def plot_scatter(
                 raise TypeError('Marker indicator cannot be None.')
             for j, m in enumerate(markers):
                 i_marked = [i for i, z in enumerate(z_data) if indicator(z) in (m, j)]
-                filter_kwargs(ax.scatter)(
+                create_kws_filterer(ax.scatter)(
                     xs[i_marked], ys[i_marked], c=z_data[i_marked], marker=m, **_kwargs,
                 )
         case cmap:
             if callable(size):
                 size = size(z_data)
-            path_clc = filter_kwargs(ax.scatter)(
+            path_clc = create_kws_filterer(ax.scatter)(
                 xs, ys, c=z_data, cmap=cmap, s=size, **_kwargs
             )
             create_colorbar(fig, ax, path_clc, limits=None, ax_cbar=ax_cbar, cax=cax)

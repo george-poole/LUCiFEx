@@ -2,7 +2,7 @@ import pytest
 
 from lucifex.utils.py_utils import (
     as_slice,
-    filter_kwargs,
+    create_kws_filterer,
 )
 
 @pytest.mark.parametrize(
@@ -24,5 +24,5 @@ def test_as_slice(arg, expected):
 def test_filter_kwargs():
     func = lambda x, y, z: (x, y, z)
     kwargs = dict(x=1, y=2, z=3)
-    assert filter_kwargs(func)(**kwargs) == tuple(kwargs.values())
-    assert filter_kwargs(func)(**kwargs, w=4) == tuple(kwargs.values())
+    assert create_kws_filterer(func)(**kwargs) == tuple(kwargs.values())
+    assert create_kws_filterer(func)(**kwargs, w=4) == tuple(kwargs.values())

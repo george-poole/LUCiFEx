@@ -11,7 +11,7 @@ from ..utils.fenicsx_utils import (
     is_grid,
     is_simplicial,
 )
-from ..utils.py_utils import filter_kwargs
+from ..utils.py_utils import create_kws_filterer
 from ..mesh import as_grid_mesh, as_tri_mesh, as_quad_mesh
 from .utils import optional_ax, set_axes, LW
 
@@ -60,12 +60,12 @@ def _plot_interval_mesh(
     )
     _kwargs.update(kwargs)
 
-    filter_kwargs(set_axes)(
+    create_kws_filterer(set_axes)(
         ax,
         x_lims=x,
         **_kwargs,
     )
-    filter_kwargs(ax.plot, Line2D)(x, [0.0] * len(x), **_kwargs)
+    create_kws_filterer(ax.plot, Line2D)(x, [0.0] * len(x), **_kwargs)
     if not y_axis:
         ax.yaxis.set_visible(False)
         ax.spines["top"].set_visible(False)
@@ -99,13 +99,13 @@ def _plot_tri_mesh(
     **kwargs,
 ) -> None:
     tri_mesh = as_tri_mesh(use_cache=use_cache)(mesh)
-    filter_kwargs(set_axes)(
+    create_kws_filterer(set_axes)(
         ax,
         x_lims=tri_mesh.x_coordinates,
         y_lims=tri_mesh.y_coordinates,
         **kwargs,
     )
-    filter_kwargs(ax.triplot, Line2D)(tri_mesh.triangulation, **kwargs)
+    create_kws_filterer(ax.triplot, Line2D)(tri_mesh.triangulation, **kwargs)
 
 
 def _plot_quad_mesh(
@@ -121,9 +121,9 @@ def _plot_quad_mesh(
 
     quad_mesh = as_quad_mesh(use_cache=use_cache)(mesh)
 
-    quad_poly = filter_kwargs(quad_mesh.polycollection, Collection)(**_kwargs)
+    quad_poly = create_kws_filterer(quad_mesh.polycollection, Collection)(**_kwargs)
 
-    filter_kwargs(set_axes)(
+    create_kws_filterer(set_axes)(
         ax,
         x_lims=quad_mesh.x_coordinates,
         y_lims=quad_mesh.y_coordinates,
@@ -146,11 +146,11 @@ def _plot_grid_mesh(
     xlim = (np.min(x), np.max(x))
     ylim = (np.min(y), np.max(y))
 
-    filter_kwargs(set_axes)(
+    create_kws_filterer(set_axes)(
         ax,
         x_lims=x, 
         y_lims=y, 
         **_kwargs,
     )
-    filter_kwargs(ax.vlines, Collection)(x, *ylim, **_kwargs)
-    filter_kwargs(ax.hlines, Collection)(y, *xlim, **_kwargs)
+    create_kws_filterer(ax.vlines, Collection)(x, *ylim, **_kwargs)
+    create_kws_filterer(ax.hlines, Collection)(y, *xlim, **_kwargs)

@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler
 
 from ..fem import as_grid_function, GridFunction
-from ..utils.py_utils import OverloadTypeError, filter_kwargs
+from ..utils.py_utils import OverloadTypeError, create_kws_filterer
 from .utils import (
     LW, set_legend, create_colorbar, optional_fig_ax, 
     set_axes, create_cycler, optional_multifig_ax,
@@ -69,7 +69,7 @@ def plot_line(
                 _plot_line(fi, ax, cyc=Ellipsis, flip=flip, **_kwargs)
 
     if legend_labels is not None and not isinstance(legend_labels, tuple):
-        filter_kwargs(set_legend)(ax, legend_labels, legend_title, **kwargs)
+        create_kws_filterer(set_legend)(ax, legend_labels, legend_title, **kwargs)
 
 
 @singledispatch
@@ -116,7 +116,7 @@ def _(
 
     _kwargs = dict(x_lims=x)
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
     if cyc is Ellipsis:
         pass
     elif cyc is None:
@@ -125,7 +125,7 @@ def _(
         _kwargs = __kwargs
     else:
         ax.set_prop_cycle(cyc)
-    filter_kwargs(ax.plot, Line2D)(x, y, **_kwargs)
+    create_kws_filterer(ax.plot, Line2D)(x, y, **_kwargs)
 
 
 @optional_fig_ax
@@ -145,8 +145,8 @@ def plot_twin_lines(
     _plt_kwargs_right = _plt_kwargs | {'linestyle': 'dashed'}
     if twin_kwargs is None:
         twin_kwargs = ({}, {})
-    _plt_kwargs_left.update(twin_kwargs[0], **kwargs)
-    _plt_kwargs_right.update(twin_kwargs[1], **kwargs)
+    _plt_kwargs_left.update(**twin_kwargs[0], **kwargs)
+    _plt_kwargs_right.update(**twin_kwargs[1], **kwargs)
 
     y_label_left, y_label_right = twin_labels
     line_left, line_right = twin_lines

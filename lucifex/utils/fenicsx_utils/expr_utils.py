@@ -146,41 +146,6 @@ def extract_function_space(
     return fs
 
 
-def extract_expr_factory(
-    expr: Expr,
-    strict: bool = True,
-    forge: bool | Iterable[str] = False,
-    extractors: Iterable[Callable[[Expr], Iterable]] = (
-        extract_arguments,
-        extract_coefficients,
-        extract_constants,
-    )
-) -> Callable[..., Expr | Any]:
-    extracted = []
-    for ext in extractors:
-        extracted.extend(ext(expr))
-
-    def _(*args):
-        mapping = dict(zip(extracted, args, strict=strict))
-        return replace(expr, mapping)
-    
-    if forge:
-        if forge is True:
-            names = [getattr(c, 'name') for c in extracted]
-        else:
-            names = forge
-        paramspec_params = [
-            Parameter(n, Parameter.POSITIONAL_OR_KEYWORD, annotation=type(c)) 
-            for n, c in zip(names, extracted, strict=True)
-        ]
-        _.__signature__ = Signature(
-            paramspec_params, 
-            return_annotation=bool,
-        )
-
-    return _
-
-
 class ElementFamilyType(set, Enum):
     CONTINUOUS_LAGRANGE = {"P", "Q", "CG", "Lagrange"}
     DISCONTINOUS_LAGRANGE = {"DP", "DQ", "DG", "Discontinuous Lagrange"} 

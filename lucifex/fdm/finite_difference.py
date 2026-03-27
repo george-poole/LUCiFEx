@@ -1,9 +1,9 @@
+from abc import ABC, abstractmethod
 from typing import (
     Iterable, Any, Callable,
     TypeAlias, Generic,
     TypeVar, overload,
 )
-from types import EllipsisType
 from typing_extensions import Self, Unpack, TypeVarTuple
 from functools import partial
 
@@ -11,18 +11,48 @@ from ufl.core.expr import Expr
 from ufl import TrialFunction, replace
 from dolfinx.fem import Function, Constant
 
-from ..utils.py_utils import OverloadTypeError, str_indexed
+from ..utils.py_utils import OverloadTypeError, str_indexed, create_kws_filterer
 from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
 
 
-class FiniteDifference:
+class FiniteDifferenceOperator(ABC):
+    def __call__(
+        self,
+        u: Series | Any,
+        *args: Any,
+        trial: FunctionSeries | bool = False,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> Expr:
+        if not isinstance(u, Series):
+            if strict:
+                raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
+            else:
+                return u
+        
+        return create_kws_filterer(self._call)(u, *args, trial=trial, strict=strict, **kwargs)
+    
+    @abstractmethod
+    def _call(
+        self,
+        u: Series,
+        *args: Any,
+        trial: FunctionSeries | bool = False,
+        strict: bool = False,
+        **kwargs: Any,
+    ):
+        ...
+    
+
+T = TypeVar('T')
+class FiniteDifference(FiniteDifferenceOperator):
     """
     Finite difference operator for time discretization
     """
 
     def __init__(
         self,
-        indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
+        coefficients: dict[int, float] | tuple[Iterable[int], Iterable[float]],
         initial: 
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
@@ -31,15 +61,14 @@ class FiniteDifference:
         use_repr: bool = True,
     ) -> None:
 
-        if not isinstance(indices_coeffs, dict):
-            indices_coeffs = dict(zip(*indices_coeffs, strict=True))
-
-        self._coefficients = indices_coeffs
+        if not isinstance(coefficients, dict):
+            coefficients = dict(zip(*coefficients, strict=True))
+        self._coefficients = dict(sorted(coefficients.items()))
 
         if initial is None:
             if self.order > 1:
                 raise ValueError(
-                    "Must also provide first-order method for initialization"
+                    "Must also provide first-order finite difference for initialization"
                 )
             self._initial = None
         elif isinstance(initial, FiniteDifference):
@@ -105,13 +134,26 @@ class FiniteDifference:
             return str_indexed(self._name, self._index, 'subscript')
         else:
             return self._name
-
+        
+    @overload
+    def __call__(
+        self,
+        u: T,
+        **kwargs: Any
+    ) -> T:
+        """
+        `𝒟(u) = u` for any argument `u` not of type `Series`.
+        """
+        ...
+        
     @overload
     def __call__(
         self,
         u: Series,
-        trial: FunctionSeries | None = None,
+        *,
+        trial: FunctionSeries | bool = False,
         strict: bool = False,
+        **kwargs: Any
     ) -> Expr:
         """
         `𝒟(u) = Σⱼ αⱼuⁿ⁺ʲ` for an argument `u` of type `Series`
@@ -123,29 +165,15 @@ class FiniteDifference:
         """
         ...
 
-    @overload
-    def __call__(
-        self,
-        u: Expr | Function | Constant,
-        trial: FunctionSeries | None = None,
-        strict: bool = False,
-    ) -> Expr | Function | Constant:
-        """
-        `𝒟(u) = u` for any argument `u` not of type `Series`.
-        """
-        ...
+    def __call__(self, *args, **kwargs):
+        return super().__call__(*args, **kwargs)
 
-    def __call__(
+    def _call(
         self,
-        u: Series | Expr | Function | Constant,
-        trial: FunctionSeries | None = None,
-        strict: bool = False,
+        u: Series,
+        *,
+        trial: FunctionSeries | bool = False,
     ) -> Expr:
-        if not isinstance(u, Series):
-            if strict:
-                raise TypeError(f"Expected argument of type {Series}, not {type(u)}.")
-            else:
-                return u
             
         if self.order > u.order:
             raise RuntimeError(
@@ -154,8 +182,18 @@ class FiniteDifference:
 
         expr = sum((c * u[n] for n, c in self.coefficients.items()))
 
-        if trial is not None:
-            expr = replace(expr, {trial[trial.FUTURE_INDEX]: TrialFunction(trial.function_space)})
+        if trial is True:
+            if not isinstance(u, FunctionSeries):
+                raise TypeError(
+                    f'Can only deduce the trial argument from an argument of type `FunctionSeries`, not {type(u)}'
+                )    
+            trial = u
+
+        if trial is not False:
+            expr = replace(
+                expr, 
+                {trial[trial.FUTURE_INDEX]: TrialFunction(trial.function_space)},
+            )
 
         return expr
     
@@ -166,14 +204,21 @@ class FiniteDifference:
         
     # def __rmatmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
     #     return other.__matmul__(self)
+
+    def __eq__(self, other: Self) -> bool:
+        if not isinstance(other, FiniteDifference):
+            raise TypeError(f'Cannot test equality of a `FiniteDifference` with a {type(other)}')
         
-   
+        return self.coefficients == other.coefficients
+        
+
 class FiniteDifferenceDerivative(FiniteDifference):
 
     def __init__(
         self,
+        numerator: FiniteDifference 
+        | dict[int, float] | tuple[Iterable[int], Iterable[float]],
         denominator: Callable[[Constant], Constant | Expr] | Callable[[float], float],
-        indices_coeffs: dict[int, float] | tuple[Iterable[int], Iterable[float]],
         initial: 
             tuple[Iterable[int], Iterable[float]] | dict[int, float] | Self | None
         = None,
@@ -181,25 +226,48 @@ class FiniteDifferenceDerivative(FiniteDifference):
         index: str | None = None,
         use_repr: bool = True,
     ) -> None:
-        super().__init__(indices_coeffs, initial, name, index, use_repr)
+        if isinstance(numerator, FiniteDifference):
+            coefficients = numerator.coefficients
+        else:
+            coefficients = numerator
+        super().__init__(coefficients, initial, name, index, use_repr)
         self._denominator = denominator
 
+    @overload
     def __call__(
-        self, 
-        u: FunctionSeries,
+        self,
+        u: Series,
         dt: ConstantSeries | Constant | None = None,
-        trial: FunctionSeries | None | EllipsisType = Ellipsis,
+        *,
+        trial: FunctionSeries | bool = False,
+        strict: bool = False,
+        **kwargs: Any
     ) -> Expr:
-        if trial is Ellipsis:
-            trial = u
-        du = super().__call__(u, trial)
+        """
+        `∂u/∂t = 𝒟(u, Δt) = 𝒟(u) / D(Δtⁿ)` given the denominator function `D`
+        or just `𝒟(u)` if `dt=None`.
+        """
+        ...
+
+    def __call__(self, *args, **kwargs):
+        return super().__call__(*args, **kwargs)
+
+    def _call(
+        self, 
+        u: Series,
+        dt: ConstantSeries | Constant | None = None,
+        *,
+        trial: FunctionSeries | bool = False,
+    ) -> Expr:
+        Du = super()._call(u, trial=trial)
         if dt is None:
-            return du
+            return Du
+        
         if isinstance(dt, ConstantSeries):
-            _dt = dt[0]
+            _dt = dt[dt.FUTURE_INDEX - 1]
         else:
             _dt = dt
-        return du / self._denominator(_dt)
+        return Du / self._denominator(_dt)
     
     @property
     def denominator(self) -> Callable[[Constant], Constant | Expr] | Callable[[float], float]:
@@ -223,22 +291,22 @@ BE = FiniteDifference({Series.FUTURE_INDEX: 1.0}, name='BE', use_repr=False)
 """Backward Euler implicit method"""
 
 DT = FiniteDifferenceDerivative(
-    lambda dt: dt,
     {
         Series.FUTURE_INDEX: 1.0,
         Series.FUTURE_INDEX - 1: -1.0,
     },
+    lambda dt: dt,
     name='DT',
     use_repr=False,
 )
 """Forward first time derivative `(uⁿ⁺¹ - uⁿ) / Δtⁿ` """
 
 DTLF = FiniteDifferenceDerivative(
-    lambda dt: dt,
     {
         Series.FUTURE_INDEX: 0.5,
         Series.FUTURE_INDEX - 2: -0.5,
     },
+    lambda dt: dt,
     DT,
     name='LF',
     use_repr=False,
@@ -246,12 +314,12 @@ DTLF = FiniteDifferenceDerivative(
 """Centred (leapfrog) first time derivative `(uⁿ⁺¹ - uⁿ⁻¹) / 2Δtⁿ` """
 
 DT2 = FiniteDifferenceDerivative(
-    lambda dt: dt ** 2,
     {
         Series.FUTURE_INDEX: 1.0,
         Series.FUTURE_INDEX - 1: -2.0,
         Series.FUTURE_INDEX - 2: 1.0,
     },
+    lambda dt: dt ** 2,
     DT,
     name='DT2',
     use_repr=False,
@@ -379,7 +447,7 @@ def BDF(
     if initial is None:
         initial = DT
 
-    return FiniteDifferenceDerivative(lambda dt: dt, d, initial, 'BDF', n, use_repr=False)
+    return FiniteDifferenceDerivative(d, lambda dt: dt, initial, 'BDF', n, use_repr=False)
 
 
 BDF1 = BDF(1)
@@ -415,8 +483,12 @@ Type alias to any `FiniteDifference` that is implicit.
 """    
 
 
+T = TypeVar('T')
 FDS = TypeVarTuple('FDS')  
-class FiniteDifferenceArgwise(Generic[Unpack[FDS]]):
+class FiniteDifferenceArgwise(
+    Generic[Unpack[FDS]],
+    FiniteDifferenceOperator,
+):
     """
     Argument-wise application of finite difference operators to time-dependent
     arguments of an expression.
@@ -428,33 +500,74 @@ class FiniteDifferenceArgwise(Generic[Unpack[FDS]]):
     """
     def __init__(
         self, 
-        *args: FiniteDifference,
+        *fd_args: FiniteDifference,
         name: str | None = None,
         use_repr: bool = False,
     ):
-        self._fd_args = tuple(args)
+        self._fd_args = tuple(fd_args)
         self._name = name
         self._use_repr = use_repr
-    
+
+    @overload
     def __call__(
-        self, 
-        u: ExprSeries | Any, 
-        /,
-        trial: FunctionSeries | None = None,
+        self,
+        u: T,
+        **kwargs: Any
+    ) -> T:
+        """
+        `𝒟(u) = u` for any argument `u` not of type `Series`.
+        """
+        ...
+        
+    @overload
+    def __call__(
+        self,
+        u: Series,
+        *,
+        trial: FunctionSeries | bool = False,
         strict: bool = False,
-    ) -> Expr | Any:
+        args: Iterable[Any] | None = None,
+        fd_template: FiniteDifference = FE,
+    ) -> Expr:
         """
         `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
         """
-        if not isinstance(u, ExprSeries):
-            if strict:
-                raise TypeError(f"Expected argument of type {ExprSeries} or {tuple}, not {type(u)}.")
-            else:
-                return u
+        ...
 
-        operators = [partial(fd, trial=trial) for fd in self._fd_args]
-        return u.reconstruct_expr(*operators)
+    def __call__(self, *args, **kwargs):
+        return super().__call__(*args, **kwargs)
     
+    def _call(
+        self, 
+        u: ExprSeries | Any, 
+        *,
+        trial: FunctionSeries | bool = False,
+        strict: bool = False,
+        args: Iterable[Any] | None = None,
+        fd_replaced: FiniteDifference = FE,
+    ) -> Expr | Any:
+        """
+        `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
+        """            
+        if strict and args is not None:
+            for i in args:
+                if not i in u.args:
+                    raise RuntimeError(
+                        f'{i} is not an argument to the `ExprSeries`.'
+                    )
+            
+        if args is None:
+            args = u.args
+
+        finite_differences = [partial(fd, trial=trial) for fd in self._fd_args]
+
+        mapping = {
+            fd_replaced(a): fd(a) 
+            for a, fd in zip(args, finite_differences, strict=True)
+        }
+        return replace(fd_replaced(u), mapping)
+        # return u.reconstruct_expr(*finite_differences, args=args)
+
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:
         return self._fd_args
@@ -514,6 +627,20 @@ class FiniteDifferenceArgwise(Generic[Unpack[FDS]]):
             return other.__matmul__(self)
         raise NotImplementedError
     
+    def __eq__(self, other: Self | FiniteDifference) -> bool:
+        if isinstance(other, FiniteDifference):
+            return False
+        if not isinstance(other, FiniteDifferenceArgwise):
+            raise TypeError(f'Cannot test equality of a `FiniteDifference` with a {type(other)}')
+        
+        if len(self.finite_differences) != len(other.finite_differences):
+            return False
+        
+        return all(
+            i == j 
+            for i, j in zip(self.finite_differences, other.finite_differences, strict=True)
+        )
+    
 
 def finite_difference_order(
     *args: FiniteDifference | FiniteDifferenceArgwise | Any,
@@ -552,17 +679,3 @@ class ImplicitDiscretizationError(DiscretizationError):
         msg: str = '',
     ):
         super().__init__('Explicit', fd, msg)
-
-
-
-from typing import Generic
-from typing_extensions import TypeVarTuple, Unpack
-
-Shape = TypeVarTuple("Shape")
-
-class Array(Generic[Unpack[Shape]]):
-    ...
-
-
-def func(x: Array[int]) -> None:
-    ...

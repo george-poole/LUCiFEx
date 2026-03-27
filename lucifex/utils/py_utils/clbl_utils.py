@@ -17,7 +17,7 @@ import time
 P = ParamSpec('P')
 R = TypeVar('R')
 def optional_lru_cache(
-    func: Callable[P, R],
+    clbl: Callable[P, R],
 ):
 
     @overload
@@ -32,33 +32,33 @@ def optional_lru_cache(
         *,
         use_cache: bool = False,
         clear_cache: bool = False,
-        canonicalize: bool = False,
+        canon: bool = False,
     ) -> Callable[P, R]:
         ...
 
     USE = 'use_cache'
     CLEAR = 'clear_cache'
-    CANON = 'canonicalize'
+    CANON = 'canon'
     cache_kwargs_default = {USE: False, CLEAR: False, CANON: False}
     
-    func_lru_cache = lru_cache(func)
-    func_lru_cache_canon = lru_cache(canonicalize_args(func))
+    clbl_lru_cache = lru_cache(clbl)
+    clbl_lru_cache_canon = lru_cache(canonical_callable(clbl))
 
-    @wraps(func)
+    @wraps(clbl)
     def _(*args, **kwargs):
         if len(args) == 0 and len(kwargs) > 0 and all(i in cache_kwargs_default for i in kwargs):
             _kwargs = cache_kwargs_default.copy()
             _kwargs.update(kwargs)
             if _kwargs[CANON]:
-                _func_lru_cache = func_lru_cache_canon
+                _func_lru_cache = clbl_lru_cache_canon
             else:
-                _func_lru_cache = func_lru_cache
+                _func_lru_cache = clbl_lru_cache
             if _kwargs[CLEAR]:
                 _func_lru_cache.cache_clear()
             if _kwargs[USE]:
                 return lambda *a, **k: _func_lru_cache(*a, **k)
             else:
-                return lambda *a, **k: func(*a, **k)
+                return lambda *a, **k: clbl(*a, **k)
         else:
             return _(**cache_kwargs_default)(*args, **kwargs)
     
@@ -68,7 +68,7 @@ def optional_lru_cache(
 P = ParamSpec('P')
 R = TypeVar('R')
 def log_timing(
-    func: Callable[P, R], 
+    clbl: Callable[P, R], 
     logged: dict[Hashable, list[float]] | None = None,
     key: Hashable | None = None,
     n: int = 1, 
@@ -78,7 +78,7 @@ def log_timing(
     Mutates `logged`
     """
     if key is None:
-        key = func.__name__
+        key = clbl.__name__
 
     n = int(n)
     assert n > 0
@@ -86,11 +86,11 @@ def log_timing(
     if not overwrite:
         assert key not in logged
 
-    @wraps(func)
+    @wraps(clbl)
     def _(*args: P.args, **kwargs: P.kwargs):
         for _ in range(n):
             t_start = time.perf_counter()
-            r = func(*args, **kwargs)
+            r = clbl(*args, **kwargs)
             t_stop = time.perf_counter()
             dt_exec = t_stop - t_start
             if key not in logged:
@@ -140,68 +140,81 @@ def replicate_callable(clbl: Callable[P, R]) -> Callable[[Callable], Callable[P,
 # TODO get_overloads in Python 3.11+
 P = ParamSpec("P")
 R = TypeVar('R')
-def canonicalize_args(
-    func: Callable[P, R],
+def canonical_callable(
+    clbl: Callable[P, R],
 ) -> Callable[P, R]:
+    
+    parameters = signature(clbl).parameters
+    defaults = [v.default for v in parameters.values() if v.default is not v.empty]
+    indices = {name: i for i, name in enumerate(parameters)}
 
-    @wraps(func)
-    def _(*args, **kwargs):
-        sig = signature(func)
-        defaults = [v.default for v in sig.parameters.values() if v.default is not v.empty]
-        indices = {name: i for i, name in enumerate(sig.parameters)}
-                                                            
+    @wraps(clbl)
+    def _(*args, **kwargs):                                                    
         _args = []
         _args.extend(args)
         _args.extend(defaults)
-        if not len(_args) == len(sig.parameters):
-            raise RuntimeError(f'Arguments {_args} cannot be matched to signature {sig.parameters}.')
+        if not len(_args) == len(parameters):
+            raise RuntimeError(
+                f"Arguments {_args} cannot be matched to the signature's parameters {parameters}."
+            )
         for name, value in kwargs.items():
             _args[indices[name]] = value
 
-        return func(*_args)
+        return clbl(*_args)
 
     return _
 
 
+def get_kws_filter(
+    clbl: Callable,
+    include: Callable | str | Iterable[str | Callable] = (),
+    strict: bool = False,
+) -> list[str]:
+    
+    get_names = lambda f: [
+        n for n, p in signature(f).parameters.items() 
+        if p.kind not in (p.VAR_KEYWORD, p.VAR_POSITIONAL)
+    ]
+    
+    if callable(include) or isinstance(include, str):
+        _include = (include, )
+    else:
+        _include = include
+
+    kw_names = []
+    for i in _include:
+        if callable(i):
+            kw_names.extend(get_names(i))
+        else:
+            kw_names.append(i)
+
+    if not strict:
+        kw_names.extend(get_names(clbl))
+
+    return kw_names
+
+
 P = ParamSpec("P")
 R = TypeVar('R')
-def filter_kwargs(
-    func: Callable[P, R],
+def create_kws_filterer(
+    clbl: Callable[P, R],
     include: Callable | str | Iterable[str | Callable] = (),
     strict: bool = False,
 ) -> Callable[P, R] | Callable[..., R]:
+    included_names = get_kws_filter(clbl, include, strict)
+
     def _(*args, **kwargs):
-        get_names = lambda f: [
-            n for n, p in signature(f).parameters.items() if p.kind not in (p.VAR_KEYWORD, p.VAR_POSITIONAL)
-        ]
-        
-        if callable(include) or isinstance(include, str):
-            _include = (include, )
-        else:
-            _include = include
-
-        included_names = []
-        for i in _include:
-            if callable(i):
-                included_names.extend(get_names(i))
-            else:
-                included_names.append(i)
-
-        if not strict:
-            included_names.extend(get_names(func))
-
         _kwargs = {k: v for k, v in kwargs.items() if k in included_names}
-
-        return func(*args, **_kwargs)
+        return clbl(*args, **_kwargs)
 
     return _
 
 
 def arity(
-    func: Callable,
+    clbl: Callable,
     variadic: bool = False,
 ) -> int:
-    params = signature(func).parameters
+    params = signature(clbl).parameters
     if not variadic:
         params = {k: v for k, v in params.items() if v.kind is not (v.VAR_KEYWORD, v.VAR_POSITIONAL)}
     return len(params)

@@ -12,7 +12,7 @@ from matplotlib.colorbar import Colorbar
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cycler import Cycler, cycler
 
-from ..utils.py_utils import filter_kwargs
+from ..utils.py_utils import create_kws_filterer
 
 
 LW = 0.75
@@ -250,7 +250,7 @@ def create_colorbar(
         )
         _kwargs.update(**kwargs)
         divider = make_axes_locatable(ax)
-        ax_cbar = filter_kwargs(divider.append_axes)(**_kwargs)
+        ax_cbar = create_kws_filterer(divider.append_axes)(**_kwargs)
     if cax:
         cbar = fig.colorbar(mappable, cax=ax_cbar, **kwargs)
     else:

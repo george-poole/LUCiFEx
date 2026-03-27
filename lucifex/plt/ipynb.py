@@ -14,7 +14,7 @@ T = TypeVar('T')
 def set_ipynb_variable(
     env_key: str,
     default: T,
-    report: bool = True,
+    silent: bool = False,
     as_type: Callable[[str], T] | None = None,
 ) -> T:
     """
@@ -29,7 +29,7 @@ def set_ipynb_variable(
     if as_type is None:
         as_type = eval
 
-    if report:
+    if not silent:
         print(f"Environment variable `{env_key}={value}`")  
 
     value = as_type(value)

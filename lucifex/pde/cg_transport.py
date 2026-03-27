@@ -2,11 +2,10 @@ from typing import Literal
 
 from ufl.core.expr import Expr
 from ufl import Form, Measure, conditional, gt, FacetNormal, Argument
-from dolfinx.mesh import Mesh
 
 from lucifex.fem import Function, Constant
 from lucifex.fdm import (
-    FunctionSeries, ConstantSeries, ExprSeries,
+    FunctionSeries, ConstantSeries,
     FiniteDifference, FiniteDifferenceArgwise, 
     FiniteDifferenceDerivative, DT, AB1,
 )
@@ -18,7 +17,7 @@ from lucifex.utils.fenicsx_utils import is_none
 
 def derivative_form(
     v: Argument,
-    u: Function | FunctionSeries,
+    u: FunctionSeries,
     dt: ConstantSeries | Constant,
     D_dt: FiniteDifferenceDerivative = DT,
     dx: Measure | Expr | Literal[1] = 1,
@@ -26,7 +25,7 @@ def derivative_form(
     """    
     `∫dx v∂u/∂t`
     """
-    return v * D_dt(u, dt) * dx
+    return v * D_dt(u, dt, trial=u) * dx
 
 
 def advection_forms(
@@ -46,12 +45,13 @@ def advection_forms(
     forms = []
 
     if not by_parts:
-        # TODO or simply `v * inner(a, grad(u))`
-        adv = v * ExprSeries(inner(a, grad(u)), args=(a, u)) 
+        # adv = v * ExprSeries(inner(a, grad(u)), args=(a, u))
+        adv = v * inner(a, grad(u)) 
     else:
-        adv = ExprSeries(-inner(grad(v), a * u), args=(a, u))
+        # adv = ExprSeries(-inner(grad(v), a * u), args=(a, u))
+        adv = -inner(grad(v), a * u)
     
-    F_adv = D_adv(adv, trial=u) * dx
+    F_adv = D_adv(adv, trial=u, args=(a, u)) * dx
     forms.append(F_adv)
 
     if by_parts and (bcs is not None):
@@ -82,11 +82,14 @@ def diffusion_forms(
     `∫dx v∇·(D·∇u) = - ∫dx ... + ∫dS ... `
     """
     if not by_parts:
-        diff = v * ExprSeries(div(d * grad(u)), args=(d, u)) 
+        # diff = v * ExprSeries(div(d * grad(u)), args=(d, u)) 
+        diff = v * div(d * grad(u))
     else:
-        diff = -inner(grad(v), ExprSeries(d * grad(u), args=(d, u)))
+        # diff = -inner(grad(v), ExprSeries(d * grad(u), args=(d, u)))
+        diff = -inner(grad(v), d * grad(u))
 
-    F_diff = D_diff(diff, trial=u) * dx 
+    F_diff = D_diff(diff, trial=u, args=(d, u)) * dx 
+
     forms = [F_diff]  
 
     if by_parts and (bcs is not None):
@@ -115,9 +118,9 @@ def reaction_forms(
     """
     forms = [] 
     if not is_none(r):
-        # TODO or simply `r * u` with args deduced
-        reac = ExprSeries(r * u, args=(r, u))
-        F_reac = v * D_reac(reac, trial=u) * dx
+        # reac = ExprSeries(r * u, args=(r, u))
+        reac = r * u
+        F_reac = v * D_reac(reac, trial=u, args=(r, u)) * dx
         forms.append(F_reac)
     if not is_none(j):
         F_src = v * D_src(j, trial=u) * dx

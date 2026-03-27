@@ -13,7 +13,7 @@ from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
     extract_component_functions, 
 )
-from ..utils.py_utils import filter_kwargs
+from ..utils.py_utils import create_kws_filterer
 from .utils import set_axes, optional_ax
 
 
@@ -53,7 +53,7 @@ def _plot_quiver(
     x, y, ux, uy = x_y_ux_uy
     _kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_kwargs)
+    create_kws_filterer(set_axes)(ax, **_kwargs)
 
     if len(np.shape(x)) ==  2:
         tri = True
@@ -74,7 +74,7 @@ def _plot_quiver(
         ux_quiv = ux[::x_arrow_slc, ::y_arrow_slc].T
         uy_quiv = uy[::x_arrow_slc, ::y_arrow_slc].T
 
-    filter_kwargs(ax.quiver, Quiver)(
+    create_kws_filterer(ax.quiver, Quiver)(
         x_quiv,
         y_quiv,
         ux_quiv,
@@ -127,7 +127,7 @@ def _plot_streamlines(
 
     _axs_kwargs = dict(x_lims=x, y_lims=y, x_label='$x$', y_label='$y$', aspect='equal')
     _axs_kwargs.update(kwargs)
-    filter_kwargs(set_axes)(ax, **_axs_kwargs)
+    create_kws_filterer(set_axes)(ax, **_axs_kwargs)
 
     if color in list(mpl_colormaps):
         norm = color_func(ux.T, uy.T)

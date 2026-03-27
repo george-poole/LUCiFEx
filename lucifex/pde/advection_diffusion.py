@@ -74,7 +74,7 @@ def advection_diffusion_reaction(
         derivative_form(v, u, dt, D_dt, dx),
         *advection_forms(v/phi, u, a, D_adv, bcs, dx, by_parts=False),
         *diffusion_forms(-v/phi, u, d, D_diff, bcs, dx, by_parts=True),
-        *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx)
+        *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx),
     ]
     if tau is not None:
         terms = [

@@ -94,11 +94,11 @@ class Solver(ABC, Generic[T, TS]):
     @abstractmethod
     def solve(
         self, 
-        future: bool | None,
+        future: bool | int | None,
         overwrite: bool | None,
     ) -> None:
         """
-        In-place mutation of `self._solution`
+        In-place mutation of the `_solution` attribute.
         """
         if future is None:
             future = self._future
@@ -132,7 +132,7 @@ class Evaluation(Solver[T, TS]):
         overwrite: bool = False,
     ) -> None:
         super().__init__(solution, corrector, future, overwrite)
-        self._evaluation = evaluator
+        self._evaluator = evaluator
 
     @classmethod
     def from_expr_factory(
@@ -157,7 +157,7 @@ class Evaluation(Solver[T, TS]):
         future: bool | None = None, 
         overwrite: bool | None = None,
     ) -> None:
-        set_solution(self._solution, self._evaluation())
+        set_solution(self._solution, self._evaluator())
         super().solve(future, overwrite)
 
 
