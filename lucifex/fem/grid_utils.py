@@ -225,10 +225,11 @@ def _average_grid(
     ...
 
 
+# TODO slc: int | float
 def _average_grid(
     u: Function | GridFunction | Iterable[Function | GridFunction],
     axis: str | int | tuple[str | int, ...],
-    slc: StrSlice | tuple[StrSlice, ...] = ':',
+    slc: StrSlice | int | float | tuple[StrSlice | int | float, ...] = ':',
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
 ):
@@ -247,7 +248,14 @@ def _average_grid(
 
     if not isinstance(slc, tuple):
         slc = [slc] * len(u.mesh.axes)
-    _slc = tuple(as_slice(i) for i in slc)
+
+    _slc = []
+    for s, ax in zip(slc, u.mesh.axes, strict=True):
+        if isinstance(s, (float, int)):
+            s = as_index(ax, s)
+        else:
+            s = as_slice(s)
+        _slc.append(s)
 
     avg = _array_average(u.value, _axis, *_slc)
 
@@ -261,7 +269,7 @@ def _average_grid(
 def _array_average(
     values: np.ndarray,
     axis: int | tuple[int, ...] | None,
-    *slc: slice,
+    *slc: slice | int,
 ) -> np.ndarray | float:
 
     return np.mean(values[slc], axis)

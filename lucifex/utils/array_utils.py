@@ -151,7 +151,7 @@ def _as_index(
                     return target_index + i
             raise ValueError(f'{msg}. target={target}, approx={approx}')
 
-    return target_index
+    return int(target_index)
 
 
 def resample(
