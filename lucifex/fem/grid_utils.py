@@ -233,7 +233,7 @@ def _average_grid(
     use_cache: bool | tuple[bool, bool] = True,
 ):
     if not isinstance(u, (Function, GridFunction)):
-        return [_average_grid(i, axis, slc, use_func_cache, axis_names) for i in u]
+        return [_average_grid(i, axis, slc, axis_names, use_cache) for i in u]
     
     if isinstance(u, Function):
         if isinstance(use_cache, bool):
@@ -350,7 +350,7 @@ def mirror_grid(
     name: str | None = None,
     axis_names: tuple[str, ...] = ("x", "y", "z"),
     use_cache: bool | tuple[bool, bool] = True,
-) -> GridFunction:
+) -> GridFunction | tuple[np.ndarray, ...]: # TODO @overload
     
     if isinstance(u, Function):
         if isinstance(use_cache, bool):
@@ -418,6 +418,85 @@ def mirror_grid(
     )
 
     return *axes_mirror, value_mirror
+
+
+def crop_grid(
+    u: GridFunction | Function,
+    crop: Iterable[tuple[float | int, float | int] | None],
+    name: str | None = None,
+    use_cache: bool | tuple[bool, bool] = True,
+) -> GridFunction:
+
+    if isinstance(u, Function):
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
+        use_mesh_cache, use_func_cache = use_cache
+        u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+        return crop_grid(u_grid, crop, name)
+    
+    value_crop = np.copy(u.value)
+    axes_crop = []
+    
+    for i, (crp, ax) in enumerate(zip(crop, u.mesh.axes)):
+        if crp is None:
+            axes_crop.append(ax)
+        else:
+            slc_start, slc_stop = (as_index(ax, trg) for trg in crp)
+            ax_slc = slice(slc_start, slc_stop + 1)
+            axes_crop.append(ax[ax_slc])
+            grid_slc = [slice(0, None)] * len(u.mesh.axes)
+            grid_slc[i] = ax_slc
+            value_crop = value_crop[tuple(grid_slc)]
+
+    return GridFunction(
+        value_crop,
+        GridMesh(tuple(axes_crop)),
+        name,
+    )
+
+
+def copy_grid(
+    u: GridFunction | Function,
+    slc: tuple[int | float | StrSlice, ...] | None = None,
+    change: float | Iterable[float] | np.ndarray | None = None,
+    name: str | None = None,
+    use_cache: bool | tuple[bool, bool] = True,
+) -> GridFunction:
+    if isinstance(u, Function):
+        if isinstance(use_cache, bool):
+            use_cache = (use_cache, use_cache)
+        use_mesh_cache, use_func_cache = use_cache
+        u_grid = as_grid_function(use_cache=use_func_cache)(u, use_mesh_cache=use_mesh_cache)
+        return copy_grid(u_grid, slc, change, name)
+    
+    value_copy = np.copy(u.value)
+    
+    if slc is None and change is None:
+        return GridFunction(
+            value_copy,
+            u.mesh,
+            name,
+        ) 
+
+    if slc is None:
+        slc = [slice(0, None)] * len(u.mesh.axes)
+
+    value_slc: list[slice | int] = []
+    for s, ax in zip(slc, u.mesh.axes, strict=True):
+        if isinstance(s, (float, int)):
+            s = as_index(ax, s)
+        else:
+            s = as_slice(s)
+        value_slc.append(s)
+
+    value_copy[tuple(value_slc)] = change
+
+    return GridFunction(
+        value_copy,
+        u.mesh,
+        name,
+    )
+
 
 
 def where_on_grid(

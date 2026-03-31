@@ -109,11 +109,11 @@ $$
 \nabla^2\psi =\omega & \\
 \rho\left(\frac{\partial\omega}{\partial t}+\left(-\frac{\partial\psi}{\partial y}, \frac{\partial\psi}{\partial x}\right)\cdot\nabla\omega\right) =\mu\nabla^2\omega + \frac{\partial f_y}{\partial x} - \frac{\partial f_x}{\partial y} & \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 \omega(\textbf{x}, t=0)=\omega_0 & \forall \textbf{x}\in\Omega \\
-\psi=\psi_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D}, \psi} \times [0,\infty] \\
+\psi=\psi_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D}, \psi} \times [0,\infty) \\
 \textbf{n}\cdot\nabla\psi = \psi_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N}, \psi}
-\times [0,\infty]~,~\partial\Omega_{\text{N}, \psi}=\partial\Omega/\partial\Omega_{\text{D}, \psi} \\
-\omega=\omega_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D},\omega} \times [0,\infty] \\
-\textbf{n}\cdot\nabla\omega = \omega_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N},\omega}\times[0,\infty]~,~\partial\Omega_{\text{N},\omega}=\partial\Omega/\partial\Omega_{\text{D},\omega} 
+\times [0,\infty)~,~\partial\Omega_{\text{N}, \psi}=\partial\Omega/\partial\Omega_{\text{D}, \psi} \\
+\omega=\omega_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D},\omega} \times [0,\infty) \\
+\textbf{n}\cdot\nabla\omega = \omega_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N},\omega}\times[0,\infty)~,~\partial\Omega_{\text{N},\omega}=\partial\Omega/\partial\Omega_{\text{D},\omega} 
 \end{cases}~.
 \end{align*}
 $$

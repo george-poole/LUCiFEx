@@ -210,6 +210,9 @@ class FiniteDifference(FiniteDifferenceOperator):
             raise TypeError(f'Cannot test equality of a `FiniteDifference` with a {type(other)}')
         
         return self.coefficients == other.coefficients
+    
+    def __hash__(self):
+        return hash((*self.coefficients.keys(), *self.coefficients.values()))
         
 
 class FiniteDifferenceDerivative(FiniteDifference):
@@ -640,6 +643,12 @@ class FiniteDifferenceArgwise(
             i == j 
             for i, j in zip(self.finite_differences, other.finite_differences, strict=True)
         )
+    
+    def __hash__(self):
+        arg = []
+        for fd in self.finite_differences:
+            arg.append((*fd.coefficients.keys(), *fd.coefficients.values()))
+        return hash(tuple(arg))
     
 
 def finite_difference_order(

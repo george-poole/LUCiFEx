@@ -1,7 +1,7 @@
 import argparse 
 from collections.abc import Iterable
 from types import GenericAlias, UnionType
-from typing import Callable, Any, Hashable, TypeAlias, Protocol
+from typing import Callable, Any, Hashable, TypeAlias, Protocol, Mapping
 import time
 from inspect import signature, Parameter, Signature
 
@@ -273,8 +273,10 @@ def cli_type_name(
     
 
 def locals_from_lucifex(
+    *,
+    return_as: Callable[[dict], Mapping] = dict,
     **extra: Any,
-) -> dict[str, Any]:
+) -> Mapping[str, Any]:
     import lucifex
     classes = [
         lucifex.solver.BoundaryConditions,
@@ -287,7 +289,8 @@ def locals_from_lucifex(
         lucifex.utils.fenicsx_utils.BoundaryType,
         lucifex.utils.fenicsx_utils.CellType,
     ]
-    fdms = [
+    fds = [
+        lucifex.fdm.DT,
         lucifex.fdm.CN,
         lucifex.fdm.AB1,
         lucifex.fdm.AB2,
@@ -296,9 +299,11 @@ def locals_from_lucifex(
         lucifex.fdm.AM1,
         lucifex.fdm.AM2,
     ]
-    return {
-        **{cls.__name__: cls for cls in classes},
-        **{repr(fdm): fdm for fdm in fdms},
-        **extra,
-    }
+    return return_as(
+        {
+            **{cls.__name__: cls for cls in classes},
+            **{repr(fd): fd for fd in fds},
+            **extra,
+        }
+    )
     

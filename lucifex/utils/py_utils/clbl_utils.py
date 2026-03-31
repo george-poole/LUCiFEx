@@ -50,13 +50,13 @@ def optional_lru_cache(
             _kwargs = cache_kwargs_default.copy()
             _kwargs.update(kwargs)
             if _kwargs[CANON]:
-                _func_lru_cache = clbl_lru_cache_canon
+                _clbl_lru_cache = clbl_lru_cache_canon
             else:
-                _func_lru_cache = clbl_lru_cache
+                _clbl_lru_cache = clbl_lru_cache
             if _kwargs[CLEAR]:
-                _func_lru_cache.cache_clear()
+                _clbl_lru_cache.cache_clear()
             if _kwargs[USE]:
-                return lambda *a, **k: _func_lru_cache(*a, **k)
+                return lambda *a, **k: _clbl_lru_cache(*a, **k)
             else:
                 return lambda *a, **k: clbl(*a, **k)
         else:

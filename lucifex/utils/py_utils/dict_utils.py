@@ -109,6 +109,12 @@ class FrozenDict(MultiKey[K, V], Generic[K, V]):
         _kwargs = {k: v for k, v in self._dict.items() if not k in keys}
         return self.__class__(**_kwargs)
     
+    def __eq__(self, other) -> bool:        
+        return dict(self) == dict(other)
+    
+    def __hash__(self):
+        return hash((*self.keys(), *self.values()))
+    
     def __iter__(self):
         return iter(self.keys())
     

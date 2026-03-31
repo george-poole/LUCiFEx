@@ -24,4 +24,6 @@ from .grid_utils import (
     average_grid, 
     resample_grid,
     mirror_grid,
+    crop_grid,
+    copy_grid,
 )

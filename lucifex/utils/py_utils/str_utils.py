@@ -299,6 +299,6 @@ def as_int_if_close(
             return arg
     else:
         if float.is_integer(arg):
-            return float(arg)
+            return int(arg)
         else:
             return arg

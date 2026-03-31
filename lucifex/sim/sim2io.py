@@ -5,7 +5,7 @@ from abc import abstractmethod
 
 from dolfinx.mesh import Mesh
 
-from ..utils.py_utils import MultiKey
+from ..utils.py_utils import MultiKey, FrozenDict
 from ..fdm import FunctionSeries, ConstantSeries, GridFunctionSeries, TriFunctionSeries, NPyConstantSeries
 from ..io.load import (
     load_txt_dict, load_mesh, 
@@ -239,7 +239,7 @@ class SimulationFromEXT(
                 ld_dict = load_txt_dict(use_cache=self.use_cache)(
                     self._dir_path, 
                     file_name, 
-                    locals_from_lucifex(),
+                    locals_from_lucifex(return_as=FrozenDict),
                 )
                 if name in ld_dict:
                     self._loaded[name] = ld_dict[name]

@@ -19,11 +19,11 @@ $$
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
 \nabla\cdot\textbf{u}=0 \\
 \textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p - \rho g\,\textbf{e}_g\right) & \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
-w=w_0  & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
-w = w_{\text{D},w} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
-\textbf{n}\cdot(\mathsf{D}_w\nabla w) = w_{\text{N}, w} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N},w} \times [0,\infty]\quad\forall w\in\{a, b, c\}\\
-\textbf{n}\cdot\textbf{u} = u_{\text{E}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty] \\
-p = p_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty]~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+w=w_0  & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty)\quad\forall w\in\{a, b, c\}\\
+w = w_{\text{D},w} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty)\quad\forall w\in\{a, b, c\}\\
+\textbf{n}\cdot(\mathsf{D}_w\nabla w) = w_{\text{N}, w} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N},w} \times [0,\infty)\quad\forall w\in\{a, b, c\}\\
+\textbf{n}\cdot\textbf{u} = u_{\text{E}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty) \\
+p = p_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases} \\
 &\text{given} \\
 &\mathbb{S}=

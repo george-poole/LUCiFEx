@@ -1,5 +1,8 @@
 from itertools import islice
-from typing import Protocol, Any, TypeVar, Generic, Iterable, Callable, get_args
+from typing import (
+    Protocol, Any, TypeVar, Generic, 
+    Iterable, Callable, get_args, Mapping,
+)
 from typing_extensions import Self
 from types import UnionType
 import pickle as pkl
@@ -257,7 +260,7 @@ def load_npy_constant_series(
 def load_txt_dict(
     dir_path: str,
     file_name: str,
-    eval_locals: dict[str, Any] | None = None,
+    eval_locals: Mapping[str, Any] | None = None,
     sep: str = ' = ',
     skip: Iterable[int | str] = (),
 ) -> dict[str, Any]:
