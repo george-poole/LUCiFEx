@@ -110,8 +110,8 @@ if __name__ == "__main__":
     HEADING = 'Gallery'
 
     NOTEBOOKS_DIR_PATH = "./demo"
-    FIGURES_DIR_NAME = "figures"
-    FIGURES_EXT = 'png'
+    THUMBNAIL_DIR_NAME = "thumbnails"
+    THUMBNAIL_EXT = 'png'
     EXCLUDE = 'xxx'
     NOTEBOOK_PARTS = [
         ('Convection', 'P5_convection'),
@@ -130,7 +130,7 @@ if __name__ == "__main__":
             HEADING, 
             NOTEBOOKS_DIR_PATH, 
             NOTEBOOK_PARTS, 
-            FIGURES_DIR_NAME, 
-            FIGURES_EXT,
+            THUMBNAIL_DIR_NAME, 
+            THUMBNAIL_EXT,
             EXCLUDE,
         )

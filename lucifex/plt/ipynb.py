@@ -77,7 +77,7 @@ def _save_figure(
         return_path: bool = False,
         mkdirs: bool = True,
         sep: str = '__',
-        thumbnail: bool = False,
+        thumb_path: str | None = None,
         **overwrite_kws: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
@@ -104,8 +104,8 @@ def _save_figure(
                 _kwargs.update(overwrite_kws)
                 _kwargs.update(kwargs)
             write(fig_or_anim, file_name, **_kwargs)
-            if thumbnail:
-                write(fig_or_anim, os.path.join(dir_path, ipynb_name), **_kwargs)
+            if thumb_path is not None:
+                write(fig_or_anim, os.path.join(thumb_path, ipynb_name), **_kwargs)
             if return_path:
                 return file_name
         return __
