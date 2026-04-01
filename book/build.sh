@@ -18,8 +18,13 @@ done
 
 GLOB=$1
 TARGET_DIR=${2:-""}
-NBCONVERT_ARGS=${3:-"--allow-errors"}
+NBCONVERT_ARGS=${3:-"--allow-errors"} 
 BUILD_ARGS=${4:-""}
+
+IPYNB_EXT="ipynb"
+THUMBNAILS_DIR="thumbnails"
+THUMBNAILS_EXT="png"
+ERROR_KEYWORD="Traceback"
 
 if [ -z "$TARGET_DIR" ]; then
     DIRS=("demo" "benchmark")
@@ -30,14 +35,17 @@ fi
 for dir in "${DIRS[@]}"; do
     unlink $dir
     ln -s "../$dir" $dir 
-    IPYNB=($(find . -name "$GLOB.ipynb" -path "../$dir/*"))
-    for i in "${IPYNB[@]}"; do
-        echo Found notebook to execute $i
+    ipynb_paths=($(find -L . -name "$GLOB.$IPYNB_EXT" -path "./$dir/*"))
+    for ipynb in "${ipynb_paths[@]}"; do
+        echo Found notebook to execute $ipynb
         if ! $DRY; then
-            echo Executing notebook $i 
-            export IPYNB_FILE_NAME="${i}"
+            echo Executing notebook $ipynb
+            ipynb_name=$(basename $ipynb ".$IPYNB_EXT")
+            ipynb_dir=$(dirname $ipynb)
+            rm "$ipynb_dir/$THUMBNAILS_DIR/$ipynb_name.$THUMBNAILS_EXT"
             echo Beginning execution "$(date)"
-            jupyter nbconvert --execute --to notebook --inplace "${i}" $NBCONVERT_ARGS  
+            export IPYNB_FILE_PATH="$ipynb"
+            jupyter nbconvert --execute --to notebook --inplace $ipynb $NBCONVERT_ARGS  
             echo Finished execution "$(date)"
         fi
     done    
@@ -58,3 +66,12 @@ ln -sf "./_build/html/index.html" alias.html
 if $REMOTE; then
     ghp-import -n -p -f ./_build/html
 fi
+
+for dir in "${DIRS[@]}"; do
+    ipynb_paths=($(grep -rl $ERROR_KEYWORD ./$dir/* --include="*.$IPYNB_EXT"))
+    for ipynb in "${ipynb_paths[@]}"; do
+        echo ""
+        echo "WARNING! Error found in $ipynb"
+    echo ""
+    done
+done
