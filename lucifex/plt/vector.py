@@ -11,7 +11,7 @@ from matplotlib.quiver import Quiver
 from ..fem import TriFunction, GridFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_vector, create_function, extract_mesh, ShapeError, 
-    extract_component_functions, 
+    extract_component_functions, as_function,
 )
 from ..utils.py_utils import create_kws_filterer
 from .utils import set_axes, optional_ax
@@ -40,7 +40,7 @@ def plot_quiver(
         return _plot_quiver(ax, x_y_ux_uy, arrow_slc, **kwargs)
     
     ux, uy = _extract_xy_functions(u, mesh)
-    return _plot_quiver(ax, (ux, uy), arrow_slc, **kwargs)
+    return plot_quiver(ax, (ux, uy), arrow_slc, **kwargs)
 
 
 def _plot_quiver(
@@ -108,7 +108,7 @@ def plot_streamlines(
         return _plot_streamlines(ax, x_y_ux_uy, density, color, **kwargs)
             
     ux, uy = _extract_xy_functions(u, mesh)
-    return _plot_streamlines(ax, (ux, uy), density, color, **kwargs)
+    return plot_streamlines(ax, (ux, uy), density, color, **kwargs)
 
 
 def _plot_streamlines(
@@ -165,7 +165,7 @@ def _extract_x_y_ux_uy_arrays(
     u_npy: list[GridFunction | TriFunction] = []
     for ui in u:
         if isinstance(ui, (Function, Expr)):
-            ui_p1 = create_function(('P', 1), ui, create=False)
+            ui_p1 = as_function(('P', 1), ui)
             ui_npy = as_npy_function(ui_p1, use_cache=use_cache, mesh=mesh)
             u_npy.append(ui_npy)
         else:

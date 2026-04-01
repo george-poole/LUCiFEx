@@ -38,7 +38,9 @@ for dir in "${DIRS[@]}"; do
     ipynb_paths=($(find -L . -name "$GLOB.$IPYNB_EXT" -path "./$dir/*"))
     for ipynb in "${ipynb_paths[@]}"; do
         echo Found notebook to execute $ipynb
-        if ! $DRY; then
+    done  
+    if ! $DRY; then
+        for ipynb in "${ipynb_paths[@]}"; do  
             echo Executing notebook $ipynb
             ipynb_name=$(basename $ipynb ".$IPYNB_EXT")
             ipynb_dir=$(dirname $ipynb)
@@ -47,8 +49,8 @@ for dir in "${DIRS[@]}"; do
             export IPYNB_FILE_PATH="$ipynb"
             jupyter nbconvert --execute --to notebook --inplace $ipynb $NBCONVERT_ARGS  
             echo Finished execution "$(date)"
-        fi
-    done    
+        done
+    fi
 done
 
 if $DRY; then

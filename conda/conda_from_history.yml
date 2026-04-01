@@ -238,7 +238,7 @@ dependencies:
   - platformdirs=3.8.1=pyhd8ed1ab_0
   - requests=2.31.0=pyhd8ed1ab_0
   - aiohttp=3.8.4=py310h6729b98_1
-  - black=25.1.0=pyha5154f8_0
+  - black=26.3.1
   - fenics-libbasix=0.6.0=hb6e1445_3
   - gst-plugins-base=1.22.4=hb5d3a86_1
   - hypre=2.27.0=mpi_mpich_h5eb2ec2_0
@@ -304,4 +304,8 @@ dependencies:
   - marimo
   - ipywidgets
   - dask
+  - cairosvg
+  - librsvg
+  - dill
+  - nbdime
 prefix: /Users/George/miniconda3/envs/lucifex

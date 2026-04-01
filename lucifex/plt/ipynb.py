@@ -40,7 +40,7 @@ def set_ipynb_variable(
     
 
 def get_ipynb_file_name(
-    env_key: str = 'IPYNB_FILE_NAME',
+    env_key: str = 'IPYNB_FILE_PATH',
     dict_key: str = '__vsc_ipynb_file__',
     ext: bool = False,
 ) -> str:
@@ -77,7 +77,7 @@ def _save_figure(
         return_path: bool = False,
         mkdirs: bool = True,
         sep: str = '__',
-        thumb_path: str | None = None,
+        thumbnail: str | bool = False,
         **overwrite_kws: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
@@ -92,20 +92,23 @@ def _save_figure(
             file_name = os.path.join(dir_path, file_name)
         if mkdirs:
             os.makedirs(dir_path, exist_ok=True)
+        if thumbnail is True:
+            thumbnail = './thumbnails'
 
         @wraps(func)
         def __(fig_or_anim, **kwargs):
+            _kwargs = overwrite_kws
             if isinstance(fig_or_anim, Figure):
-                _kwargs = dict(
+                _kwargs.update(
                     file_ext=('pdf', 'png'), 
                     close=False,
                     pickle=False,
                 )
-                _kwargs.update(overwrite_kws)
-                _kwargs.update(kwargs)
+            _kwargs.update(kwargs)
             write(fig_or_anim, file_name, **_kwargs)
-            if thumb_path is not None:
-                write(fig_or_anim, os.path.join(thumb_path, ipynb_name), **_kwargs)
+            if thumbnail:
+                _kwargs.update(file_ext='png')
+                write(fig_or_anim, os.path.join(thumbnail, ipynb_name), **_kwargs)
             if return_path:
                 return file_name
         return __

@@ -17,10 +17,10 @@ p = p_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/
 &\text{given} \\
 &\mathbb{S}_{\textbf{u},p}\begin{cases}
 \Omega\subset\mathbb{R}^d  & \text{domain}\\
-\mathsf{K}(\textbf{x}) & \text{permeability}\\
-\mu(\textbf{x}) & \text{viscosity} \\
 u_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{normal velocity essential boundary condition} \\
 p_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{pressure natural boundary condition} \\
+\mathsf{K}(\textbf{x}) & \text{permeability}\\
+\mu(\textbf{x}) & \text{viscosity} \\
 \end{cases}
 \end{align*}
 $$
@@ -40,24 +40,6 @@ $$
 
 ## Streamfunction formulation
 
-### General definition
-
-$$
-\begin{align*}
-&\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0 \\
-&\implies\nabla\times\left(\mu\mathsf{K}^{-1}\cdot\nabla\times\boldsymbol{\psi}\right) = \nabla\times\textbf{f}
-\end{align*}
-$$
-
-### Two-dimensional Cartesian definition
-
-$$
-\begin{align*}
-&\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \\
-&\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y
-\end{align*}
-$$
-
 ### Strong form
 
 $$
@@ -71,12 +53,15 @@ $$
 &\text{given} \\
 &\mathbb{S}_{\psi}\begin{cases}
 \Omega\subset\mathbb{R}^2  & \text{domain}\\
-\mathsf{K}(\textbf{x}) & \text{permeability}\\
-\mu(\textbf{x}) & \text{viscosity} \\
-f_x(\textbf{x}), f_y(\textbf{x}) & \text{body force components} \\
 \psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition} \\
 \psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition} \\
-\end{cases}
+\mathsf{K}(\textbf{x}) & \text{permeability}\\
+\mu(\textbf{x}) & \text{viscosity} \\
+f_x(\textbf{x}), f_y(\textbf{x}) & \text{body force} \\
+\end{cases}\\
+&\text{where}\\
+&\textbf{u}=\nabla\times\boldsymbol{\psi}=\textbf{u}=\nabla\times\psi\textbf{e}_z=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \iff \nabla\cdot\textbf{u}=0\\
+&\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y \\
 \end{align*}
 $$
 
@@ -99,11 +84,11 @@ p=p_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D}} \\
 &\text{given} \\
 &\mathbb{S}_{p}\begin{cases}
 \Omega\subset\mathbb{R}^d  & \text{domain}\\
+p_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition} \\
+p_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition} \\
 \mathsf{K}(\textbf{x}) & \text{permeability}\\
 \mu(\textbf{x}) & \text{viscosity} \\
 \textbf{f}(\textbf{x}) & \text{body force} \\
-p_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition} \\
-p_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition} \\
 \end{cases}
 \end{align*}
 $$

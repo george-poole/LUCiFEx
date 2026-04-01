@@ -38,17 +38,33 @@ F(\textbf{u}, p, \textbf{v}, q)&=\int_\Omega\text{d}\Omega~q(\nabla\cdot\textbf{
 \end{aligned}
 $$
 
+### Linear algebra
+
+#### Monolithic structure
+
+$$
+\begin{align*}
+&\begin{pmatrix}\textbf{v}\\q\end{pmatrix}=\boldsymbol{\xi}_i~,~\begin{pmatrix}\textbf{u}\\p\end{pmatrix}=\sum_jX_j\boldsymbol{\xi}_j \\
+&\implies A_{ij}X_j=b_i \iff \mathsf{A}\cdot\textbf{X}=\textbf{b} 
+\end{align*}
+$$
+
 #### Block structure
 
 $$
 \begin{align*}
 F_{\textbf{u}\textbf{u}}(\textbf{u}, \textbf{v}) + F_{\textbf{u}p}(p, \textbf{v})  &= 0 \quad\forall \textbf{v}\in V_{\textbf{u}} \\
-F_{p\textbf{u}}(\textbf{u}, q) &= 0 \quad\forall q\in V_{p} \\
+F_{p\textbf{u}}(\textbf{u}, q) + F_{pp}(p, q) &= 0 \quad\forall q\in V_{p} \\
 \end{align*}
-\implies
+$$
+
+$$
+\begin{align*}
+&\textbf{v}=\boldsymbol{\xi}^u_i~,~q=\xi^p_i~,~\textbf{u}=\sum_jU_j\boldsymbol{\xi}^u_j~,~u=\sum_jP_j\xi^p_j \\
+&\implies
 \begin{pmatrix}
 \mathsf{A}_{\textbf{u}\textbf{u}} & \mathsf{A}_{\textbf{u}p} \\
-\mathsf{A}_{p\textbf{u}} & \mathsf{0}
+\mathsf{A}_{p\textbf{u}} & \mathsf{A}_{pp}
 \end{pmatrix}
 \begin{pmatrix}
 \textbf{U} \\
@@ -58,28 +74,10 @@ F_{p\textbf{u}}(\textbf{u}, q) &= 0 \quad\forall q\in V_{p} \\
 \textbf{b}_{\textbf{u}} \\
 \textbf{b}_{p} \\
 \end{pmatrix}
+\end{align*}
 $$
 
 ## Streamfunction formulation
-
-### General definition
-
-$$
-\begin{align*}
-&\textbf{u}=\nabla\times\boldsymbol{\psi} \iff \nabla\cdot\textbf{u}=0 \\
-&\text{and}~\tau(\textbf{u}) = \tfrac{1}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
-&\implies\textbf{0}=\nabla^2(\nabla\times\boldsymbol{\psi}) + \nabla\times\textbf{f}
-\end{align*}
-$$
-
-### Two-dimensional Cartesian definition
-
-$$
-\begin{align*}
-&\boldsymbol{\psi}=\psi\textbf{e}_z\implies\textbf{u}=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \\
-&\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y
-\end{align*}
-$$
 
 ### Strong form
 
@@ -87,10 +85,22 @@ $$
 \begin{align*}
 &\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
 &\mathbb{BVP}_\psi\begin{cases}
-\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} & \forall\textbf{x}\in\Omega \\
+\mu\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} & \forall\textbf{x}\in\Omega \\
 \psi=\psi_{\text{D}} & \forall \textbf{x}\in\partial\Omega \\
 \nabla^2\psi=\psi_{\text{L}} & \forall \textbf{x}\in\partial\Omega
-\end{cases}~.
+\end{cases}\\
+&\text{given} \\
+&\mathbb{S}_{\psi}\begin{cases}
+\Omega\subset\mathbb{R}^2  & \text{domain}\\
+\psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition} \\
+\psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition} \\
+f_x(\textbf{x}), f_y(\textbf{x}) & \text{body force} \\
+\end{cases}\\
+&\text{where}\\
+&\textbf{u}=\nabla\times\boldsymbol{\psi}=\textbf{u}=\nabla\times\psi\textbf{e}_z=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \iff \nabla\cdot\textbf{u}=0\\
+&\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y \\
+&\tau(\textbf{u}) = \tfrac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
+&\nabla\mu=\textbf{0} \\
 \end{align*}
 $$
 
@@ -101,10 +111,11 @@ $$
 &\text{Find}~\psi\in V~\text{such that} \\
 &\begin{align*}
 F(\psi, v) &= 
-\int_\Omega\text{d}\Omega~\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
-&\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
-&=0\quad\forall v\in V~.
+\int_\Omega\text{d}\Omega~\mu\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
+&\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha\mu}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \mu\left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \mu\langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
+&=0\quad\forall v\in V
 \end{align*} \\
-&\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter and}~h(\textbf{x})~\text{is the local mesh cell size.}
+&\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter}\\
+&\text{and}~h(\textbf{x})~\text{is the local mesh cell size.}
 \end{aligned}
 $$

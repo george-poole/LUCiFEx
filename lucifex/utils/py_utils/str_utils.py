@@ -95,7 +95,7 @@ SUBSCRIPTS = {
 
 
 def str_indexed(
-    name: str, 
+    s: str, 
     n: int,
     mode: Literal['superscript', 'subscript'],
     show_plus: bool = False,
@@ -124,7 +124,7 @@ def str_indexed(
     if parentheses:
         superscript = f'⁽{superscript}⁾'
 
-    return f'{name}{superscript}'
+    return f'{s}{superscript}'
 
 
 def str_scientific(
@@ -216,7 +216,7 @@ def str_tex(
     tex_symbols: Iterable[str] = TEX_SYMBOLS,
 ) -> str:
     """
-    Returns a TeX-formatted string
+    Returns a TeX-formatted string.
     """
 
     if isinstance(s, (float, int)):

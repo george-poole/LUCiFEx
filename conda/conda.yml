@@ -33,7 +33,7 @@ dependencies:
   - aws-sdk-cpp=1.11.212=h9475118_0
   - babel=2.17.0=pyhd8ed1ab_0
   - beautifulsoup4=4.13.3=pyha770c72_0
-  - black=25.1.0=pyha5154f8_0
+  - black=26.3.1=pyha5154f8_0
   - bleach=6.2.0=pyh29332c3_4
   - bleach-with-css=6.2.0=h82add2a_4
   - blosc=1.21.4=heccf04b_0
@@ -48,6 +48,8 @@ dependencies:
   - cached-property=1.5.2=hd8ed1ab_1
   - cached_property=1.5.2=pyha770c72_1
   - cairo=1.16.0=h09dd18c_1016
+  - cairocffi=1.7.1=pyhcf101f3_2
+  - cairosvg=2.8.2=pyhcf101f3_1
   - certifi=2026.2.25=pyhd8ed1ab_0
   - cffi=1.15.1=py310ha78151a_3
   - cftime=1.6.4=py310hcb5bc8d_2
@@ -57,6 +59,7 @@ dependencies:
   - colorama=0.4.6=pyhd8ed1ab_1
   - comm=0.2.2=pyhd8ed1ab_1
   - contourpy=1.1.0=py310h88cfcbd_0
+  - cssselect2=0.9.0=pyhd8ed1ab_0
   - curl=8.1.2=hbee3ae8_0
   - cycler=0.11.0=pyhd8ed1ab_0
   - cython=3.0.11=py310he0a0c5d_0
@@ -67,6 +70,7 @@ dependencies:
   - debugpy=1.8.5=py310he0a0c5d_0
   - decorator=5.1.1=pyhd8ed1ab_1
   - defusedxml=0.7.1=pyhd8ed1ab_0
+  - dill=0.4.1=pyhcf101f3_0
   - distributed=2026.1.2=pyhcf101f3_1
   - docutils=0.21.2=pyhd8ed1ab_1
   - dolfinx_mpc=0.6.1=py310h1682543_2
@@ -100,9 +104,12 @@ dependencies:
   - fribidi=1.0.10=hbcb3906_0
   - frozenlist=1.3.3=py310h90acd4f_0
   - fsspec=2026.2.0=pyhd8ed1ab_0
+  - gdk-pixbuf=2.42.10=hff535ac_2
   - gettext=0.21.1=h8a4c099_0
   - gflags=2.2.2=hb1e8313_1004
   - ghp-import=2.1.0=pyhd8ed1ab_2
+  - gitdb=4.0.12=pyhd8ed1ab_0
+  - gitpython=3.1.46=pyhd8ed1ab_0
   - gl2ps=1.4.2=h4cff582_0
   - glew=2.1.0=h046ec9c_2
   - glib=2.76.4=h7d26f99_0
@@ -212,6 +219,7 @@ dependencies:
   - libprotobuf=5.29.3=h66a43dd_1
   - libraw=0.21.1=h9804679_1
   - libre2-11=2024.07.02=hab2016f_0
+  - librsvg=2.56.3=hec3db73_0
   - libsodium=1.0.18=hbcb3906_1
   - libsqlite=3.42.0=h58db7d2_0
   - libssh2=1.11.0=hd019ec5_0
@@ -269,6 +277,7 @@ dependencies:
   - nbconvert=7.16.6=hb482800_0
   - nbconvert-core=7.16.6=pyh29332c3_0
   - nbconvert-pandoc=7.16.6=hed9df3c_0
+  - nbdime=4.0.4=pyhcf101f3_0
   - nbformat=5.10.4=pyhd8ed1ab_1
   - ncurses=6.4=hf0c8a7f_0
   - nest-asyncio=1.6.0=pyhd8ed1ab_1
@@ -295,6 +304,7 @@ dependencies:
   - pandas=2.2.2=py310hbf2a7f0_1
   - pandoc=3.6.4=h694c41f_0
   - pandocfilters=1.5.0=pyhd8ed1ab_0
+  - pango=1.50.14=hbce5e75_1
   - parmetis=4.0.3=hb7fa8f8_1005
   - parso=0.8.4=pyhd8ed1ab_1
   - partd=1.4.2=pyhd8ed1ab_0
@@ -342,6 +352,7 @@ dependencies:
   - python-json-logger=2.0.7=pyhd8ed1ab_0
   - python-tzdata=2025.2=pyhd8ed1ab_0
   - python_abi=3.10=3_cp310
+  - pytokens=0.4.1=py310h8bcfd8d_0
   - pytz=2025.2=pyhd8ed1ab_0
   - pyvista=0.40.1=pyhd8ed1ab_0
   - pywavelets=1.8.0=py310h6fa6179_0
@@ -367,6 +378,7 @@ dependencies:
   - six=1.16.0=pyh6c4a22f_0
   - slepc=3.18.3=real_ha03fd1b_100
   - slepc4py=3.18.3=real_hcbbcfa8_100
+  - smmap=5.0.2=pyhd8ed1ab_0
   - snappy=1.1.10=h225ccf5_0
   - sniffio=1.3.1=pyhd8ed1ab_2
   - snowballstemmer=3.0.1=pyhd8ed1ab_0

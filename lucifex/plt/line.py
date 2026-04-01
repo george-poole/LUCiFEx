@@ -156,29 +156,31 @@ def plot_twin_lines(
 
 
 def plot_stacked_lines(
-    f: Iterable[Function | tuple[Iterable[float], Iterable[float]]],
+    stacked_lines: Iterable[Function | tuple[Iterable[float], Iterable[float]]],
     x_label: str | None = None,
     y_labels: Iterable[str] | None = None,
     title: str | None = None,
     gridspec_kw: dict | None = None,
     **plt_kwargs,
 ) -> tuple[Figure, list[Axes]]:
-    assert len(f) > 0
+    if len(stacked_lines) == 0:
+        raise ValueError(f'Iterable if lines to plot must be non-empty.')
+    
     if gridspec_kw is None:
         gridspec_kw = {}
     if y_labels is None:
-        y_labels = [None] * len(f)
+        y_labels = [None] * len(stacked_lines)
 
-    fig, ax = plt.subplots(len(f), sharex=True, gridspec_kw=gridspec_kw)
+    fig, axs = plt.subplots(len(stacked_lines), sharex=True, gridspec_kw=gridspec_kw)
     
-    for fi, axi, y_label in zip(f, ax, y_labels, strict=True):
-        plot_line(fig, axi, fi, y_label=y_label, **plt_kwargs)
+    for line, ax, y_label in zip(stacked_lines, axs, y_labels, strict=True):
+        plot_line(fig, ax, line, y_label=y_label, **plt_kwargs)
 
-    set_axes(ax[0], title=title)
-    set_axes(ax[-1], x_label=x_label)
+    set_axes(axs[0], title=title)
+    set_axes(axs[-1], x_label=x_label)
     fig.subplots_adjust(hspace=0)
 
-    return fig, list(ax)
+    return fig, list(axs)
 
 
 @optional_multifig_ax

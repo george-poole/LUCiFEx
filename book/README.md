@@ -1,4 +1,6 @@
-# Building the Jupyter Book
+# LUCiFEx Demo Book
+
+## Building the Juptyer Book
 
 To execute only notebooks with name matching the glob pattern `XYZ*` do
 
@@ -13,3 +15,8 @@ For a dry-run do
 For a complete rebuild do
 
 `bash build.sh "*" "" "--allow-errors" "--all"` 
+
+## Style guide
+
++ no gaps between imports in notebooks
++ problem specification listed in the order: domain, domain boundaries, initial conditions, boundary conditions and lastly coefficients or constitutive relations

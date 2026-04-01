@@ -222,7 +222,7 @@ def darcy_rayleigh_benard_semicircle(
         Omega, 
         {
             "lower": lambda x: x[1],
-            "outer": lambda x: r2(x) - radius**2,
+            "upper": lambda x: r2(x) - radius**2,
         },
     )
     Di, Bu = scaling_map[Omega, 'Di', 'Bu']
@@ -237,7 +237,7 @@ def darcy_rayleigh_benard_semicircle(
         ) 
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['lower'], 1.0),
-        ("dirichlet", dOmega['outer'], 0.0),  
+        ("dirichlet", dOmega['upper'], 0.0),  
     )
     dispersion = lambda phi: Di * phi
     density = lambda c: -Bu * c

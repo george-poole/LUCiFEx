@@ -29,6 +29,7 @@ parts:
       - file: demo/P2_introductory/I40_advection_diffusion_equation
         sections: 
           - file: demo/P2_introductory/I41_advection_diffusion_interval
+          - file: demo/P2_introductory/I42_advection_diffusion_rectangle
       - file: demo/P2_introductory/I50_helmholtz_equation
         sections: 
           - file: demo/P2_introductory/I51_helmholtz_evp
@@ -45,6 +46,7 @@ parts:
           - file: demo/P3_fluids/F11_darcy_lens
           - file: demo/P3_fluids/F12_darcy_anticline
           - file: demo/P3_fluids/F13_darcy_annulus
+          - file: demo/P3_fluids/F14_darcy_injected
       - file: demo/P3_fluids/F20_stokes_equations
         sections: 
           - file: demo/P3_fluids/F21_stokes_channel

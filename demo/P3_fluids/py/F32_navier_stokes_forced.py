@@ -15,7 +15,6 @@ from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction, s
 from lucifex.pde.navier_stokes import navier_stokes_vorticity
 
 
-
 @configure_simulation(
     store_delta=1,
     write_delta=None,

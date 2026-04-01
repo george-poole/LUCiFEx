@@ -59,6 +59,7 @@ def stokes_streamfunction(
     alpha: Constant,
     fx: Function | None = None,
     fy: Function | None = None,
+    mu: Function | Constant | float = 1,
     # bcs: BoundaryConditions | None = None # TODO
 ) -> list[Form]:
     """
@@ -71,11 +72,11 @@ def stokes_streamfunction(
     n = FacetNormal(psi.function_space.mesh)
     h = CellDiameter(psi.function_space.mesh)
 
-    F_dx = div(grad(v)) * div(grad(psi_trial)) * dx
+    F_dx = mu * div(grad(v)) * div(grad(psi_trial)) * dx
 
-    F_dS = (alpha / avg(h)) * inner(jump(grad(v), n), jump(grad(psi_trial), n)) * dS
-    F_dS -= inner(jump(grad(v), n), avg(div(grad(psi_trial)))) * dS
-    F_dS -= inner(avg(div(grad(v))), jump(grad(psi_trial), n)) * dS
+    F_dS = mu * (alpha / avg(h)) * inner(jump(grad(v), n), jump(grad(psi_trial), n)) * dS
+    F_dS -= mu * inner(jump(grad(v), n), avg(div(grad(psi_trial)))) * dS
+    F_dS -= mu * inner(avg(div(grad(v))), jump(grad(psi_trial), n)) * dS
 
     forms = [F_dx, F_dS]
 
