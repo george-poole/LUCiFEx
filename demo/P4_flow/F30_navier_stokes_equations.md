@@ -40,7 +40,7 @@ $$
 &p^{n+1}\in V_p, \\
 &\textbf{u}^{n+1}\in V_{\textbf{u}} \\
 &\text{such that} \\
-&\mathbb{F} 
+&\mathbb{F}_{\tilde{\textbf{u}},p,\textbf{u}} 
 \begin{cases}
 \begin{align*}
 F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &= 
@@ -65,7 +65,7 @@ $$
 &p^{n+1}\in V_p, \\
 &\textbf{u}^{n+1}\in V_{\textbf{u}} \\
 &\text{such that} \\
-&\mathbb{F} 
+&\mathbb{F}_{\tilde{\textbf{u}},p,\textbf{u}} 
 \begin{cases}
 \begin{align*}
 F_1(\widetilde{\textbf{u}}^{n+1}, \textbf{v}) &= 
@@ -93,7 +93,7 @@ $$
 \textbf{n}\cdot\nabla\psi = \psi_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N}, \psi}
 \times [0,\infty)~,~\partial\Omega_{\text{N}, \psi}=\partial\Omega/\partial\Omega_{\text{D}, \psi} \\
 \omega=\omega_{\text{D}} & \forall \textbf{x}\in\partial\Omega_{\text{D},\omega} \times [0,\infty) \\
-\textbf{n}\cdot\nabla\omega = \omega_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N},\omega}\times[0,\infty)~,~\partial\Omega_{\text{N},\omega}=\partial\Omega/\partial\Omega_{\text{D},\omega} 
+\textbf{n}\cdot\mu\nabla\omega = \omega_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N},\omega}\times[0,\infty)~,~\partial\Omega_{\text{N},\omega}=\partial\Omega/\partial\Omega_{\text{D},\omega} 
 \end{cases} \\
 &\text{given}\\
 &\mathbb{S}_{\psi,\omega}\begin{cases}

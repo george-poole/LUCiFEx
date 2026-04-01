@@ -67,55 +67,55 @@
     </tr>
     </table>
 
-## Fluids
+## Flow
 
 <table>
     <tr>
     <td>
-    <img src="./demo/P3_fluids/thumbnails/F11_darcy_lens.png" width="400"/>
-    <a href="./demo/P3_fluids/F11_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a> 
+    <img src="./demo/P4_flow/thumbnails/F11_darcy_lens.png" width="400"/>
+    <a href="./demo/P4_flow/F11_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F12_darcy_anticline.png" width="400"/>
-    <a href="./demo/P3_fluids/F12_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a> 
+    <img src="./demo/P4_flow/thumbnails/F12_darcy_anticline.png" width="400"/>
+    <a href="./demo/P4_flow/F12_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F13_darcy_annulus.png" width="400"/>
-    <a href="./demo/P3_fluids/F13_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a> 
+    <img src="./demo/P4_flow/thumbnails/F13_darcy_annulus.png" width="400"/>
+    <a href="./demo/P4_flow/F13_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P3_fluids/thumbnails/F14_darcy_injected.png" width="400"/>
-    <a href="./demo/P3_fluids/F14_darcy_injected.html">Flow of a Darcy fluid injected and extracted in a porous rectangle</a> 
+    <img src="./demo/P4_flow/thumbnails/F14_darcy_injected.png" width="400"/>
+    <a href="./demo/P4_flow/F14_darcy_injected.html">Flow of a Darcy fluid injected and extracted in a porous rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F21_stokes_channel.png" width="400"/>
-    <a href="./demo/P3_fluids/F21_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a> 
+    <img src="./demo/P4_flow/thumbnails/F21_stokes_channel.png" width="400"/>
+    <a href="./demo/P4_flow/F21_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F22_stokes_cavity.png" width="400"/>
-    <a href="./demo/P3_fluids/F22_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a> 
+    <img src="./demo/P4_flow/thumbnails/F22_stokes_cavity.png" width="400"/>
+    <a href="./demo/P4_flow/F22_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P3_fluids/thumbnails/F23_stokes_forced.png" width="400"/>
-    <a href="./demo/P3_fluids/F23_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a> 
+    <img src="./demo/P4_flow/thumbnails/F23_stokes_forced.png" width="400"/>
+    <a href="./demo/P4_flow/F23_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F24_stokes_corrugated.png" width="400"/>
-    <a href="./demo/P3_fluids/F24_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a> 
+    <img src="./demo/P4_flow/thumbnails/F24_stokes_corrugated.png" width="400"/>
+    <a href="./demo/P4_flow/F24_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a> 
     </td>
 <td>
-    <img src="./demo/P3_fluids/thumbnails/F31_navier_stokes_obstacle.png" width="400"/>
-    <a href="./demo/P3_fluids/F31_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a> 
+    <img src="./demo/P4_flow/thumbnails/F31_navier_stokes_obstacle.png" width="400"/>
+    <a href="./demo/P4_flow/F31_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P3_fluids/thumbnails/F32_navier_stokes_forced.png" width="400"/>
-    <a href="./demo/P3_fluids/F32_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a> 
+    <img src="./demo/P4_flow/thumbnails/F32_navier_stokes_forced.png" width="400"/>
+    <a href="./demo/P4_flow/F32_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a> 
     </td>
     </tr>
     </table>
@@ -125,68 +125,68 @@
 <table>
     <tr>
     <td>
-    <img src="./demo/P4_transport/thumbnails/T11_dg_advection_interval_step.png" width="400"/>
-    <a href="./demo/P4_transport/T11_dg_advection_interval_step.html">DG advection of a step in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T11_dg_advection_interval_step.png" width="400"/>
+    <a href="./demo/P3_transport/T11_dg_advection_interval_step.html">DG advection of a step in an interval</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T12_dg_advection_interval_cosine.png" width="400"/>
-    <a href="./demo/P4_transport/T12_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T12_dg_advection_interval_cosine.png" width="400"/>
+    <a href="./demo/P3_transport/T12_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T13_dg_advection_rectangle_cone.png" width="400"/>
-    <a href="./demo/P4_transport/T13_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T13_dg_advection_rectangle_cone.png" width="400"/>
+    <a href="./demo/P3_transport/T13_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P4_transport/thumbnails/T14_dg_advection_rectangle_vortex.png" width="400"/>
-    <a href="./demo/P4_transport/T14_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T14_dg_advection_rectangle_vortex.png" width="400"/>
+    <a href="./demo/P3_transport/T14_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T21_dg_steady_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P4_transport/T21_dg_steady_advection_diffusion_interval.html">DG steady advection-diffusion in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T21_dg_steady_advection_diffusion_interval.png" width="400"/>
+    <a href="./demo/P3_transport/T21_dg_steady_advection_diffusion_interval.html">DG steady advection-diffusion in an interval</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T22_dg_steady_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P4_transport/T22_dg_steady_advection_diffusion_rectangle.html">DG steady advection-diffusion in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T22_dg_steady_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./demo/P3_transport/T22_dg_steady_advection_diffusion_rectangle.html">DG steady advection-diffusion in a rectangle</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P4_transport/thumbnails/T31_dg_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P4_transport/T31_dg_advection_diffusion_interval.html">DG advection-diffusion of a tophat on an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T31_dg_advection_diffusion_interval.png" width="400"/>
+    <a href="./demo/P3_transport/T31_dg_advection_diffusion_interval.html">DG advection-diffusion of a tophat on an interval</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T32_dg_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P4_transport/T32_dg_advection_diffusion_rectangle.html">DG advection-diffusion in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T32_dg_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./demo/P3_transport/T32_dg_advection_diffusion_rectangle.html">DG advection-diffusion in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T41_supg_steady_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P4_transport/T41_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T41_supg_steady_advection_diffusion_interval.png" width="400"/>
+    <a href="./demo/P3_transport/T41_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion in an interval</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P4_transport/thumbnails/T42_supg_steady_advection_diffusion_hemker.png" width="400"/>
-    <a href="./demo/P4_transport/T42_supg_steady_advection_diffusion_hemker.html">SUPG steady advection-diffusion of the Hemker problem</a> 
+    <img src="./demo/P3_transport/thumbnails/T42_supg_steady_advection_diffusion_hemker.png" width="400"/>
+    <a href="./demo/P3_transport/T42_supg_steady_advection_diffusion_hemker.html">SUPG steady advection-diffusion of the Hemker problem</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T43_supg_steady_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P4_transport/T43_supg_steady_advection_diffusion_rectangle.html">SUPG steady advection-diffusion with a skew velocity</a> 
+    <img src="./demo/P3_transport/thumbnails/T43_supg_steady_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./demo/P3_transport/T43_supg_steady_advection_diffusion_rectangle.html">SUPG steady advection-diffusion with a skew velocity</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T51_supg_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P4_transport/T51_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T51_supg_advection_diffusion_interval.png" width="400"/>
+    <a href="./demo/P3_transport/T51_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian in an interval</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P4_transport/thumbnails/T52_supg_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P4_transport/T52_supg_advection_diffusion_rectangle.html">SUPG advection-diffusion of a rotating pulse in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T52_supg_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./demo/P3_transport/T52_supg_advection_diffusion_rectangle.html">SUPG advection-diffusion of a rotating pulse in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P4_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>
-    <a href="./demo/P4_transport/T61_splitting_advection_reaction.html">Operator splitting of the advection-reaction equation</a> 
+    <img src="./demo/P3_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>
+    <a href="./demo/P3_transport/T61_splitting_advection_reaction.html">Operator splitting of the advection-reaction equation</a> 
     </td>
     </tr>
     </table>

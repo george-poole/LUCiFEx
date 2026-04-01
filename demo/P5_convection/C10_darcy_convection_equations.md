@@ -129,7 +129,7 @@ $$
 &c^{n+1}\in V_c \\
 &\theta^{n+1}\in V_\theta \\
 &\text{such that} \\
-&\mathbb{F}_{\textbf{u},p} 
+&\mathbb{F}_{\textbf{u},p,c,\theta} 
 \begin{cases}
 F_{\textbf{u},p}(\textbf{u}^n, p^n, \textbf{v}, q)=0 \quad\forall(\textbf{v}, q)\in V_{\textbf{u}} \times V_p\\
 F_c(c^{n+1}, v) = 0\quad\forall v\in V_c \\ 
@@ -148,7 +148,7 @@ $$
 &c^{n+1}\in V_c \\
 &\theta^{n+1}\in V_\theta \\
 &\text{such that} \\
-&\mathbb{F}_\psi 
+&\mathbb{F}_{\psi,c,\theta} 
 \begin{cases}
 F_\psi(\psi^n, v) = 0\quad\forall v\in V_\psi \\
 F_{\textbf{u}}(\textbf{u}^n, \textbf{v}) = 0\quad\forall \textbf{v}\in V_{\textbf{u}} \\ 

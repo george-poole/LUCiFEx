@@ -55,14 +55,14 @@ def reset_matplotlib() -> None:
 P = ParamSpec('P')
 def optional_fig(
     plot_func: Callable[Concatenate[Figure, P], None],
-) -> Callable[P, tuple[Figure, Axes]] | Callable[Concatenate[Figure, Axes, P], None]:
+) -> Callable[P, tuple[Figure, Axes]] | Callable[Concatenate[Figure, Axes, P], None] | Callable[Concatenate[Figure, P], None]:
     return _optional_fig_and_or_ax(plot_func, fig_ax_arg='fig')
 
 
 P = ParamSpec('P')
 def optional_ax(
     plot_func: Callable[Concatenate[Axes, P], None],
-) -> Callable[P, tuple[Figure, Axes]] | Callable[Concatenate[Figure, Axes, P], None]:
+) -> Callable[P, tuple[Figure, Axes]] | Callable[Concatenate[Figure, Axes, P], None] | Callable[Concatenate[Axes, P], None]:
     return _optional_fig_and_or_ax(plot_func, fig_ax_arg='ax')
 
 
@@ -70,7 +70,7 @@ P = ParamSpec('P')
 def optional_fig_ax(
     plot_func: Callable[Concatenate[Figure, Axes, P], None],
 ) -> Callable[P, tuple[Figure, Axes]] | Callable[Concatenate[Figure, Axes, P], None]:
-    return _optional_fig_and_or_ax(plot_func, fig_ax_arg='both')
+    return _optional_fig_and_or_ax(plot_func, fig_ax_arg='fig_ax')
 
 
 P = ParamSpec('P')
@@ -78,34 +78,39 @@ def _optional_fig_and_or_ax(
     plot_func: Callable[Concatenate[Figure, Axes, P], None] 
     | Callable[Concatenate[Figure, P], None]
     | Callable[Concatenate[Axes, P], None],
-    fig_ax_arg: Literal['fig', 'ax', 'both'],
+    fig_ax_arg: Literal['fig', 'ax', 'fig_ax'],
 ):  
     # @wraps(func)
     def _inner(*args, **kwargs):
-
-        mutate_fig_ax = isinstance(args[0], Figure) and isinstance(args[1], Axes)
-
-        if mutate_fig_ax:
+        if isinstance(args[0], Figure) and isinstance(args[1], Axes):
             # mutating existing `Figure, Axes` and returning `None`
             fig, ax, *_args = args
+            return_fig_ax = False
+        elif isinstance(args[0], Figure) and not isinstance(args[1], Axes):
+            # mutating existing `Figure` and returning `None`
+            fig, *_args = args
+            return_fig_ax = False
+        elif isinstance(args[0], Axes):
+            # mutating existing `Axes` and returning `None`
+            ax, *_args = args
+            return_fig_ax = False
         else:
             # creating and returning new `Figure, Axes`
             _args = args
             fig, ax = plt.subplots()
-        
+            return_fig_ax = True
+
         if fig_ax_arg == 'fig':
             plot_func(fig, *_args, **kwargs)
         elif fig_ax_arg == 'ax':
             plot_func(ax, *_args, **kwargs)
-        elif fig_ax_arg == 'both':
+        elif fig_ax_arg == 'fig_ax':
             plot_func(fig, ax, *_args, **kwargs)
         else:
             raise ValueError
         
-        if not mutate_fig_ax:
+        if return_fig_ax:
             return fig, ax
-        
-
 
     return _inner
 

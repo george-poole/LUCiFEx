@@ -17,8 +17,8 @@ $$
 \frac{\partial\theta}{\partial t}+\textbf{u}\cdot\nabla\theta=\nabla\cdot(\mathsf{G}\cdot\nabla\theta) & \\
 \nabla\cdot\textbf{u} = 0 & \\
 \textbf{0}=-\nabla p + \nabla\cdot\tau + \rho g\,\textbf{e}_g & \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
-c(\textbf{x},t=0)=c_0 & \forall\textbf{x}\in\Omega \\
-\theta(\textbf{x},t=0)=\theta_0 & \forall\textbf{x}\in\Omega \\
+c=c_0 & \forall(\textbf{x},t)\in\Omega\times\{0\} \\
+\theta=\theta_0 & \\forall(\textbf{x},t)\in\Omega\times\{0\} \\
 c=c_{\text{D}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty) \\
 \textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
 \times [0,\infty)~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\

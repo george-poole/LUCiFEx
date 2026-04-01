@@ -25,10 +25,10 @@ $$u^0=u_0$$
 
 $$u^{-1}=u^0 - \Delta t^0\dot{u}_0$$
 
-## Weak form
+## Second-order time derivative formulation
 
 ...
 
-## Mixed formulation
+## First-order time derivatives formulation
 
 ...

@@ -1,6 +1,4 @@
-# DG formulation of the advection equation
-
-Solutions obtained by the continous Galerkin (CG) formulation of PDEs dominated by advection or containing discontinuities typically suffer from numerical instabilities. A discontinuous Galerkin (DG) formulation provides a better alternative.
+# DG method for the advection equation
 
 ## Strong form
 

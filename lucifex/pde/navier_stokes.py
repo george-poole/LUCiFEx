@@ -41,7 +41,7 @@ def ipcs_1(
     dim = u.ufl_shape[0]
     epsilon = strain(v)
 
-    F_dt = inner(v, D_dt(u, dt)) * dx
+    F_dt = inner(v, D_dt(u, dt, trial=u)) * dx
     F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u))), trial=u) * dx
     tau = deviatoric_stress(D_visc(u, trial=u))
     sigma = -p_scale * p[0] * Identity(dim) + tau
@@ -136,7 +136,7 @@ def chorin_1(
     adv_scale: Constant | float = 1,
 ) -> list[Form]:
     v = TestFunction(u.function_space)
-    F_dt = inner(v, D_dt(u, dt)) * dx
+    F_dt = inner(v, D_dt(u, dt, trial=u)) * dx
     F_adv = adv_scale * inner(v, D_adv(dot(u, nabla_grad(u)))) * dx
     tau = deviatoric_stress(D_visc(u))
     F_visc = inner(grad(v), tau) * dx

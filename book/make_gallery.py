@@ -36,9 +36,9 @@ def table_row(
 
 def table_data(
     caption_path: str,
-    fig_dir_path,
-    fig_name,
-    caption,
+    fig_dir_path: str,
+    fig_name: str,
+    caption: str,
     fig_ext: str = 'png',
     img_width: int = 400,
 ) -> str:
@@ -106,24 +106,23 @@ def make_gallery(
 
 
 if __name__ == "__main__":
-
     HEADING = 'Gallery'
-
     NOTEBOOKS_DIR_PATH = "./demo"
     THUMBNAIL_DIR_NAME = "thumbnails"
     THUMBNAIL_EXT = 'png'
     EXCLUDE = 'xxx'
-    NOTEBOOK_PARTS = [
+    NOTEBOOK_PARTS = (
+        # ('Further Applications', 'P6_further_applications'),
         ('Convection', 'P5_convection'),
-        ('Fluids', 'P3_fluids'),
-        ('Transport', 'P4_transport'),
+        ('Flow', 'P4_flow'),
+        ('Transport', 'P3_transport'),
         ('Introductory', 'P2_introductory'),
-        # ('Advanced', 'P6_advanced'),
-    ]
-
-    outputs = [('gallery.md', True), ('gallery_local.md', False)]
-
-    for file, html in outputs:
+    )
+    OUTPUTS = (
+        ('gallery.md', True), 
+        ('gallery_local.md', False),
+    )
+    for file, html in OUTPUTS:
         make_gallery(
             file, 
             html,

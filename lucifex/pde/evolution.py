@@ -26,7 +26,7 @@ def evolution(
     phi = D_phi(phi)
     dx = Measure('dx', u.function_space.mesh)
     v = TestFunction(u.function_space)
-    F_dsdt = v * D_dt(u, dt) * dx
+    F_dsdt = v * D_dt(u, dt, trial=u) * dx
     r = D_rhs(r, trial=u)
     F_reac = -v * (1/phi) * r * dx
     return F_dsdt, F_reac

@@ -1,4 +1,4 @@
-# DG formulation of the advection-diffusion-reaction equation
+# DG method for the advection-diffusion-reaction equation
 
 ## Strong form
 

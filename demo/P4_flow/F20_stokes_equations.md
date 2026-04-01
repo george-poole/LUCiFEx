@@ -86,14 +86,14 @@ $$
 &\text{Find}~\psi(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
 &\mathbb{BVP}_\psi\begin{cases}
 \mu\nabla^2(\nabla^2\psi) = \frac{\partial f_y}{\partial x}- \frac{\partial f_x}{\partial y} & \forall\textbf{x}\in\Omega \\
-\psi=\psi_{\text{D}} & \forall \textbf{x}\in\partial\Omega \\
-\nabla^2\psi=\psi_{\text{L}} & \forall \textbf{x}\in\partial\Omega
+\psi=\psi_{\text{E}} & \forall \textbf{x}\in\partial\Omega \\
+\mu\nabla^2\psi=\psi_{\text{W}} & \forall \textbf{x}\in\partial\Omega
 \end{cases}\\
 &\text{given} \\
 &\mathbb{S}_{\psi}\begin{cases}
 \Omega\subset\mathbb{R}^2  & \text{domain}\\
-\psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition} \\
-\psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition} \\
+\psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{essential boundary condition} \\
+\psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{W}} & \text{weak boundary condition} \\
 f_x(\textbf{x}), f_y(\textbf{x}) & \text{body force} \\
 \end{cases}\\
 &\text{where}\\
