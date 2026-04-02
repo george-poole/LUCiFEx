@@ -418,6 +418,7 @@ https://conda.anaconda.org/conda-forge/noarch/ipykernel-6.29.5-pyh57ce528_0.cond
 https://conda.anaconda.org/conda-forge/noarch/jupyter_events-0.12.0-pyh29332c3_0.conda
 https://conda.anaconda.org/conda-forge/osx-64/matplotlib-base-3.7.2-py310h475a17b_0.conda
 https://conda.anaconda.org/conda-forge/noarch/nbclient-0.10.2-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/nbstripout-0.9.1-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/osx-64/netcdf4-1.6.4-nompi_py310h3504ac7_100.conda
 https://conda.anaconda.org/conda-forge/osx-64/petsc-3.18.5-real_h04a6aba_100.conda
 https://conda.anaconda.org/conda-forge/osx-64/scikit-image-0.24.0-py310hbf2a7f0_2.conda

@@ -308,4 +308,5 @@ dependencies:
   - librsvg
   - dill
   - nbdime
+  - nbstripout
 prefix: /Users/George/miniconda3/envs/lucifex
