@@ -37,12 +37,16 @@ parts:
       - file: demo/P2_introductory/I60_mathieu_equation
         sections: 
           - file: demo/P2_introductory/I61_mathieu_evp
-      - file: demo/P2_introductory/I70_bcs
+      # - file: demo/P2_introductory/I70_wave_equation
+      #   sections: 
+      #     - file: demo/P2_introductory/I71_wave_interval
+      - file: demo/P2_introductory/I80_bcs
         sections: 
-          - file: demo/P2_introductory/I71_bcs_dirichlet_time
-          - file: demo/P2_introductory/I72_bcs_neumann_time
-          - file: demo/P2_introductory/I73_bcs_periodic
-          - file: demo/P2_introductory/I74_bcs_robin
+          - file: demo/P2_introductory/I81_bcs_dirichlet_time
+          - file: demo/P2_introductory/I82_bcs_neumann_time
+          - file: demo/P2_introductory/I83_bcs_periodic
+          - file: demo/P2_introductory/I84_bcs_robin
+          - file: demo/P2_introductory/I85_bcs_nitsche
 
   - caption: Transport
     chapters:

@@ -19,7 +19,7 @@ Scaled: TypeAlias = tuple[Constant | float, T]
 
 def is_scaled_type(
     obj: Any,
-    tp: type | None = None
+    tp: type | Iterable[type] | None = None
 ) -> bool:
     _bool = isinstance(obj, tuple) and len(obj) == 2 and isinstance(obj[0], (float, Constant))
     if tp is None:

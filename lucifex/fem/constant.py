@@ -5,7 +5,7 @@ from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant as DOLFINxConstant
 import numpy as np
 
-from ..utils.py_utils import str_indexed, AnyFloat
+from ..utils.py_utils import str_indexed, AnyNumber
 from .unsolved import UnsolvedType
 
 
@@ -13,7 +13,7 @@ class Constant(DOLFINxConstant):
     def __init__(
         self,
         mesh: Mesh,
-        value: AnyFloat | Iterable[AnyFloat] | UnsolvedType | Self | None = None,
+        value: AnyNumber | Iterable[AnyNumber] | UnsolvedType | Self | None = None,
         name: str | None = None,
         shape: tuple[int, ...] = (),
         index: int | None = None,
@@ -32,22 +32,21 @@ class Constant(DOLFINxConstant):
         if name is None:
             name =  f'{self.__class__.__name__}{id(self)}'
 
-        self._name = name
-        self._subnames = subnames
-        self._create_subname = lambda i: (
-            self._subnames[i] if self._subnames else f'{self.name}{i}'
-        )
-
         if value is None:
             value = 0.0
-        if isinstance(value, (int, UnsolvedType)):
+        if isinstance(value, (AnyNumber, UnsolvedType)):
             value = float(value)
         if not isinstance(value, Iterable):
             value = np.full(shape, value)
         if isinstance(value, DOLFINxConstant):
             value = value.value
         super().__init__(mesh, value)
-        
+
+        self._name = name
+        self._subnames = subnames
+        self._create_subname = lambda i: (
+            self._subnames[i] if self._subnames else f'{self.name}{i}'
+        )
         self._index = index
 
     @property

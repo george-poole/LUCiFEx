@@ -654,8 +654,11 @@ class FiniteDifferenceArgwise(
 def finite_difference_order(
     *args: FiniteDifference | FiniteDifferenceArgwise | Any,
     minimum: int = 1,
+    strict: bool = False,
 ) -> int | None:
     orders = [a.order for a in args if isinstance(a, (FiniteDifference, FiniteDifferenceArgwise))]
+    if strict and len(orders) < len(args):
+        raise TypeError('All arguments must be of type `FiniteDifference` or `FiniteDifferenceArgwise`.')
     if orders:
         return max(minimum, max(orders))
     else:

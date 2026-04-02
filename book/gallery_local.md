@@ -246,28 +246,28 @@
     <a href="./demo/P2_introductory/I61_mathieu_evp.ipynb">Mathieu eigenvalue problem in an interval</a> 
     </td>
 <td>
-    <img src="./demo/P2_introductory/thumbnails/I71_bcs_dirichlet_time.png" width="400"/>
-    <a href="./demo/P2_introductory/I71_bcs_dirichlet_time.ipynb">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I81_bcs_dirichlet_time.png" width="400"/>
+    <a href="./demo/P2_introductory/I81_bcs_dirichlet_time.ipynb">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P2_introductory/thumbnails/I72_bcs_neumann_time.png" width="400"/>
-    <a href="./demo/P2_introductory/I72_bcs_neumann_time.ipynb">Diffusion equation with time-dependent Neumann boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I82_bcs_neumann_time.png" width="400"/>
+    <a href="./demo/P2_introductory/I82_bcs_neumann_time.ipynb">Diffusion equation with time-dependent Neumann boundary conditions</a> 
     </td>
 <td>
-    <img src="./demo/P2_introductory/thumbnails/I73_bcs_periodic.png" width="400"/>
-    <a href="./demo/P2_introductory/I73_bcs_periodic.ipynb">Poisson equation with periodic boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I83_bcs_periodic.png" width="400"/>
+    <a href="./demo/P2_introductory/I83_bcs_periodic.ipynb">Poisson equation with periodic boundary conditions</a> 
     </td>
 <td>
-    <img src="./demo/P2_introductory/thumbnails/I74_bcs_robin.png" width="400"/>
-    <a href="./demo/P2_introductory/I74_bcs_robin.ipynb">Diffusion equation with Robin boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I84_bcs_robin.png" width="400"/>
+    <a href="./demo/P2_introductory/I84_bcs_robin.ipynb">Diffusion equation with Robin boundary conditions</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P2_introductory/thumbnails/I75_bcs_nitsche.png" width="400"/>
-    <a href="./demo/P2_introductory/I75_bcs_nitsche.ipynb">Poisson equation with Nitsche boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I85_bcs_nitsche.png" width="400"/>
+    <a href="./demo/P2_introductory/I85_bcs_nitsche.ipynb">Poisson equation with Nitsche boundary conditions</a> 
     </td>
     </tr>
     </table>

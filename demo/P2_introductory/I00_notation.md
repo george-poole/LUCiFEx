@@ -28,7 +28,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathbb{IBVP}$ | initial boundary value problem |
 | $\mathbb{IVP}$ | initial value problem |
 | $\mathbb{EVP}$ | eigenvalue problem |
-| $\mathbb{S}$ | specification |
+| $\mathbb{S}$ | problem specification |
 | $\mathbb{F}$ | linearized or time-discretized weak forms sequence |
 | $u_0$ | initial condition on $u$ |
 | $u_\text{D}$ | Dirichlet boundary condition on $u$ |

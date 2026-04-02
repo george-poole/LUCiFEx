@@ -25,7 +25,7 @@ class Function(DOLFINxFunction):
         fs: FunctionSpace
             | tuple[Mesh, str, int]
             | tuple[Mesh, str, int, int],
-        x: VectorMetaClass
+        value: VectorMetaClass
             | Self
             | Expression
             | Callable[[np.ndarray], np.ndarray]
@@ -52,34 +52,30 @@ class Function(DOLFINxFunction):
             name = f'{self.__class__.__name__}{id(self)}'
 
         if isinstance(
-            x, 
+            value, 
             (
                 DOLFINxFunction, 
                 Expression, 
                 Callable, 
                 SpatialPerturbation, 
-                int, 
-                float, 
+                AnyNumber, 
                 UnsolvedType,
             ),
         ):
             super().__init__(fs, None, name, dtype)
-            if isinstance(x, SpatialPerturbation):
-                x = x.combine_base_noise(fs)
-            if isinstance(x, UnsolvedType):
-                x = x.value
-            if isinstance(x, AnyNumber):
-                self.x.array[:] = float(x)
+            if isinstance(value, (AnyNumber, UnsolvedType)):
+                self.x.array[:] = float(value)
             else:
-                self.interpolate(x)
+                if isinstance(value, SpatialPerturbation):
+                    value = value.combine_base_noise(fs)
+                self.interpolate(value)
         else:
-            super().__init__(fs, x, name, dtype)
+            super().__init__(fs, value, name, dtype)
 
         self._subnames = subnames
         self._create_subname = lambda i: (
             self._subnames[i] if self._subnames else f'{self.name}{i}'
         )
-        
         self._index = index
 
     def copy(self, name: str | None = None) -> Self:

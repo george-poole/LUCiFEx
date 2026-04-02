@@ -1,4 +1,4 @@
-from typing import TypeAlias, Callable
+from typing import TypeAlias, Callable, TypeAlias
 from collections.abc import Iterable
 from typing_extensions import Unpack
 
@@ -24,10 +24,9 @@ from ..utils.fenicsx_utils import (
     BooleanMarker,
     DofsLocatorType,
     FacetLocatorType,
-    is_scalar, is_vector, as_function, 
+    as_function, 
     create_function, create_constant, 
     extract_function_space,
-    NonScalarVectorError,
 )
 
 Value: TypeAlias = (
@@ -42,14 +41,14 @@ Value: TypeAlias = (
 SubspaceIndex: TypeAlias = int | None 
 
 
+V: TypeAlias = Argument
+UW: TypeAlias = Expr | Function | Constant
 class BoundaryConditions:
     """
     A weakly-enforced boundary condition (e.g. `'natural'`, `'neumann'` or `'robin'`) with 
-    boundary value `uW` will add to the variational forms a term `+∫ v·uW ds`, 
-    where `v` is the test function.
-
-    Weakly-enforced boundary conditions that cannnot be expressed by 
-    such a form should instead be specified in the forms factory.
+    boundary value `uW` will add to the variational forms a term `+∫ f(v,uW) ds` , given 
+    the test function `v` and some expression factory `f` which if unspecified 
+    defaults to `f(v,uW) = v·uW`.
     """
     def __init__(
         self,
@@ -58,13 +57,12 @@ class BoundaryConditions:
         | tuple[Marker, Value]
         | tuple[Marker, Value, SubspaceIndex],
         dofs_locator: DofsLocatorType | Iterable[DofsLocatorType] = DofsLocatorType.TOPOLOGICAL,
-        rescale_weak: int | float | None = None, 
+        **auto_exprs: Callable[[V, UW], Expr], 
     ):
         self._markers: list[BooleanMarker] = []
         self._values: list = []
         self._btypes: list[BoundaryType] = []
         self._subindices: list[int | None] = []
-        self._rescale_weak = rescale_weak
 
         if isinstance(dofs_locator, str):
             dofs_locator = [dofs_locator] * len(bcs)
@@ -91,6 +89,14 @@ class BoundaryConditions:
             self._values.append(value)
             self._btypes.append(BoundaryType(btype))
             self._subindices.append(subindex)
+
+        _weak_btypes = (BoundaryType.NEUMANN, BoundaryType.WEAK, BoundaryType.NATURAL, BoundaryType.ROBIN)
+        _auto_exprs: dict[BoundaryType, Callable[[V, UW], Expr]] = {
+            btype: lambda v, uW: inner(v, uW)
+            for btype in _weak_btypes
+        }
+        _auto_exprs.update({BoundaryType(k): v for k, v in auto_exprs.items()})
+        self._auto_exprs = _auto_exprs
             
     def create_strong_bcs(
         self,
@@ -138,7 +144,7 @@ class BoundaryConditions:
         finalize: bool = True,
     ) -> MultiPointConstraint | None:
         """
-        Implements periodic and antiperiodic boundary conditions via a geometrical constraint
+        Implements periodic and antiperiodic boundary conditions via a geometrical constraint.
         """
     
         if bcs is None:
@@ -176,28 +182,17 @@ class BoundaryConditions:
             BoundaryType.NATURAL, BoundaryType.WEAK,
         )
     ) -> list[Form]:
-        """
-        Weakly enforced boundary condition by a term `+∫ v·uW ds` with 
-        test function `v` and prescribed value `uW` in the variational form `F(u,v)=0`.
-        """
         fs = extract_function_space(solution)
         v = TestFunction(fs)
-        if self._rescale_weak is not None:
-            scale = Constant(fs.mesh, self._rescale_weak)
-        else:
-            scale = 1
 
-        ds, *boundary_data = self.boundary_data(solution, *weak_types)
+        ds, *u_weaks = self.boundary_data(solution, *weak_types)
         forms = []
         
-        for bd in boundary_data:
-            for i, uW in bd:
-                if is_scalar(uW):
-                    forms.append(scale * v * uW * ds(i))
-                elif is_vector(uW):
-                    forms.append(scale * inner(v, uW) * ds(i))
-                else:
-                    raise NonScalarVectorError(uW)
+        for u_weak, tp in zip(u_weaks, weak_types, strict=True):
+            if u_weak:
+                expr = self._auto_exprs[tp]
+                F_weak = sum([expr(v, uW) * ds(i) for i, uW in u_weak])
+                forms.append(F_weak)
 
         return forms
     
@@ -238,20 +233,20 @@ class BoundaryConditions:
                 g = create_robin(g, solution)
             if b in boundary_types:
                 if isinstance(g, (Function, Expr, Constant)):
-                    pass 
+                    _g = g
                 elif isinstance(g, Iterable):
                     if all(isinstance(gi, (float, int)) for gi in g):
-                        g = create_constant(fs.mesh, g)
+                        _g = create_constant(fs.mesh, g)
                     else:
-                        g = create_function(fs, g, i)
+                        _g = create_function(fs, g, i)
                 elif isinstance(g, (float, int)):
-                    g = create_constant(fs.mesh, g)
+                    _g = create_constant(fs.mesh, g) 
                 else:
-                    g = create_function(fs, g, i)
+                    _g = create_function(fs, g, i)
 
                 tags[b].append(tag)
                 markers[b].append(m)
-                exprs[b].append(g)
+                exprs[b].append(_g)
                 tag += 1
 
         nums_all = [t for _tags in tags.values() for t in _tags]

@@ -27,4 +27,5 @@ For a complete rebuild do
 + vector Poisson equation
 + Darcy-Brinkman notebooks
 + ABC convection notebook
++ fix Nitsche
 + ~~DG advection multifigures~~
