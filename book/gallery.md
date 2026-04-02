@@ -245,5 +245,29 @@
     <img src="./demo/P2_introductory/thumbnails/I61_mathieu_evp.png" width="400"/>
     <a href="./demo/P2_introductory/I61_mathieu_evp.html">Mathieu eigenvalue problem in an interval</a> 
     </td>
+<td>
+    <img src="./demo/P2_introductory/thumbnails/I71_bcs_dirichlet_time.png" width="400"/>
+    <a href="./demo/P2_introductory/I71_bcs_dirichlet_time.html">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./demo/P2_introductory/thumbnails/I72_bcs_neumann_time.png" width="400"/>
+    <a href="./demo/P2_introductory/I72_bcs_neumann_time.html">Diffusion equation with time-dependent Neumann boundary conditions</a> 
+    </td>
+<td>
+    <img src="./demo/P2_introductory/thumbnails/I73_bcs_periodic.png" width="400"/>
+    <a href="./demo/P2_introductory/I73_bcs_periodic.html">Poisson equation with periodic boundary conditions</a> 
+    </td>
+<td>
+    <img src="./demo/P2_introductory/thumbnails/I74_bcs_robin.png" width="400"/>
+    <a href="./demo/P2_introductory/I74_bcs_robin.html">Diffusion equation with Robin boundary conditions</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./demo/P2_introductory/thumbnails/I75_bcs_nitsche.png" width="400"/>
+    <a href="./demo/P2_introductory/I75_bcs_nitsche.html">Poisson equation with Nitsche boundary conditions</a> 
+    </td>
     </tr>
     </table>

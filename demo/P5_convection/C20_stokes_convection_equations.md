@@ -18,7 +18,7 @@ $$
 \nabla\cdot\textbf{u} = 0 & \\
 \textbf{0}=-\nabla p + \nabla\cdot\tau + \rho g\,\textbf{e}_g & \forall(\textbf{x}, t)\in\Omega\times[0,\infty) \\
 c=c_0 & \forall(\textbf{x},t)\in\Omega\times\{0\} \\
-\theta=\theta_0 & \\forall(\textbf{x},t)\in\Omega\times\{0\} \\
+\theta=\theta_0 & \forall(\textbf{x},t)\in\Omega\times\{0\} \\
 c=c_{\text{D}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0,\infty) \\
 \textbf{n}\cdot(\mathsf{D}\cdot\nabla c) = c_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}, c}
 \times [0,\infty)~,~\partial\Omega_{\text{N}, c}=\partial\Omega/\partial\Omega_{\text{D}, c} \\
@@ -74,15 +74,20 @@ $$
 
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
-| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
+| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to solutal transport and domain length scale. |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
 
 ### Scaling choice
 
-| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, Bu, X\}$ | Examples | 
-| -------- | -------- | ------- | ------- | ------- | ------- |
-| advective | $\mathcal{L}_\Omega$  | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, 1, 1\}$| ... |
-| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1, Ra, 1\}$| ... |
+| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, Bu, X\}$ | 
+| -------- | -------- | ------- | ------- | ------- |
+| advective | $\mathcal{L}_\Omega$  | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, 1, 1\}$ |
+| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1, Ra, 1\}$ |
+
+| Name | $\mathcal{L}$ | $\mathcal{U}$ | $\mathcal{T}$ | $Ad$ | $Di$ | $Bu$ | $X$ |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| advective | $\mathcal{L}_\Omega$ | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $1$ |  $1/Ra$ | $1$ | $1$ |
+| diffusive | $\mathcal{L}_\Omega$ | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $1$ | $1$ | $Ra$ | $1$ | 
 
 ## Non-dimensional time-discretized equations
 

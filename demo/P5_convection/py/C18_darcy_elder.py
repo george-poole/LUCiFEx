@@ -29,6 +29,7 @@ def darcy_convection_elder_rectangle(
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
     psi_petsc: OptionsPETSc | None = None,
+    c_limits: tuple[float, float] | bool = False,
     c_petsc: OptionsPETSc | None = None,
     diagnostic: bool = False,
 ):
@@ -78,6 +79,7 @@ def darcy_convection_elder_rectangle(
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
-        c_petsc=c_petsc, 
+        c_petsc=c_petsc,
+        c_limits=c_limits, 
         diagnostic=diagnostic,
     )

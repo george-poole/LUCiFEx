@@ -133,7 +133,6 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    # grid: bool | None = None,
     ax_cbar: Axes | None = None,
     cax: bool = True,
     **kwargs,

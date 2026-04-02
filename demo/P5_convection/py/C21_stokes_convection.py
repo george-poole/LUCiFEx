@@ -18,11 +18,11 @@ from lucifex.utils.fenicsx_utils import CellType, limits_corrector
 
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.stokes import stokes_incompressible
-from lucifex.pde.scaling import ScalingOptionss
+from lucifex.pde.scaling import ScalingOptions
 from lucifex.pde.constitutive import newtonian_stress
 
 
-STOKES_CONVECTION_SCALINGS = ScalingOptionss(
+STOKES_CONVECTION_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'Bu', 'X'),
     lambda Ra: {
         'advective': (1, 1/Ra, 1, 1),

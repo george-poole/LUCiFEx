@@ -20,3 +20,11 @@ For a complete rebuild do
 
 + no gaps between imports in notebooks
 + problem specification listed in the order: domain, domain boundaries, initial conditions, boundary conditions and lastly coefficients or constitutive relations
+
+## TODO
+
++ user guide notebooks
++ vector Poisson equation
++ Darcy-Brinkman notebooks
++ ABC convection notebook
++ ~~DG advection multifigures~~

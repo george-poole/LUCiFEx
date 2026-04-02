@@ -124,7 +124,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         elif all(isinstance(i, BlockForm) or i is None for i in (*self._forms, pc_form)):
             self._blocked = True
         else:
-            raise TypeError('Cannot have non-blocked and blocked forms together.')
+            raise RuntimeError('Cannot have non-blocked and blocked forms together.')
         
         # bilinear forms
         self._a_forms = [extract_bilinear_form(i) for i in self._forms]
@@ -156,17 +156,28 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
             forms_weak_bcs = bcs.create_weak_bcs(solution)
             forms = (*forms, *forms_weak_bcs)
             self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=self._blocked_subspaces)   
-            self._mpc = []
+            mpcs = []
             mpc = bcs.create_periodic_mpc(solution.function_space)
             if mpc:
-                self._mpc.append(mpc)
+                mpcs.append(mpc)
         else:
             self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
-            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
+            mpcs = [i for i in bcs if isinstance(i, MultiPointConstraint)]
 
-        for mpc in self._mpc:
-            mpc.finalize()
-        
+        for mpc in mpcs:
+            if not mpc.finalized:
+                mpc.finalize()
+
+        if self._blocked:
+            self._mpc = mpcs
+        else:
+            if len(mpcs) > 1:
+                raise RuntimeError('Multiple multipoint constraints are for blocked solvers.')
+            if not mpcs:
+                self._mpc = None
+            else:
+                self._mpc = mpcs[0]
+    
         # setters
         self._create_metaform = partial(
             create_metaform,
@@ -434,8 +445,11 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         
         self._solution.x.scatter_forward()
         
-        for mpc in self._mpc:
-            mpc.backsubstitution(vec)
+        if self._mpc:
+            if self._blocked:
+                [mpc.backsubstitution(vec) for mpc in self._mpc]
+            else:
+                self._mpc.backsubstitution(vec)
 
         super().solve(future, overwrite)
 
@@ -522,7 +536,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         return self._bcs
     
     @property
-    def mpc(self) -> list[MultiPointConstraint]:
+    def mpc(self) -> MultiPointConstraint | list[MultiPointConstraint] | None:
         return self._mpc
     
     @property
@@ -884,16 +898,28 @@ class EigenvalueProblem:
         if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(fs)
             self._bcs = bcs.create_strong_bcs(fs)        
-            self._mpc = []
+            mpcs = []
             mpc = bcs.create_periodic_mpc(fs)
             if mpc:
-                self._mpc.append(mpc)
+                mpcs.append(mpc)
         else:
             self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
-            self._mpc = [i for i in bcs if isinstance(i, MultiPointConstraint)]
+            mpcs = [i for i in bcs if isinstance(i, MultiPointConstraint)]
 
-        for mpc in self._mpc:
-            mpc.finalize()
+        for mpc in mpcs:
+            if not mpc.finalized:
+                mpc.finalize()
+
+        self._blocked = False # FIXME
+        if self._blocked:
+            self._mpc = mpcs
+        else:
+            if len(mpcs) > 1:
+                raise RuntimeError('Multiple multipoint constraints are for blocked solvers.')
+            if not mpcs:
+                self._mpc = None
+            else:
+                self._mpc = mpcs[0]
 
         _create_form = partial(
             create_metaform,

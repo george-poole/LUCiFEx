@@ -8,7 +8,8 @@ from ufl.geometry import GeometricCellQuantity
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
-from lucifex.utils.fenicsx_utils import is_none
+from lucifex.utils.fenicsx_utils import is_none, cell_size_quantity
+from lucifex.utils.py_utils import AnyFloat
 
 
 def poisson(
@@ -58,9 +59,9 @@ def poisson(
 def nitsche_poisson(
     u: Function | FunctionSpace,
     f: Function | Constant | Expr,
-    h: str | GeometricCellQuantity, 
     alpha: float | Constant,
     bcs: BoundaryConditions | None = None,
+    h: str | GeometricCellQuantity = 'hdiam', 
 ) -> list[Form]:
     """
     `∇²u = f` with boundary conditions imposed by the Nitsche method.
@@ -76,8 +77,10 @@ def nitsche_poisson(
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
     n = FacetNormal(mesh)
-    if isinstance(alpha, (float, int)):
+    if isinstance(alpha, AnyFloat):
         alpha = Constant(mesh, alpha)
+    if isinstance(h, str):
+        h = cell_size_quantity(mesh, h)
 
     ds, u_neumann, u_dirichlet = bcs.boundary_data(u, 'neumann', 'dirichlet')
 

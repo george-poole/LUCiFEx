@@ -1,10 +1,9 @@
+from math import floor
 from typing import (
     Callable, ParamSpec, TypeVar, Any,
     ParamSpec, Generic, TypeVar, TypeAlias,
 )
-from math import floor
 
-import numpy as np
 from dolfinx.fem import Constant
 
 from .clbl_utils import arity
@@ -96,7 +95,7 @@ class Stopper(DeferredBoolean[[float]]):
             _insert_dummy_arg(condition) if not arity(condition) else condition
         )
 
-    def stop(self, t: float | Constant | np.ndarray) -> bool:
+    def stop(self, t: float | Constant) -> bool:
         return self.evaluate(float(t))
     
 
@@ -146,7 +145,7 @@ class Writer(DeferredConditionalRoutine[[float], [float]]):
     def name(self) -> str:
         return self._name
 
-    def write(self, t: float | Constant | np.ndarray) -> None:
+    def write(self, t: float | Constant) -> None:
         t = float(t)
         self.evaluate_if_true(t)(t)
 

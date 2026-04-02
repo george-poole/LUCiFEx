@@ -80,19 +80,19 @@ $$
 
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
-| $Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
-| $Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta \Sigma}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}$  |  Damköhler  | Ratio of reaction to convection rates, defined with respect to the transport of $c$ and domain length scale. |
+| $Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to solutal transport and domain length scale. |
+| $Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta \Sigma}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}$  |  Damköhler  | Ratio of reaction to convection rates, defined with respect to solutal transport and domain length scale. |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
-| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta \Sigma} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{solutal reaction rate}}$  |  Lewis-reaction  | Ratio of thermal to solutal reaction rates. |
+| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta \Sigma} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{solutal reaction rate}}$  |  reaction Lewis  | Ratio of thermal to solutal reaction rates. |
 
 ### Scaling choice
 
-| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, Ki, Bu, X\}$ | Examples | 
-| -------- | -------- | ------- | ------- | ------- | ------- |
-| advective | $\mathcal{L}_\Omega$  |  $K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, Da, 1, 1\}$| [Hewitt et al. (2012)](https://link.aps.org/doi/10.1103/PhysRevLett.108.224503) |
-| diffusive | $\mathcal{L}_\Omega$  |  $D_{\text{ref}}/\mathcal{L}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, RaDa, Ra, 1\}$| [Ritchie \& Pritchard  (2011)](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/natural-convection-and-the-evolution-of-a-reactive-porous-medium/71E5FB557F61CB9125E5B4E4EE9D828F) | 
-| advective-diffusive | $D_{\text{ref}}/\mathcal{U}$  |  $K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}$  | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, Da/Ra, 1, Ra\}$| [Slim (2014)](https://www.cambridge.org/core/product/identifier/S0022112013006733/type/journal_article) | 
-| reactive | $\sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}}$  |  $\phi_{\text{ref}}\mathcal{L}/\mathcal{T}$  | $\phi_{\text{ref}}\Delta c/\Delta \Sigma$  | $\{1, 1, 1, \sqrt{Ra/Da}, \sqrt{RaDa}\}$| [Kabbadj et al. (2025)](https://nlpc.ulb.be/pdf/25.Kabbadj_MATRIX.pdf) | 
+| Name | $\mathcal{L}$ | $\mathcal{U}$ | $\mathcal{T}$ | $Ad$ | $Di$ | $Ki$ | $Bu$ | $X$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| advective | $\mathcal{L}_\Omega$ | $K_{\text{ref}}g\Delta\rho/\mu_{\text{ref}}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1/Ra$ | $Da$ | $1$ | 1 |
+| diffusive | $\mathcal{L}_\Omega$ | $D_{\text{ref}}/\mathcal{L}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1$ | $RaDa$ | $Ra$ | 1 |
+| advective-diffusive | $D_{\text{ref}}/\mathcal{U}$ | $K_{\text{ref}}g\Delta\rho/\mu_{\text{ref}}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1$ | $Da/Ra$ | $1$ | $Ra$ |
+| reactive | $\sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{T}$ | $\phi_{\text{ref}}\Delta c/\Delta\Sigma$ | $1$ | $1$ | $1$ | $\sqrt{Ra/Da}$ | $\sqrt{RaDa}$ |
 
 ## Non-dimensional time-discretized equations
 

@@ -275,7 +275,7 @@ def create_multifigure(
     figscale: float = 1.0,
     width_ratio: float = 0.025,
     suptitle: str | None = None,
-    suptitle_dict: dict | None = None,
+    suptitle_kws: dict | None = None,
     suptitle_index: int | None = None,
     **subplots_kws,
 ) -> tuple[Figure, list[Axes], list[Axes] | list[tuple[float, float] | None]]:
@@ -293,12 +293,15 @@ def create_multifigure(
     fig, _ = plt.subplots(n_rows, n_cols, **_subplots_kws)
 
     if suptitle:
-        if suptitle_dict is None:
-            suptitle_dict = {}
+        if suptitle_kws is None:
+            suptitle_kws = {}
         if suptitle_index is None:
-            suptitle_index = n_cols - 1
+            if cbars is False:
+                suptitle_index = n_cols - 1
+            else:
+                suptitle_index = n_cols - 2
         axs_sup: Axes = fig.axes[suptitle_index]
-        _suptitle_dict = dict(
+        _suptitle_kws = dict(
             x=1.0,
             y=1.25,
             horizontalalignment='right', 
@@ -306,8 +309,8 @@ def create_multifigure(
             transform=axs_sup.transAxes,
             fontsize=16,
         )
-        _suptitle_dict.update(suptitle_dict)
-        axs_sup.text(s=suptitle, **_suptitle_dict)
+        _suptitle_kws.update(suptitle_kws)
+        axs_sup.text(s=suptitle, **_suptitle_kws)
 
     if cbars is True:
         axs_main = fig.axes[0::2]
@@ -328,13 +331,13 @@ def optional_multifig_ax(
 
     @overload
     def _(
-        **multifig_kwargs: dict,
+        **create_multifigure_kws: dict,
     ) -> Callable[P, tuple[Figure, list[Axes], list[Axes | tuple[float, float] | None]]]:
         ...
 
     @overload
     def _(
-        **multifig_kwargs: dict,
+        **create_multifigure_kws: dict,
     ) -> Callable[Concatenate[Figure, list[Axes], list[Axes | tuple[float, float] | None], P], None]:
         ...
     

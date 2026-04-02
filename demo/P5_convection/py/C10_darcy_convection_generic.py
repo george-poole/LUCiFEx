@@ -20,14 +20,15 @@ from lucifex.solver import (
 )
 from lucifex.sim import Simulation
 from lucifex.utils.py_utils import arity
+from lucifex.utils.fenicsx_utils import limits_corrector
 
 from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
 from lucifex.pde.advection_diffusion import advection_diffusion, flux
 from lucifex.pde.darcy import darcy_streamfunction
-from lucifex.pde.scaling import ScalingOptionss
+from lucifex.pde.scaling import ScalingOptions
 
 
-DARCY_CONVECTION_SCALINGS = ScalingOptionss(
+DARCY_CONVECTION_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'Bu', 'X'),
     lambda Ra: {
         'advective': (1, 1/Ra, 1, 1),
@@ -82,12 +83,10 @@ def darcy_convection_generic(
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = FE,
     D_diff: FiniteDifference = FE,
-    # TODO supg stabilization
-    # c_stabilization: str | None = None,
-    # c_limits: tuple[float, float] | EllipsisType | None = None,
     # linear algebra
     psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'hypre'),
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
+    c_limits: tuple[float, float] | bool = False,
     # optional postprocessing
     diagnostic: bool | Iterable[Solver] = False,    
     auxiliary: Iterable = (),
@@ -129,7 +128,9 @@ def darcy_convection_generic(
     dt_solver = evaluation(dt, advective_timestep)(
             u[0], dt_h, dt_courant, dt_max, dt_min,
         ) 
-    c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc)(
+    c_limits = (0, 1) if c_limits is True else c_limits
+    c_corrector = limits_corrector(*c_limits) if c_limits else None
+    c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc, corrector=c_corrector)(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
     solvers = [psi_solver, u_solver, dt_solver, c_solver]

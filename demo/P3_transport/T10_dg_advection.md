@@ -14,7 +14,7 @@ F(u^{n+1}, v)&=\int_\Omega\text{d}\Omega~v\frac{u^{n+1} - u^n}{\Delta t^n} - \na
 &\quad + \int_{\mathcal{F}}\text{d}\Gamma~\left[\!\left[ v\right]\!\right] f(\mathcal{D}_u(u)^+, \mathcal{D}_u(u)^-, \textbf{n}\cdot\textbf{a}) \\
 &\quad + \int_{\partial\Omega_{\text{I}}}\text{d}\Gamma~vu_{\text{I}}\,\textbf{n}\cdot\mathcal{D}_{\textbf{a}}(\textbf{a}) \\
 &\quad + \int_{\partial\Omega/\partial\Omega_{\text{I}}}\text{d}\Gamma~v\mathcal{D}_u(u)\,\textbf{n}\cdot\mathcal{D}_{\textbf{a}}(\textbf{a}) \\
-&= 0 \quad\forall v\in V~.
+&= 0 \quad\forall v\in V
 \end{align*} \\
 &\text{where $f$ is a numerical flux between facets} \\
 & f = \begin{cases}

@@ -75,10 +75,10 @@ $$
 
 ### Scaling choice
 
-| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, In, X\}$ | Examples | 
-| -------- | -------- | ------- | ------- | ------- | ------- |
-| advective | $\mathcal{L}_\Omega$  | $\vert\textbf{u}_{\text{in}}\vert$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1/Pe, 1, 1\}$| [Nijjer et al. (2012)](https://www.cambridge.org/core/product/identifier/S0022112017008291/type/journal_article) |
-| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, Pe, 1\}$| ... |
+| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, In, X\}$ |
+| -------- | -------- | ------- | ------- | ------- | 
+| advective | $\mathcal{L}_\Omega$  | $\vert\textbf{u}_{\text{in}}\vert$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1/Pe, 1, 1\}$|
+| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, Pe, 1\}$| 
 
 ## Non-dimensional time-discretized equations
  

@@ -8,5 +8,5 @@ from .str_utils import (
     str_indexed, str_scientific, 
     str_plain, str_tex, StrSlice, as_slice, is_slice, as_int_if_close,
 )
-from .cls_utils import StrEnum, FloatEnum, ToDoError
+from .type_utils import StrEnum, FloatEnum, ToDoError, AnyFloat, AnyInt, AnyNumber, AnyBool
 from .dict_utils import MultiKey, FrozenDict, nested_dict

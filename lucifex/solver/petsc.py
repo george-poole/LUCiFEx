@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import TypeAlias, Iterable, Literal
+from typing import TypeAlias, Literal
 from types import EllipsisType
 
 import numpy as np
@@ -85,8 +85,8 @@ ATTR_COEFFICIENTS = "coefficients"
 def assemble_petsc_matrix(
     m: PETScMat,
     a: MetaForm | Iterable[MetaForm],
-    bcs: list[DirichletBCMetaClass] | None = None,
-    mpc: MultiPointConstraint | list[MultiPointConstraint] | None = None,
+    bcs: Iterable[DirichletBCMetaClass] | None = None,
+    mpc: MultiPointConstraint | Iterable[MultiPointConstraint] | None = None,
     diag: float = 1.0,
     cache: bool | EllipsisType = False,
 ) -> None:
@@ -121,9 +121,9 @@ def assemble_petsc_matrix(
 
 def _assemble_petsc_matrix(
     m: PETScMat,
-    a: MetaForm | list[list[MetaForm]],
-    bcs: list[DirichletBCMetaClass],
-    mpc: MultiPointConstraint | list[MultiPointConstraint] | None,
+    a: MetaForm | Iterable[Iterable[MetaForm]],
+    bcs: Iterable[DirichletBCMetaClass],
+    mpc: MultiPointConstraint | Iterable[MultiPointConstraint] | None,
     diag: float,
 ) -> None:
     if m.isAssembled():
@@ -155,9 +155,9 @@ def _assemble_petsc_matrix(
 
 def assemble_petsc_vector(
     v: PETScVec,
-    l: MetaForm | list[MetaForm],
-    bcs_a: tuple[list[DirichletBCMetaClass], MetaForm] = None,
-    mpc: MultiPointConstraint | list[MultiPointConstraint] | None = None,
+    l: MetaForm | Iterable[MetaForm],
+    bcs_a: tuple[Iterable[DirichletBCMetaClass], MetaForm] = None,
+    mpc: MultiPointConstraint | None = None,
 ) -> None:
     with v.localForm() as local:
         local.set(0)
@@ -193,8 +193,8 @@ def assemble_petsc_vector(
 
   
 def create_petsc_matrix(
-   a: MetaForm | list[list[MetaForm]], 
-   mpc: MultiPointConstraint | list[MultiPointConstraint] |  None = None,  
+   a: MetaForm | Iterable[Iterable[MetaForm]], 
+   mpc: MultiPointConstraint | Iterable[MultiPointConstraint] |  None = None,  
 ) -> PETScMat:
     if not isinstance(a, FormMetaClass):
         if not mpc:
@@ -211,7 +211,7 @@ def create_petsc_matrix(
 
 
 def create_petsc_vector(
-    l: MetaForm | list[MetaForm],
+    l: MetaForm | Iterable[MetaForm],
 ) -> PETScVec:
     if not isinstance(l, FormMetaClass):
         return create_vector_block(l)
@@ -221,10 +221,10 @@ def create_petsc_vector(
 
 def sum_petsc_matrix(
     m_sum: PETScMat,
-    m: list[PETScMat | None],
-    scalings: list[float | Constant],
+    m: Iterable[PETScMat | None],
+    scalings: Iterable[float | Constant],
     bcs_fs: tuple[
-        list[DirichletBCMetaClass], tuple[FunctionSpace, FunctionSpace]
+        Iterable[DirichletBCMetaClass], tuple[FunctionSpace, FunctionSpace]
     ] = None,
 ) -> None:
     m_sum.zeroEntries()
@@ -255,10 +255,10 @@ def sum_petsc_matrix(
 
 def sum_petsc_vector(
     v_sum: PETScVec,
-    v: list[PETScVec | None],
-    scalings: list[float],
+    v: Iterable[PETScVec | None],
+    scalings: Iterable[float],
     bcs_fs: tuple[
-        list[DirichletBCMetaClass], tuple[FunctionSpace, FunctionSpace]
+        Iterable[DirichletBCMetaClass], tuple[FunctionSpace, FunctionSpace]
     ] = None,
 ) -> None:
     v_sum.zeroEntries()

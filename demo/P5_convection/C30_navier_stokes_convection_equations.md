@@ -80,17 +80,17 @@ $$
 
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
-| $Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}$ | Prandtl | Ratio of kinematic viscosity to diffusivity, defined with respect to the transport of $c$ |
-| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
+| $Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}$ | Prandtl | Ratio of kinematic viscosity to diffusivity, defined with respect to solutal transport. |
+| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to solutal transport and domain length scale. |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
 
 
 ### Scaling choice
 
-| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, Vi, Bu, X\}$ | Examples | 
-| -------- | -------- | ------- | ------- | ------- | ------- |
-| advective | $\mathcal{L}_\Omega$  | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1/Ra, Pr/Ra, Pr/Ra, 1\}$| ... |
-| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $\{1, 1, Pr, PrRa, 1\}$| ... |
+| Name | $\mathcal{L}$ | $\mathcal{U}$ | $\mathcal{T}$ | $Ad$ | $Di$ | $Vi$ | $Bu$ | $X$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| advective | $\mathcal{L}_\Omega$ | $g\Delta\rho\mathcal{L}_\Omega^2/\mu_{\text{ref}}$ | $\mathcal{L}/\mathcal{U}$ | $1$ |  $1/Ra$ | $Pr/Ra$ | $Pr/Ra$ | $1$ | 
+| diffusive | $\mathcal{L}_\Omega$ | $D_{\text{ref}}/\mathcal{L}$ | $\mathcal{L}/\mathcal{U}$ | $1$ | $1$ | $Pr$ | $PrRa$ | $1$ | 
 
 ## Non-dimensional time-discretized equations
 

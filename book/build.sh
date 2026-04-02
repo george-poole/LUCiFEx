@@ -27,7 +27,7 @@ THUMBNAILS_EXT="png"
 ERROR_KEYWORD="Traceback"
 
 if [ -z "$TARGET_DIR" ]; then
-    DIRS=("demo" "benchmark")
+    DIRS=("demo" "bench")
 else
     DIRS=($TARGET_DIR)
 fi

@@ -15,10 +15,10 @@ from lucifex.sim import configure_simulation
 from lucifex.pde.navier_stokes import ipcs_solvers
 from lucifex.pde.advection_diffusion import advection_diffusion
 from lucifex.pde.constitutive import newtonian_stress
-from lucifex.pde.scaling import ScalingOptionss
+from lucifex.pde.scaling import ScalingOptions
 
 
-NAVIER_STOKES_CONVECTION_SCALINGS = ScalingOptionss(
+NAVIER_STOKES_CONVECTION_SCALINGS = ScalingOptions(
     ('Ad', 'Di', 'Vi', 'Bu', 'X'),
     lambda Ra, Pr: {
         'advective': (1, 1/Ra, Pr/Ra, Pr/Ra, 1),
@@ -54,7 +54,7 @@ def navier_stokes_thermosolutal_rectangle(
     Le = 1.0,
     Pr = 1.0,
     Ra = 1e2,
-    beta = 1.0,
+    gamma = 1.0,
     # initial perturbation
     noise_eps: float = 1e-6,
     noise_freq: tuple[int, int] = (8, 8),
@@ -104,7 +104,7 @@ def navier_stokes_thermosolutal_rectangle(
     Le = Constant(Omega, Le, 'Le')  
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
-    beta = Constant(Omega, beta, 'beta')
+    gamma = Constant(Omega, gamma, 'gamma')
     u_zero = [0.0] * dim
     # initial conditions
     c_ics = SpatialPerturbation(
@@ -141,7 +141,7 @@ def navier_stokes_thermosolutal_rectangle(
     theta = FunctionSeries((Omega, 'P', 1), 'theta', order, ics=theta_ics)
     # constitutive
     deviatoric_stress = lambda u: Vi * newtonian_stress(u, 1)
-    rho = ExprSeries(c - beta * theta, 'rho')
+    rho = ExprSeries(c - gamma * theta, 'rho')
     eg = as_vector([0, -1])
     f = Bu * rho * eg
     # solvers
@@ -161,5 +161,5 @@ def navier_stokes_thermosolutal_rectangle(
         theta, dt[0], u, Le * Di, D_adv_ad, D_diff_ad,
     )
     solvers = [dt_solver, *ns_solvers, c_solver, theta_solver]
-    auxiliary = [Le, Pr, Ra, beta, rho, Di, Vi, Bu]
+    auxiliary = [Le, Pr, Ra, gamma, rho, Di, Vi, Bu]
     return solvers, t, dt, auxiliary

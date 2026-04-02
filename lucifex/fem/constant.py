@@ -5,7 +5,7 @@ from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant as DOLFINxConstant
 import numpy as np
 
-from ..utils.py_utils.str_utils import str_indexed
+from ..utils.py_utils import str_indexed, AnyFloat
 from .unsolved import UnsolvedType
 
 
@@ -13,7 +13,7 @@ class Constant(DOLFINxConstant):
     def __init__(
         self,
         mesh: Mesh,
-        value: float | Iterable[float] | UnsolvedType | Self | None = None,
+        value: AnyFloat | Iterable[AnyFloat] | UnsolvedType | Self | None = None,
         name: str | None = None,
         shape: tuple[int, ...] = (),
         index: int | None = None,

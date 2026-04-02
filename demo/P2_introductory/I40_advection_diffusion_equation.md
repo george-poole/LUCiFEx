@@ -13,7 +13,7 @@ u=u_{\text{D}} & \forall(\textbf{x},t)\in\partial\Omega_{\text{D}}\times[0,\inft
 \end{cases} \\
 &\text{given} \\
 &\mathbb{S}_u\begin{cases}
-\Omega\subset\mathbb{R}^d \\
+\Omega\subset\mathbb{R}^d & \text{domain} \\
 u_0(\textbf{x}) & \text{initial condition} \\
 u_{\text{D}}(\textbf{x}, t)~,~\partial\Omega_{\text{D}} & \text{Dirichlet boundary condition}\\
 u_{\text{N}}(\textbf{x}, t)~,~\partial\Omega_{\text{N}} & \text{Neumann boundary condition}\\

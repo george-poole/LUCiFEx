@@ -19,7 +19,7 @@ $$
 \Omega & \text{domain}\\
 \textbf{u}_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{velocity essential boundary condition} \\
 \boldsymbol{\tau}_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{traction natural boundary condition} \\
-\tau(\textbf{u}) & \text{deviatoric stress constitutive relation} \\
+\tau(\mu,\textbf{u}) & \text{deviatoric stress constitutive relation} \\
 \textbf{f}(\textbf{x}) & \text{body force} \\
 \end{cases}
 \end{align*}
@@ -92,14 +92,14 @@ $$
 &\text{given} \\
 &\mathbb{S}_{\psi}\begin{cases}
 \Omega\subset\mathbb{R}^2  & \text{domain}\\
-\psi_{\text{D}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{essential boundary condition} \\
-\psi_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{W}} & \text{weak boundary condition} \\
+\psi_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{essential boundary condition} \\
+\psi_{\text{W}}(\textbf{x})~,~\partial\Omega_{\text{W}} & \text{weak boundary condition} \\
 f_x(\textbf{x}), f_y(\textbf{x}) & \text{body force} \\
 \end{cases}\\
 &\text{where}\\
 &\textbf{u}=\nabla\times\boldsymbol{\psi}=\textbf{u}=\nabla\times\psi\textbf{e}_z=\frac{\partial\psi}{\partial y}\textbf{e}_x - \frac{\partial\psi}{\partial x}\textbf{e}_y \iff \nabla\cdot\textbf{u}=0\\
 &\textbf{f}=f_x\textbf{e}_x + f_y\textbf{e}_y \\
-&\tau(\textbf{u}) = \tfrac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
+&\tau(\mu,\textbf{u}) = \tfrac{\mu}{2}\left(\nabla\textbf{u} + \nabla\textbf{u}^{\mathsf{T}}\right) \\
 &\nabla\mu=\textbf{0} \\
 \end{align*}
 $$

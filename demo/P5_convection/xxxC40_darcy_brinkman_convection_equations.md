@@ -49,17 +49,16 @@ $$X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}$$
 
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
-| $Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}$ | Prandtl | Ratio of kinematic viscosity to diffusivity, defined with respect to the transport of $c$ |
-| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to the transport of $c$ and domain length scale. |
+| $Pr=\frac{\mu_{\text{ref}}}{\rho_{\text{ref}}D_{\text{ref}}}$ | Prandtl | Ratio of kinematic viscosity to diffusivity, defined with respect to solutal transport |
+| $Ra=\frac{\mathcal{L}_\Omega^3g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to solutal transport and domain length scale. |
 | $Da = \frac{K_{\text{ref}}}{\mathcal{L}_\Omega^2}$  |  Darcy  | ... |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
 
 ### Scaling choice
 
-| $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Pe, Vi, Bu, Pm, X\}$ | Examples | 
-| -------- | ------- | ------- | ------- | ------- |
-| $\mathcal{L}_\Omega$  |  $\sqrt{\mathcal{L}g\Delta\rho/\rho_{\text{ref}}}$  | $\mathcal{L}/\mathcal{U}$ | $\{1, \sqrt{RaPr}, \sqrt{Pr/Ra}, 1, \sqrt{Pr/RaDa^2}, 1\}$| [Le Reun & Hewitt (2021)](https://www.cambridge.org/core/product/identifier/S0022112021004493/type/journal_article) |
-
+| $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Pe, Vi, Bu, Pm, X\}$ |
+| -------- | ------- | ------- | ------- | 
+| $\mathcal{L}_\Omega$  |  $\sqrt{\mathcal{L}g\Delta\rho/\rho_{\text{ref}}}$  | $\mathcal{L}/\mathcal{U}$ | $\{1, \sqrt{RaPr}, \sqrt{Pr/Ra}, 1, \sqrt{Pr/RaDa^2}, 1\}$| 
 ## Non-dimensional time-discretized equations
 
 ### Strong form
@@ -102,4 +101,4 @@ Vi \\
 Bu\,\rho\,\textbf{e}_g \\
 1
 \end{Bmatrix}
-$$
+$$$

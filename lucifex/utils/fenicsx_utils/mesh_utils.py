@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from functools import wraps
 
 import numpy as np
+import ufl.geometry
 from ufl import Measure
 from ufl.core.expr import Expr
 from dolfinx.fem import assemble_scalar, form, FunctionSpace
@@ -10,8 +11,9 @@ from dolfinx.cpp.mesh import entities_to_geometry
 from dolfinx.mesh import CellType as DolfinxCellType
 from dolfinx.mesh import DiagonalType as DolfinxDiagonalType
 from dolfinx.mesh import Mesh, locate_entities, meshtags
-from ufl.geometry import (GeometricCellQuantity, Circumradius, 
-                          CellDiameter, MaxCellEdgeLength, MinCellEdgeLength)
+from ufl.geometry import (
+    GeometricCellQuantity, MaxCellEdgeLength, MinCellEdgeLength,
+)
 
 from ..py_utils import optional_lru_cache, StrEnum
 from .expr_utils import extract_mesh
@@ -374,15 +376,18 @@ def cell_aspect_ratios(mesh) -> np.ndarray:
 
 def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
     d = {
-        'hmin': MinCellEdgeLength,
-        'hmax': MaxCellEdgeLength,
-        'hdiam': CellDiameter,
-        'hrad': Circumradius,
+        'hmin': ufl.geometry.MinCellEdgeLength,
+        'hmax': ufl.geometry.MaxCellEdgeLength,
+        'hdiam': ufl.geometry.CellDiameter,
+        'hrad': ufl.geometry.Circumradius,
     }
-    try:
+    if h in d:
         return d[h](mesh)
-    except KeyError:
-        raise ValueError(f'Invalid cell size quantity {h}.')
+    else:
+        try:
+            return getattr(ufl.geometry, h)(mesh)
+        except AttributeError:
+            raise ValueError(f"Invalid option '{h}' for the cell size quantity.")
     
 
 class NonSimplexMeshError(NotImplementedError):

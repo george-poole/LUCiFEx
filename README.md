@@ -16,7 +16,7 @@ The complete gallery of examples can be viewed [here](https://george-poole.githu
 * classic instabilities such as Rayleigh-Bénard and Rayleigh-Taylor
 <!-- * discontinuous Galerkin and stabilization methods for advection-dominated transport equations -->
 
-These short notebooks are primarily for quick, inexpensive demonstration purposes and as such most do not use a high-resolution mesh, sophisticated stabilization methods or low-level problem-specific optimizations. See `./benchmarks/` for more rigorous benchmarking.
+These short notebooks are primarily for quick, inexpensive demonstration purposes and as such most do not use a high-resolution mesh, sophisticated stabilization methods or low-level problem-specific optimizations. See `./bench/` for more rigorous benchmarking.
 
 ## What does LUCiFEx do?
 

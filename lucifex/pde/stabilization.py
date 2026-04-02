@@ -1,7 +1,7 @@
-from typing import Callable
+from typing import Callable, TypeAlias
 from functools import wraps
 
-from ufl import Measure, Form, div, sqrt, conditional, lt, tanh, tr
+from ufl import Argument, Measure, Form, div, sqrt, conditional, lt, tanh, tr
 from ufl.core.expr import Expr
 from ufl.geometry import GeometricCellQuantity
 
@@ -29,6 +29,10 @@ class TauType(StrEnum):
     UNSTABILIZED = 'unstabilized'
 
 
+V: TypeAlias = Argument
+A: TypeAlias = Expr | Function | Constant
+D: TypeAlias = Expr | Function | Constant
+R: TypeAlias = Expr | Function | Constant
 def stabilization_form(
     tau: str | Callable,
     v: Expr,
@@ -43,7 +47,7 @@ def stabilization_form(
     D_reac: FiniteDifference = BE,
     D_dt: FiniteDifference = DT,
     phi: Expr = 1,
-    Pv: str | Callable | None = None,
+    Pv: str | Callable[[V, A, D, R], Expr] | None = None,
     dx: Measure = 1,
 ) -> Form:
     """
@@ -65,20 +69,22 @@ def stabilization_form(
             tau = tau_codina(h, a_eff, d_eff, r_eff)
         case TauType.SHAKIB:
             tau = tau_shakib(h, a_eff, d_eff, r_eff)
-        case TauType.COTH:
-            tau = tau_coth(h, a_eff, d_eff)
         case TauType.TRANSIENT:
             r_eff = (1 / phi) * effective_reaction(r, D_reac)
             tau = tau_transient(h, a_eff, d_eff, r_eff, dt)
-        case TauType.UPWIND:
+        case TauType.COTH:
+            tau = tau_coth(h, a_eff, d_eff)
+        case TauType.COTH_INFTY:
             tau = tau_coth_infty(h, a_eff)
+        case TauType.COTH_PWL:
+            tau = tau_coth_pwl(h, a_eff, d_eff)
         case TauType.NONE | TauType.UNSTABILIZED:
             tau = 0
         case _ if callable(tau):
             tau = tau(h, a_eff, d_eff, r_eff)
         case _:
             raise ValueError(
-                f"Value '{tau}' for the stabilization parameter `𝜏` is not implemented."
+                f"Option '{tau}' for the stabilization parameter `𝜏` is not implemented."
             )
             
     match Pv:
@@ -90,7 +96,7 @@ def stabilization_form(
             Pv = Pv(v, a_eff, d_eff, r_eff)
         case _:
             raise ValueError(
-                f"Value '{Pv}' for the function `P` is not implemented."
+                f"Option '{Pv}' for the function `P` is not implemented."
             )
 
     return tau * Pv * res * dx

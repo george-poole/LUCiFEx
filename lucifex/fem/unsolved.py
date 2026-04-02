@@ -12,9 +12,8 @@ from ..utils.py_utils import OverloadTypeError
 
 
 class UnsolvedType:
-    """Singleton with a numerical sentinel value to represent an unsolved object"""
     value: float = np.nan
-    is_unsolved = staticmethod(np.isnan)
+    is_equal = staticmethod(np.isnan)
 
     _instance = None
 
@@ -49,6 +48,9 @@ class UnsolvedType:
 
 
 Unsolved = UnsolvedType()
+"""
+Singleton representing a quantity that has not yet been solved for.
+"""
 
 
 def is_unsolved(
@@ -65,15 +67,15 @@ def _is_unsolved(obj, _):
 
 @_is_unsolved.register(Function)
 def _(obj: Function, iter_func):
-    return iter_func(UnsolvedType.is_unsolved(obj.x.array))
+    return iter_func(UnsolvedType.is_equal(obj.x.array))
 
 
 @_is_unsolved.register(Constant)
 def _(obj: Constant, iter_func):
     if obj.value.shape == ():
-        return UnsolvedType.is_unsolved(obj.value)
+        return UnsolvedType.is_equal(obj.value)
     else:
-        return iter_func(UnsolvedType.is_unsolved(obj.value))
+        return iter_func(UnsolvedType.is_equal(obj.value))
 
 
 @_is_unsolved.register(Expr)

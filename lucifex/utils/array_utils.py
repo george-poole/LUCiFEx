@@ -1,5 +1,5 @@
 import operator
-from typing import Callable, Iterable, Any, overload
+from typing import Callable, Iterable, overload
 
 import numpy as np
 from scipy.interpolate import PchipInterpolator

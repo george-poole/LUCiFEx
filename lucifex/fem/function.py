@@ -10,7 +10,7 @@ from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
 from ..utils.fenicsx_utils import create_function_space
-from ..utils.py_utils.str_utils import str_indexed
+from ..utils.py_utils import str_indexed, AnyNumber
 from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
 
@@ -30,7 +30,7 @@ class Function(DOLFINxFunction):
             | Expression
             | Callable[[np.ndarray], np.ndarray]
             | SpatialPerturbation
-            | float
+            | AnyNumber
             | UnsolvedType
             | None
         = None,
@@ -68,7 +68,7 @@ class Function(DOLFINxFunction):
                 x = x.combine_base_noise(fs)
             if isinstance(x, UnsolvedType):
                 x = x.value
-            if isinstance(x, (int, float)):
+            if isinstance(x, AnyNumber):
                 self.x.array[:] = float(x)
             else:
                 self.interpolate(x)
