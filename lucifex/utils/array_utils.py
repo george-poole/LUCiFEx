@@ -75,12 +75,12 @@ def as_index(
 @overload
 def as_index(
     arr: Iterable[float],
-    target: Iterable[int | float] | range | StrSlice | int,
+    target: Iterable[int | float] | StrSlice | int,
     fraction: bool = False,
     condition: Callable[[float, float], bool] | str | None = None,
     msg: str = 'Target validation condition not satisfied',
     window: bool = False,
-    int_as_range: bool = False,
+    range_from_int: bool = False,
 ) -> Iterable[int]:
     ...
 
@@ -92,22 +92,19 @@ def as_index(
     condition: Callable[[float, float], bool] | str | None = None,
     msg: str = 'Target validation condition not satisfied',
     window: bool = False,
-    int_as_range: bool = False,
+    range_from_int: bool = False,
 ) -> Iterable[int]:
     if isinstance(target, float):
         return _as_index(arr, target, fraction, condition, msg)
     
-    if not int_as_range and isinstance(target, int):
-        return _as_index(arr, target, fraction, condition, msg)
-
-    if isinstance(target, range):
-        return target
-    
     if isinstance(target, StrSlice):
         slc = as_slice(target)
         return range(slc.start, slc.stop, slc.step)
+
+    if not range_from_int and isinstance(target, int):
+        return _as_index(arr, target, fraction, condition, msg)
     
-    if int_as_range and isinstance(target, int):
+    if range_from_int and isinstance(target, int):
         stop = len(arr)
         step = stop // target
         return range(0, stop, step)

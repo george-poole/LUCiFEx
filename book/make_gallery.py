@@ -112,7 +112,7 @@ if __name__ == "__main__":
     THUMBNAIL_EXT = 'png'
     EXCLUDE = 'xxx'
     NOTEBOOK_PARTS = (
-        # ('Further Applications', 'P6_further_applications'),
+        ('Further Applications', 'P6_applications'),
         ('Convection', 'P5_convection'),
         ('Flow', 'P4_flow'),
         ('Transport', 'P3_transport'),

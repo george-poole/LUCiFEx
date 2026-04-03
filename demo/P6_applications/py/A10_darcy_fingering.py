@@ -147,3 +147,7 @@ def darcy_fingering_rectangle(
         auxiliary=[Pe, Lmbda, Di, In],
     )
     return simulation
+
+
+def darcy_fingering_annulus():
+    ...

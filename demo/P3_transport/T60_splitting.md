@@ -1,4 +1,4 @@
-# Operator splitting of the transport equation
+# Splitting methods for the transport equation
 
 ## Lie splitting
 

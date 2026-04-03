@@ -14,7 +14,7 @@ from dolfinx.fem import (
 
 from ..fdm import FunctionSeries
 from ..fem import Function, Constant
-from ..utils.py_utils import ToDoError
+from ..utils.py_utils import ToDoError, AnyFloat
 from ..utils.fenicsx_utils import (
     BoundaryType, 
     create_tagged_measure,
@@ -31,11 +31,11 @@ from ..utils.fenicsx_utils import (
 
 Value: TypeAlias = (
     Function
+    | Expr
     | Constant
     | Callable[[np.ndarray], np.ndarray]
-    | float
-    | Iterable[float]
-    | Expr
+    | AnyFloat
+    | Iterable[AnyFloat]
 )
 
 SubspaceIndex: TypeAlias = int | None 
@@ -176,16 +176,16 @@ class BoundaryConditions:
 
     def create_weak_bcs(
         self,
-        solution: Function | FunctionSeries | FunctionSpace,
+        fs_or_u: Function | FunctionSeries | FunctionSpace,
         weak_types: Iterable[BoundaryType] = (
             BoundaryType.NEUMANN, BoundaryType.ROBIN, 
             BoundaryType.NATURAL, BoundaryType.WEAK,
         )
     ) -> list[Form]:
-        fs = extract_function_space(solution)
+        fs = extract_function_space(fs_or_u)
         v = TestFunction(fs)
 
-        ds, *u_weaks = self.boundary_data(solution, *weak_types)
+        ds, *u_weaks = self.boundary_data(fs_or_u, *weak_types)
         forms = []
         
         for u_weak, tp in zip(u_weaks, weak_types, strict=True):
@@ -198,7 +198,7 @@ class BoundaryConditions:
     
     def boundary_data(
         self,
-        solution: Function | FunctionSeries | FunctionSpace | Argument,
+        fs_or_u: FunctionSpace | Function | FunctionSeries | Argument,
         *boundary_types: BoundaryType,
         strict: bool = False,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
@@ -214,7 +214,7 @@ class BoundaryConditions:
         Given `n_total` boundary conditions, `ds(n_total)` is the measure for the subset of the boundary 
         where no boundary conditions are applied.
         """
-        fs = extract_function_space(solution) 
+        fs = extract_function_space(fs_or_u) 
         boundary_types = [BoundaryType(i) for i in boundary_types]
 
         if strict and not all(b in boundary_types for b in self._btypes):
@@ -222,53 +222,54 @@ class BoundaryConditions:
 
         tag = 0
         tags = {b: [] for b in boundary_types}
-        exprs = {b: [] for b in boundary_types}
         markers = {b: [] for b in boundary_types}
+        values = {b: [] for b in boundary_types}
 
-        for b, m, g, i in zip(
+        for b, m, uB, i in zip(
             self._btypes, self._markers, self._values, self._subindices, 
             strict=True,
         ):
-            if b == BoundaryType.ROBIN and isinstance(solution, (Function, FunctionSeries)):
-                g = create_robin(g, solution)
+            if b == BoundaryType.ROBIN and isinstance(fs_or_u, (Function, FunctionSeries)):
+                uB = self.robin_auto_expr(uB, fs_or_u, future=True)
             if b in boundary_types:
-                if isinstance(g, (Function, Expr, Constant)):
-                    _g = g
-                elif isinstance(g, Iterable):
-                    if all(isinstance(gi, (float, int)) for gi in g):
-                        _g = create_constant(fs.mesh, g)
+                if isinstance(uB, (Function, Expr, Constant)):
+                    _uB = uB
+                elif isinstance(uB, Iterable):
+                    if all(isinstance(gi, (float, int)) for gi in uB):
+                        _uB = create_constant(fs.mesh, uB)
                     else:
-                        _g = create_function(fs, g, i)
-                elif isinstance(g, (float, int)):
-                    _g = create_constant(fs.mesh, g) 
+                        _uB = create_function(fs, uB, i)
+                elif isinstance(uB, (float, int)):
+                    _uB = create_constant(fs.mesh, uB) 
                 else:
-                    _g = create_function(fs, g, i)
-
+                    _uB = create_function(fs, uB, i)
                 tags[b].append(tag)
                 markers[b].append(m)
-                exprs[b].append(_g)
+                values[b].append(_uB)
                 tag += 1
 
-        nums_all = [t for _tags in tags.values() for t in _tags]
+        tags_all = [t for _tags in tags.values() for t in _tags]
         markers_all = [m for _markers in markers.values() for m in _markers]
-        ds = create_tagged_measure('ds', fs.mesh, markers_all, nums_all)
-        tags_exprs = [[(t, e) for t, e in zip(tags[b], exprs[b])] for b in boundary_types]
+        ds = create_tagged_measure('ds', fs.mesh, markers_all, tags_all)
+        tags_values = [[(t, e) for t, e in zip(tags[b], values[b])] for b in boundary_types]
 
-        return ds, *tags_exprs
-
-
-def create_robin(
-    expr: Expr,
-    solution: Function | FunctionSeries,
-    future: bool = True,
-) -> Expr:
-    fs = solution.function_space
-    if isinstance(solution, Function):
-        return replace(expr, {solution: TrialFunction(fs)})
-    else:
-        if future:
-            index = solution.FUTURE_INDEX
+        return ds, *tags_values
+    
+    @staticmethod
+    def robin_auto_expr(
+        expr: Expr,
+        u: Function | FunctionSeries,
+        future: bool | int,
+    ) -> Expr:
+        fs = u.function_space
+        if isinstance(u, Function):
+            return replace(expr, {u: TrialFunction(fs)})
         else:
-            index = solution.FUTURE_INDEX - 1
-        return replace(expr, {solution[index]: TrialFunction(fs)})
+            if future is True:
+                index = u.FUTURE_INDEX
+            elif future is False:
+                index = u.FUTURE_INDEX - 1
+            else:
+                index = future
+            return replace(expr, {u[index]: TrialFunction(fs)})
     

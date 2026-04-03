@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from typing import TypeAlias, Literal
 from types import EllipsisType
@@ -314,3 +315,16 @@ def view_petsc_vector(
         return _v.getArray()
     else:
         return _v.getValues(indices)
+    
+
+def set_petsc_threads(
+    omp_num_threads: int | None = None,
+    openblas_num_threads: int | None = None,
+    mkl_num_threads: int | None = None,
+) -> None:
+    if omp_num_threads is not None:
+        os.environ["OMP_NUM_THREADS"] = str(omp_num_threads)
+    if openblas_num_threads is not None:
+        os.environ["OPENBLAS_NUM_THREADS"] = str(openblas_num_threads)
+    if mkl_num_threads is not None:
+        os.environ["MKL_NUM_THREADS"] = str(mkl_num_threads)

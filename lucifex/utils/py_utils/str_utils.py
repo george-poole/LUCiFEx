@@ -1,6 +1,7 @@
 from typing import Iterable, Literal, TypeAlias, Any
 import numpy as np
 
+from .clbl_utils import OverloadTypeError
 
 StrSlice: TypeAlias = str | slice
 """
@@ -18,6 +19,7 @@ def as_slice(s: str | slice| Iterable[int]) -> slice:
 
     if isinstance(s, slice):
         return s
+    
     if isinstance(s, str):
         s = s.replace(' ', '')
         n_colon = s.count(COLON)

@@ -1,5 +1,34 @@
 # Gallery
 
+## Further Applications
+
+<table>
+    <tr>
+    <td>
+    <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_dirichlet.png" width="400"/>
+    <a href="./demo/P6_applications/A11_darcy_fingering_dirichlet.ipynb">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a> 
+    </td>
+<td>
+    <img src="./demo/P6_applications/thumbnails/A12_darcy_fingering_periodic.png" width="400"/>
+    <a href="./demo/P6_applications/A12_darcy_fingering_periodic.ipynb">Darcy fingering in a porous rectangle with periodic boundary conditions</a> 
+    </td>
+<td>
+    <img src="./demo/P6_applications/thumbnails/A13_darcy_fingering_annulus.png" width="400"/>
+    <a href="./demo/P6_applications/A13_darcy_fingering_annulus.ipynb">Darcy fingering in a porous annulus</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./demo/P6_applications/thumbnails/A21_darcy_abc_reaction_density.png" width="400"/>
+    <a href="./demo/P6_applications/A21_darcy_abc_reaction_density.ipynb">ABC convection of a Darcy fluid with a destabilising reaction</a> 
+    </td>
+<td>
+    <img src="./demo/P6_applications/thumbnails/A22_darcy_abc_reaction_viscosity.png" width="400"/>
+    <a href="./demo/P6_applications/A22_darcy_abc_reaction_viscosity.ipynb">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a> 
+    </td>
+    </tr>
+    </table>
+
 ## Convection
 
 <table>
@@ -64,6 +93,14 @@
     <img src="./demo/P5_convection/thumbnails/C33_navier_stokes_marangoni.png" width="400"/>
     <a href="./demo/P5_convection/C33_navier_stokes_marangoni.ipynb">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
     </td>
+<td>
+    <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_taylor.png" width="400"/>
+    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor.ipynb">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    </td>
+<td>
+    <img src="./demo/P5_convection/thumbnails/C42_darcy_brinkman_rayleigh_benard.png" width="400"/>
+    <a href="./demo/P5_convection/C42_darcy_brinkman_rayleigh_benard.ipynb">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    </td>
     </tr>
     </table>
 
@@ -116,6 +153,10 @@
     <td>
     <img src="./demo/P4_flow/thumbnails/F32_navier_stokes_forced.png" width="400"/>
     <a href="./demo/P4_flow/F32_navier_stokes_forced.ipynb">Flow of a Navier-Stokes fluid with vertical forcing</a> 
+    </td>
+<td>
+    <img src="./demo/P4_flow/thumbnails/F41_darcy_brinkman_lens.png" width="400"/>
+    <a href="./demo/P4_flow/F41_darcy_brinkman_lens.ipynb">Flow of a Darcy-Brinkman fluid past a permeable obstacle</a> 
     </td>
     </tr>
     </table>
@@ -186,7 +227,11 @@
     </td>
 <td>
     <img src="./demo/P3_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>
-    <a href="./demo/P3_transport/T61_splitting_advection_reaction.ipynb">Operator splitting of the advection-reaction equation</a> 
+    <a href="./demo/P3_transport/T61_splitting_advection_reaction.ipynb">Splitting method for the advection-reaction equation</a> 
+    </td>
+<td>
+    <img src="./demo/P3_transport/thumbnails/T71_predictor_corrector_advection_diffusion.png" width="400"/>
+    <a href="./demo/P3_transport/T71_predictor_corrector_advection_diffusion.ipynb">Predictor-corrector method for the advection-reaction equation</a> 
     </td>
     </tr>
     </table>
@@ -246,12 +291,16 @@
     <a href="./demo/P2_introductory/I61_mathieu_evp.ipynb">Mathieu eigenvalue problem in an interval</a> 
     </td>
 <td>
-    <img src="./demo/P2_introductory/thumbnails/I81_bcs_dirichlet_time.png" width="400"/>
-    <a href="./demo/P2_introductory/I81_bcs_dirichlet_time.ipynb">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
+    <img src="./demo/P2_introductory/thumbnails/I71_wave_interval.png" width="400"/>
+    <a href="./demo/P2_introductory/I71_wave_interval.ipynb">Wave equation in an interval</a> 
     </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P2_introductory/thumbnails/I81_bcs_dirichlet_time.png" width="400"/>
+    <a href="./demo/P2_introductory/I81_bcs_dirichlet_time.ipynb">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
+    </td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I82_bcs_neumann_time.png" width="400"/>
     <a href="./demo/P2_introductory/I82_bcs_neumann_time.ipynb">Diffusion equation with time-dependent Neumann boundary conditions</a> 
     </td>
@@ -259,13 +308,13 @@
     <img src="./demo/P2_introductory/thumbnails/I83_bcs_periodic.png" width="400"/>
     <a href="./demo/P2_introductory/I83_bcs_periodic.ipynb">Poisson equation with periodic boundary conditions</a> 
     </td>
-<td>
-    <img src="./demo/P2_introductory/thumbnails/I84_bcs_robin.png" width="400"/>
-    <a href="./demo/P2_introductory/I84_bcs_robin.ipynb">Diffusion equation with Robin boundary conditions</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P2_introductory/thumbnails/I84_bcs_robin.png" width="400"/>
+    <a href="./demo/P2_introductory/I84_bcs_robin.ipynb">Diffusion equation with Robin boundary conditions</a> 
+    </td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I85_bcs_nitsche.png" width="400"/>
     <a href="./demo/P2_introductory/I85_bcs_nitsche.ipynb">Poisson equation with Nitsche boundary conditions</a> 
     </td>

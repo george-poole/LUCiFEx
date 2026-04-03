@@ -11,7 +11,7 @@ $$
 &\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
 &p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &\text{such that} \\
-&\mathbb{IBVP}
+&\mathbb{IBVP}_{\textbf{u},p,a,b,c}
 \begin{cases}
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}\cdot\nabla c) & \\
 \nabla\cdot\textbf{u} = 0 & \\
@@ -24,7 +24,7 @@ c=c_{\text{D}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0
 p = p_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases} \\
 &\text{given} \\
-&\mathbb{S}=
+&\mathbb{S}_{\textbf{u},p,a,b,c}=
 \begin{cases}
 \Omega & \text{domain}\\
 c_0(\textbf{x}) & \text{concentration initial condition}\\
@@ -102,4 +102,4 @@ $$
 
 ### Weak forms
 
-Equivalent to [Darcy convection equations](../P05_convection/C01.0_darcy_convection_equations.md).
+...

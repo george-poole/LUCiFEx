@@ -37,9 +37,9 @@ parts:
       - file: demo/P2_introductory/I60_mathieu_equation
         sections: 
           - file: demo/P2_introductory/I61_mathieu_evp
-      # - file: demo/P2_introductory/I70_wave_equation
-      #   sections: 
-      #     - file: demo/P2_introductory/I71_wave_interval
+      - file: demo/P2_introductory/I70_wave_equation
+        sections: 
+          - file: demo/P2_introductory/I71_wave_interval
       - file: demo/P2_introductory/I80_bcs
         sections: 
           - file: demo/P2_introductory/I81_bcs_dirichlet_time
@@ -76,6 +76,9 @@ parts:
       - file: demo/P3_transport/T60_splitting
         sections: 
           - file: demo/P3_transport/T61_splitting_advection_reaction
+      - file: demo/P3_transport/T70_predictor_corrector
+        sections: 
+          - file: demo/P3_transport/T71_predictor_corrector_advection_diffusion
 
   - caption: Flow
     chapters:
@@ -96,9 +99,9 @@ parts:
         sections: 
           - file: demo/P4_flow/F31_navier_stokes_obstacle
           - file: demo/P4_flow/F32_navier_stokes_forced
-      # - file: demo/P4_flow/F40_darcy_brinkman_equations
-      #   sections: 
-      #     - file: demo/P4_flow/F41_darcy_brinkman_lens
+      - file: demo/P4_flow/F40_darcy_brinkman_equations
+        sections: 
+          - file: demo/P4_flow/F41_darcy_brinkman_lens
 
   - caption: Convection 
     chapters:
@@ -121,24 +124,21 @@ parts:
           - file: demo/P5_convection/C31_navier_stokes_thermosolutal
           - file: demo/P5_convection/C32_navier_stokes_rayleigh_taylor
           - file: demo/P5_convection/C33_navier_stokes_marangoni
-      # - file: demo/P5_convection/C40_darcy_brinkman_convection_equations
-      #   sections:
-      #     - file: demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor
-      #     - file: demo/P5_convection/C42_darcy_brinkman_rayleigh_benard
+      - file: demo/P5_convection/C40_darcy_brinkman_convection_equations
+        sections:
+          - file: demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor
+          - file: demo/P5_convection/C42_darcy_brinkman_rayleigh_benard
 
-  # - caption: Further Applications 
-  #   chapters:
-  #     - file: demo/P6_applications/A10_darcy_fingering_equations
-  #       sections:
-  #         - file: demo/P6_applications/A11_darcy_fingering_dirichlet
-  #         - file: demo/P6_applications/A12_darcy_fingering_periodic
-  #     - file: demo/P6_applications/A20_darcy_abc_reaction_equations
-  #       sections:
-  #         - file: demo/P6_applications/A21_darcy_abc_reaction_density
-  #         - file: demo/P6_applications/A22_darcy_abc_reaction_viscosity
-  #     - file: demo/P6_applications/A30_darcy_porosity_evolution_equations
-  #       sections: 
-  #         - file: demo/P6_applications/A31_darcy_porosity_evolution_injection
+  - caption: Further Applications 
+    chapters:
+      - file: demo/P6_applications/A10_darcy_fingering_equations
+        sections:
+          - file: demo/P6_applications/A11_darcy_fingering_dirichlet
+          - file: demo/P6_applications/A12_darcy_fingering_periodic
+      - file: demo/P6_applications/A20_darcy_abc_reaction_equations
+        sections:
+          - file: demo/P6_applications/A21_darcy_abc_reaction_density
+          - file: demo/P6_applications/A22_darcy_abc_reaction_viscosity
 
   - caption: Benchmarks 
     chapters:

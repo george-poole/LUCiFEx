@@ -3,27 +3,27 @@ from typing_extensions import Unpack
 
 from dolfinx.mesh import Mesh
 from lucifex.fem import Constant
-from lucifex.utils.py_utils import MultiKey
+from lucifex.utils.py_utils import MultiKey, AnyNumber
 
 
 # FIXME overloaded __getitem__ type hints
 class ScalingMap(
     MultiKey[
         str | tuple[Mesh, str] | tuple[Mesh, Unpack[tuple[str, ...]]], 
-        int | float | Constant
+        AnyNumber | Constant
     ]
 ):
 
     def __init__(
         self, 
-        d: dict[str, float | int],
+        d: dict[str, AnyNumber],
         name: str | None = None
     ):
         self._d = d
         self._name = name
 
     @property
-    def map(self) -> dict[str, float | int]:
+    def map(self) -> dict[str, AnyNumber]:
         return self._d
     
     @property

@@ -1,5 +1,5 @@
-from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure, create_robin
-from .pde import (
+from .bcs import BoundaryConditions, BoundaryType, create_tagged_measure
+from .problem import (
     BoundaryValueProblem,
     InitialBoundaryValueProblem,
     InitialValueProblem,

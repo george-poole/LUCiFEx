@@ -1067,7 +1067,7 @@ class EigenvalueProblem:
         return self._n_converged
 
     @property
-    def eigenvalues(self) -> list[float]: 
+    def eigenvalues(self) -> list[complex]: 
         return self._eigenvalues
     
     @property
