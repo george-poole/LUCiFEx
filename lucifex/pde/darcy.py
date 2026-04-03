@@ -41,7 +41,7 @@ def darcy(
     dx = Measure('dx', up.function_space.mesh)
     n = FacetNormal(up.function_space.mesh)
     if blocked:
-        subspaces = extract_subspaces(up.function_space)
+        subspaces = up.function_subspaces
         v, q = (TestFunction(i) for i in subspaces)
         u, p = (TrialFunction(i) for i in subspaces)
     else:

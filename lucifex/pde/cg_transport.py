@@ -7,7 +7,7 @@ from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     FunctionSeries, ConstantSeries,
     FiniteDifference, FiniteDifferenceArgwise, 
-    FiniteDifferenceDerivative, DT, AB1,
+    FiniteDifferenceDerivative, DT, AB1, DT2,
 )
 from lucifex.fdm.ufl_operators import inner, grad, div
 from lucifex.fem import Function, Constant
@@ -24,6 +24,19 @@ def derivative_form(
 ) -> Form | Expr:
     """    
     `∫dx v∂u/∂t`
+    """
+    return v * D_dt(u, dt, trial=u) * dx
+
+
+def second_derivative_form(
+    v: Argument,
+    u: FunctionSeries,
+    dt: ConstantSeries | Constant,
+    D_dt: FiniteDifferenceDerivative = DT2,
+    dx: Measure | Expr | Literal[1] = 1,
+) -> Form | Expr:
+    """    
+    `∫dx v∂²u/∂t²`
     """
     return v * D_dt(u, dt, trial=u) * dx
 

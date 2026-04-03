@@ -8,11 +8,11 @@ from typing_extensions import Self, Unpack, TypeVarTuple
 from functools import partial
 
 from ufl.core.expr import Expr
-from ufl import TrialFunction, replace
-from dolfinx.fem import Function, Constant
+from ufl import TrialFunction, TrialFunctions, replace
+from dolfinx.fem import Constant
 
 from ..utils.py_utils import OverloadTypeError, str_indexed, create_kws_filterer
-from .series import FunctionSeries, ConstantSeries, ExprSeries, Series
+from .series import FunctionSeries, SubFunctionSeries, ConstantSeries, ExprSeries, Series
 
 
 class FiniteDifferenceOperator(ABC):
@@ -20,7 +20,6 @@ class FiniteDifferenceOperator(ABC):
         self,
         u: Series | Any,
         *args: Any,
-        trial: FunctionSeries | bool = False,
         strict: bool = False,
         **kwargs: Any,
     ) -> Expr:
@@ -30,15 +29,15 @@ class FiniteDifferenceOperator(ABC):
             else:
                 return u
         
-        return create_kws_filterer(self._call)(u, *args, trial=trial, strict=strict, **kwargs)
+        return create_kws_filterer(self._call)(u, *args, strict=strict, **kwargs)
     
     @abstractmethod
     def _call(
         self,
         u: Series,
         *args: Any,
-        trial: FunctionSeries | bool = False,
-        strict: bool = False,
+        trial: FunctionSeries | SubFunctionSeries | bool = False,
+        blocked: bool = False,
         **kwargs: Any,
     ):
         ...
@@ -151,8 +150,8 @@ class FiniteDifference(FiniteDifferenceOperator):
         self,
         u: Series,
         *,
-        trial: FunctionSeries | bool = False,
-        strict: bool = False,
+        trial: FunctionSeries | SubFunctionSeries | bool = False,
+        blocked: bool = False,
         **kwargs: Any
     ) -> Expr:
         """
@@ -172,7 +171,8 @@ class FiniteDifference(FiniteDifferenceOperator):
         self,
         u: Series,
         *,
-        trial: FunctionSeries | bool = False,
+        trial: FunctionSeries | SubFunctionSeries | bool = False,
+        blocked: bool = False,
     ) -> Expr:
             
         if self.order > u.order:
@@ -182,20 +182,29 @@ class FiniteDifference(FiniteDifferenceOperator):
 
         expr = sum((c * u[n] for n, c in self.coefficients.items()))
 
+        if trial is False:
+            return expr
+
         if trial is True:
-            if not isinstance(u, FunctionSeries):
+            if not isinstance(u, (FunctionSeries, SubFunctionSeries)):
                 raise TypeError(
                     f'Can only deduce the trial argument from an argument of type `FunctionSeries`, not {type(u)}'
                 )    
             trial = u
 
-        if trial is not False:
-            expr = replace(
-                expr, 
-                {trial[trial.FUTURE_INDEX]: TrialFunction(trial.function_space)},
-            )
-
-        return expr
+        if isinstance(trial, FunctionSeries):
+            _trial = TrialFunction(trial.function_space)
+        elif isinstance(trial, SubFunctionSeries) and blocked:
+            _trial = TrialFunction(trial.function_space)
+        elif isinstance(trial, SubFunctionSeries) and not blocked:
+            _trial = TrialFunctions(trial.function_supspace)[trial.subspace_index]
+        else:
+            raise TypeError(f'Unexpected type {type(trial)}.')
+        
+        return replace(
+            expr, 
+            {trial[trial.FUTURE_INDEX]: _trial},
+        )
     
     def __matmul__(self, other: Self) -> 'FiniteDifferenceArgwise':
         if not isinstance(other, FiniteDifference):
@@ -243,7 +252,7 @@ class FiniteDifferenceDerivative(FiniteDifference):
         dt: ConstantSeries | Constant | None = None,
         *,
         trial: FunctionSeries | bool = False,
-        strict: bool = False,
+        blocked: bool = False,
         **kwargs: Any
     ) -> Expr:
         """
@@ -261,8 +270,9 @@ class FiniteDifferenceDerivative(FiniteDifference):
         dt: ConstantSeries | Constant | None = None,
         *,
         trial: FunctionSeries | bool = False,
+        blocked: bool = False,
     ) -> Expr:
-        Du = super()._call(u, trial=trial)
+        Du = super()._call(u, trial=trial, blocked=blocked)
         if dt is None:
             return Du
         
@@ -528,9 +538,9 @@ class FiniteDifferenceArgwise(
         u: Series,
         *,
         trial: FunctionSeries | bool = False,
-        strict: bool = False,
+        blocked: bool = False,
         args: Iterable[Any] | None = None,
-        fd_template: FiniteDifference = FE,
+        template_index: int = 0,
     ) -> Expr:
         """
         `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
@@ -545,31 +555,27 @@ class FiniteDifferenceArgwise(
         u: ExprSeries | Any, 
         *,
         trial: FunctionSeries | bool = False,
-        strict: bool = False,
+        blocked: bool = False,
         args: Iterable[Any] | None = None,
-        fd_replaced: FiniteDifference = FE,
+        template_index: int = 0,
     ) -> Expr | Any:
         """
         `(𝒟₀◦𝒟₁◦...)(f(u₀, u₁, ...)) = f(𝒟₀(u₀), 𝒟₁(u₁), ...)`
         """            
-        if strict and args is not None:
-            for i in args:
-                if not i in u.args:
-                    raise RuntimeError(
-                        f'{i} is not an argument to the `ExprSeries`.'
-                    )
             
         if args is None:
             args = u.args
 
-        finite_differences = [partial(fd, trial=trial) for fd in self._fd_args]
+        finite_differences = [
+            partial(fd, trial=trial, blocked=blocked) for fd in self._fd_args
+        ]
 
+        fd_template = FiniteDifference({template_index: 1.0})
         mapping = {
-            fd_replaced(a): fd(a) 
+            fd_template(a): fd(a) 
             for a, fd in zip(args, finite_differences, strict=True)
         }
-        return replace(fd_replaced(u), mapping)
-        # return u.reconstruct_expr(*finite_differences, args=args)
+        return replace(fd_template(u), mapping)
 
     @property
     def finite_differences(self) -> tuple[FiniteDifference, ...]:

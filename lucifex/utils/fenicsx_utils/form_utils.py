@@ -54,7 +54,7 @@ class BlockForm:
             self._names = tuple(names)
 
     @property
-    def function_spaces(self) -> list[list[FunctionSpace | None]] |  list[FunctionSpace | None]:
+    def block_subspaces(self) -> list[list[FunctionSpace | None]] |  list[FunctionSpace | None]:
         if self.is_matrix_like:
             return [
                 [extract_function_space(f.arguments()[0]) if f is not None else None for f in row] 

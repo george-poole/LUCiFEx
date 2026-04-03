@@ -1,6 +1,7 @@
 from typing import Iterable
 from typing_extensions import Self
 from collections.abc import Callable
+from functools import cached_property
 
 import numpy as np
 from dolfinx.mesh import Mesh
@@ -9,7 +10,7 @@ from dolfinx.fem import Function as DOLFINxFunction
 from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
-from ..utils.fenicsx_utils import create_function_space
+from ..utils.fenicsx_utils import create_function_space, set_function, extract_subspaces
 from ..utils.py_utils import str_indexed, AnyNumber
 from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
@@ -54,6 +55,7 @@ class Function(DOLFINxFunction):
         if isinstance(
             value, 
             (
+                self.__class__,
                 DOLFINxFunction, 
                 Expression, 
                 Callable, 
@@ -68,7 +70,8 @@ class Function(DOLFINxFunction):
             else:
                 if isinstance(value, SpatialPerturbation):
                     value = value.combine_base_noise(fs)
-                self.interpolate(value)
+                # self.interpolate(value)
+                set_function(self, value)
         else:
             super().__init__(fs, value, name, dtype)
 
@@ -98,6 +101,15 @@ class Function(DOLFINxFunction):
         else:
             return str_indexed(name, self.index, 'superscript', True)
         
+    @cached_property
+    def function_subspaces(
+        self,
+    ) -> tuple[FunctionSpace, ...]:
+        """
+        Cached collapsed subspaces of the function space.
+        """
+        return extract_subspaces(self.function_space)
+        
     def sub(
         self, 
         subspace_index: int, 
@@ -106,6 +118,7 @@ class Function(DOLFINxFunction):
     ) -> Self:
         if name is None:
             name = self._create_subname(subspace_index)
+        
         f = Function(
             self.function_space.sub(subspace_index), 
             self.x, 

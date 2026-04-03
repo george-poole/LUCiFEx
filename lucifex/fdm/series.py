@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, TypeVar, Iterable, Generic, Protocol, overload
 from typing_extensions import Self
-from functools import singledispatch
+from functools import singledispatch, cached_property
 
 import numpy as np
 from ufl import split, replace
@@ -12,9 +12,9 @@ from dolfinx.mesh import Mesh
 
 from ..utils.fenicsx_utils import (
     set_constant, set_function, extract_mesh,
-    create_function_space,
+    create_function_space, extract_subspaces,
 )
-from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator
+from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator, AnyNumber
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 
@@ -282,29 +282,6 @@ class ExprSeries(Series[Expr]):
             self._series = series
             self._time_series = time_series
             self._args = tuple(args)
-
-    # def create_expr(
-    #     self, 
-    #     *args: Expr,
-    # ) -> Expr | Any:
-        
-    #     print('sol')
-    #     for i in args:
-    #         print(i)
-    #     print('eol')
-    #     print(self._expr_factory)
-    #     print(self._expr_factory(*args))
-    #     return self._expr_factory(*args)
-
-    # def reconstruct_expr(
-    #     self,
-    #     *operators: Callable[[Series | Expr], Expr],
-    #     args: Iterable[Any] | None = None,
-    # ) -> Expr | Any:
-    #     if args is None:
-    #         args = self.args
-    #     op_args = [op(arg) for op, arg in zip(operators, args, strict=True)]
-    #     return self.create_expr(*op_args)
     
     @property
     def args(self) -> tuple[Series | Expr | Any]:
@@ -472,13 +449,12 @@ class SolutionSeries(Series[T], Generic[T, U, I]):
 
     def forward(
         self, 
-        t: float | Constant | np.ndarray,
+        t: AnyNumber | Constant,
     ) -> None:
-        """Steps the `Series` object forward in time.
+        """
+        Steps the `Series` forward in time, for example
 
-        e.g.
-        `Series([Unsolved, uⁿ⁻², uⁿ⁻¹]; uⁿ; uⁿ⁺¹) -> 
-        Series([uⁿ⁻², uⁿ⁻¹, uⁿ]; uⁿ⁺¹; Unsolved)`
+        `[Unsolved, uⁿ⁻², uⁿ⁻¹, uⁿ, uⁿ⁺¹] <- [uⁿ⁻², uⁿ⁻¹, uⁿ, uⁿ⁺¹, Unsolved]`
         """
         self._series_append.write(t)
 
@@ -528,6 +504,15 @@ class FunctionSeries(
         self,
     ) -> FunctionSpace:
         return self._function_space
+    
+    @cached_property
+    def function_subspaces(
+        self,
+    ) -> tuple[FunctionSpace, ...]:
+        """
+        Cached collapsed subspaces of the function space.
+        """
+        return extract_subspaces(self.function_space)
     
     @property
     def mesh(
@@ -580,21 +565,22 @@ class SubFunctionSeries(Series[Expr]):
     
     def __init__(
         self,
-        mixed: FunctionSeries,
+        sup_series: FunctionSeries,
         subspace_index: int,
         name: str | None = None,
     ):
         if name is None:
             name = f'{self.name}{subspace_index}'
-        order = len(mixed.sequence) - 1
+        order = len(sup_series.sequence) - 1
         super().__init__(
-            lambda i: split(mixed.sequence[i - self.FUTURE_INDEX - 1])[subspace_index], 
+            lambda i: split(sup_series.sequence[i - self.FUTURE_INDEX - 1])[subspace_index], 
             name, 
             order,
         )
-        self._mixed = mixed
+        self._sup_series = sup_series
         self._subspace_index = subspace_index
-        self._function_space = mixed.function_space.sub(self._subspace_index).collapse()[0]
+        # self._function_space = sup_series.function_space.sub(self._subspace_index).collapse()[0]
+        self._function_space = sup_series.function_subspaces[subspace_index]
         self._series = None
     
     @property
@@ -603,11 +589,15 @@ class SubFunctionSeries(Series[Expr]):
         
     @property
     def function_supspace(self) -> FunctionSpace:
-        return self._mixed.function_space
+        return self._sup_series.function_space
     
     @property
     def ufl_shape(self):
         return self._function_space.ufl_element().value_shape() 
+    
+    @property
+    def subspace_index(self) -> int:
+        return self._subspace_index
     
     @property
     def mesh(self) -> Mesh:
@@ -618,7 +608,7 @@ class SubFunctionSeries(Series[Expr]):
         if self._series is None:
             self._series = [
                 i.sub(self._subspace_index, self.name, collapse=True) 
-                for i in self._mixed.series
+                for i in self._sup_series.series
             ]
         return self._series
     
@@ -626,11 +616,11 @@ class SubFunctionSeries(Series[Expr]):
         self._series = None
 
     def get_series_item(self, time_index: int) -> Function:
-        return self._mixed.series[time_index].sub(self._subspace_index, self.name, collapse=True)
+        return self._sup_series.series[time_index].sub(self._subspace_index, self.name, collapse=True)
     
     @property
     def time_series(self) -> list[float | None]:
-        return self._mixed.time_series
+        return self._sup_series.time_series
 
 
 class ConstantSeries(

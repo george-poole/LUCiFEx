@@ -18,14 +18,14 @@ def diffusion(
     u: FunctionSeries,
     dt: Constant | float,
     d: Function | Constant | Expr,
-    D_diff: FiniteDifference, # TODO tuple
+    D_diff: FiniteDifference | FiniteDifferenceArgwise,
     D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
     `∂u/∂t = ∇·(D·∇u)`
 
-    `𝒟(∂u/∂t) = ∇·(𝒟(D·∇u))`
+    `𝒟(∂u/∂t) = ∇·𝒟(D·∇u)`
     """
     return diffusion_reaction(
         u,

@@ -8,25 +8,32 @@ from ufl.core.expr import Expr
 
 from lucifex.solver import BoundaryConditions
 from lucifex.fem import Function, Constant
-from lucifex.utils.fenicsx_utils import is_none, BlockForm
+from lucifex.fdm import FunctionSeries
+from lucifex.utils.fenicsx_utils import is_none, BlockForm, extract_subspaces
 
 
 def stokes_incompressible(
-    up: Function,
+    up: Function | FunctionSeries,
     deviatoric_stress: Callable[[Function | Argument], Expr],
     f: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
     *,
     blocked: bool = False,
-    add_zero: tuple[bool | None, bool | None] = (False, False),
+    # add_zero: tuple[bool | None, bool | None] = (False, False),  # TODO
 ) -> list[Form] | BlockForm:
     """
     `∇·𝐮 = 0` \\
     `𝟎 = -∇p + ∇·𝜏(𝐮) + 𝐟`
     """
     dx = Measure('dx', up.function_space.mesh)
-    v, q = TestFunctions(up.function_space)
-    u, p = TrialFunctions(up.function_space) 
+    if blocked:
+        subspaces = up.function_subspaces
+        v, q = (TestFunction(i) for i in subspaces)
+        u, p = (TrialFunction(i) for i in subspaces)
+    else:
+        v, q = TestFunctions(up.function_space)
+        u, p = TrialFunctions(up.function_space) 
+
     tau = deviatoric_stress(u)
 
     F_div = q * div(u) * dx

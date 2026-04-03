@@ -146,17 +146,18 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         if is_none(self._l_form_termwise, any) or is_none(self._l_form_nontermwise, any):
             raise LinearFormError(self.__class__, solution.name)
 
-        # blocked subspaces if applicable
+        # set block subspaces if applicable
         if self._blocked:
-            self._blocked_subspaces = self._l_form_termwise.function_spaces
+            self._block_subspaces = solution.function_subspaces
+            # self._block_subspaces = self._l_form_termwise.block_subspaces
         else:
-            self._blocked_subspaces = None
+            self._block_subspaces = None
 
         # essential boundary conditions and constraints
         if bcs is None:
             bcs = []
         if isinstance(bcs, BoundaryConditions):
-            self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=self._blocked_subspaces)   
+            self._bcs = bcs.create_strong_bcs(solution.function_space, fs_sub=self._block_subspaces)   
             constraints = []
             mpc = bcs.create_periodic_mpc(solution.function_space, finalize=True) # TODO include dirichlet bcs here?
             if mpc is not None:
@@ -440,7 +441,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
         self._solver.solve(self._vector, vec)
 
         if self._blocked:   
-            dofmaps, slices = self._get_blocked_dofmaps_slices()     
+            dofmaps, slices = self._get_block_dofmaps_slices()     
             for dfmp, slc in zip(dofmaps, slices, strict=True):
                 self._solution.x.array[dfmp] = vec[slc]
         
@@ -454,7 +455,7 @@ class BoundaryValueProblem(Solver[Function, FunctionSeries]):
 
         super().solve(future, overwrite)
 
-    def _get_blocked_dofmaps_slices(
+    def _get_block_dofmaps_slices(
         self,
     ) -> tuple[list[np.ndarray], list[slice]]:
         if self._dofmaps_slices is None:

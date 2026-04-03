@@ -9,7 +9,7 @@ from petsc4py import PETSc
 from dolfinx.fem import Function, FunctionSpace, Constant, Function
 from dolfinx.fem import Expression
 
-from ..py_utils import OverloadTypeError, StrSlice, optional_lru_cache, as_slice
+from ..py_utils import OverloadTypeError, StrSlice, AnyNumber, optional_lru_cache, as_slice
 from .expr_utils import (
     is_same_element, 
     is_scalar,
@@ -201,14 +201,14 @@ def extract_subdofs(
 
 
 def set_function(
-    f: Function,
+    u: Function,
     value: Function 
     | Callable[[np.ndarray], np.ndarray] 
     | Expression 
     | Expr 
     | Constant 
-    | float 
-    | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+    | AnyNumber 
+    | Iterable[AnyNumber | Constant | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """
@@ -216,20 +216,20 @@ def set_function(
     method. Does not mutate `value`.
     """
     if dofs_indices is None:
-        set_function_interpolate(f, value)
+        set_function_interpolate(u, value)
     else:
-        set_function_dofs(f, value, dofs_indices)
+        set_function_dofs(u, value, dofs_indices)
 
 
 def set_function_dofs(
-    f: Function | np.ndarray,
+    u: Function | np.ndarray,
     value: Function 
     | Callable[[np.ndarray], np.ndarray] 
     | Expression 
     | Expr 
     | Constant 
-    | float 
-    | Iterable[float | Constant | Callable[[np.ndarray], np.ndarray]],
+    | AnyNumber 
+    | Iterable[AnyNumber | Constant | Callable[[np.ndarray], np.ndarray]],
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """
@@ -240,10 +240,10 @@ def set_function_dofs(
     elif isinstance(dofs_indices, Iterable):
         dofs_indices = np.array(dofs_indices)
 
-    if isinstance(f, Function):
-        f = f.x.array
+    if isinstance(u, Function):
+        u = u.x.array
 
-    return _set_function_dofs(value, f, dofs_indices)
+    return _set_function_dofs(value, u, dofs_indices)
 
 
 @singledispatch
