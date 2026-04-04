@@ -179,8 +179,7 @@ def dg_advection_diffusion_reaction(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        bcs = bcs.boundary_data(u, 'dirichlet', 'neumann')
-        bcs
+        bcs_tuple = bcs.boundary_data(u, 'dirichlet', 'neumann')
 
     dg_adv_kws, dg_diff_kws = dg_kws
     if dg_adv_kws is None:
@@ -190,8 +189,8 @@ def dg_advection_diffusion_reaction(
 
     return [
         derivative_form(v, u, dt, D_dt, dx),
-        *dg_advection_forms(v/phi, u, a, n, bcs, D_adv, dx, dS, **dg_adv_kws),
-        *dg_diffusion_forms(-v/phi, u, d, n, h, alpha, bcs, D_diff, dx, dS, **dg_diff_kws),
+        *dg_advection_forms(v/phi, u, a, n, bcs_tuple, D_adv, dx, dS, **dg_adv_kws),
+        *dg_diffusion_forms(-v/phi, u, d, n, h, alpha, bcs_tuple, D_diff, dx, dS, **dg_diff_kws),
         *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx),
     ]
 
@@ -217,12 +216,7 @@ def dg_steady_advection_diffusion(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        ds, u_dirichlet, u_neumann = bcs.boundary_data(u, 'dirichlet', 'neumann')
-        bcs_adv = (ds, u_dirichlet)
-        bcs_diff = (ds, u_dirichlet, u_neumann)
-    else:
-        bcs_adv = None
-        bcs_diff = None
+        bcs_tuple = bcs.boundary_data(u, 'dirichlet', 'neumann')
 
     dg_adv_kws, dg_diff_kws = dg_kws
     if dg_adv_kws is None:
@@ -231,8 +225,8 @@ def dg_steady_advection_diffusion(
         dg_diff_kws = {}
 
     return [
-        *dg_advection_forms(v, u_trial, a, n, bcs_adv, dx=dx, dS=dS, **dg_adv_kws),
-        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dx, dS, dg_diff_kws),
+        *dg_advection_forms(v, u_trial, a, n, bcs_tuple, dx=dx, dS=dS, **dg_adv_kws),
+        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_tuple, dx=dx, dS=dS, **dg_diff_kws),
         *reaction_forms(-v, u_trial, r, j, dx=dx),
     ]
 

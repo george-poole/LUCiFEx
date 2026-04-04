@@ -10,7 +10,7 @@ from slepc4py import SLEPc
 from lucifex.utils.py_utils import FrozenDict
 
 
-DEFAULT_JIT_DIR = os.path.abspath(
+LUCIFEX_JIT_DIR = os.path.abspath(
     os.path.join(
         __file__,
         '../../..',
@@ -126,7 +126,7 @@ class OptionsJIT(Options):
         **kwargs: Any,
     ):
         if cache_dir is Ellipsis:
-            cache_dir = DEFAULT_JIT_DIR
+            cache_dir = LUCIFEX_JIT_DIR
         if cache_dir is None:
             cache_dir = os.getenv("XDG_CACHE_HOME", default=Path.home().joinpath(".cache")) / Path("fenics")
         if cffi_extra_compile_args is None:

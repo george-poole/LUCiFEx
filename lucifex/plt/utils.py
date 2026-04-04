@@ -245,26 +245,34 @@ def create_colorbar(
     ax: Axes,
     mappable: ScalarMappable,
     limits: tuple[float, float] | None,
-    ax_cbar: Axes | None,
+    cbar_ax: Axes | None,
     cax: bool = True,
+    cbar_title: str | None = None,
     **kwargs,
 ) -> Colorbar:
-    if ax_cbar is None:
+    if cbar_ax is None:
         _kwargs = dict(
             position="right", size="5%", pad=0.1,
         )
         _kwargs.update(**kwargs)
         divider = make_axes_locatable(ax)
-        ax_cbar = create_kws_filterer(divider.append_axes)(**_kwargs)
+        cbar_ax = create_kws_filterer(divider.append_axes)(**_kwargs)
     if cax:
-        cbar = fig.colorbar(mappable, cax=ax_cbar, **kwargs)
+        cbar = fig.colorbar(mappable, cax=cbar_ax, **kwargs)
     else:
-        cbar = fig.colorbar(mappable, ax=ax_cbar, **kwargs)
+        cbar = fig.colorbar(mappable, ax=cbar_ax, **kwargs)
 
     if limits is not None:
         assert len(limits) == 2
         mappable.set_clim(*limits)
 
+    if cbar_title:
+        _kwargs = dict(
+            rotation=360, ha='left', legend_fontsizes=14,
+        )
+        # _kwargs.update(**kwargs) # FIXME
+        cbar.set_label(cbar_title, **_kwargs)
+ 
     return cbar
 
 

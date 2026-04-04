@@ -7,13 +7,14 @@ from ufl.geometry import GeometricCellQuantity
 
 from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
+from lucifex.fdm import FunctionSeries
 from lucifex.solver import BoundaryConditions
-from lucifex.utils.fenicsx_utils import is_none, cell_size_quantity
+from lucifex.utils.fenicsx_utils import is_none, cell_size_quantity, extract_function_space
 from lucifex.utils.npy_utils import AnyFloat
 
 
 def poisson(
-    u: Function | FunctionSpace,
+    u: Function | FunctionSeries | FunctionSpace,
     f: Function | Constant | Expr | None = None,
     w: Function | Constant | Expr | None = None,
     bcs: BoundaryConditions | None = None,
@@ -24,11 +25,7 @@ def poisson(
     if w is None:
         w = 1
 
-    if isinstance(u, FunctionSpace):
-        fs = u
-    else:
-        fs = u.function_space
-
+    fs = extract_function_space(u)
     dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
@@ -57,7 +54,7 @@ def poisson(
 
 
 def nitsche_poisson(
-    u: Function | FunctionSpace,
+    u: Function | FunctionSeries | FunctionSpace,
     f: Function | Constant | Expr,
     alpha: float | Constant,
     bcs: BoundaryConditions | None = None,
@@ -68,10 +65,7 @@ def nitsche_poisson(
     """
     forms = poisson(u, f, bcs=None)  
 
-    if isinstance(u, FunctionSpace):
-        fs = u
-    else:
-        fs = u.function_space
+    fs = extract_function_space(u)
     mesh = fs.mesh
 
     v = TestFunction(fs)
@@ -82,12 +76,12 @@ def nitsche_poisson(
     if isinstance(h, str):
         h = cell_size_quantity(mesh, h)
 
-    ds, u_neumann, u_dirichlet = bcs.boundary_data(u, 'neumann', 'dirichlet')
+    ds, u_neumann, u_dirichlet = bcs.boundary_data(u_trial, 'neumann', 'dirichlet')
 
-    a_nistche = - v * u * inner(n, grad(u_trial)) * ds
-    a_nistche += -inner(n, grad(v)) * u * ds 
-    a_nistche += alpha / h * inner(u_trial, v) * ds
-    forms.append(a_nistche)
+    F_nistche = - v * inner(n, grad(u_trial)) * ds
+    F_nistche += -inner(n, grad(v)) * u_trial * ds 
+    F_nistche += alpha / h * inner(u_trial, v) * ds
+    forms.append(F_nistche)
 
     if u_neumann:
         F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])

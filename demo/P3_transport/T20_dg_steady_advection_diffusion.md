@@ -1,1 +1,1 @@
-# DG method for the steady advection-diffusion-reaction equation
+# DG methods for the steady advection-diffusion-reaction equation

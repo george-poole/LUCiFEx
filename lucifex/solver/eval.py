@@ -62,7 +62,10 @@ class Solver(ABC, Generic[T, TS]):
                 self._correction = Function(self._solution.function_space, name=corr_name)
                 if self._solution_series is not None:
                     self._correction_series = FunctionSeries(
-                        self._solution.function_space, corr_name, sltn_series.order, sltn_series.store,
+                        self._solution.function_space, 
+                        corr_name, 
+                        sltn_series.order, 
+                        sltn_series.store,
                     )
             elif isinstance(self._solution, Constant):
                 self._correction = Constant(
@@ -70,10 +73,13 @@ class Solver(ABC, Generic[T, TS]):
                 )
                 if self._solution_series is not None:
                     self._correction_series = ConstantSeries(
-                        self._solution.mesh, corr_name, self._solution_series.order, self._solution_series.ufl_shape, self._solution_series.store,
+                        self._solution.mesh, corr_name, 
+                        self._solution_series.order, 
+                        self._solution_series.ufl_shape, 
+                        self._solution_series.store,
                     )
             else:
-                raise TypeError
+                raise OverloadTypeError(corrector)
             
     @property
     def solution(self) -> T:

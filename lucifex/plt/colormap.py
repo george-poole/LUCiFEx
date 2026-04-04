@@ -133,8 +133,9 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
-    ax_cbar: Axes | None = None,
+    cbar_ax: Axes | None = None,
     cax: bool = True,
+    cbar_title: str | None = None,
     **kwargs,
 ):
     _poly_kwargs = dict(cmap='hot', edgecolors='face')
@@ -158,7 +159,7 @@ def _(
 
     if colorbar is not False:
         limits = None if colorbar is True else colorbar
-        create_colorbar(fig, ax, quad_poly, limits, ax_cbar, cax)
+        create_colorbar(fig, ax, quad_poly, limits, cbar_ax, cax, cbar_title)
     
 
 
@@ -170,8 +171,9 @@ def _(
     colorbar: bool | tuple[float, float] = True,
     grid: bool | None = None,
     triang: Triangulation | None = None,
-    ax_cbar: Axes | None = None,
+    cbar_ax: Axes | None = None,
     cax: bool = True,
+    cbar_title: str | None = None,
     **kwargs,
 ):
     x, y, z = xyz
@@ -198,7 +200,7 @@ def _(
 
     if colorbar is not False:
         limits = None if colorbar is True else colorbar
-        create_colorbar(fig, ax, cmap, limits, ax_cbar, cax)
+        create_colorbar(fig, ax, cmap, limits, cbar_ax, cax, cbar_title)
 
 
 plot_colormap = optional_fig_ax(_plot_colormap)
@@ -362,22 +364,22 @@ def plot_colormap_multifigure(
     for ui, cmp, ttl, ax_m, ax_cb in zip(u, cmap, title, axs_main, axs_cbar): 
         if isinstance(ax_cb, tuple):
             _colorbar = ax_cb
-            _ax_cbar = ax_m
+            _cbar_ax = ax_m
             _cax = False
         elif isinstance(ax_cb, Axes):
             _colorbar = True
-            _ax_cbar = ax_cb
+            _cbar_ax = ax_cb
             _cax = True
         else:
             _colorbar = False
-            _ax_cbar = None
+            _cbar_ax = None
             _cax = True
         plot_colormap(
             fig, ax_m, ui, 
             title=ttl, 
             cmap=cmp, 
             colorbar=_colorbar,
-            ax_cbar=_ax_cbar, 
+            cbar_ax=_cbar_ax, 
             cax=_cax,
             **_kwargs,
         )

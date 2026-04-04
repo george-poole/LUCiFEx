@@ -10,19 +10,22 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\text{d}\Omega$ | integration measure over the cells | 
 | $\text{d}\Gamma$ | integration measure over the cell facets | 
 | $\textbf{e}_x, \textbf{e}_y, \textbf{e}_z$ | unit vectors | 
-| $\textbf{x}=(x, y, z) = x\textbf{e}_x + y\textbf{e}_y + z\textbf{e}_z$ | spatial coordinates |
+| $\textbf{x}=\begin{pmatrix} x \\ y \\ z\end{pmatrix} = x\textbf{e}_x + y\textbf{e}_y + z\textbf{e}_z$ | spatial coordinates |
 | $t$ | time |
 | $\Delta t$ | timestep |
-| $\mathcal{D}(\cdot)$ | finite difference operator |
+| $\mathcal{D}$ | finite difference operator |
+| $\mathcal{D}_{u,w,\dots}=\mathcal{D}_u\circ\mathcal{D}_w\dots$ | argument-wise finite difference operator |
+| $\mathscr{D}^{\text{i}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
+| $\mathscr{D}^{\text{e}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
 | $h(\textbf{x})$ | local cell size |
 | $\mathcal{F}$ | set of cell facets |
 | $\left[\!\left[ \cdot \right]\!\right]$ | cell facet jump operator |
 | $\{\cdot\}$ | cell facet average operator |
 | $u, v, \dots$ | scalar quantity | 
 | $\textbf{u}, \textbf{v}, \dots$ | vector quantity | 
-| $\textbf{u} = u_x\textbf{e}_x + u_y\textbf{e}_y + u_z\textbf{e}_z$ | vector quantity components | 
+| $\textbf{u} = \begin{pmatrix} u_x \\ u_y \\ u_z\end{pmatrix}=u_x\textbf{e}_x + u_y\textbf{e}_y + u_z\textbf{e}_z$ | vector quantity components | 
 | $\mathsf{U}, \mathsf{V}, \dots$ | tensor quantity | 
-| $\mathsf{U} = ((U_{xx}, U_{xy}), (U_{yx}, U_{yy})) $ | tensor quantity components | 
+| $\mathsf{U} = \begin{pmatrix} U_{xx} &  U_{xy} &  U_{xz} \\ U_{yx} &  U_{yy} & U_{yz} \\ U_{zx} &  U_{zy} & U_{zz} \end{pmatrix} $ | tensor quantity components | 
 | $V_u$ | function space to which $u$ belongs
 | $\mathbb{BVP}$ | boundary value problem |
 | $\mathbb{IBVP}$ | initial boundary value problem |
@@ -32,7 +35,11 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathbb{F}$ | linearized or time-discretized weak forms sequence |
 | $u_0$ | initial condition on $u$ |
 | $u_\text{D}$ | Dirichlet boundary condition on $u$ |
-| $u_\text{N}$ | Neumann or natural boundary condition on $u$ |
 | $u_\text{E}$ | essential boundary condition on $u$ |
+| $u_\text{N}$ | Neumann or natural boundary condition on $u$ |
+| $u_\text{S}$ | strong boundary condition on $u$ |
+| $u_\text{W}$ | weak boundary condition on $u$ |
+| $u_\text{I}$ | inflow boundary condition on $u$ |
+| $u_\text{R}$ | Robin boundary condition on $u$ |
 | $\mathbb{R}$ | the set of real numbers |
 | $\mathbb{C}$ | the set of complex numbers |

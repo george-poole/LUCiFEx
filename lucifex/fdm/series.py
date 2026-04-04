@@ -424,7 +424,10 @@ class SolutionSeries(Series[T], Generic[T, U, I]):
         overwrite: bool = False,
     ) -> None:
         if not overwrite:
-            assert self._ics is None
+            if self._ics is not None:
+                raise RuntimeError(
+                    f'Cannot overwrite the initial condition for {self.name} if `overwrite=False`.'
+                )
         self.update(ics, future=False, overwrite=overwrite)
         self._ics = self._present.copy()
 

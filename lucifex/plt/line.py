@@ -32,7 +32,7 @@ def plot_line(
     legend_title: str | None = None,
     cyc: Cycler | Literal["black", "color", "marker", "markerline"] | str | None = None,
     flip: bool = False,
-    ax_cbar: Axes | None = None,
+    cbar_ax: Axes | None = None,
     cax: bool = True,
     **kwargs,
 ) -> None:
@@ -48,17 +48,15 @@ def plot_line(
             mappable = ScalarMappable(
                 cmap=cyc, norm=plt.Normalize(vmin=min(legend_labels), vmax=max(legend_labels)),
             )
-            cbar = create_colorbar(
+            create_colorbar(
                 fig, ax, mappable, 
                 limits=None, 
-                ax_cbar=ax_cbar, 
+                cbar_ax=cbar_ax, 
                 cax=cax,
+                cbar_title=legend_title,
                 **dict(shrink=0.5) if cax else {},
             )
-            if legend_title:
-                fontsize = kwargs.get('legend_fontsizes', 14)
-                cbar.set_label(legend_title, rotation=360, ha='left', fontsize=fontsize)
-
+        
         cyc = create_cycler(cyc, len(f))
         _kwargs = dict(x_lims=None)
         _kwargs.update(kwargs)
@@ -216,12 +214,12 @@ def plot_line_multifigure(
         if isinstance(ax_cb, tuple):
             _legend_labels = ax_cb
             _legend_title = leg_ttl
-            _ax_cbar = ax_m
+            _cbar_ax = ax_m
             _cax = False
         elif isinstance(ax_cb, Axes):
             _legend_labels = leg_lbl
             _legend_title = leg_ttl
-            _ax_cbar = ax_cb
+            _cbar_ax = ax_cb
             _cax = True
         else:
             if isinstance(leg_lbl, tuple):
@@ -230,7 +228,7 @@ def plot_line_multifigure(
             else: 
                 _legend_labels = leg_lbl
                 _legend_title = leg_ttl
-            _ax_cbar = None
+            _cbar_ax = None
             _cax = True
 
         plot_line(
@@ -239,7 +237,7 @@ def plot_line_multifigure(
             cyc=cy,
             legend_labels=_legend_labels,
             legend_title=_legend_title,
-            ax_cbar=_ax_cbar,
+            cbar_ax=_cbar_ax,
             cax=_cax,
             **kwargs,
         )

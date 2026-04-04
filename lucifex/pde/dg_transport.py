@@ -1,7 +1,6 @@
 from ufl.core.expr import Expr
 from ufl import (
-    Form, inner, grad,
-    inner, grad,
+    Form, inner, grad, Argument,
     div, jump, avg, lt, gt, conditional,
 )
 
@@ -14,12 +13,13 @@ from lucifex.fdm import (
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.npy_utils import AnyFloat
+from lucifex.utils.fenicsx_utils import extract_function_space
 
 from .cg_transport import OptionError
 
 
 def dg_advection_forms(
-    v,
+    v: Argument,
     u: FunctionSeries,
     a: Series | Function | Constant | Expr,
     n,
@@ -99,8 +99,7 @@ def dg_advection_forms(
                 ds_complement = ds(len(u_dirichlet) + len(u_neumann))
                 ds_not_inflow = ds_complement
                 if u_neumann:
-                    ds_neumann = sum([ds(i) for i, _ in u_neumann[1:]], start=ds(u_neumann[0][0]))
-                    ds_not_inflow += ds_neumann
+                    ds_not_inflow = sum([ds(i) for i, _ in u_neumann], start=ds_not_inflow)
                 uI_inflow = lambda uI: conditional(lt(inner(n, Da), 0), uI, 0)
                 F_inflow = sum([v * inner(n, Da) * uI_inflow(uI) * ds(i) for i, uI in u_dirichlet])
                 F_outflow = v * inner(n, Da) * _Du * ds_not_inflow
@@ -117,7 +116,7 @@ def dg_advection_forms(
 
 def dg_diffusion_forms(
     v,
-    u: Function | FunctionSeries,
+    u: Function | FunctionSeries | Argument,
     d,
     n,
     h,
@@ -137,13 +136,14 @@ def dg_diffusion_forms(
     if isinstance(D_diff, FiniteDifference):
         D_diff = FE @ D_diff
 
+    fs = extract_function_space(u)
     if not isinstance(alpha, tuple):
         alpha = (alpha, alpha)
     alphaI, alphaB = alpha
     if isinstance(alphaI, AnyFloat):
-        alphaI = Constant(u.function_space.mesh, alphaI)
+        alphaI = Constant(fs.mesh, alphaI)
     if isinstance(alphaB, AnyFloat):
-        alphaB = Constant(u.function_space.mesh, alphaB)
+        alphaB = Constant(fs.mesh, alphaB)
 
     D_diff_d, D_diff_u = D_diff
     Dd = D_diff_d(d, trial=u)

@@ -181,23 +181,19 @@
 <tr>
     <td>
     <img src="./demo/P3_transport/thumbnails/T14_dg_advection_rectangle_vortex.png" width="400"/>
-    <a href="./demo/P3_transport/T14_dg_advection_rectangle_vortex.html">DG advection with a vortex in a rectangle</a> 
+    <a href="./demo/P3_transport/T14_dg_advection_rectangle_vortex.html">DG advection with a vortical velocity</a> 
     </td>
 <td>
-    <img src="./demo/P3_transport/thumbnails/T21_dg_steady_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P3_transport/T21_dg_steady_advection_diffusion_interval.html">DG steady advection-diffusion in an interval</a> 
+    <img src="./demo/P3_transport/thumbnails/T21_dg_steady_advection_diffusion_rectangle.png" width="400"/>
+    <a href="./demo/P3_transport/T21_dg_steady_advection_diffusion_rectangle.html">DG steady advection-diffusion-reaction with a skew velocity</a> 
     </td>
 <td>
-    <img src="./demo/P3_transport/thumbnails/T22_dg_steady_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P3_transport/T22_dg_steady_advection_diffusion_rectangle.html">DG steady advection-diffusion in a rectangle</a> 
+    <img src="./demo/P3_transport/thumbnails/T31_dg_advection_diffusion_interval.png" width="400"/>
+    <a href="./demo/P3_transport/T31_dg_advection_diffusion_interval.html">DG advection-diffusion of a tophat on an interval</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P3_transport/thumbnails/T31_dg_advection_diffusion_interval.png" width="400"/>
-    <a href="./demo/P3_transport/T31_dg_advection_diffusion_interval.html">DG advection-diffusion of a tophat on an interval</a> 
-    </td>
-<td>
     <img src="./demo/P3_transport/thumbnails/T32_dg_advection_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P3_transport/T32_dg_advection_diffusion_rectangle.html">DG advection-diffusion in a rectangle</a> 
     </td>
@@ -205,13 +201,13 @@
     <img src="./demo/P3_transport/thumbnails/T41_supg_steady_advection_diffusion_interval.png" width="400"/>
     <a href="./demo/P3_transport/T41_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion in an interval</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P3_transport/thumbnails/T42_supg_steady_advection_diffusion_hemker.png" width="400"/>
     <a href="./demo/P3_transport/T42_supg_steady_advection_diffusion_hemker.html">SUPG steady advection-diffusion of the Hemker problem</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P3_transport/thumbnails/T43_supg_steady_advection_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P3_transport/T43_supg_steady_advection_diffusion_rectangle.html">SUPG steady advection-diffusion with a skew velocity</a> 
     </td>
@@ -219,19 +215,19 @@
     <img src="./demo/P3_transport/thumbnails/T51_supg_advection_diffusion_interval.png" width="400"/>
     <a href="./demo/P3_transport/T51_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian in an interval</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P3_transport/thumbnails/T52_supg_advection_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P3_transport/T52_supg_advection_diffusion_rectangle.html">SUPG advection-diffusion-reaction of a rotating pulse in a rectangle</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P3_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>
     <a href="./demo/P3_transport/T61_splitting_advection_reaction.html">Splitting method for the advection-reaction equation</a> 
     </td>
 <td>
     <img src="./demo/P3_transport/thumbnails/T71_predictor_corrector_advection_diffusion.png" width="400"/>
-    <a href="./demo/P3_transport/T71_predictor_corrector_advection_diffusion.html">Predictor-corrector method for the advection-reaction equation</a> 
+    <a href="./demo/P3_transport/T71_predictor_corrector_advection_diffusion.html">Predictor-corrector method for the advection-diffusion equation</a> 
     </td>
     </tr>
     </table>

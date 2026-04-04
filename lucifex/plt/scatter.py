@@ -16,7 +16,7 @@ def plot_scatter(
     size: float | Callable[[Iterable[float]], np.ndarray] = 36.0,
     cmap: str | tuple[str, str] | Iterable[str] = "plasma",
     indicator: Callable[..., bool | str | int] | None = None,
-    ax_cbar: Axes | None = None,
+    cbar_ax: Axes | None = None,
     cax: bool = True,
     **kwargs,
 ) -> None:
@@ -57,7 +57,7 @@ def plot_scatter(
             path_clc = create_kws_filterer(ax.scatter)(
                 xs, ys, c=z_data, cmap=cmap, s=size, **_kwargs
             )
-            create_colorbar(fig, ax, path_clc, limits=None, ax_cbar=ax_cbar, cax=cax)
+            create_colorbar(fig, ax, path_clc, limits=None, cbar_ax=cbar_ax, cax=cax)
 
 
 def scatter_size(

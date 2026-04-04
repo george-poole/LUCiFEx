@@ -1,5 +1,5 @@
+import math
 from typing import Iterable, Literal, TypeAlias, Any
-import numpy as np
 
 from .clbl_utils import OverloadTypeError
 
@@ -134,7 +134,9 @@ def str_scientific(
     n_digits: int = 3,
     ignore: Iterable[int] = (-1, 0, 1, 2),
     tex: bool = False,
-    mode: Literal['tex', 'unicode'] = 'tex'
+    mode: Literal['tex', 'unicode'] = 'tex',
+    rtol: float = 1e-6,
+    atol: float = 1e-9,
 ) -> str:
     """
     Returns the number's string representation in the scientific format.
@@ -142,11 +144,11 @@ def str_scientific(
     e.g. `123400` –> `1.234 × 10⁵`
     """
 
-    if np.isclose(number, 0):
+    if math.isclose(number, 0, rel_tol=rtol, abs_tol=atol):
         exponent = 0
         coeff = 0
     else:
-        exponent = int(np.floor(np.log10(abs(number))))
+        exponent = int(math.floor(math.log10(abs(number))))
         coeff = round(number / float(10**exponent), n_digits)
 
     if mode == 'tex':
@@ -283,7 +285,8 @@ def str_plain(
 def as_int_if_close(
     arg: float | int | Any,
     strict: bool = False,
-    tol: float | None = None,
+    rtol: float | None = None,
+    atol: float | None = None,
 ) -> float | int | Any:
     if not isinstance(arg, (float, int)):
         if not strict:
@@ -294,8 +297,10 @@ def as_int_if_close(
     if isinstance(arg, int):
         return arg
     
-    if tol is not None:
-        if np.isclose(arg, np.floor(arg), atol=tol):
+    if (rtol is not None) or (atol is not None):
+        rtol = 1e-9 if rtol is None else rtol
+        atol = 0 if atol is None else atol
+        if math.isclose(arg, math.floor(arg), rel_tol=rtol, abs_tol=atol):
             return int(arg)
         else:
             return arg

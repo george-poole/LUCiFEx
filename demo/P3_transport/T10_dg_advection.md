@@ -1,4 +1,4 @@
-# DG method for the advection equation
+# DG methods for the advection equation
 
 ## Strong form
 

@@ -58,8 +58,7 @@ parts:
           - file: demo/P3_transport/T14_dg_advection_rectangle_vortex
       - file: demo/P3_transport/T20_dg_steady_advection_diffusion
         sections: 
-          - file: demo/P3_transport/T21_dg_steady_advection_diffusion_interval
-          - file: demo/P3_transport/T22_dg_steady_advection_diffusion_rectangle
+          - file: demo/P3_transport/T21_dg_steady_advection_diffusion_rectangle
       - file: demo/P3_transport/T30_dg_advection_diffusion
         sections:
           - file: demo/P3_transport/T31_dg_advection_diffusion_interval

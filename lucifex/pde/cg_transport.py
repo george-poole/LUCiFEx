@@ -12,7 +12,7 @@ from lucifex.fdm import (
 from lucifex.fdm.ufl_operators import inner, grad, div
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
-from lucifex.utils.fenicsx_utils import is_none
+from lucifex.utils.fenicsx_utils import is_none, extract_function_space
 
 
 def derivative_form(
@@ -43,8 +43,8 @@ def second_derivative_form(
 
 def advection_forms(
     v: Argument,
-    u: Function | FunctionSeries,
-    a,
+    u: Function | FunctionSeries | Argument,
+    a: Function | FunctionSeries | Expr | Constant,
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     bcs: BoundaryConditions | tuple | None = None,
     dx: Measure | Expr | Literal[1] = 1,
@@ -72,7 +72,8 @@ def advection_forms(
             bcs.boundary_data(u, 'dirichlet') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
-        n = FacetNormal(u.function_space.mesh)
+        fs = extract_function_space(u)
+        n = FacetNormal(fs.mesh)
         lmbda = conditional(gt(inner(n, a), 0), 1, 0)
         F_ds = v * lmbda * inner(n, a) * u * ds
         F_ds += sum([v * (1 - lmbda) * inner(n, a) * uD * ds(i) for i, uD in u_dirichlet])
@@ -143,4 +144,5 @@ def reaction_forms(
 
 class OptionError(ValueError):
     def __init__(self, opt: int):
+        """Error to raise for an invalid option"""
         super().__init__(f"Invalid option number '{opt}'")
