@@ -78,7 +78,7 @@ def _save_figure(
         mkdirs: bool = True,
         sep: str = '__',
         thumbnail: str | bool = False,
-        **overwrite_kws: Any,
+        **overwrite_kwargs: Any,
     ) -> Callable[Concatenate[Figure, P], R | str] | Callable[Concatenate[FuncAnimation, Q], R | str]:
 
         ipynb_name = get_ipynb_file_name()
@@ -97,7 +97,9 @@ def _save_figure(
 
         @wraps(func)
         def __(fig_or_anim, **kwargs):
-            _kwargs = overwrite_kws
+            if not isinstance(fig_or_anim, (Figure, FuncAnimation)):
+                raise TypeError(f'Unexpected type {type(fig_or_anim)}')
+            _kwargs = overwrite_kwargs
             if isinstance(fig_or_anim, Figure):
                 _kwargs.update(
                     file_ext=('pdf', 'png'), 

@@ -3,7 +3,8 @@ from typing_extensions import Unpack
 
 from dolfinx.mesh import Mesh
 from lucifex.fem import Constant
-from lucifex.utils.py_utils import MultiKey, AnyNumber
+from lucifex.utils.py_utils import MultiKey
+from lucifex.utils.npy_utils import AnyNumber
 
 
 # FIXME overloaded __getitem__ type hints

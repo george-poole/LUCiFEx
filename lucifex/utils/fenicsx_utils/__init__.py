@@ -14,8 +14,6 @@ from .expr_utils import (
     is_scalar, 
     is_vector, is_tensor, extract_mesh, extract_meshes,
     is_shape, 
-    is_continuous_lagrange, is_discontinuous_lagrange, 
-    is_same_element, is_family_alias,
     NonVectorError,
     NonScalarError,
     NonScalarVectorError,
@@ -23,6 +21,10 @@ from .expr_utils import (
     MeshExtractionError,
     Scaled,
     extract_function_space,
+)
+from .elem_utils import (
+    is_continuous_lagrange, is_discontinuous_lagrange, 
+    is_same_element, is_family_alias,
 )
 from .form_utils import (
     extract_integrands,

@@ -14,7 +14,8 @@ from ..utils.fenicsx_utils import (
     set_constant, set_function, extract_mesh,
     create_function_space, extract_subspaces,
 )
-from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator, AnyNumber
+from ..utils.py_utils import OverloadTypeError, Writer, LazyEvaluator
+from ..utils.npy_utils import AnyNumber
 from ..fem.perturbation import Perturbation
 from ..fem import Function, Constant, Unsolved, UnsolvedType, is_unsolved
 

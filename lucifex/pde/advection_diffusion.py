@@ -79,9 +79,9 @@ def advection_diffusion_reaction(
     if tau is not None:
         terms = [
             derivative_form(1, u, dt, D_dt),
-            *advection_forms(1/phi, u, a, D_adv, by_parts=False), #TODO bcs here?
-            *diffusion_forms(-1/phi, u, d, D_diff, by_parts=False), #TODO and/or here?
-            *reaction_forms(-v/phi, u, r, j, D_reac, D_src),
+            *advection_forms(1/phi, u, a, D_adv, by_parts=False),
+            *diffusion_forms(-1/phi, u, d, D_diff, by_parts=False),
+            *reaction_forms(-1/phi, u, r, j, D_reac, D_src),
         ]
         res = sum(terms)
         F_stbl = stabilization_form(
@@ -138,8 +138,8 @@ def dg_advection_diffusion(
     D_phi: FiniteDifference = FE,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    dx_opt: int = 0,
-    dS_opt: int= 0,
+    *,
+    dg_kws: tuple[dict | None, dict | None] = (None, None),
 ) -> list[Form]:
     return dg_advection_diffusion_reaction(
         u, dt, alpha, a, d,
@@ -148,8 +148,7 @@ def dg_advection_diffusion(
         D_phi=D_phi,
         phi=phi, 
         bcs=bcs,
-        dx_opt=dx_opt, 
-        dS_opt=dS_opt,
+        dg_kws=dg_kws,
     )
 
 
@@ -169,9 +168,8 @@ def dg_advection_diffusion_reaction(
     D_phi: FiniteDifference = FE,
     phi: Series | Function | Expr | float = 1,
     bcs: BoundaryConditions | None = None,
-    dx_opt: int = 0,
-    ds_opt: int = 0,
-    dS_opt: int= 0,
+    *,
+    dg_kws: tuple[dict | None, dict | None] = (None, None),
 ) -> list[Form]:
     
     phi = D_phi(phi)
@@ -184,10 +182,16 @@ def dg_advection_diffusion_reaction(
         bcs = bcs.boundary_data(u, 'dirichlet', 'neumann')
         bcs
 
+    dg_adv_kws, dg_diff_kws = dg_kws
+    if dg_adv_kws is None:
+        dg_adv_kws = {}
+    if dg_diff_kws is None:
+        dg_diff_kws = {}
+
     return [
         derivative_form(v, u, dt, D_dt, dx),
-        *dg_advection_forms(v/phi, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, ds_opt=ds_opt, dS_opt=dS_opt),
-        *dg_diffusion_forms(-v/phi, u, d, n, h, alpha, bcs, D_diff, dx, dS),
+        *dg_advection_forms(v/phi, u, a, n, bcs, D_adv, dx, dS, **dg_adv_kws),
+        *dg_diffusion_forms(-v/phi, u, d, n, h, alpha, bcs, D_diff, dx, dS, **dg_diff_kws),
         *reaction_forms(-v/phi, u, r, j, D_reac, D_src, dx),
     ]
 
@@ -200,9 +204,8 @@ def dg_steady_advection_diffusion(
     r: Function | Constant | None = None,
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
-    dx_opt: int = 0,
-    ds_opt: int = 0,
-    dS_opt: int= 0,
+    *,
+    dg_kws: tuple[dict | None, dict | None] = (None, None),
 ) -> list[Form]:
     """
     `𝐚·∇u = ∇·(D·∇u) + Ru + J`
@@ -221,9 +224,15 @@ def dg_steady_advection_diffusion(
         bcs_adv = None
         bcs_diff = None
 
+    dg_adv_kws, dg_diff_kws = dg_kws
+    if dg_adv_kws is None:
+        dg_adv_kws = {}
+    if dg_diff_kws is None:
+        dg_diff_kws = {}
+
     return [
-        *dg_advection_forms(v, u_trial, a, n, bcs_adv, dx=dx, dS=dS, dx_opt=dx_opt, ds_opt=ds_opt, dS_opt=dS_opt),
-        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dx, dS),
+        *dg_advection_forms(v, u_trial, a, n, bcs_adv, dx=dx, dS=dS, **dg_adv_kws),
+        *dg_diffusion_forms(-v, u_trial, d, n, h, alpha, bcs_diff, dx, dS, dg_diff_kws),
         *reaction_forms(-v, u_trial, r, j, dx=dx),
     ]
 

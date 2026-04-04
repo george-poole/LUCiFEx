@@ -9,9 +9,10 @@ from petsc4py import PETSc
 from dolfinx.fem import Function, FunctionSpace, Constant, Function
 from dolfinx.fem import Expression
 
-from ..py_utils import OverloadTypeError, StrSlice, AnyNumber, optional_lru_cache, as_slice
-from .expr_utils import (
-    is_same_element, 
+from ..py_utils import OverloadTypeError, StrSlice, optional_lru_cache, as_slice
+from ..npy_utils import AnyNumber
+from .elem_utils import is_same_element
+from .expr_utils import ( 
     is_scalar,
     is_vector, 
     NonVectorError,
@@ -83,7 +84,7 @@ def create_function(
 
 
 def _as_or_create_function(
-    force_new: bool,
+    create: bool,
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[Mesh, str, int, int] 
     | tuple[str, int] | tuple[str, int, int],
     value: Function | Constant | Expression | Expr
@@ -103,13 +104,13 @@ def _as_or_create_function(
             
     if isinstance(fs, FunctionSpace):
         fs = extract_subspace(fs, subspace_index, collapse=True)
-        if not force_new and isinstance(value, Function) and value.function_space == fs:
+        if not create and isinstance(value, Function) and value.function_space == fs:
             return value
         f = Function(fs, name=name)
     else:
         if not isinstance(fs[0], Mesh):
             fs = fs_from_elem(fs, value)
-        if not force_new and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
+        if not create and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
             return value
         if use_cache is True:
             f = _create_function(fs, subspace_index, name)

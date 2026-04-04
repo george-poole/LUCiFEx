@@ -11,7 +11,8 @@ from dolfinx.la import VectorMetaClass
 from petsc4py import PETSc
 
 from ..utils.fenicsx_utils import create_function_space, set_function, extract_subspaces
-from ..utils.py_utils import str_indexed, AnyNumber
+from ..utils.py_utils import str_indexed
+from ..utils.npy_utils import AnyNumber
 from .perturbation import SpatialPerturbation
 from .unsolved import UnsolvedType
 

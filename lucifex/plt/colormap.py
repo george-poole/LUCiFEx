@@ -14,7 +14,7 @@ from matplotlib.tri.triangulation import Triangulation
 from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
 from ..utils.fenicsx_utils import is_scalar, is_grid, NonScalarError
 from ..utils.py_utils import create_kws_filterer, OverloadTypeError
-from ..utils.array_utils import as_index
+from ..utils.npy_utils import as_index
 
 from .utils import (
     LW, set_axes, optional_ax, set_axes, create_colorbar,

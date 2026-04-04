@@ -669,7 +669,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
     @classmethod
     def from_forms_factory(
         cls,
-        forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
+        forms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
         ics: Function | Constant | Perturbation | None = None,
         bcs: BoundaryConditions | None = None,
         petsc: OptionsPETSc | dict | None = None,
@@ -687,7 +687,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
     ):
         """
         If the `solution` argument is not provided, it will be inferred
-        as the zeroth argument to `forms_func`.
+        as the zeroth argument to `forms_factory`.
         """
         def _create(
             *args: P.args,
@@ -696,7 +696,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             nonlocal solution
             if solution is None:
                 solution = _deduce_from_args(0, args, kwargs)
-            forms = forms_func(*args, **kwargs)
+            forms = forms_factory(*args, **kwargs)
 
             def _init(arg):
                 if isinstance(arg, (FiniteDifference, FiniteDifferenceArgwise)):
@@ -713,7 +713,7 @@ class InitialBoundaryValueProblem(BoundaryValueProblem):
             if order > 1:
                 args_init = [_init(i) for i in args]
                 kwargs_init = {k: _init(v) for k, v in kwargs.items()}
-                forms_init = forms_func(*args_init, **kwargs_init)
+                forms_init = forms_factory(*args_init, **kwargs_init)
                 n_init = order - 1
             else:
                 forms_init = None
@@ -794,7 +794,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
     @classmethod
     def from_forms_factory(
         cls,
-        forms_func: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
+        forms_factory: Callable[P, Iterable[Form | tuple[Constant | float, Form]]],
         ics: Function | Constant | Perturbation | None = None,
         petsc: OptionsPETSc | dict | None = None,
         jit: OptionsJIT | dict | None = None,
@@ -811,7 +811,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
     ):
         bcs = None
         return InitialBoundaryValueProblem.from_forms_factory(
-            forms_func,
+            forms_factory,
             ics,
             bcs,
             petsc,

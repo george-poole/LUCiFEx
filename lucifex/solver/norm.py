@@ -3,7 +3,8 @@ from typing import Literal
 import numpy as np
 from ufl.core.expr import Expr
 from ufl import inner, div, grad
-from dolfinx.fem import Function
+from dolfinx.mesh import Mesh
+from dolfinx.fem import Function, FunctionSpace
 
 from ..utils.fenicsx_utils import dofs, mesh_integral
 
@@ -73,32 +74,30 @@ def grad_norm(
 
 def extrema(
     u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
+    elem: tuple[str, int] | tuple[Mesh, str, int] | FunctionSpace | None = ('P', 1),
 ) -> tuple[float, float]:
     """
     `minₓ(u(𝐱)), maxₓ(u(𝐱))` or `minₓ|𝐮(𝐱)|, maxₓ|𝐮(𝐱)|`
     """
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True) 
+    _dofs = dofs(u, elem, l2_norm=True, use_cache=True, avoid_new=True) 
     return np.min(_dofs), np.max(_dofs)
 
 
 def minimum(
     u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
+    elem: tuple[str, int] | tuple[Mesh, str, int] | FunctionSpace | None = ('P', 1),
 ) -> float:
     """
     `minₓ(u(𝐱))` or `minₓ|𝐮(𝐱)|`
     """
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
-    return np.min(_dofs)
+    return extrema(u, elem)[0]
 
 
 def maximum(
     u: Function | Expr,
-    elem: tuple[str, int] = ('P', 1),
+    elem: tuple[str, int] | tuple[Mesh, str, int] | FunctionSpace | None = ('P', 1),
 ) -> float:
     """
     `maxₓ(u(𝐱))` or `maxₓ|𝐮(𝐱)|`
     """
-    _dofs = dofs(u, elem, l2_norm=True, use_cache=True)
-    return np.max(_dofs)
+    return extrema(u, elem)[1]

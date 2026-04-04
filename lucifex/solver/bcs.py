@@ -14,7 +14,8 @@ from dolfinx.fem import (
 
 from ..fdm import FunctionSeries
 from ..fem import Function, Constant
-from ..utils.py_utils import ToDoError, AnyFloat
+from ..utils.py_utils import ToDoError
+from ..utils.npy_utils import AnyFloat
 from ..utils.fenicsx_utils import (
     BoundaryType, 
     create_tagged_measure,

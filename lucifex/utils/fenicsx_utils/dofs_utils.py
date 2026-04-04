@@ -104,7 +104,7 @@ def dofs(
     fs: FunctionSpace | tuple[Mesh, str, int] | tuple[str, int] | None = None,
     l2_norm: bool = False,
     use_cache: bool | EllipsisType | tuple[bool, bool] = False,
-    create: bool = True,
+    avoid_new: bool = False,
 ) -> np.ndarray:
     """
     scalar `u(𝐱) = Σᵢ Uᵢϕᵢ(𝐱)` returns `{Uᵢ}`
@@ -113,17 +113,16 @@ def dofs(
     
     vector `𝐮(𝐱) = Σᵢ (Uˣᵢ, Uʸᵢ, Uᶻᵢ)ϕᵢ(𝐱)` and `l2_norm=True` returns `{(Uˣᵢ² + Uʸᵢ² + Uᶻᵢ²)¹ᐟ²}`
     """
-    
     if fs is None:
         if not isinstance(u, Function):
             raise TypeError('`Function` object required if no function space specified.')
         fs = u.function_space
     
     if is_scalar(u) or (not l2_norm and is_vector(u)):
-        if create:
-            u = create_function(fs, u, use_cache=use_cache)
-        else:
+        if avoid_new:
             u = as_function(fs, u, use_cache=use_cache)
+        else:
+            u = create_function(fs, u, use_cache=use_cache)
         return u.x.array[:]
     elif l2_norm and is_vector(u):
         if not isinstance(use_cache, tuple):
@@ -131,7 +130,7 @@ def dofs(
         use_scalars_cache, use_vector_cache= use_cache
         component_dofs = np.stack(
             [
-                dofs(i, fs, use_cache=use_scalars_cache, create=True) 
+                dofs(i, fs, use_cache=use_scalars_cache, avoid_new=False) 
                 for i in extract_component_functions(fs, u, use_cache=use_vector_cache)
             ], 
             axis=1,

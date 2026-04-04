@@ -69,8 +69,7 @@ def dg_advection(
     D_adv: FiniteDifference,
     D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
-    dx_opt: int = 0,
-    dS_opt: int= 0,
+    **dg_kwargs,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = 0`
@@ -78,7 +77,7 @@ def dg_advection(
     return dg_advection_reaction(
         u, dt, a,
         D_adv=D_adv, D_dt=D_dt, bcs=bcs, 
-        dx_opt=dx_opt, dS_opt=dS_opt,
+        **dg_kwargs,
     )
 
 
@@ -93,8 +92,7 @@ def dg_advection_reaction(
     D_src: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_dt: FiniteDifferenceDerivative = DT,
     bcs: BoundaryConditions | None = None,
-    dx_opt: int = 0,
-    dS_opt: int= 0,
+    **dg_kwargs,
 ) -> list[Form]:
     """
     `∂u/∂t + 𝐚·∇u = Ru + J`
@@ -105,6 +103,6 @@ def dg_advection_reaction(
     dS = Measure('dS', u.function_space.mesh)
     return [
         derivative_form(v, u, dt, D_dt, dx),
-        *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, dx_opt=dx_opt, dS_opt=dS_opt),
+        *dg_advection_forms(v, u, a, n, bcs, D_adv, dx, dS, **dg_kwargs),
         *reaction_forms(-v, u, r, j, D_reac, D_src, dx),
     ]

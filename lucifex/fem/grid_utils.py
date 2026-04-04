@@ -6,7 +6,7 @@ from scipy.interpolate import RegularGridInterpolator
 from dolfinx.fem import Function
 import numpy as np
 
-from ..utils.array_utils import as_index
+from ..utils.npy_utils import as_index
 from ..utils.py_utils import (
     as_slice, StrSlice, OverloadTypeError, 
     optional_lru_cache,
@@ -284,7 +284,7 @@ def resample_grid(
     factor: int | float | tuple[int | float, ...],
     name: str | None = None,
     use_cache: bool | tuple[bool, bool] = True,
-    **interpolator_kws: Any,
+    **interpolator_kwargs: Any,
 ) -> GridFunction:
     """
     `factor > 1` to refine and `factor < 1` to coarsen
@@ -307,7 +307,7 @@ def resample_grid(
         np.linspace(np.min(ax), np.max(ax), int(n * len(ax))) 
         for ax, n in zip(axes, factor, strict=True)
     )
-    interpolator = RegularGridInterpolator(axes, u.value, **interpolator_kws)
+    interpolator = RegularGridInterpolator(axes, u.value, **interpolator_kwargs)
     u_fine_values = interpolator(tuple(np.meshgrid(*axes_fine))).T
 
     return GridFunction(

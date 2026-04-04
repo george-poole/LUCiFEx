@@ -9,7 +9,7 @@ from dolfinx.fem import FunctionSpace
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import is_none, cell_size_quantity
-from lucifex.utils.py_utils import AnyFloat
+from lucifex.utils.npy_utils import AnyFloat
 
 
 def poisson(

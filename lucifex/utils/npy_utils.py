@@ -1,10 +1,31 @@
 import operator
-from typing import Callable, Iterable, overload
+from typing import Callable, Iterable, TypeAlias, overload
 
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 
 from .py_utils import StrSlice, as_slice
+
+
+AnyFloat: TypeAlias = float | np.floating
+"""
+Type alias to `float | np.floating`
+"""
+
+AnyInt: TypeAlias = int | np.integer
+"""
+Type alias to `int | np.integer`
+"""
+
+AnyNumber: TypeAlias = AnyFloat | AnyInt
+"""
+Type alias to `AnyFloat | AnyInt`
+"""
+
+AnyBool: TypeAlias = bool | np.bool_
+"""
+Type alias to `bool | np.bool_`
+"""
 
 
 def derivative(

@@ -116,6 +116,8 @@ def _(velocity: Constant, h, tol, mesh):
 
 @_advective_dt_evaluator.register(float)
 @_advective_dt_evaluator.register(int)
+@_advective_dt_evaluator.register(np.floating)
+@_advective_dt_evaluator.register(np.integer)
 def _(velocity, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
@@ -184,6 +186,8 @@ def _(diffusion: Constant, h, tol, mesh):
 
 @_diffusive_dt_evaluator.register(float)
 @_diffusive_dt_evaluator.register(int)
+@_diffusive_dt_evaluator.register(np.floating)
+@_diffusive_dt_evaluator.register(np.integer)
 def _(d, h, tol, _):
     if not isinstance(h, (float, int)):
         raise TypeError(f'`h` must be a `float` if `velocity` is a `float`')
@@ -250,6 +254,8 @@ def _(reaction: Constant, tol, _):
 
 @_reactive_dt_evaluator.register(float)
 @_reactive_dt_evaluator.register(int)
+@_reactive_dt_evaluator.register(np.floating)
+@_reactive_dt_evaluator.register(np.integer)
 def _(reaction, tol, _):
     return lambda: 1.0 / max(reaction, tol)
 

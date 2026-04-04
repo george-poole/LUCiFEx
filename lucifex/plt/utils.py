@@ -277,20 +277,20 @@ def create_multifigure(
     suptitle: str | None = None,
     suptitle_kws: dict | None = None,
     suptitle_index: int | None = None,
-    **subplots_kws,
+    **subplots_kwargs,
 ) -> tuple[Figure, list[Axes], list[Axes] | list[tuple[float, float] | None]]:
 
-    _subplots_kws = dict(
+    _subplots_kwargs = dict(
         figsize=figscale * np.multiply((n_cols, n_rows), plt.rcParams["figure.figsize"]), 
         layout='compressed',
     )
     if cbars is True:
-        _subplots_kws.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
+        _subplots_kwargs.update({'width_ratios': np.array([(1, width_ratio)] * n_cols).flatten()})
         n_cols = 2 * n_cols
 
-    _subplots_kws.update(subplots_kws)
+    _subplots_kwargs.update(subplots_kwargs)
 
-    fig, _ = plt.subplots(n_rows, n_cols, **_subplots_kws)
+    fig, _ = plt.subplots(n_rows, n_cols, **_subplots_kwargs)
 
     if suptitle:
         if suptitle_kws is None:
@@ -360,14 +360,14 @@ def optional_multifig_ax(
                 if isinstance(a[0], Figure):
                     return plot_func(*a, **k)
                 else:
-                    plot_objs = a[0]
+                    plt_series = a[0]
                     n_cols = kwargs.get(N_COLS)
                     n_rows = kwargs.get(N_ROWS)
                     assert (n_cols, n_rows).count(None) != 2
                     if n_cols is None:
-                        n_cols = len(plot_objs) // n_rows
+                        n_cols = len(plt_series) // n_rows
                     if n_rows is None:
-                        n_rows = len(plot_objs) // n_cols
+                        n_rows = len(plt_series) // n_cols
                     fig, axs_main, axs_cbar = create_multifigure(
                         n_rows, 
                         n_cols, 

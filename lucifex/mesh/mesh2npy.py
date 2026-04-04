@@ -164,7 +164,7 @@ class QuadMesh(NPy2DMesh):
     def from_mesh(
         cls: type['QuadMesh'], 
         mesh: Mesh,
-        **reorder_kws,
+        **reorder_kwargs,
     ) -> Self:
         if not mesh.geometry.dim == 2:
             raise ValueError(
@@ -185,7 +185,7 @@ class QuadMesh(NPy2DMesh):
         connec = mesh.topology.connectivity(mesh.geometry.dim, 0)
         n_cells = connec.num_nodes
         cells = [
-            _reorder_quad_vertices(connec.links(i), **reorder_kws) for i in range(n_cells)
+            _reorder_quad_vertices(connec.links(i), **reorder_kwargs) for i in range(n_cells)
         ]
 
         return cls(x_coordinates, y_coordinates, cells, mesh.name)

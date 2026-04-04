@@ -239,7 +239,7 @@ class TriFunction(NPyFunction[TriMesh]):
             elem = ('P', 1)
         else:
             elem = (mesh, 'P', 1)
-        get_values = lambda u: dofs(u, elem, create=False)
+        get_values = lambda u: dofs(u, elem, avoid_new=True)
         convert_mesh = lambda m: as_tri_mesh(use_cache=use_mesh_cache)(m)
         return super().from_function(
             u,
@@ -264,7 +264,7 @@ class QuadFunction(NPyFunction[QuadMesh]):
             elem = ('P', 1)
         else:
             elem = (mesh, 'P', 1)
-        get_values = lambda u: dofs(u, elem, create=False)
+        get_values = lambda u: dofs(u, elem, avoid_new=True)
         convert_mesh = lambda m: as_quad_mesh(use_cache=use_mesh_cache)(m)
         return super().from_function(
             u,

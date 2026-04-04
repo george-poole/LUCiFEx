@@ -137,16 +137,16 @@ def plot_twin_lines(
         Function | GridFunction | tuple[np.ndarray, np.ndarray]
     ],
     twin_labels: tuple[str | None, str | None] = (None, None),
-    twin_kwargs: tuple[dict[str, Any], dict[str, Any]] = None,
+    twin_kws: tuple[dict[str, Any], dict[str, Any]] = None,
     **kwargs,
 ) -> None:
     _plt_kwargs = {'color': 'black', 'linewidth': LW}
     _plt_kwargs_left = _plt_kwargs | {'linestyle': 'solid'}
     _plt_kwargs_right = _plt_kwargs | {'linestyle': 'dashed'}
-    if twin_kwargs is None:
-        twin_kwargs = ({}, {})
-    _plt_kwargs_left.update(**twin_kwargs[0], **kwargs)
-    _plt_kwargs_right.update(**twin_kwargs[1], **kwargs)
+    if twin_kws is None:
+        twin_kws = ({}, {})
+    _plt_kwargs_left.update(**twin_kws[0], **kwargs)
+    _plt_kwargs_right.update(**twin_kws[1], **kwargs)
 
     y_label_left, y_label_right = twin_labels
     line_left, line_right = twin_lines

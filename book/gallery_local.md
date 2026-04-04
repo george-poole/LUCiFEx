@@ -223,7 +223,7 @@
 <tr>
     <td>
     <img src="./demo/P3_transport/thumbnails/T52_supg_advection_diffusion_rectangle.png" width="400"/>
-    <a href="./demo/P3_transport/T52_supg_advection_diffusion_rectangle.ipynb">SUPG advection-diffusion of a rotating pulse in a rectangle</a> 
+    <a href="./demo/P3_transport/T52_supg_advection_diffusion_rectangle.ipynb">SUPG advection-diffusion-reaction of a rotating pulse in a rectangle</a> 
     </td>
 <td>
     <img src="./demo/P3_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>

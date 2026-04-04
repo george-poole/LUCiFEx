@@ -19,11 +19,11 @@ from lucifex.utils.py_utils import StrEnum
 
 
 class TauType(StrEnum):
-    CODINA = 'codina'
-    SHAKIB = 'shakib'
     COTH = 'coth'
     COTH_PWL = 'coth_pwl'
     COTH_INFTY = 'coth_infty'
+    CODINA = 'codina'
+    SHAKIB = 'shakib'
     TRANSIENT = 'transient'
     NONE = 'none'
     UNSTABILIZED = 'unstabilized'
@@ -152,33 +152,6 @@ def tau_expr(func):
 
 
 @tau_expr
-def tau_codina(h, a, d, r) -> Expr:
-    """
-    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
-    `⟹ 𝜏 = (2|𝐚| / h  +  4D / h²  -  R)⁻¹`
-    """
-    return ((2 * a / h) + (4 * d / h**2) - r) ** (-1) 
-
-
-@tau_expr
-def tau_shakib(h, a, d, r) -> Expr:
-    """
-    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
-    `⟹ 𝜏 = ( (2|𝐚| / h)²  +  9(4D / h²)²  +  R²)⁻¹ᐟ²`
-    """
-    return ((2 * a / h)**2 + 9 * (4 * d / h**2)**2 + r**2) ** (-0.5) 
-
-
-@tau_expr
-def tau_transient(h, a, d, r, dt) -> Expr:
-    """
-    `∂u/∂t + 𝐚·∇u = ∇·(D∇u) + Ru + s` \\
-    `⟹ 𝜏 = ( (2 / Δt)² + (2|𝐚| / h)²  +  (4D / h²)²  +  R²)⁻¹ᐟ²`
-    """
-    return ((2 / dt)**2 + (2 * a / h)**2 + (2 * d / h**2)**2 + r**2) ** (-0.5) 
-
-
-@tau_expr
 def tau_coth(h, a, d) -> Expr:
     """
     `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
@@ -210,6 +183,33 @@ def tau_coth_infty(h, a) -> Expr:
     which is the `Pe -> ∞` limit of `𝜏 = h / 2|𝐚| ξ(Pe)`.
     """
     return (0.5 * h / a) 
+
+
+@tau_expr
+def tau_codina(h, a, d, r) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = (2|𝐚| / h  +  4D / h²  -  R)⁻¹`
+    """
+    return ((2 * a / h) + (4 * d / h**2) - r) ** (-1) 
+
+
+@tau_expr
+def tau_shakib(h, a, d, r) -> Expr:
+    """
+    `𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = ( (2|𝐚| / h)²  +  9(4D / h²)²  +  R²)⁻¹ᐟ²`
+    """
+    return ((2 * a / h)**2 + 9 * (4 * d / h**2)**2 + r**2) ** (-0.5) 
+
+
+@tau_expr
+def tau_transient(h, a, d, r, dt) -> Expr:
+    """
+    `∂u/∂t + 𝐚·∇u = ∇·(D∇u) + Ru + s` \\
+    `⟹ 𝜏 = ( (2 / Δt)² + (2|𝐚| / h)²  +  (4D / h²)²  +  R²)⁻¹ᐟ²`
+    """
+    return ((2 / dt)**2 + (2 * a / h)**2 + (2 * d / h**2)**2 + r**2) ** (-0.5) 
         
 
 def xi(Pe):

@@ -5,7 +5,8 @@ from dolfinx.mesh import Mesh
 from dolfinx.fem import Constant as DOLFINxConstant
 import numpy as np
 
-from ..utils.py_utils import str_indexed, AnyNumber
+from ..utils.py_utils import str_indexed
+from ..utils.npy_utils import AnyNumber
 from .unsolved import UnsolvedType
 
 
