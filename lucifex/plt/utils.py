@@ -166,7 +166,7 @@ def _create_cycler(
         else:
             ls = '' 
         ncyc = len(MARKERS)
-        cyc = cycler(marker=MARKERS, color=["black"] * ncyc, linewidth=[LW] * ncyc, linestyle=[ls] * ncyc, s=[MS] * ncyc)
+        cyc = cycler(marker=MARKERS, color=["black"] * ncyc, linewidth=[LW] * ncyc, linestyle=[ls] * ncyc, ms=[MS] * ncyc)
     else:
         assert num is not None
         cmap = getattr(plt.cm, cyc)

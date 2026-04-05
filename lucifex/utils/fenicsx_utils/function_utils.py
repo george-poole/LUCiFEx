@@ -213,7 +213,7 @@ def set_function(
     dofs_indices: Iterable[int] | StrSlice | None = None,
 ) -> None:
     """
-    Mutates `f` by either setting its DoFs array or calling its interpolation
+    Mutates `u` by either setting its DoFs array or calling its interpolation
     method. Does not mutate `value`.
     """
     if dofs_indices is None:

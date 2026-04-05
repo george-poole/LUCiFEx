@@ -1,4 +1,4 @@
-# Table of partial differential equations
+# Summary
 
 Name | Equation | Classification(s) |
 | -------- | -------- | ------- |
@@ -14,6 +14,8 @@ Name | Equation | Classification(s) |
 | Helmholtz | $\nabla\cdot(\mathsf{D}\cdot\nabla u) + k^2 u = f$ | elliptic, second-order in space | 
 | wave | $\frac{\partial^2u}{\partial t^2} = \nabla\cdot(\mathsf{D}\cdot\nabla u)$ | hyperbolic, second-order in space, second-order in time |
 | Darcy | $\begin{matrix}\nabla\cdot\textbf{u} = 0\\ \textbf{u} = -\frac{\mathsf{K}}{\mu}\cdot(\nabla p - \textbf{f}\,)\end{matrix}$ | mixed, first-order in space | 
+| Darcy streamfunction | $\nabla\cdot\left(\frac{\mu\mathsf{K}^{\mathsf{T}}\cdot\nabla\psi}{\text{det}(\mathsf{K})}\right)=-\frac{\partial(f_y)}{\partial x} + \frac{\partial(f_x)}{\partial y}$ | elliptic, second-order in space | 
+| Darcy pressure | $\nabla\cdot\left(\frac{\mathsf{K}}{\mu}\cdot\nabla p\right)=\nabla\cdot\left(\frac{\mathsf{K}}{\mu}\cdot\textbf{f}\right)$ | elliptic, second-order in space |
 | Stokes | $\begin{matrix}\nabla\cdot\textbf{u} = 0\\ \textbf{0}=-\nabla p + \nabla\cdot\tau + \textbf{f}\end{matrix}$ | mixed, second-order in space |  
 | Navier-Stokes | $\begin{matrix}\nabla\cdot\textbf{u} = 0\\ \rho \left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla\textbf{u}\right)=-\nabla p + \nabla\cdot\tau + \textbf{f}\end{matrix}$ | mixed, second-order in space, first-order in time |  
   
