@@ -314,5 +314,15 @@
     <img src="./demo/P2_introductory/thumbnails/I85_bcs_nitsche.png" width="400"/>
     <a href="./demo/P2_introductory/I85_bcs_nitsche.ipynb">Poisson equation with Nitsche boundary conditions</a> 
     </td>
+<td>
+    <img src="./demo/P2_introductory/thumbnails/I91_hp_refinement.png" width="400"/>
+    <a href="./demo/P2_introductory/I91_hp_refinement.ipynb">Steady diffusion-reaction with mesh refinement</a> 
+    </td>
+    </tr>
+<tr>
+    <td>
+    <img src="./demo/P2_introductory/thumbnails/I92_poisson_mms.png" width="400"/>
+    <a href="./demo/P2_introductory/I92_poisson_mms.ipynb">Poisson equation with method of manufactured solutions</a> 
+    </td>
     </tr>
     </table>

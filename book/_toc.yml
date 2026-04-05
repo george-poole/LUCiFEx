@@ -2,6 +2,10 @@ format: jb-book
 root: gallery
 
 parts:
+
+  - chapters:
+    - file: table
+
   # - caption: User Guide
   #   chapters:
   #     - file: demo/P1_user_guide/U00_introduction
@@ -47,6 +51,10 @@ parts:
           - file: demo/P2_introductory/I83_bcs_periodic
           - file: demo/P2_introductory/I84_bcs_robin
           - file: demo/P2_introductory/I85_bcs_nitsche
+      - file: demo/P2_introductory/I90_mesh
+        sections: 
+          - file: demo/P2_introductory/I91_hp_refinement
+          - file: demo/P2_introductory/I92_poisson_mms
 
   - caption: Transport
     chapters:

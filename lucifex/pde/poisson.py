@@ -12,39 +12,31 @@ from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import is_none, cell_size_quantity, extract_function_space
 from lucifex.utils.npy_utils import AnyFloat
 
+from .cg_transport import diffusion_forms
+
 
 def poisson(
     u: Function | FunctionSeries | FunctionSpace,
     f: Function | Constant | Expr | None = None,
-    w: Function | Constant | Expr | None = None,
+    d: Function | Constant | Expr | None = None,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """
-    `∇²u = f` or `∇·(w·∇u) = f`
+    `∇²u = f` or `∇·(D·∇u) = f`
     """
-    if w is None:
-        w = 1
+    if d is None:
+        d = 1
 
     fs = extract_function_space(u)
     dx = Measure('dx', fs.mesh)
     v = TestFunction(fs)
     u_trial = TrialFunction(fs)
-    
-    F_lhs = -inner(grad(v), w * grad(u_trial)) * dx
-    forms = [F_lhs]
+
+    forms = diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx)
 
     if not is_none(f):
         F_rhs = -inner(v, f) * dx
         forms.append(F_rhs)
-
-    if bcs is not None:
-        ds, u_neumann, u_robin = bcs.boundary_data(u, 'neumann', 'robin')
-        if u_neumann:
-            F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
-            forms.append(F_neumann)
-        if u_robin:
-            F_robin = sum([v * uR * ds(i) for i, uR in u_robin])
-            forms.append(F_robin)
 
     if is_none(f) and bcs is None:
         F_zero = v * Constant(fs.mesh, 0.0) * dx

@@ -15,7 +15,7 @@ u=u_{\text{D}} & \forall(\textbf{x},t)\in\partial\Omega_{\text{D}}\times[0,\inft
 \end{align*}
 $$
 
-## Time-discretization
+## Second-order time derivative formulation
 
 $$
 \frac{u^{n+1}-2u^n-u^{n-1}}{(\Delta t^n)^2} = \nabla\cdot\mathcal{D}_{\mathsf{D},u}(\mathsf{D}\cdot\nabla u) 
@@ -24,10 +24,6 @@ $$
 $$u^0=u_0$$
 
 $$u^{-1}=u^0 - \Delta t^0\dot{u}_0$$
-
-## Second-order time derivative formulation
-
-...
 
 ## First-order time derivatives formulation
 

@@ -68,8 +68,8 @@ def steady_diffusion_reaction(
     j: Function | Constant | None = None,
     bcs: BoundaryConditions | None = None,
     add_zero: bool | None = None,
-) -> tuple[Form, Form]:
-    """"
+) -> list[Form]:
+    """
     `0 = ∇·(D·∇u) + Ru + J`
     """
     v = TestFunction(u.function_space)
