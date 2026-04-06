@@ -1,4 +1,4 @@
-from typing import TypeAlias
+from typing import TypeAlias, Any
 from types import EllipsisType
 from collections.abc import Callable, Iterable
 
@@ -59,7 +59,7 @@ def dofs_indices(
     dofs_locator: DofsLocatorType = DofsLocatorType.TOPOLOGICAL,
     facet_locator: FacetLocatorType = FacetLocatorType.ANY, 
     collapsed: bool = False,
-) -> np.ndarray[np.int32] | list[np.ndarray[np.int32]]:
+) -> np.ndarray[Any, np.int32] | list[np.ndarray[Any, np.int32]]:
 
     dofs_locator = DofsLocatorType(dofs_locator)
     facet_locator = FacetLocatorType(facet_locator)

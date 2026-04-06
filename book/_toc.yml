@@ -6,6 +6,7 @@ parts:
   - chapters:
     - file: table
       title: Table
+    - file: notation
 
   # - caption: User Guide
   #   chapters:
@@ -18,7 +19,6 @@ parts:
 
   - caption: Introductory
     chapters:
-      - file: demo/P2_introductory/I00_notation
       - file: demo/P2_introductory/I10_poisson_equation
         sections: 
           - file: demo/P2_introductory/I11_poisson_rectangle
@@ -90,7 +90,6 @@ parts:
 
   - caption: Flow
     chapters:
-      - file: demo/P4_flow/F00_notation
       - file: demo/P4_flow/F10_darcy_equations
         sections: 
           - file: demo/P4_flow/F11_darcy_lens
@@ -135,8 +134,7 @@ parts:
           - file: demo/P5_convection/C33_navier_stokes_marangoni
       - file: demo/P5_convection/C40_darcy_brinkman_convection_equations
         sections:
-          - file: demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor
-          - file: demo/P5_convection/C42_darcy_brinkman_rayleigh_benard
+          - file: demo/P5_convection/C41_darcy_brinkman_rayleigh_benard
 
   - caption: Further Applications 
     chapters:

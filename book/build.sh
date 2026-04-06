@@ -65,6 +65,10 @@ echo Gallery made
 jupyter-book build . $BUILD_ARGS
 ln -sf "./_build/html/index.html" alias.html
 
+echo Making extra html paths ...
+python make_html_paths.py
+echo Extra html paths made
+
 if $REMOTE; then
     ghp-import -n -p -f ./_build/html
 fi

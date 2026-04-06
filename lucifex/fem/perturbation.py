@@ -253,6 +253,8 @@ def cubic_noise(
 
     if isinstance(boundary, str):
         boundary = (boundary, boundary)
+    boundary = tuple(BoundaryType(i) for i in boundary)
+    
     if isinstance(interval, float):
         interval = (0, interval)
     
@@ -262,42 +264,36 @@ def cubic_noise(
 
     match boundary:
         case (BoundaryType.PERIODIC, BoundaryType.PERIODIC):
-            # f(xmin) = f(xmax)
-            # enforcing periodicity
+            # `N(x₋) = N(x₊)`
             noise_coarse[0] = noise_coarse[-1]
             noise = CubicSpline(x_coarse, noise_coarse, bc_type="periodic")
 
         case (BoundaryType.NEUMANN, BoundaryType.NEUMANN):
-            # dfdx(xmin) = 0 and dfdx(xmax) = 0
+            # `∂N/∂x(x₋) = ∂N/∂x(x₊) = 0`
             noise = CubicSpline(x_coarse, noise_coarse, bc_type="clamped")
 
         case (BoundaryType.DIRICHLET, BoundaryType.DIRICHLET):
-            # f(xmin) = 0 and f(xmax) = 0
-            # enforcing Dirichlet boundary conditions
+            # `N(x₋) = N(x₊) = 0`
             noise_coarse[0] = 0.0
             noise_coarse[-1] = 0.0
             noise = PchipInterpolator(x_coarse, noise_coarse)
 
         case (BoundaryType.NEUMANN, BoundaryType.DIRICHLET):
-            # dfdx(xmin) = 0 and f(xmax) = 0
-            # enforcing Dirichlet boundary condition
+            # `∂N/∂x(x₋) = N(x₊) = 0`
             noise_coarse[-1] = 0.0
-            # enforcing Neumann boundary condition by inserting an additional coarse value
             x_coarse = np.insert(x_coarse, 1, 0.5 * (x_coarse[0] + x_coarse[1]))
             noise_coarse = np.insert(noise_coarse, 1, noise_coarse[0])
             noise = PchipInterpolator(x_coarse, noise_coarse)
 
         case (BoundaryType.DIRICHLET, BoundaryType.NEUMANN):
-            # f(xmin) = 0 and dfdx(xmax) = 0
-            # enforcing Dirichlet boundary condition
+            # `N(x₋) = ∂N/∂x(x₊) = 0`
             noise_coarse[0] = 0.0
-            # enforcing Neumann boundary condition by inserting an additional coarse value
             x_coarse = np.insert(x_coarse, -1, 0.5 * (x_coarse[-2] + x_coarse[-1]))
             noise_coarse = np.insert(noise_coarse, -1, noise_coarse[-1])
             noise = PchipInterpolator(x_coarse, noise_coarse)
 
         case _:
-            raise BoundaryTypeError(boundary)
+            raise ValueError(boundary)
         
     if index is not None:
         return lambda x: noise(x[index])
@@ -342,6 +338,8 @@ def sinusoid_noise(
 
     if isinstance(boundary, str):
         boundary = (boundary, boundary)
+    boundary = tuple(BoundaryType(i) for i in boundary)
+
     if isinstance(interval, float):
         interval = (0, interval)
 
@@ -350,27 +348,27 @@ def sinusoid_noise(
 
     match boundary:
         case (BoundaryType.PERIODIC, BoundaryType.PERIODIC):
-            # f(xmin) = f(xmax) and anti-symmetric about centre
+            # `N(x₋) = N(x₊)` and anti-symmetric about centre
             wavelength = Lx / n_waves
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.DIRICHLET):
-            # f(xmin) = 0 , f(xmax) = 0 and symmetric about centre
+            # `N(x₋) = N(x₊) = 0` and symmetric about centre
             wavelength = Lx / (n_waves + 0.5)
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.NEUMANN):
-            # dfdx(xmin) = 0 , dfdx(xmax) = 0 and symmetric about centre
+            # `∂N/∂x(x₋) = ∂N/∂x(x₊) = 0` and symmetric about centre
             wavelength = Lx / n_waves
             noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.NEUMANN, BoundaryType.DIRICHLET):
-            # dfdx(xmin) = 0 and f(xmax) = 0
+            # `∂N/∂x(x₋) = N(x₊) = 0`
             wavelength = Lx / (n_waves + 0.25)
             noise = lambda x: np.cos(2 * np.pi * (x - x0) / wavelength)
         case (BoundaryType.DIRICHLET, BoundaryType.NEUMANN):
-            # f(xmin) = 0 and dfdx(xmax) = 0
+            # `N(x₋) = ∂N/∂x(x₊) = 0`
             wavelength = Lx / (n_waves + 0.25)
             noise = lambda x: np.sin(2 * np.pi * (x - x0) / wavelength)
         case _:
-            raise BoundaryTypeError(boundary)
+            raise ValueError(boundary)
         
        
     if index is not None:
@@ -458,9 +456,3 @@ def is_univariate(
         return True
     except TypeError:
         return False
-    
-
-class BoundaryTypeError(ValueError):
-    def __init__(self, arg: Any):
-        msg = f'Boundary type {arg} not valid.'
-        super().__init__(msg)

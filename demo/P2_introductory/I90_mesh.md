@@ -13,8 +13,8 @@ $hp$-refinement combines both strategies.
 $$
 \begin{align*}
 &\text{Find}~u(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&\begin{cases}
-\mathcal{L} u = \mathcal{L}u_{\text{e}} & \forall\textbf{x}\in\Omega \\
+&\mathbb{BVP}_u\begin{cases}
+\mathscr{L}_{\textbf{x}}(u) = \mathscr{L}_{\textbf{x}}(u_{\text{e}}) & \forall\textbf{x}\in\Omega \\
 u=u_{\text{e}} & \forall \textbf{x}\in\partial\Omega \\
 \end{cases}~.
 \end{align*}

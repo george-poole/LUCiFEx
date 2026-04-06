@@ -98,14 +98,8 @@
     <a href="./demo/P5_convection/C33_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_taylor.png" width="400"/>
-    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
-    </td>
-    </tr>
-<tr>
-    <td>
-    <img src="./demo/P5_convection/thumbnails/C42_darcy_brinkman_rayleigh_benard.png" width="400"/>
-    <a href="./demo/P5_convection/C42_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_benard.png" width="400"/>
+    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
     </td>
     </tr>
     </table>

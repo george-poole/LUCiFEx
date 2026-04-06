@@ -35,6 +35,7 @@ def as_function(
     dofs_indices: Iterable[int] | StrSlice | None = None,
     name: str | None = None,
     use_cache: bool | EllipsisType = False,
+    strict: bool = False,
 ) -> Function:
     """
     If `value` is of type `Function` and already belongs to the specified function space,
@@ -48,6 +49,7 @@ def as_function(
         dofs_indices,
         name,
         use_cache,
+        strict,
     )
 
 
@@ -95,6 +97,7 @@ def _as_or_create_function(
     dofs_indices: Iterable[int] | StrSlice | None = None,
     name: str | None = None,
     use_cache: bool | EllipsisType = False,
+    strict: bool = False,
 ) -> Function:
     if name is None:
         try:
@@ -104,7 +107,7 @@ def _as_or_create_function(
             
     if isinstance(fs, FunctionSpace):
         fs = extract_subspace(fs, subspace_index, collapse=True)
-        if not create and isinstance(value, Function) and is_equivalent_space(value.function_space, fs):
+        if not create and isinstance(value, Function) and is_equivalent_space(value.function_space, fs, strict):
             return value
         f = Function(fs, name=name)
     else:

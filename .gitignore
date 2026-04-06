@@ -1,8 +1,26 @@
+# repository-specific
+book/_build
+_private
+*__jit__/
+*__ffcx__/
+*.npy
+*.npz
+*.csv
+*.h5
+*.xdmf
+*.xml
+*.vtk
+*.mp4
+*.pdf
+*.svg
+*.png
+*.pickle
+*.log
+
 # interactive
 .ipynb_checkpoints
 profile_default/
 ipython_config.py
-book/_build
 
 # compiled
 *.com
@@ -41,12 +59,7 @@ var/
 *.tar
 *.zip
 
-# logs and databases
-*.log
-*.sql
-*.sqlite
-
-# OS generated
+# operating system
 .DS_Store
 .DS_Store?
 
@@ -65,3 +78,4 @@ venv.bak/
 # unit testing
 .pytest_cache
 .coverage
+*.log

@@ -12,7 +12,7 @@ from .problem import (
     projection,
 )
 from .options import OptionsJIT, OptionsFFCX, OptionsPETSc, OptionsSLEPc
-from .eval import (
+from .solver import (
     Solver,
     Evaluation,
     Interpolation,

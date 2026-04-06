@@ -129,19 +129,10 @@ class BoundaryConditions:
                         dbc = dirichletbc(uD, dofs, fs_sub[i]) # TODO check this
                 else:
                     if fs_sub is None:
-                        ###
-                        # _id = id(uD)
-                        # _tp = type(uD)
-                        # uD = as_function(fs, uD, i)
-                        # print('uD', _tp, _id, '->', id(uD), type(uD))
-                        # if _id == id(uD):
-                        #     print('newdofs')
-                        #     dofs = dofs_indices(uD.function_space, m, i, d, facet_locator)
-                        ###
-                        uD = as_function(fs, uD, i)
+                        uD = as_function(fs, uD, i, strict=True)
                         dbc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
                     else:
-                        uD = as_function(fs_sub[i], uD)
+                        uD = as_function(fs_sub[i], uD, strict=True)
                         dbc = dirichletbc(uD, dofs)
                 dirichlet.append(dbc)
                 

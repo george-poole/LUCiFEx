@@ -4,6 +4,6 @@ execute:
   execute_notebooks: off
   allow_errors: true
 
-sphinx:
-  config:
-    html_extra_path: ['./']
+# sphinx:
+#   config:
+#     html_extra_path: ['./']

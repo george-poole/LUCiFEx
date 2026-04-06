@@ -48,7 +48,7 @@ from .petsc import (
     PETScMat,
     PETScVec,
 )
-from .eval import Solver
+from .solver import Solver
 from .utils import BilinearFormError, LinearFormError, EigenvalueFormError, UnsolvedFormError
 
 

@@ -59,5 +59,8 @@ def copy_mesh(
         connec = mesh.topology.connectivity(tdim, 0)
         cells =  np.copy(connec.array.reshape(-1, 4)).astype(np.int64)
         ufl_domain = mesh.ufl_domain()
-        return create_mesh(mesh.comm, cells, x, ufl_domain)
+        mesh_copied =  create_mesh(mesh.comm, cells, x, ufl_domain)
+        if name is not None:
+            mesh_copied.name = name
+        return mesh_copied
     
