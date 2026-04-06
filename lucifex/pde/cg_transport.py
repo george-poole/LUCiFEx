@@ -69,7 +69,7 @@ def advection_forms(
 
     if by_parts and (bcs is not None):
         ds, u_dirichlet = (
-            bcs.boundary_data(u, 'dirichlet') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_values(u, 'dirichlet') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         fs = extract_function_space(u)
@@ -107,7 +107,7 @@ def diffusion_forms(
     forms = [F_diff]  
 
     if by_parts and (bcs is not None):
-        ds, u_neumann, u_robin = bcs.boundary_data(u, 'neumann', 'robin')
+        ds, u_neumann, u_robin = bcs.boundary_values(u, 'neumann', 'robin')
         if u_neumann:
             F_neumann = sum([v * uN * ds(i) for i, uN in u_neumann])
             forms.append(F_neumann)

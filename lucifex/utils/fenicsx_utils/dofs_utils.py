@@ -59,7 +59,7 @@ def dofs_indices(
     dofs_locator: DofsLocatorType = DofsLocatorType.TOPOLOGICAL,
     facet_locator: FacetLocatorType = FacetLocatorType.ANY, 
     collapsed: bool = False,
-) -> np.ndarray | list[np.ndarray]:
+) -> np.ndarray[np.int32] | list[np.ndarray[np.int32]]:
 
     dofs_locator = DofsLocatorType(dofs_locator)
     facet_locator = FacetLocatorType(facet_locator)

@@ -122,6 +122,7 @@ parts:
           - file: demo/P5_convection/C16_darcy_evolving_layered
           - file: demo/P5_convection/C17_darcy_evolving_inclined
           - file: demo/P5_convection/C18_darcy_elder
+          - file: demo/P5_convection/C19_darcy_data_driven
       - file: demo/P5_convection/C20_stokes_convection_equations
         sections: 
           - file: demo/P5_convection/C21_stokes_rayleigh_benard_isoviscous

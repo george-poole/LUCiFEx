@@ -129,6 +129,15 @@ class BoundaryConditions:
                         dbc = dirichletbc(uD, dofs, fs_sub[i]) # TODO check this
                 else:
                     if fs_sub is None:
+                        ###
+                        # _id = id(uD)
+                        # _tp = type(uD)
+                        # uD = as_function(fs, uD, i)
+                        # print('uD', _tp, _id, '->', id(uD), type(uD))
+                        # if _id == id(uD):
+                        #     print('newdofs')
+                        #     dofs = dofs_indices(uD.function_space, m, i, d, facet_locator)
+                        ###
                         uD = as_function(fs, uD, i)
                         dbc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
                     else:
@@ -186,7 +195,7 @@ class BoundaryConditions:
         fs = extract_function_space(fs_or_u)
         v = TestFunction(fs)
 
-        ds, *u_weaks = self.boundary_data(fs_or_u, *weak_types)
+        ds, *u_weaks = self.boundary_values(fs_or_u, *weak_types)
         forms = []
         
         for u_weak, tp in zip(u_weaks, weak_types, strict=True):
@@ -197,7 +206,7 @@ class BoundaryConditions:
 
         return forms
     
-    def boundary_data(
+    def boundary_values(
         self,
         fs_or_u: FunctionSpace | Function | FunctionSeries | Argument,
         *boundary_types: BoundaryType,

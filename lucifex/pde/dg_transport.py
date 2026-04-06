@@ -90,7 +90,7 @@ def dg_advection_forms(
 
     if bcs is not None:
         ds, u_dirichlet, u_neumann = (
-            bcs.boundary_data(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_values(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         _Du = D_ds(u) if D_ds is not None else Du
@@ -160,7 +160,7 @@ def dg_diffusion_forms(
 
     if bcs is not None:
         ds, u_dirichlet, u_neumann = (
-            bcs.boundary_data(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
+            bcs.boundary_values(u, 'dirichlet', 'neumann') if isinstance(bcs, BoundaryConditions)
             else bcs
         )
         _Du = D_ds(u) if D_ds is not None else Du

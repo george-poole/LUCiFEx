@@ -68,7 +68,7 @@ def nitsche_poisson(
     if isinstance(h, str):
         h = cell_size_quantity(mesh, h)
 
-    ds, u_neumann, u_dirichlet = bcs.boundary_data(u_trial, 'neumann', 'dirichlet')
+    ds, u_neumann, u_dirichlet = bcs.boundary_values(u_trial, 'neumann', 'dirichlet')
 
     F_nistche = - v * inner(n, grad(u_trial)) * ds
     F_nistche += -inner(n, grad(v)) * u_trial * ds 

@@ -179,7 +179,7 @@ def dg_advection_diffusion_reaction(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        bcs_tuple = bcs.boundary_data(u, 'dirichlet', 'neumann')
+        bcs_tuple = bcs.boundary_values(u, 'dirichlet', 'neumann')
 
     dg_adv_kws, dg_diff_kws = dg_kws
     if dg_adv_kws is None:
@@ -216,7 +216,7 @@ def dg_steady_advection_diffusion(
     dx = Measure('dx', u.function_space.mesh)
     dS = Measure('dS', u.function_space.mesh)
     if bcs is not None:
-        bcs_tuple = bcs.boundary_data(u, 'dirichlet', 'neumann')
+        bcs_tuple = bcs.boundary_values(u, 'dirichlet', 'neumann')
 
     dg_adv_kws, dg_diff_kws = dg_kws
     if dg_adv_kws is None:

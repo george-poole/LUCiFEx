@@ -46,7 +46,7 @@ def stokes_incompressible(
 
     F_bcs = 0
     if bcs is not None:
-        ds, tau_natural =  bcs.boundary_data(up, 'natural')
+        ds, tau_natural =  bcs.boundary_values(up, 'natural')
         F_bcs = sum([-inner(v, tauN) * ds(i) for i, tauN in tau_natural])
 
     if blocked:

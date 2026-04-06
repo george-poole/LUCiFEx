@@ -24,7 +24,7 @@ from .expr_utils import (
 )
 from .elem_utils import (
     is_continuous_lagrange, is_discontinuous_lagrange, 
-    is_same_element, is_family_alias,
+    is_equivalent_element, is_equivalent_family,
 )
 from .form_utils import (
     extract_integrands,

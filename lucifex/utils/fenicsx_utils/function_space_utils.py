@@ -141,3 +141,18 @@ def fs_from_elem(
 ) -> tuple[Mesh, str, int] | tuple[Mesh, str, int, int]:
     mesh = extract_mesh(u)
     return mesh, *elem
+
+
+def is_equivalent_space(
+    fs: FunctionSpace,
+    other: FunctionSpace,
+    strict: bool = False,
+) -> bool:
+    if strict:
+        return fs is other
+    if fs is other:
+        return True
+    if not fs.mesh is other.mesh:
+        return False
+    return fs.element == other.element
+    

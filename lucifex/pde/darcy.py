@@ -70,7 +70,7 @@ def darcy(
 
     F_bcs = 0
     if bcs is not None:
-        ds, p_natural = bcs.boundary_data(up, 'natural')
+        ds, p_natural = bcs.boundary_values(up, 'natural')
         F_bcs = sum([inner(v, n) * pN * ds(i) for i, pN in p_natural])
 
     if blocked:

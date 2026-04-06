@@ -4,6 +4,7 @@ from types import EllipsisType
 
 import numpy as np
 from dolfinx.mesh import Mesh
+from dolfinx.fem import FunctionSpace
 from ufl.core.expr import Expr
 from ufl import inner, sqrt
 
@@ -61,6 +62,8 @@ def darcy_convection_generic(
     # domain
     Omega: Mesh,
     dOmega: MeshBoundary,
+    # time
+    t: ConstantSeries | None = None,
     # gravity
     egx: Expr | Function | Constant | float = 0,
     egy: Expr | Function | Constant | float = -1,
@@ -88,8 +91,15 @@ def darcy_convection_generic(
     c_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
     c_limits: tuple[float, float] | bool = False,
     # optional postprocessing
-    diagnostic: bool | Iterable[Solver] = False,    
+    diagnostic: bool = False,    
     auxiliary: Iterable = (),
+    prepend_solvers: Iterable[Solver] = (),
+    pre_solvers: Iterable[Solver] = (),
+    post_solvers: Iterable[Solver] = (),
+    append_solvers: Iterable[Solver] = (),
+    # function spaces
+    c_fs: FunctionSpace | None = None,
+    psi_fs: FunctionSpace | None = None,
 ) -> Simulation:
     """
     `ϕ∂c/∂t + 𝐮·∇c =  ∇·(D(ϕ,𝐮)·∇c) ` \\
@@ -98,7 +108,7 @@ def darcy_convection_generic(
     """
     # time
     order = finite_difference_order(D_adv, D_diff)
-    t = ConstantSeries(Omega, "t", order, ics=0.0)  
+    t = ConstantSeries(Omega, "t", order, ics=0.0) if t is None else t
     dt = ConstantSeries(Omega, 'dt')
     # default boundary conditions
     if c_bcs is Ellipsis:
@@ -106,11 +116,19 @@ def darcy_convection_generic(
     if psi_bcs is Ellipsis:
         psi_bcs = BoundaryConditions(("dirichlet", dOmega.union, 0.0))
     # flow
-    psi_deg = 2
-    psi = FunctionSeries((Omega, 'P', psi_deg), 'psi')
+    psi = FunctionSeries(
+        (Omega, 'P', 2) if psi_fs is None else psi_fs, 
+        'psi',
+    )
+    psi_deg = psi.function_space.ufl_element().degree()
     u = FunctionSeries((Omega, "P", psi_deg - 1, 2), "u", order)
     # transport
-    c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c_ics)
+    c = FunctionSeries(
+        (Omega, 'P', 1) if c_fs is None else c_fs, 
+        'c', 
+        order, 
+        ics=c_ics,
+    )
     # constitutive
     phi = Function((Omega, 'P', 1), porosity, 'phi')
     k: Expr = permeability(phi)
@@ -133,7 +151,15 @@ def darcy_convection_generic(
     c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc, corrector=c_corrector)(
         c, dt, u, d, D_adv, D_diff, phi=phi,
     )
-    solvers = [psi_solver, u_solver, dt_solver, c_solver]
+    solvers = [
+        psi_solver, 
+        u_solver, 
+        *pre_solvers,
+        dt_solver, 
+        *post_solvers,
+        c_solver,
+    ]
+
     if diagnostic:
         uMinMax = ConstantSeries(Omega, "uMinMax", shape=(2,))
         uRMS = ConstantSeries(Omega, 'uRMS')
@@ -150,8 +176,7 @@ def darcy_convection_generic(
                 integration(fBoundary, flux, 'ds', *dOmega.markers)(c[0], u[0], FE(d)),
             ]
         )
-        if isinstance(diagnostic, Iterable):
-            solvers.extend(diagnostic)
             
+    solvers = [*prepend_solvers, *solvers, *append_solvers]
     auxiliary = [phi, ('k', k), ('d', d), rho, mu, *auxiliary]
     return Simulation(solvers, t, dt, auxiliary)

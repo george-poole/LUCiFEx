@@ -11,7 +11,7 @@ from dolfinx.fem import Expression
 
 from ..py_utils import OverloadTypeError, StrSlice, optional_lru_cache, as_slice
 from ..npy_utils import AnyNumber
-from .elem_utils import is_same_element
+from .elem_utils import is_equivalent_element
 from .expr_utils import ( 
     is_scalar,
     is_vector, 
@@ -20,7 +20,7 @@ from .expr_utils import (
 )
 from .function_space_utils import (
     extract_subspace, create_function_space,
-    is_component_space, fs_from_elem,
+    is_component_space, fs_from_elem, is_equivalent_space,
 )
 
 
@@ -104,13 +104,13 @@ def _as_or_create_function(
             
     if isinstance(fs, FunctionSpace):
         fs = extract_subspace(fs, subspace_index, collapse=True)
-        if not create and isinstance(value, Function) and value.function_space == fs:
+        if not create and isinstance(value, Function) and is_equivalent_space(value.function_space, fs):
             return value
         f = Function(fs, name=name)
     else:
         if not isinstance(fs[0], Mesh):
             fs = fs_from_elem(fs, value)
-        if not create and isinstance(value, Function) and is_same_element(value, *fs[1:], mesh=fs[0]):
+        if not create and isinstance(value, Function) and is_equivalent_element(value, *fs[1:], mesh=fs[0]):
             return value
         if use_cache is True:
             f = _create_function(fs, subspace_index, name)

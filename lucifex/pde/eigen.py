@@ -69,7 +69,7 @@ def mathieu(
     F_eig = v * u_trial * dx
 
     if bcs is not None:
-        ds, u_neumann = bcs.boundary_data(u, 'neumann')
+        ds, u_neumann = bcs.boundary_values(u, 'neumann')
         F_neumann = sum([-v * uN * ds(i) for i, uN in u_neumann])
         return F_lapl, -F_eig, F_neumann
     else:

@@ -14,7 +14,7 @@ class ElementFamilyType(set, Enum):
     RAVIART_THOMAS = {"RT", "Raviart-Thomas"}
 
 
-def is_same_element(
+def is_equivalent_element(
     f: Function | FunctionSpace,
     family: str,
     degree: int | None = None,
@@ -43,7 +43,7 @@ def is_same_element(
     if mesh is None:
         mesh = f_mesh
 
-    if (is_family_alias(f_fam, family) is True 
+    if (is_equivalent_family(f_fam, family) is True 
         and f_deg == degree 
         and f_mesh == mesh
         and f_shape == shape
@@ -53,7 +53,7 @@ def is_same_element(
         return False
     
 
-def is_family_alias(
+def is_equivalent_family(
     name: str,
     other: str,
 ) -> bool:
@@ -70,14 +70,14 @@ def is_continuous_lagrange(
     f: Function | FunctionSpace,
     degree: int | None = None,
 ) -> bool:
-    return is_same_element(f, "P", degree)
+    return is_equivalent_element(f, "P", degree)
 
 
 def is_discontinuous_lagrange(
     f: Function | FunctionSpace,
     degree: int | None = None,
 ) -> bool:
-    return is_same_element(f, "DP", degree)
+    return is_equivalent_element(f, "DP", degree)
 
 
 def is_discontinuous_family(family: str) -> bool:

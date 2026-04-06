@@ -50,7 +50,7 @@ def ipcs_1(
     if sigma_bcs is None:
         F_ds = -inner(v, dot(n, sigma)) * ds
     else:
-        dsN, natural = sigma_bcs.boundary_data(u, 'natural')
+        dsN, natural = sigma_bcs.boundary_values(u, 'natural')
         F_ds = sum([-inner(v, sigmaN) * dsN(i) for i, sigmaN in natural])
     forms = [F_dt, F_adv, F_stress, F_ds]
 
