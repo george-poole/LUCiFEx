@@ -243,10 +243,6 @@
 <table>
     <tr>
     <td>
-    <img src="./demo/P2_introductory/thumbnails/I11_poisson_rectangle copy.png" width="400"/>
-    <a href="./demo/P2_introductory/I11_poisson_rectangle copy.html">Poisson equation in a rectangle</a> 
-    </td>
-<td>
     <img src="./demo/P2_introductory/thumbnails/I11_poisson_rectangle.png" width="400"/>
     <a href="./demo/P2_introductory/I11_poisson_rectangle.html">Poisson equation in a rectangle</a> 
     </td>
@@ -254,13 +250,13 @@
     <img src="./demo/P2_introductory/thumbnails/I12_poisson_annulus.png" width="400"/>
     <a href="./demo/P2_introductory/I12_poisson_annulus.html">Poisson equation on an annulus</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I13_poisson_vector.png" width="400"/>
     <a href="./demo/P2_introductory/I13_poisson_vector.html">Vector Poisson equation in a rectangle</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I21_diffusion_interval.png" width="400"/>
     <a href="./demo/P2_introductory/I21_diffusion_interval.html">Diffusion of a Gaussian in an interval</a> 
     </td>
@@ -268,13 +264,13 @@
     <img src="./demo/P2_introductory/thumbnails/I22_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P2_introductory/I22_diffusion_rectangle.html">Diffusion of a Gaussian in a rectangle</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I31_advection_interval.png" width="400"/>
     <a href="./demo/P2_introductory/I31_advection_interval.html">Advection of a Gaussian in an interval</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I41_advection_diffusion_interval.png" width="400"/>
     <a href="./demo/P2_introductory/I41_advection_diffusion_interval.html">Advection-diffusion of a Gaussian in an interval</a> 
     </td>
@@ -282,13 +278,13 @@
     <img src="./demo/P2_introductory/thumbnails/I42_advection_diffusion_rectangle.png" width="400"/>
     <a href="./demo/P2_introductory/I42_advection_diffusion_rectangle.html">Advection-diffusion of a Gaussian in a rectangle</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I51_helmholtz_evp.png" width="400"/>
     <a href="./demo/P2_introductory/I51_helmholtz_evp.html">Helmholtz eigenvalue problem in a rectangle</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I52_helmholtz_bvp.png" width="400"/>
     <a href="./demo/P2_introductory/I52_helmholtz_bvp.html">Helmholtz boundary value problem in a rectangle</a> 
     </td>
@@ -296,13 +292,13 @@
     <img src="./demo/P2_introductory/thumbnails/I61_mathieu_evp.png" width="400"/>
     <a href="./demo/P2_introductory/I61_mathieu_evp.html">Mathieu eigenvalue problem in an interval</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I71_wave_interval.png" width="400"/>
     <a href="./demo/P2_introductory/I71_wave_interval.html">Wave equation in an interval</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I81_bcs_dirichlet_time.png" width="400"/>
     <a href="./demo/P2_introductory/I81_bcs_dirichlet_time.html">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
     </td>
@@ -310,13 +306,13 @@
     <img src="./demo/P2_introductory/thumbnails/I82_bcs_neumann_time.png" width="400"/>
     <a href="./demo/P2_introductory/I82_bcs_neumann_time.html">Diffusion equation with time-dependent Neumann boundary conditions</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I83_bcs_periodic.png" width="400"/>
     <a href="./demo/P2_introductory/I83_bcs_periodic.html">Poisson equation with periodic boundary conditions</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I84_bcs_robin.png" width="400"/>
     <a href="./demo/P2_introductory/I84_bcs_robin.html">Diffusion equation with Robin boundary conditions</a> 
     </td>
@@ -324,13 +320,13 @@
     <img src="./demo/P2_introductory/thumbnails/I85_bcs_nitsche.png" width="400"/>
     <a href="./demo/P2_introductory/I85_bcs_nitsche.html">Poisson equation with Nitsche boundary conditions</a> 
     </td>
-    </tr>
-<tr>
-    <td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I91_hp_refinement.png" width="400"/>
     <a href="./demo/P2_introductory/I91_hp_refinement.html">Steady diffusion-reaction with mesh refinement</a> 
     </td>
-<td>
+    </tr>
+<tr>
+    <td>
     <img src="./demo/P2_introductory/thumbnails/I92_poisson_mms.png" width="400"/>
     <a href="./demo/P2_introductory/I92_poisson_mms.html">Poisson equation with method of manufactured solutions</a> 
     </td>
