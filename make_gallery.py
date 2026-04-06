@@ -36,9 +36,9 @@ def table_row(
 
 def table_data(
     caption_path: str,
-    fig_dir_path,
-    fig_name,
-    caption,
+    fig_dir_path: str,
+    fig_name: str,
+    caption: str,
     fig_ext: str = 'png',
     img_width: int = 400,
 ) -> str:
@@ -106,30 +106,30 @@ def make_gallery(
 
 
 if __name__ == "__main__":
-
     HEADING = 'Gallery'
-
-    NOTEBOOKS_DIR_PATH = "./notebooks"
-    FIGURES_DIR_NAME = "figures"
-    FIGURES_EXT = 'png'
-    EXCLUDE = 'xx.'
-    NOTEBOOK_PARTS = [
-        ('Convection', 'P05_convection'),
-        ('Fluids', 'P03_fluids'),
-        ('Transport', 'P04_transport'),
-        ('Introductory', 'P02_introductory'),
-    ]
-
-    outputs = [('gallery.md', True), ('gallery_local.md', False)]
-
-    for file, html in outputs:
+    NOTEBOOKS_DIR_PATH = "./demo"
+    THUMBNAIL_DIR_NAME = "thumbnails"
+    THUMBNAIL_EXT = 'png'
+    EXCLUDE = 'xxx'
+    NOTEBOOK_PARTS = (
+        ('Further Applications', 'P6_applications'),
+        ('Convection', 'P5_convection'),
+        ('Flow', 'P4_flow'),
+        ('Transport', 'P3_transport'),
+        ('Introductory', 'P2_introductory'),
+    )
+    OUTPUTS = (
+        ('gallery.md', True), 
+        ('gallery_local.md', False),
+    )
+    for file, html in OUTPUTS:
         make_gallery(
             file, 
             html,
             HEADING, 
             NOTEBOOKS_DIR_PATH, 
             NOTEBOOK_PARTS, 
-            FIGURES_DIR_NAME, 
-            FIGURES_EXT,
+            THUMBNAIL_DIR_NAME, 
+            THUMBNAIL_EXT,
             EXCLUDE,
         )

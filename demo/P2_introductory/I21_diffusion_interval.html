@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Diffusion of a Gaussian in an interval &#8212; LUCiFEx Demo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'demo/P2_introductory/I21_diffusion_interval';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Diffusion of a Gaussian in a rectangle" href="I22_diffusion_rectangle.html" />
+    <link rel="prev" title="Diffusion equation" href="I20_diffusion_equation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../gallery.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">LUCiFEx Demo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../gallery.html">
+                    Gallery
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../table.html">Summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="I00_notation.html">Notation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I10_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I11_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I12_poisson_annulus.html">Poisson equation on an annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I13_poisson_vector.html">Vector Poisson equation in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="I20_diffusion_equation.html">Diffusion equation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Diffusion of a Gaussian in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I22_diffusion_rectangle.html">Diffusion of a Gaussian in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I30_advection_equation.html">Advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I31_advection_interval.html">Advection of a Gaussian in an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I40_advection_diffusion_equation.html">Advection-diffusion equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I41_advection_diffusion_interval.html">Advection-diffusion of a Gaussian in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I42_advection_diffusion_rectangle.html">Advection-diffusion of a Gaussian in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I50_helmholtz_equation.html">Helmholtz equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I51_helmholtz_evp.html">Helmholtz eigenvalue problem in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I52_helmholtz_bvp.html">Helmholtz boundary value problem in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I60_mathieu_equation.html">Mathieu equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I61_mathieu_evp.html">Mathieu eigenvalue problem in an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I70_wave_equation.html">Wave equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I71_wave_interval.html">Wave equation in an interval</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I80_bcs.html">Other boundary conditions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I81_bcs_dirichlet_time.html">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I82_bcs_neumann_time.html">Diffusion equation with time-dependent Neumann boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I83_bcs_periodic.html">Poisson equation with periodic boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I84_bcs_robin.html">Diffusion equation with Robin boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I85_bcs_nitsche.html">Poisson equation with Nitsche boundary conditions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I90_mesh.html">Mesh resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="I91_hp_refinement.html">Steady diffusion-reaction with mesh refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="I92_poisson_mms.html">Poisson equation with method of manufactured solutions</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Transport</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T10_dg_advection.html">DG methods for the advection equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T11_dg_advection_interval_step.html">DG advection of a step in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T12_dg_advection_interval_cosine.html">DG advection of a cosine in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T13_dg_advection_rectangle_cone.html">DG advection of a rotating cone in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T14_dg_advection_rectangle_vortex.html">DG advection with a vortical velocity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T20_dg_steady_advection_diffusion.html">DG methods for the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T21_dg_steady_advection_diffusion_rectangle.html">DG steady advection-diffusion-reaction with a skew velocity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T30_dg_advection_diffusion.html">DG methods for the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T31_dg_advection_diffusion_interval.html">DG advection-diffusion of a tophat on an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T32_dg_advection_diffusion_rectangle.html">DG advection-diffusion in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T40_supg_steady_advection_diffusion.html">SUPG stabilization of the steady advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T41_supg_steady_advection_diffusion_interval.html">SUPG steady advection-diffusion in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T42_supg_steady_advection_diffusion_hemker.html">SUPG steady advection-diffusion of the Hemker problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T43_supg_steady_advection_diffusion_rectangle.html">SUPG steady advection-diffusion with a skew velocity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T50_supg_advection_diffusion.html">SUPG stabilization of the advection-diffusion-reaction equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T51_supg_advection_diffusion_interval.html">SUPG advection-diffusion of a Gaussian in an interval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T52_supg_advection_diffusion_rectangle.html">SUPG advection-diffusion-reaction of a rotating pulse in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T60_splitting.html">Splitting methods for the transport equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T61_splitting_advection_reaction.html">Splitting method for the advection-reaction equation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P3_transport/T70_predictor_corrector.html">Predictor-corrector methods for the transport equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P3_transport/T71_predictor_corrector_advection_diffusion.html">Predictor-corrector method for the advection-diffusion equation</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Flow</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../P4_flow/F00_notation.html">Notation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F10_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F11_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F12_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F13_darcy_annulus.html">Flow of a Darcy fluid in an annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F14_darcy_injected.html">Flow of a Darcy fluid injected and extracted in a porous rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F20_stokes_equations.html">Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F21_stokes_channel.html">Flow of a Stokes fluid in a pressure-driven channel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F22_stokes_cavity.html">Flow of a Stokes fluid in a lid-driven cavity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F23_stokes_forced.html">Flow of a Stokes fluid with vertical forcing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F24_stokes_corrugated.html">Flow of a Stokes fluid in a corrugated channel</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F30_navier_stokes_equations.html">Navier-Stokes equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F31_navier_stokes_obstacle.html">Flow of Navier-Stokes fluid past a circular obstacle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F32_navier_stokes_forced.html">Flow of a Navier-Stokes fluid with vertical forcing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F40_darcy_brinkman_equations.html">Darcy-Brinkman equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F41_darcy_brinkman_lens.html">Flow of a Darcy-Brinkman fluid past a permeable obstacle</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Convection</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C10_darcy_convection_equations.html">Darcy convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C11_darcy_rayleigh_benard_rectangle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C12_darcy_rayleigh_benard_annulus.html">Rayleigh-Bénard convection of a Darcy fluid in a porous annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C13_darcy_rayleigh_benard_semicircle.html">Rayleigh-Bénard convection of a Darcy fluid in a porous semicircle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C14_darcy_evolving_isotropic.html">Evolving convection of a Darcy fluid in an isotropic porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C15_darcy_evolving_crossbedded.html">Evolving convection of a Darcy fluid in a cross-bedded porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C16_darcy_evolving_layered.html">Evolving convection of a Darcy fluid in a layered porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C17_darcy_evolving_inclined.html">Evolving convection of a Darcy fluid in an inclined porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C18_darcy_elder.html">Elder convection of a Darcy fluid in a porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C19_darcy_data_driven.html">Data-driven convection of a Darcy fluid in a porous rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C20_stokes_convection_equations.html">Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C21_stokes_rayleigh_benard_isoviscous.html">Rayleigh-Bénard convection of an isoviscous Stokes fluid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C22_stokes_rayleigh_benard_nonisoviscous.html">Rayleigh-Bénard convection of a non-isoviscous Stokes fluid</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C30_navier_stokes_convection_equations.html">Navier-Stokes convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C31_navier_stokes_thermosolutal.html">Thermosolutal convection of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C32_navier_stokes_rayleigh_taylor.html">Rayleigh-Taylor instability of a Navier-Stokes fluid in a rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C33_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C42_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Further Applications</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A10_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A20_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A21_darcy_abc_reaction_density.html">ABC convection of a Darcy fluid with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A22_darcy_abc_reaction_viscosity.html">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Benchmarks</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../bench/rayleigh_benard/introduction.html">Rayleigh-Bénard convection benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bench/taylor_green/introduction.html">Taylor-Green vortex benchmark</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/demo/P2_introductory/I21_diffusion_interval.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Diffusion of a Gaussian in an interval</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="diffusion-of-a-gaussian-in-an-interval">
+<h1>Diffusion of a Gaussian in an interval<a class="headerlink" href="#diffusion-of-a-gaussian-in-an-interval" title="Link to this heading">#</a></h1>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\mathbb{S}_u
+\begin{cases}
+\Omega = [0, L_x] \\
+u_0(x) = \exp\left(-\frac{(x-x_0)^2}{L_x/100}\right) \\
+u_{\text{D}}(x=0) = 0 \\
+u_{\text{D}}(x=L_x) = 0 \\
+\mathsf{D}=D\mathsf{I} \\
+\end{cases}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">interval_mesh</span><span class="p">,</span> <span class="n">mesh_boundary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">BE</span><span class="p">,</span> <span class="n">FunctionSeries</span><span class="p">,</span> <span class="n">diffusive_timestep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">ibvp</span><span class="p">,</span> <span class="n">BoundaryConditions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.plt</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_line</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.pde.diffusion</span><span class="w"> </span><span class="kn">import</span> <span class="n">diffusion</span>
+
+<span class="n">Nx</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">Lx</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">interval_mesh</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">boundary</span> <span class="o">=</span> <span class="n">mesh_boundary</span><span class="p">(</span>
+    <span class="n">mesh</span><span class="p">,</span> 
+    <span class="p">{</span>
+        <span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">dt</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+<span class="n">D_diff</span> <span class="o">=</span> <span class="n">BE</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">/</span> <span class="n">Nx</span>
+<span class="n">dt_diffusive</span> <span class="o">=</span> <span class="n">diffusive_timestep</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+<span class="n">courant</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="n">dt_diffusive</span>
+
+<span class="n">ics</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">Lx</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">Lx</span><span class="p">))</span>
+<span class="n">bcs</span> <span class="o">=</span>  <span class="n">BoundaryConditions</span><span class="p">(</span>
+    <span class="p">(</span><span class="s2">&quot;dirichlet&quot;</span><span class="p">,</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span> 
+<span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">FunctionSeries</span><span class="p">((</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">u_solver</span> <span class="o">=</span> <span class="n">ibvp</span><span class="p">(</span><span class="n">diffusion</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)(</span><span class="n">u</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">D_diff</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">t_stop</span> <span class="o">=</span> <span class="mf">10.0</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">n_stop</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">t_stop</span><span class="p">:</span>
+    <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">legend_title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;$\mathcal</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}</span><span class="s2">, u</span><span class="se">}}</span><span class="s2">=</span><span class="se">\\</span><span class="s2">mathrm</span><span class="se">{{</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">D_diff</span><span class="p">)</span><span class="si">}</span><span class="se">}}</span><span class="s2">$</span><span class="se">\n</span><span class="s2">$C_</span><span class="se">{{</span><span class="s2">\mathsf</span><span class="se">{{</span><span class="s2">D</span><span class="se">}}}}</span><span class="s2">=</span><span class="si">{</span><span class="n">courant</span><span class="si">}</span><span class="s2">$</span><span class="se">\n\n</span><span class="s2">$t$&quot;</span>
+<span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">]]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">(</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">time_slice</span><span class="p">],</span> <span class="n">legend_labels</span><span class="p">,</span> <span class="n">legend_title</span><span class="p">,</span> 
+    <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u$&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,t)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/10cb0364c42e8f253d78b1faae8ba1c9a4e7f30e795df7d127d757c35d4b5588.png" src="../../_images/10cb0364c42e8f253d78b1faae8ba1c9a4e7f30e795df7d127d757c35d4b5588.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">Kernel</span> <span class="n">crashed</span> <span class="k">while</span> <span class="n">executing</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">cell</span> <span class="ow">or</span> <span class="n">a</span> <span class="n">previous</span> <span class="n">cell</span><span class="o">.</span> 
+
+<span class="n">Please</span> <span class="n">review</span> <span class="n">the</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">cell</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">identify</span> <span class="n">a</span> <span class="n">possible</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">failure</span><span class="o">.</span> 
+
+<span class="n">Click</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://aka.ms/vscodeJupyterKernelCrash&#39;</span><span class="o">&gt;</span><span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">info</span><span class="o">.</span> 
+
+<span class="n">View</span> <span class="n">Jupyter</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;command:jupyter.viewOutput&#39;</span><span class="o">&gt;</span><span class="n">log</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">further</span> <span class="n">details</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y_label_series</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$u(t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">]</span>
+
+<span class="n">anim</span> <span class="o">=</span> <span class="n">create_animation</span><span class="p">(</span>
+    <span class="n">plot_line</span><span class="p">,</span>
+    <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$x$&#39;</span><span class="p">,</span>
+<span class="p">)(</span><span class="n">u</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="n">y_label_series</span><span class="p">)</span>
+<span class="n">anim_path</span> <span class="o">=</span> <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,t)&#39;</span><span class="p">,</span> <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">anim</span><span class="p">)</span>
+
+<span class="n">display_animation</span><span class="p">(</span><span class="n">anim_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><video controls loop  width="600" >
+ <source src="data:video/mp4;base64,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" type="video/mp4">
+ Your browser does not support the video tag.
+ </video></div></div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./demo/P2_introductory"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="I20_diffusion_equation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Diffusion equation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="I22_diffusion_rectangle.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Diffusion of a Gaussian in a rectangle</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Jupyter Book community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
