@@ -1,4 +1,4 @@
-# Summary
+# Table of partial differential equations
 
 Name | Equation | Classification(s) |
 | -------- | -------- | ------- |

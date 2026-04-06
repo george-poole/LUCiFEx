@@ -5,6 +5,7 @@ parts:
 
   - chapters:
     - file: table
+      title: Table
 
   # - caption: User Guide
   #   chapters:
