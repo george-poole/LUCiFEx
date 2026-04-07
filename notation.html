@@ -318,21 +318,20 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="demo/P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Further Applications</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="demo/P6_applications/A10_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A11_darcy_fingering_neumann.html">Darcy fingering in a porous rectangle with Neumann boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A13_darcy_fingering_annulus.html">Darcy fingering in a porous annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="demo/P6_applications/A20_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A21_darcy_abc_reaction_density.html">ABC convection of a Darcy fluid with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demo/P6_applications/A22_darcy_abc_reaction_viscosity.html">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a></li>
 </ul>
 </details></li>
 </ul>
@@ -545,10 +544,10 @@ document.write(`
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{D}_{u,w,\dots}=\mathcal{D}_u\circ\mathcal{D}_w\dots\)</span></p></td>
 <td><p>argument-wise finite difference operator</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathscr{D}^{\text{i}}_u\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathscr{D}^{\text{IM}}_u\)</span></p></td>
 <td><p>the set of all finite difference operators that are explicit with respect to <span class="math notranslate nohighlight">\(u\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathscr{D}^{\text{e}}_u\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathscr{D}^{\text{EX}}_u\)</span></p></td>
 <td><p>the set of all finite difference operators that are explicit with respect to <span class="math notranslate nohighlight">\(u\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\text{FE}\)</span></p></td>
@@ -623,65 +622,71 @@ document.write(`
 <tr class="row-even"><td><p><em>Finite element method</em></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\bigcup_{\mathcal{K}} \mathcal{K}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathscr{T}\)</span></p></td>
+<td><p>tesselation of the domain</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\bigcup_{\mathcal{K}} \mathcal{K}\)</span></p></td>
 <td><p>union of cells forming the mesh</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(h\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(h\)</span></p></td>
 <td><p>local cell size</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{F}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{F}\)</span></p></td>
 <td><p>set of cell facets</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{V}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{V}\)</span></p></td>
 <td><p>set of cell vertices</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(V_u\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(V_u\)</span></p></td>
 <td><p>trial function space to which <span class="math notranslate nohighlight">\(u\)</span> belongs</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\hat{V}_v\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\hat{V}_v\)</span></p></td>
 <td><p>test function space to which <span class="math notranslate nohighlight">\(v\)</span> belongs</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\xi_j(\mathbf{x})\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\xi_j(\mathbf{x})\)</span></p></td>
 <td><p>finite element basis functions</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\sum_jU_j\xi_j\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\sum_jU_j\xi_j\)</span></p></td>
 <td><p>finite element approximation</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\{U_j\}_j\leftrightarrow\textbf{U}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\{U_j\}_j\leftrightarrow\textbf{U}\)</span></p></td>
 <td><p>degrees of freedom vector</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(L^2(\Omega)\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(L^2(\Omega)\)</span></p></td>
 <td><p>Lebesgue function space on the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(H^1(\Omega)\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(H^1(\Omega)\)</span></p></td>
 <td><p>Sobolev function space on the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(C^0(\Omega)\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(C^0(\Omega)\)</span></p></td>
 <td><p>set of continuous functions on the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{P}_k\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathrm{P}_k\)</span></p></td>
 <td><p>continuous Lagrange element of degree <span class="math notranslate nohighlight">\(k\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathrm{DP}_k\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{DP}_k\)</span></p></td>
 <td><p>discontinuous Lagrange element of degree <span class="math notranslate nohighlight">\(k\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{BDM}_k\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathrm{BDM}_k\)</span></p></td>
 <td><p>Brezzi–Douglas–Marini element of degree <span class="math notranslate nohighlight">\(k\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathcal{R}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{R}\)</span></p></td>
 <td><p>residual of the equation</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\left[\!\left[ \cdot \right]\!\right]\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\left[\!\left[ \cdot \right]\!\right]\)</span></p></td>
 <td><p>cell facet jump operator</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\{\cdot\}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\{\cdot\}\)</span></p></td>
 <td><p>cell facet average operator</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\tau_{\text{SUPG}}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\tau_{\text{SUPG}}\)</span></p></td>
 <td><p>SUPG stabilization parameter</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha_{\text{DG}}, \gamma_{\text{DG}}\)</span></p></td>
-<td><p>DG penalty parameters</p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\alpha_{\text{DG}}\)</span></p></td>
+<td><p>DG penalty parameter</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha_{\text{W}}\)</span></p></td>
+<td><p>weak enforcement penalty parameter</p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathcal{E}\)</span></p></td>
 <td><p>the error in the numerical solution</p></td>
@@ -719,50 +724,56 @@ document.write(`
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\nabla = (\partial_x, \partial_y, \partial_z)\)</span></p></td>
 <td><p>gradient operator</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{H}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathbf{n}\)</span></p></td>
+<td><p>outward unit normal vector</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathrm{H}\)</span></p></td>
 <td><p>Heaviside step function</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathsf{I}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathsf{I}\)</span></p></td>
 <td><p>identity tensor</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\det\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\det\)</span></p></td>
 <td><p>matrix determinant</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\min_{\mathbf{x} \in \Omega}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\min_{\mathbf{x} \in \Omega}\)</span></p></td>
 <td><p>minimum over the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\max_{\mathbf{x} \in \Omega}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\max_{\mathbf{x} \in \Omega}\)</span></p></td>
 <td><p>maximum over the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathrm{vol}(\Omega)\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{vol}(\Omega)\)</span></p></td>
 <td><p>volume of domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\langle \cdot \rangle_{\Omega}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\langle \cdot \rangle_{\Omega}\)</span></p></td>
 <td><p>space-averaging over the domain <span class="math notranslate nohighlight">\(\Omega\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\overline{\;\cdot\;}^{[t,t']}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\overline{\;\cdot\;}^{[t,t']}\)</span></p></td>
 <td><p>time-averaging over interval <span class="math notranslate nohighlight">\([t,t']\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathbb{R}\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathbb{R}\)</span></p></td>
 <td><p>the set of real numbers</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\mathbb{C}\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathbb{C}\)</span></p></td>
 <td><p>the set of complex numbers</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(~\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(~\)</span></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><em>Fluid mechanics</em></p></td>
+<tr class="row-odd"><td><p><em>Fluid mechanics</em></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\textbf{u}\)</span></p></td>
-<td><p>fluid velocity</p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\textbf{u}\)</span></p></td>
+<td><p>velocity</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(p\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(p\)</span></p></td>
 <td><p>pressure</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\psi\)</span></p></td>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\psi\)</span></p></td>
 <td><p>streamfunction</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{\omega}\)</span></p></td>
+<td><p>vorticity</p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\rho\)</span></p></td>
 <td><p>fluid density</p></td>
@@ -772,12 +783,6 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\textbf{f}\)</span></p></td>
 <td><p>body force</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(g\)</span></p></td>
-<td><p>gravity constant</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\,{\textbf{e}}_g\)</span></p></td>
-<td><p>gravity unit vector</p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\tau\)</span></p></td>
 <td><p>deviatoric stress</p></td>
@@ -799,6 +804,12 @@ document.write(`
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathsf{G}\)</span></p></td>
 <td><p>thermal dispersion</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(g\)</span></p></td>
+<td><p>gravity constant</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\,{\textbf{e}}_g\)</span></p></td>
+<td><p>gravity unit vector</p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(~\)</span></p></td>
 <td><p></p></td>

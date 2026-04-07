@@ -57,6 +57,8 @@
     <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'demo/P4_flow/F40_darcy_brinkman_equations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -316,21 +318,20 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Further Applications</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A10_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A11_darcy_fingering_neumann.html">Darcy fingering in a porous rectangle with Neumann boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A13_darcy_fingering_annulus.html">Darcy fingering in a porous annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A20_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A21_darcy_abc_reaction_density.html">ABC convection of a Darcy fluid with a destabilising reaction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A22_darcy_abc_reaction_viscosity.html">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a></li>
 </ul>
 </details></li>
 </ul>
@@ -463,7 +464,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -479,6 +482,14 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-strong-form">Nonlinear strong form</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -490,28 +501,34 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="darcy-brinkman-equations">
 <h1>Darcy-Brinkman equations<a class="headerlink" href="#darcy-brinkman-equations" title="Link to this heading">#</a></h1>
-<!-- ## Nonlinear strong form
-
-$$
+<section id="nonlinear-strong-form">
+<h2>Nonlinear strong form<a class="headerlink" href="#nonlinear-strong-form" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{align*}
-&\text{Find}~\textbf{u}(\textbf{x}): \Omega \to \mathbb{R}^d~\text{and}~p(\textbf{x}): \Omega \to \mathbb{R}~\text{such that} \\
-&\mathbb{BVP}_{\textbf{u}, p}\begin{cases}
-\nabla\cdot\textbf{u} = 0 & \\
-\textbf{0}=-\nabla p + \nabla\cdot\tau + \textbf{f} & \forall\textbf{x}\in\Omega \\
-\textbf{u} = \textbf{u}_{\text{E}} & \forall \textbf{x}\in\partial\Omega_{\text{E}} \\
-(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} & \forall\textbf{x}\in\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
+&amp;\text{Find} \\
+&amp;\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
+&amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
+&amp;\text{such that} \\
+&amp;\mathbb{IBVP}_{\textbf{u},p}\begin{cases}
+\nabla\cdot\textbf{u} = 0 &amp; \\
+\rho\left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla(\phi^{-1}\textbf{u})\right)=-\phi\nabla p + \nabla\cdot\tau + \phi\,\textbf{f} - \mu\phi\mathsf{K}^{-1}\cdot\textbf{u} \\
+\textbf{u}=\textbf{u}_0 &amp; \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+p=p_0 &amp; \forall(\textbf{x}, t)\in\Omega\times\{0\} \\
+\textbf{u} = \textbf{u}_{\text{E}} &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{E}} \times [0,\infty) \\
+(-p\mathsf{I}+\tau)\cdot\textbf{n} = \boldsymbol{\tau}_{\text{N}} &amp; \forall(\textbf{x},t)\in\partial\Omega_{\text{N}}\times[0, \infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases} \\
-&\text{given} \\
-&\mathbb{S}_{\textbf{u}, p}
+&amp;\text{given} \\
+&amp;\mathbb{S}_{\textbf{u},p}=
 \begin{cases}
-\Omega & \text{domain}\\
-\textbf{u}_{\text{E}}(\textbf{x})~,~\partial\Omega_{\text{E}} & \text{velocity essential boundary condition} \\
-\boldsymbol{\tau}_{\text{N}}(\textbf{x})~,~\partial\Omega_{\text{N}} & \text{traction natural boundary condition} \\
-\tau(\mu,\textbf{u}) & \text{deviatoric stress constitutive relation} \\
-\textbf{f}(\textbf{x}) & \text{body force} \\
-\end{cases}
+\Omega\subset\mathbb{R}^d &amp; \text{domain} \\
+\mu_{\text{ref}} &amp; \text{constant viscosity} \\
+\tau(\mu,\textbf{u}) &amp; \text{deviatoric stress} \\
+\end{cases} 
 \end{align*}
-$$ --><div class="toctree-wrapper compound">
+\end{split}\]</div>
+</section>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 
@@ -569,6 +586,21 @@ $$ --><div class="toctree-wrapper compound">
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-strong-form">Nonlinear strong form</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

@@ -20,8 +20,8 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $t^n$ | time at the $n^{\text{th}}$ time-level |
 | $\mathcal{D}$ | finite difference operator |
 | $\mathcal{D}_{u,w,\dots}=\mathcal{D}_u\circ\mathcal{D}_w\dots$ | argument-wise finite difference operator |
-| $\mathscr{D}^{\text{i}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
-| $\mathscr{D}^{\text{e}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
+| $\mathscr{D}^{\text{IM}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
+| $\mathscr{D}^{\text{EX}}_u$ | the set of all finite difference operators that are explicit with respect to $u$ |
 | $\text{FE}$ | forward Euler finite difference operator |
 | $\text{BE}$ | backward Euler finite difference operator |
 | $\text{CN}$ | Crank-Nicolson finite difference operator |
@@ -46,6 +46,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $u_\text{R}$ | Robin boundary condition on $u$ |
 | $~$ | |
 | *Finite element method*| |
+| $\mathscr{T}$ | tesselation of the domain | 
 | $\bigcup_{\mathcal{K}} \mathcal{K}$ | union of cells forming the mesh | 
 | $h$ | local cell size |
 | $\mathcal{F}$ | set of cell facets |
@@ -65,7 +66,8 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\left[\!\left[ \cdot \right]\!\right]$ | cell facet jump operator |
 | $\{\cdot\}$ | cell facet average operator |
 | $\tau_{\text{SUPG}}$ | SUPG stabilization parameter | 
-| $\alpha_{\text{DG}}, \gamma_{\text{DG}}$ | DG penalty parameters | 
+| $\alpha_{\text{DG}}$ | DG penalty parameter | 
+| $\alpha_{\text{W}}$ | weak enforcement penalty parameter | 
 | $\mathcal{E}$ | the error in the numerical solution | 
 | $\mathbb{F}_{u,w\dots}$ | sequence of weak forms solving for $u,w\dots$|
 | $~$ | |
@@ -78,6 +80,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\dfrac{\mathrm{d}}{\mathrm{d}x}$ | ordinary derivative operator | 
 | $\partial_x = \dfrac{\partial}{\partial x}$ | partial derivative operator | 
 | $\nabla = (\partial_x, \partial_y, \partial_z)$ | gradient operator | 
+| $\mathbf{n}$ | outward unit normal vector |  
 | $\mathrm{H}$ | Heaviside step function | 
 | $\mathsf{I}$ | identity tensor | 
 | $\det$ | matrix determinant |  
@@ -90,14 +93,13 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\mathbb{C}$ | the set of complex numbers |
 | $~$ | |
 | *Fluid mechanics*| |
-| $\textbf{u}$ | fluid velocity |
+| $\textbf{u}$ | velocity |
 | $p$| pressure |
-| $\psi$| streamfunction |
+| $\psi$ | streamfunction |
+| $\boldsymbol{\omega}$| vorticity |
 | $\rho$ | fluid density |
 | $\mu$ | fluid viscosity |
 | $\textbf{f}$ | body force |
-| $g$ | gravity constant |
-| $\,{\textbf{e}}_g$ | gravity unit vector |
 | $\tau$ | deviatoric stress |
 | $\phi$ | porosity |
 | $\mathsf{K}$ | permeability |
@@ -105,6 +107,8 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\theta$ | temperature | 
 | $\mathsf{D}$ | solutal dispersion |
 | $\mathsf{G}$ | thermal dispersion |
+| $g$ | gravity constant |
+| $\,{\textbf{e}}_g$ | gravity unit vector |
 | $~$ | |
 | *Acronyms*| |
 | PDE | partial differential equation |
