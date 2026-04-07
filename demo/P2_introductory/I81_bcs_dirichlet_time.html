@@ -177,10 +177,10 @@
         </ul>
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../table.html">Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notation.html">Notation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="I00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="I10_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="I11_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="I12_poisson_annulus.html">Poisson equation on an annulus</a></li>
@@ -222,7 +222,7 @@
 <li class="toctree-l2"><a class="reference internal" href="I85_bcs_nitsche.html">Poisson equation with Nitsche boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="I90_mesh.html">Mesh resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="I90_resolution.html">Spatial and temporal resolution</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="I91_hp_refinement.html">Steady diffusion-reaction with mesh refinement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="I92_poisson_mms.html">Poisson equation with method of manufactured solutions</a></li>
 </ul>
@@ -268,7 +268,6 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Flow</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../P4_flow/F00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F10_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P4_flow/F11_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P4_flow/F12_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
@@ -319,8 +318,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C42_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -329,6 +327,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A10_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A13_darcy_fingering_annulus.html">Darcy fingering in a porous annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A20_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -596,12 +595,12 @@ J=1 \\
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x,t)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">uD</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;uD&#39;</span><span class="p">]</span>
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">((</span><span class="n">uD</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uD</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{D}</span><span class="s1">}(x=0,t)$&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">((</span><span class="n">uD</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">uD</span><span class="o">.</span><span class="n">value_series</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u_{\mathrm</span><span class="si">{D}</span><span class="s1">}(x=0)$&#39;</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;uD(x=0,t)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 
 <span class="n">u</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
 <span class="n">u_x0</span> <span class="o">=</span> <span class="p">[</span><span class="n">dofs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">dofs</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">dofs_series</span><span class="p">]</span>
-<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">((</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">u_x0</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u(x=0, t)$&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_line</span><span class="p">((</span><span class="n">u</span><span class="o">.</span><span class="n">time_series</span><span class="p">,</span> <span class="n">u_x0</span><span class="p">),</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;$t$&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;$u(x=0)$&#39;</span><span class="p">)</span>
 <span class="n">save_figure</span><span class="p">(</span><span class="s1">&#39;u(x=0,t)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>

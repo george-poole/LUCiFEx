@@ -112,10 +112,10 @@ $$
 &\begin{align*}
 F(\psi, v) &= 
 \int_\Omega\text{d}\Omega~\mu\nabla^2v \nabla^2u - v\frac{\partial f_y}{\partial x} + v\frac{\partial f_x}{\partial y} \\ 
-&\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha\mu}{h(\textbf{x})}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \mu\left[\!\left[\nabla v\right]\!\right]\langle\nabla^2u\rangle - \mu\langle\nabla^2v\rangle\left[\!\left[\nabla u\right]\!\right] \\ 
+&\quad + \int_{\mathcal{F}}\text{d}\Gamma~\frac{\alpha\mu}{h}\left[\!\left[\nabla v\right]\!\right]\left[\!\left[\nabla u\right]\!\right] - \mu\left[\!\left[\nabla v\right]\!\right]\{\nabla^2u\} - \mu\{\nabla^2v\}\left[\!\left[\nabla u\right]\!\right] \\ 
 &=0\quad\forall v\in V
 \end{align*} \\
 &\text{where}~\alpha\in\mathbb{R}~\text{is a penalty parameter}\\
-&\text{and}~h(\textbf{x})~\text{is the local mesh cell size.}
+&\text{and}~~\text{is the local mesh cell size.}
 \end{aligned}
 $$

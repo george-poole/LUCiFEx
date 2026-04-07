@@ -5,8 +5,8 @@
 <table>
     <tr>
     <td>
-    <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_dirichlet.png" width="400"/>
-    <a href="./demo/P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a> 
+    <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_neumann.png" width="400"/>
+    <a href="./demo/P6_applications/A11_darcy_fingering_neumann.html">Darcy fingering in a porous rectangle with Neumann boundary conditions</a> 
     </td>
 <td>
     <img src="./demo/P6_applications/thumbnails/A12_darcy_fingering_periodic.png" width="400"/>
@@ -21,10 +21,6 @@
     <td>
     <img src="./demo/P6_applications/thumbnails/A21_darcy_abc_reaction_density.png" width="400"/>
     <a href="./demo/P6_applications/A21_darcy_abc_reaction_density.html">ABC convection of a Darcy fluid with a destabilising reaction</a> 
-    </td>
-<td>
-    <img src="./demo/P6_applications/thumbnails/A22_darcy_abc_reaction_viscosity.png" width="400"/>
-    <a href="./demo/P6_applications/A22_darcy_abc_reaction_viscosity.html">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a> 
     </td>
     </tr>
     </table>
@@ -98,14 +94,8 @@
     <a href="./demo/P5_convection/C33_navier_stokes_marangoni.html">Marangoni convection of a Navier-Stokes fluid in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_taylor.png" width="400"/>
-    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
-    </td>
-    </tr>
-<tr>
-    <td>
-    <img src="./demo/P5_convection/thumbnails/C42_darcy_brinkman_rayleigh_benard.png" width="400"/>
-    <a href="./demo/P5_convection/C42_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_benard.png" width="400"/>
+    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
     </td>
     </tr>
     </table>

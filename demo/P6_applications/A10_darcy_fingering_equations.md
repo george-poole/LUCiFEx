@@ -1,6 +1,6 @@
 # Darcy fingering equations
 
-Governing equations for miscible viscous fingering.
+Governing equations for miscible viscous fingering in Darcy flow.
 
 ## Dimensional equations
 
@@ -11,7 +11,7 @@ $$
 &\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
 &p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &\text{such that} \\
-&\mathbb{IBVP}_{\textbf{u},p,a,b,c}
+&\mathbb{IBVP}_{\textbf{u},p,c}
 \begin{cases}
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}\cdot\nabla c) & \\
 \nabla\cdot\textbf{u} = 0 & \\
@@ -24,7 +24,7 @@ c=c_{\text{D}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D}, c} \times [0
 p = p_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases} \\
 &\text{given} \\
-&\mathbb{S}_{\textbf{u},p,a,b,c}=
+&\mathbb{S}_{\textbf{u},p,c}=
 \begin{cases}
 \Omega & \text{domain}\\
 c_0(\textbf{x}) & \text{concentration initial condition}\\
@@ -42,7 +42,7 @@ $$
 
 ## Non-dimensionalization
 
-### Frame of reference
+### Scalings
 
 $$
 \begin{align*}
@@ -51,14 +51,12 @@ $$
 \end{align*}
 $$
 
-### Scalings
-
 | Quantity | $\vert\textbf{x}\vert$ | $\vert\textbf{u}\vert$ | $t$ | $c$ | $p$ | $\psi$ | $\mu$ | $\phi$ | $K$ | $\vert\mathsf{D}\vert$ |
 | -------- | ------- | ------- | ------- | ------- | -------  |  ------- |  ------- | ------- | ------- | ------- | 
 | **Scaling** | $\mathcal{L}$ | $\mathcal{U}$ |$\mathcal{T}$ | $\Delta c$ | $\mu_{\text{ref}}\,\mathcal{U}\mathcal{L}/K_{\text{ref}}$ | $\mathcal{U}\mathcal{L}$ | $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ |
 
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$
 Ad=\frac{\mathcal{U}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}}~,~
@@ -72,13 +70,15 @@ $$
 | Definition | Name | Physical interpretation | 
 | -------- | ------- | ------- |
 | $Pe=\frac{\vert\textbf{u}_{\text{in}}\vert\mathcal{L}_\Omega}{D_{\text{ref}}}$ |  Peclet number  | Ratio of injection to diffusive speeds. |
+| $P_\Delta=\frac{K_{\text{ref}}\Delta p}{D_{\text{ref}}\mu_{\text{ref}}}$ |  pressure Peclet number  | Peclet number for pressure-driven flow. |
 
 ### Scaling choice
 
-| Name | $\mathcal{L}$ | $\mathcal{U}$ |$ \mathcal{T}$ | $\{Ad, Di, In, X\}$ |
-| -------- | -------- | ------- | ------- | ------- | 
-| advective | $\mathcal{L}_\Omega$  | $\vert\textbf{u}_{\text{in}}\vert$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1/Pe, 1, 1\}$|
-| diffusive | $\mathcal{L}_\Omega$  | $D_{\text{ref}}/\mathcal{L}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $\{1, 1, Pe, 1\}$| 
+| Name | $\mathcal{L}$ | $\mathcal{U}$ | $\mathcal{T}$ | $Ad$ | $Di$ | $In$ | $X$ |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| advective | $\mathcal{L}_\Omega$ | $\lvert\mathbf{u}_{\text{in}}\rvert$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1/Pe$ | $1$ | $1$ |
+| diffusive | $\mathcal{L}_\Omega$ | $D_{\text{ref}}/\mathcal{L}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1$ | $Pe$ | $1$ |
+| pressure-driven | $\mathcal{L}_\Omega$ | $K_{\text{ref}}\Delta p/\mathcal{L}\mu_{\text{ref}}$ | $\phi_{\text{ref}}\mathcal{L}/\mathcal{U}$ | $1$ | $1/P_\Delta$ | $0$ | $1$ | 
 
 ## Non-dimensional time-discretized equations
  
@@ -99,7 +99,3 @@ p^n\vert_{\partial\Omega_{\text{N}}} = p^n_{\text{N}} \\
 \end{cases}~.
 \end{align*}
 $$
-
-### Weak forms
-
-...

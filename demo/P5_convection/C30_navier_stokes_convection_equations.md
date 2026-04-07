@@ -66,7 +66,7 @@ $$
 | $\mu_{\text{ref}}$ |  $\mu_{\text{ref}}\,\mathcal{U}/\mathcal{L}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ |
 
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$
 Ad=\frac{\mathcal{U}\mathcal{T}}{\mathcal{L}}~,~

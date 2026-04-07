@@ -177,10 +177,10 @@
         </ul>
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../table.html">Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notation.html">Notation</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="I00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="I10_poisson_equation.html">Poisson equation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="I11_poisson_rectangle.html">Poisson equation in a rectangle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="I12_poisson_annulus.html">Poisson equation on an annulus</a></li>
@@ -222,7 +222,7 @@
 <li class="toctree-l2"><a class="reference internal" href="I85_bcs_nitsche.html">Poisson equation with Nitsche boundary conditions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="I90_mesh.html">Mesh resolution</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="I90_resolution.html">Spatial and temporal resolution</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="I91_hp_refinement.html">Steady diffusion-reaction with mesh refinement</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Poisson equation with method of manufactured solutions</a></li>
 </ul>
@@ -268,7 +268,6 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Flow</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../P4_flow/F00_notation.html">Notation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F10_darcy_equations.html">Darcy equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P4_flow/F11_darcy_lens.html">Flow of a Darcy fluid through a lens of low permeability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P4_flow/F12_darcy_anticline.html">Flow of a Darcy fluid across an anticline of heterogeneous permeability</a></li>
@@ -319,8 +318,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_taylor.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C42_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -329,6 +327,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A10_darcy_fingering_equations.html">Darcy fingering equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A11_darcy_fingering_dirichlet.html">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P6_applications/A13_darcy_fingering_annulus.html">Darcy fingering in a porous annulus</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P6_applications/A20_darcy_abc_reaction_equations.html">Darcy ABC convection-reaction equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -582,7 +581,7 @@ u_{\text{e}}(x,y)=\cos(2\pi x)\cos(2\pi y) \\
 <span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">exact_solution</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-<span class="n">Nx_opts</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="p">)</span><span class="c1">#200)</span>
+<span class="n">Nx_opts</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
 <span class="n">degree_raise_opts</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">solutions</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">((</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Function</span><span class="p">))</span>
 
@@ -593,7 +592,7 @@ u_{\text{e}}(x,y)=\cos(2\pi x)\cos(2\pi y) \\
         <span class="n">u_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">u_solver</span><span class="o">.</span><span class="n">solution</span>
         <span class="n">L2_norm_expr</span><span class="p">,</span> <span class="n">L2_norm_func</span><span class="p">,</span> <span class="n">l2_norm</span><span class="p">,</span> <span class="n">linf_norm</span> <span class="o">=</span> <span class="n">compute_norms</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">exact_solution</span><span class="p">,</span> <span class="n">deg_raise</span><span class="p">)</span>
-        <span class="n">solutions</span><span class="p">[</span><span class="s1">&#39;L2_Function&#39;</span><span class="p">][</span><span class="n">deg_raise</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">L2_norm_expr</span>
+        <span class="n">solutions</span><span class="p">[</span><span class="s1">&#39;L2_Expr&#39;</span><span class="p">][</span><span class="n">deg_raise</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">L2_norm_expr</span>
         <span class="n">solutions</span><span class="p">[</span><span class="s1">&#39;L2_Function&#39;</span><span class="p">][</span><span class="n">deg_raise</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">L2_norm_func</span>
         <span class="n">solutions</span><span class="p">[</span><span class="s1">&#39;l2&#39;</span><span class="p">][</span><span class="n">deg_raise</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">l2_norm</span>
         <span class="n">solutions</span><span class="p">[</span><span class="s1">&#39;linf&#39;</span><span class="p">][</span><span class="n">deg_raise</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">linf_norm</span>
@@ -604,10 +603,10 @@ u_{\text{e}}(x,y)=\cos(2\pi x)\cos(2\pi y) \\
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">norm_type_tex</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;L2_Function&#39;</span><span class="p">:</span> <span class="s1">&#39;L_2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;L2_Function&#39;</span><span class="p">:</span> <span class="s1">&#39;L_2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;l2&#39;</span><span class="p">:</span> <span class="s1">&#39;\ell_2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;linf&#39;</span><span class="p">:</span> <span class="s1">&#39;\ell_\infty&#39;</span>
+    <span class="s1">&#39;L2_Expr&#39;</span><span class="p">:</span> <span class="s1">&#39;_</span><span class="si">{L_2}</span><span class="s1">~(</span><span class="se">\\</span><span class="s1">texttt</span><span class="si">{Expr}</span><span class="s1">)&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;L2_Function&#39;</span><span class="p">:</span> <span class="s1">&#39;_</span><span class="si">{L_2}</span><span class="s1">~(</span><span class="se">\\</span><span class="s1">texttt</span><span class="si">{Function}</span><span class="s1">)&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;l2&#39;</span><span class="p">:</span> <span class="s1">&#39;_{\ell_2}&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;linf&#39;</span><span class="p">:</span> <span class="s1">&#39;_{\ell_\infty}&#39;</span>
 <span class="p">}</span>
 
 <span class="k">for</span> <span class="n">norm_type</span><span class="p">,</span> <span class="n">subdict</span> <span class="ow">in</span> <span class="n">solutions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -629,7 +628,7 @@ u_{\text{e}}(x,y)=\cos(2\pi x)\cos(2\pi y) \\
         <span class="n">cyc</span><span class="o">=</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span>
         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">x_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$h$&#39;</span><span class="p">,</span> 
-        <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$||\mathcal</span><span class="se">{{</span><span class="s1">E</span><span class="se">}}</span><span class="s1">||_</span><span class="se">{{</span><span class="si">{</span><span class="n">norm_type_tex</span><span class="p">[</span><span class="n">norm_type</span><span class="p">]</span><span class="si">}</span><span class="se">}}</span><span class="s1">$&#39;</span><span class="p">,</span> 
+        <span class="n">y_label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$||\mathcal</span><span class="se">{{</span><span class="s1">E</span><span class="se">}}</span><span class="s1">||</span><span class="si">{</span><span class="n">norm_type_tex</span><span class="p">[</span><span class="n">norm_type</span><span class="p">]</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">,</span> 
     <span class="p">)</span>
     <span class="n">plot_line</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">lobfs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
@@ -639,9 +638,10 @@ u_{\text{e}}(x,y)=\cos(2\pi x)\cos(2\pi y) \\
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/15247b767af0f2899368859e3a02d2ba11995ccacd77b7e638b4954b50aa13c4.png" src="../../_images/15247b767af0f2899368859e3a02d2ba11995ccacd77b7e638b4954b50aa13c4.png" />
-<img alt="../../_images/05f2cc8c71e8d8760690534dba67e02dfb8057e67b9763d724888839ff47a217.png" src="../../_images/05f2cc8c71e8d8760690534dba67e02dfb8057e67b9763d724888839ff47a217.png" />
-<img alt="../../_images/c1872ab0f30ebb65c6d8f13e55c2cb768bbb7dee175c8208f5c5f82ab4ab35df.png" src="../../_images/c1872ab0f30ebb65c6d8f13e55c2cb768bbb7dee175c8208f5c5f82ab4ab35df.png" />
+<img alt="../../_images/972f7990724a705791160ab8c32b2f06a50f6da3341d1735c650249fa5c02af8.png" src="../../_images/972f7990724a705791160ab8c32b2f06a50f6da3341d1735c650249fa5c02af8.png" />
+<img alt="../../_images/2280afbe7e6b514d1e5109761a550ebbd57a01cd827006f48caa569b03974bb4.png" src="../../_images/2280afbe7e6b514d1e5109761a550ebbd57a01cd827006f48caa569b03974bb4.png" />
+<img alt="../../_images/de891a9ebe7bbfc9044a142f033aab4d0b44dcb15c14c4e15ff076beaccdf3c5.png" src="../../_images/de891a9ebe7bbfc9044a142f033aab4d0b44dcb15c14c4e15ff076beaccdf3c5.png" />
+<img alt="../../_images/14e2aece86fff2a65a1104be9b1fd3abc32557b7d013f1930cb4c3842be19432.png" src="../../_images/14e2aece86fff2a65a1104be9b1fd3abc32557b7d013f1930cb4c3842be19432.png" />
 </div>
 </div>
 </section>

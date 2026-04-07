@@ -66,7 +66,7 @@ $$
 | $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ | $\Delta \Sigma$ | $\Delta H$ |
 
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$
 Ad=\frac{\mathcal{U}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}}~,~

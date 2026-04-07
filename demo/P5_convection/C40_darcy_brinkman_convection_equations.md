@@ -11,7 +11,7 @@ $$
 &\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
 &p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &\text{such that} \\
-&\mathbb{IBVP}\begin{cases}
+&\mathbb{IBVP}_{\textbf{u},p}\begin{cases}
 \phi\frac{\partial c}{\partial t}+\textbf{u}\cdot\nabla c=\nabla\cdot(\mathsf{D}(\phi, \textbf{u})\cdot\nabla c) & \\
 \nabla\cdot\textbf{u} = 0 & \\
 \rho_{\text{ref}}\left(\frac{\partial\textbf{u}}{\partial t}+\textbf{u}\cdot\nabla(\phi^{-1}\textbf{u})\right)=-\phi\nabla p + \mu_{\text{ref}}\nabla^2\textbf{u}+\phi\rho(c) g\,\textbf{e}_g - \mu_{\text{ref}}\,\phi\mathsf{K}^{-1}(\phi)\cdot\textbf{u} \\
@@ -41,7 +41,7 @@ $$
 | $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ | $\Delta R$ | $\Delta Q$ |
 
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}$$
 

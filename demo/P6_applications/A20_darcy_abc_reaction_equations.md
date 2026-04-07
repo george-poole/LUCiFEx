@@ -13,7 +13,7 @@ $$
 &\textbf{u}(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R}^d, \\
 &p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &\text{such that} \\
-&\begin{cases}
+&\mathbb{IBVP}_{\textbf{u},p,a,b,c}\begin{cases}
 \phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R \\
 \phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R \\
 \phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
@@ -26,7 +26,7 @@ w = w_{\text{D},w} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times
 p = p_{\text{N}} & \forall(\textbf{x}, t)\in\partial\Omega_{\text{N}}\times [0,\infty)~,~\partial\Omega_{\text{N}}=\partial\Omega/\partial\Omega_{\text{E}}
 \end{cases} \\
 &\text{given} \\
-&\mathbb{S}=
+&\mathbb{S}_{\textbf{u},p,a,b,c}=
 \begin{cases}
 \Omega\subset\mathbb{R}^d & \text{domain}\\
 w_0(\textbf{x})~\forall w\in\{a,b,c\} & \text{solutal initial conditions}\\ 
@@ -53,7 +53,7 @@ $$
 | ------- | ------- | ------- | ------- | ------- |  ------- | ------- | 
 | $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{a, \text{ref}}$ | $D_{b, \text{ref}}$ | $D_{c, \text{ref}}$ | $\Delta R$ |
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$
 \begin{align*}
