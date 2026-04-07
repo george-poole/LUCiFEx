@@ -95,7 +95,7 @@
     </td>
 <td>
     <img src="./demo/P5_convection/thumbnails/C41_darcy_brinkman_rayleigh_benard.png" width="400"/>
-    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.ipynb">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
+    <a href="./demo/P5_convection/C41_darcy_brinkman_rayleigh_benard.ipynb">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a> 
     </td>
     </tr>
     </table>
