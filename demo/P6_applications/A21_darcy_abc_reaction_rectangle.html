@@ -506,54 +506,114 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="abc-convection-of-a-darcy-fluid-in-a-porous-rectangle">
 <h1>ABC convection of a Darcy fluid in a porous rectangle<a class="headerlink" href="#abc-convection-of-a-darcy-fluid-in-a-porous-rectangle" title="Link to this heading">#</a></h1>
+<p><a class="reference external" href="https://nlpc.ulb.be/pdf/25.Kabbadj_MATRIX.pdf">Kabbadj et al. (2025)</a></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \mathbb{S}_{a,b,c,\psi}
 \begin{cases}
 \Omega = [0, \mathcal{A}X] \times [0, X] &amp; \text{aspect ratio } \mathcal{A}=\mathcal{O}(1) \\
-a_0(x,y)=\lim_{\epsilon\to0}\frac{1}{2}\left(1+\text{erf}\left(\frac{y-X}{\epsilon X}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed initial condition} \\
-w_0\geq 0\quad\forall w\in\{b,c\} \\
-a_{\text{D}}(x,y=X)=1 &amp; \text{prescribed concentration on upper boundary} \\
-a_{\text{N}}(x,y=0) &amp; \text{no-$a$-flux on remaining boundary} \\
-a_{\text{N}}(x=0,y) \\
-a_{\text{N}}(x=\mathcal{A}X,y) \\
+a_0(x,y)=\lim_{\epsilon\to0}\left(1+\text{erf}\left(\frac{y-X}{\epsilon X}\right)\right)+\mathcal{N}(x,y) &amp; \text{perturbed initial concentration} \\
+w_0\geq 0\quad\forall w\in\{b,c\} &amp; \text{constant initial concentrations} \\
+a_{\text{D}}(x,y=X)=1 &amp; \text{heavy upper boundary} \\
+a_{\text{N}}(x,y=0) &amp; \text{no-$a$-flux on lower boundary} \\
+a_{\text{N}}(x=0,y) &amp; \text{no-$a$-flux on left boundary} \\
+a_{\text{N}}(x=\mathcal{A}X,y) &amp; \text{no-$a$-flux on right boundary} \\
 w_{\text{N}}\vert_{\partial\Omega}=0\quad\forall w\in\{b,c\} &amp; \text{no-$b$-flux and no-$c$-flux on entire boundary} \\
 \psi_{\text{D}}\vert_{\partial\Omega}=0 &amp; \text{no-penetration on entire boundary} \\
 \phi=1 &amp; \text{constant porosity} \\
 \mathsf{D}_w = \mathsf{I}\quad\forall w\in\{a,b,c\} &amp; \text{constant isotropic dispersions}\\ 
 \mathsf{K} = \mathsf{I} &amp; \text{constant isotropic permeability} \\
-R(a,b) = ab &amp; \text{bilinear reaction} \\
 \mu = 1 &amp; \text{constant viscosity} \\
-\rho(a,b,c) = a + \beta b + \gamma c &amp; \text{$\gamma&gt;\beta$ for destabilisation}\\
+\rho(a,b,c) = \beta_a a + \beta_b b + \beta_c c &amp; \text{$\beta_c&gt;\beta_b$ for destabilization}\\
+\Sigma(a,b) = ab &amp; \text{bilinear reaction} \\
 \textbf{e}_g=-\textbf{e}_y &amp; \text{vertically downward gravity} \\
 \end{cases}
 \end{split}\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB2</span><span class="p">,</span> <span class="n">CN</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.fdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AB1</span><span class="p">,</span> <span class="n">CN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.plt</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lucifex.plt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_colormap</span><span class="p">,</span> <span class="n">plot_colormap_multifigure</span><span class="p">,</span> 
+    <span class="n">create_animation</span><span class="p">,</span> <span class="n">save_figure</span><span class="p">,</span> <span class="n">display_animation</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">py.A20_darcy_abc_convection</span><span class="w"> </span><span class="kn">import</span> <span class="n">darcy_abc_convection_rectangle</span>
 
+<span class="n">b0</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">c0</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">beta_a</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">beta_b</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">beta_c</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">darcy_abc_convection_rectangle</span><span class="p">(</span>
-    <span class="n">aspect</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">aspect</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">Nx</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">Ny</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
     <span class="n">cell</span><span class="o">=</span><span class="s1">&#39;quadrilateral&#39;</span><span class="p">,</span> 
-    <span class="n">Pe</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
-    <span class="n">Lmbda</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> 
-    <span class="n">D_adv</span><span class="o">=</span><span class="n">AB2</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;reactive&#39;</span><span class="p">,</span>
+    <span class="n">Ra</span><span class="o">=</span><span class="mf">500.0</span><span class="p">,</span>
+    <span class="n">Da</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> 
+    <span class="n">beta_a</span><span class="o">=</span><span class="n">beta_a</span><span class="p">,</span>
+    <span class="n">beta_b</span><span class="o">=</span><span class="n">beta_b</span><span class="p">,</span>
+    <span class="n">beta_c</span><span class="o">=</span><span class="n">beta_c</span><span class="p">,</span>
+    <span class="n">b0</span><span class="o">=</span><span class="n">b0</span><span class="p">,</span>
+    <span class="n">c0</span><span class="o">=</span><span class="n">c0</span><span class="p">,</span>
+    <span class="n">D_adv</span><span class="o">=</span><span class="n">AB1</span> <span class="o">@</span> <span class="n">CN</span><span class="p">,</span>
     <span class="n">D_diff</span><span class="o">=</span><span class="n">CN</span><span class="p">,</span>
+    <span class="n">D_src_a</span><span class="o">=</span><span class="n">AB1</span><span class="p">,</span>
+    <span class="n">D_src_b</span><span class="o">=</span><span class="n">AB1</span><span class="p">,</span>
+    <span class="n">D_src_c</span><span class="o">=</span><span class="n">AB1</span><span class="p">,</span>
+    <span class="n">courant_adv</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">courant_diff</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">courant_reac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">a_limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">b_limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">b0</span><span class="p">),</span>
+    <span class="n">c_limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">n_stop</span> <span class="o">=</span> <span class="mi">600</span>
 <span class="n">dt_init</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">n_init</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">run</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">n_stop</span><span class="o">=</span><span class="n">n_stop</span><span class="p">,</span> <span class="n">dt_init</span><span class="o">=</span><span class="n">dt_init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">)</span>
 
-<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">rho</span> <span class="o">=</span> <span class="n">simulation</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;rho&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">n_stop</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
+    <span class="n">cmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)]</span> 
+    <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(t=</span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)$&#39;</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">)]</span> 
+    <span class="n">mfig</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span>  <span class="n">plot_colormap_multifigure</span><span class="p">(</span><span class="n">n_cols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">cbars</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
+        <span class="n">cmaps</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;abc(x,y,t=</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">time_indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))(</span><span class="n">mfig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/643aae55596b2e2a24b054dea2d40ba5553f1828009a1765c3524c3b4414c2d0.png" src="../../_images/643aae55596b2e2a24b054dea2d40ba5553f1828009a1765c3524c3b4414c2d0.png" />
+<img alt="../../_images/ad3557ddf4c55e4bc00afd51d9093efcc653892769f30bc8ec8d8f646014901d.png" src="../../_images/ad3557ddf4c55e4bc00afd51d9093efcc653892769f30bc8ec8d8f646014901d.png" />
+<img alt="../../_images/56f00397deaa95f3495bc07fa68f3fca081be5700c8e2f590e41040fc07f2836.png" src="../../_images/56f00397deaa95f3495bc07fa68f3fca081be5700c8e2f590e41040fc07f2836.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">n_stop</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">time_indices</span><span class="p">:</span>
+    <span class="n">ti</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">time_series</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_colormap</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">rho(t=</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1">)$&#39;</span><span class="p">)</span>
+    <span class="n">save_figure</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;rho(x,y,t=</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/d54ae5c589ca770cb70da9db102e304b2b0a445aeaf95e60b387cc99044306f6.png" src="../../_images/d54ae5c589ca770cb70da9db102e304b2b0a445aeaf95e60b387cc99044306f6.png" />
+<img alt="../../_images/f86dad00d5733cafac30913ce351d50433fed3e437369e2a934a08906df044e1.png" src="../../_images/f86dad00d5733cafac30913ce351d50433fed3e437369e2a934a08906df044e1.png" />
+<img alt="../../_images/aadbd61f1a3e436f040e9a4062ae873f44857b33ad69a61fd38bcf14ca75464a.png" src="../../_images/aadbd61f1a3e436f040e9a4062ae873f44857b33ad69a61fd38bcf14ca75464a.png" />
 </div>
 </div>
 </section>

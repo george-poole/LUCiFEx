@@ -83,7 +83,7 @@ $$
 | $Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}$  |  Rayleigh  | Ratio of convective to diffusive speeds, defined with respect to solutal transport and domain length scale. |
 | $Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta \Sigma}{K_{\text{ref}}\,g\Delta\rho\Delta c} = \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}$  |  Damköhler  | Ratio of reaction to convection rates, defined with respect to solutal transport and domain length scale. |
 | $Le=\frac{G_{\text{ref}}}{D_{\text{ref}}}$  |  Lewis  | Ratio of thermal to solutal diffusivities. |
-| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta \Sigma} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{solutal reaction rate}}$  |  reaction Lewis  | Ratio of thermal to solutal reaction rates. |
+| $Lr=\frac{\Delta H\Delta c}{\Delta\theta \Delta \Sigma} = \underbrace{\frac{\Delta H}{\Delta\theta}}_{\text{thermal reaction rate}} \big/ \underbrace{\frac{\Delta \Sigma}{\Delta c}}_{\text{solutal reaction rate}}$  |  | Ratio of thermal to solutal reaction rates. |
 
 ### Scaling choice
 

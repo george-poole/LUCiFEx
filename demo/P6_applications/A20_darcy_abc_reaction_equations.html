@@ -507,11 +507,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generic-dimensionless-numbers">Generic dimensionless numbers</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-choice">Scaling choice</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-time-discretized-equations">Non-dimensional time-discretized equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms">Weak forms</a></li>
 </ul>
 </li>
 </ul>
@@ -562,7 +562,7 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} &amp; \text{solutal initial conditions}\\
 \mathsf{D}_w(\phi, \textbf{u}) ~\forall w\in\{a,b,c\} &amp; \text{solutal dispersions}\\ 
 \rho(a,b,c) \\
 \mu(a,b,c) \\
-\Sigma(a,b)
+\Sigma(a,b,c)
 \end{cases}
 \end{align*}
 \end{split}\]</div>
@@ -608,7 +608,7 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} &amp; \text{solutal initial conditions}\\
 <th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}_a\vert\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}_b\vert\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(\vert\mathsf{D}_c\vert\)</span></p></th>
-<th class="head"><p><span class="math notranslate nohighlight">\(R\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\Sigma\)</span></p></th>
 </tr>
 </thead>
 <tbody>
@@ -618,7 +618,7 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} &amp; \text{solutal initial conditions}\\
 <td><p><span class="math notranslate nohighlight">\(D_{a, \text{ref}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(D_{b, \text{ref}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(D_{c, \text{ref}}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\Delta R\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta\Sigma\)</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -627,18 +627,103 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} &amp; \text{solutal initial conditions}\\
 <section id="generic-dimensionless-numbers">
 <h3>Generic dimensionless numbers<a class="headerlink" href="#generic-dimensionless-numbers" title="Link to this heading">#</a></h3>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
-Ad&amp;=\frac{\mathcal{U}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}} \\
-Di&amp;=\frac{D_{a, \text{ref}}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}^2} \\
-Ki&amp;=\frac{\mathcal{T}\Delta R}{\phi_{\text{ref}}\Delta c} \\
-Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
-\end{align*} 
-\end{split}\]</div>
+\[
+Ad=\frac{\mathcal{U}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}}~,~
+Di=\frac{D_{a,\text{ref}}\mathcal{T}}{\phi_{\text{ref}}\mathcal{L}^2}~,~
+Ki=\frac{\mathcal{T}\Delta\Sigma}{\phi_{\text{ref}}\Delta a}~,~
+Bu=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}}~,~
+X=\frac{\mathcal{L}}{\mathcal{L}_\Omega}
+\]</div>
 </section>
 <section id="physical-dimensionless-numbers">
 <h3>Physical dimensionless numbers<a class="headerlink" href="#physical-dimensionless-numbers" title="Link to this heading">#</a></h3>
-<p>…</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Definition</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Physical interpretation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(Ra=\frac{\mathcal{L}_\Omega K_{\text{ref}}g\Delta\rho}{\mu_{\text{ref}}D_{\text{ref}}}=\underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}}}_{\text{convective speed}} \big/ \underbrace{\frac{D_{a,\text{ref}}}{\mathcal{L}_\Omega}}_{\text{diffusive speed}}\)</span></p></td>
+<td><p>Rayleigh</p></td>
+<td><p>Ratio of convective to diffusive speeds, defined with respect to the transport of <span class="math notranslate nohighlight">\(a\)</span> and domain length scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Da=\frac{\mathcal{L}_\Omega \mu_{\text{ref}}\,\Delta\Sigma}{K_{\text{ref}}\,g\Delta\rho\Delta a} = \underbrace{\frac{\Delta\Sigma}{\Delta a}}_{\text{reaction rate}} \big/ \underbrace{\frac{K_{\text{ref}}\,g\Delta\rho}{\mathcal{L}_\Omega \mu_{\text{ref}}}}_{\text{convection rate}}\)</span></p></td>
+<td><p>Damköhler</p></td>
+<td><p>Ratio of reaction to convection rates, defined with respect to the transport of <span class="math notranslate nohighlight">\(a\)</span> and domain length scale.</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(Le_w=\frac{D_{w,\text{ref}}}{D_{a,\text{ref}}}\quad\forall w\in\{b,c\}\)</span></p></td>
+<td><p>Lewis</p></td>
+<td><p>Ratio of diffusivities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Lr_w=\frac{\Delta w}{\Delta a}\quad\forall w\in\{b,c\}\)</span></p></td>
+<td><p></p></td>
+<td><p>Effective stoichiometric coefficient.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="scaling-choice">
+<h3>Scaling choice<a class="headerlink" href="#scaling-choice" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{L}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\mathcal{T}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Ad\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Di\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Ki\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Bu\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(X\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>advective</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/Ra\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(Da\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>diffusive</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{L}_\Omega\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}/\mathcal{L}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(RaDa\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(Ra\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>advective-diffusive</p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{\text{ref}}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(K_{\text{ref}}\,g\Delta\rho/\mu_{\text{ref}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\mathcal{L}/\mathcal{U}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(Da/Ra\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(Ra\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>reactive</p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt{D_{\text{ref}}\mathcal{T}/\phi_{\text{ref}}}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\mathcal{L}/\mathcal{T}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_{\text{ref}}\Delta a/\Delta\Sigma\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt{Ra/Da}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\sqrt{RaDa}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 </section>
 <section id="non-dimensional-time-discretized-equations">
@@ -650,18 +735,14 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 \begin{align*}
 &amp;\text{Find}~a^{n+1}, b^{n+1}, c^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\
 &amp;\begin{cases}
-\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\nabla\cdot\mathcal{D}_{\mathsf{D},a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki\,\Sigma \\
-\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = \frac{Di}{Le_b}\nabla\cdot\mathcal{D}_{\mathsf{D},b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki\,\Sigma \\
-\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \frac{Di}{Le_c}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki\,\Sigma \\
+\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\,\nabla\cdot\mathcal{D}_{\mathsf{D}_a,a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki\,\Sigma \\
+\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = Le_bDi\,\nabla\cdot\mathcal{D}_{\mathsf{D}_b,b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Lr_b Ki\,\Sigma \\
+\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = Le_cDi\,\nabla\cdot\mathcal{D}_{\mathsf{D}_c,c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Lr_c Ki\,\Sigma \\
 \nabla\cdot\textbf{u}^n=0 \\
 \textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n + Bu\,\rho^ng\,\textbf{e}_g\right) \\
 \end{cases}
 \end{align*}
 \end{split}\]</div>
-</section>
-<section id="weak-forms">
-<h3>Weak forms<a class="headerlink" href="#weak-forms" title="Link to this heading">#</a></h3>
-<p>…</p>
 </section>
 </section>
 <div class="toctree-wrapper compound">
@@ -737,11 +818,11 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scalings">Scalings</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generic-dimensionless-numbers">Generic dimensionless numbers</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#physical-dimensionless-numbers">Physical dimensionless numbers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-choice">Scaling choice</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-dimensional-time-discretized-equations">Non-dimensional time-discretized equations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strong-form">Strong form</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#weak-forms">Weak forms</a></li>
 </ul>
 </li>
 </ul>
