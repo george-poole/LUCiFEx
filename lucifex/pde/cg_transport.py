@@ -133,8 +133,7 @@ def reaction_forms(
     forms = [] 
     if not is_none(r):
         # reac = ExprSeries(r * u, args=(r, u))
-        reac = r * u
-        F_reac = v * D_reac(reac, trial=u, args=(r, u)) * dx
+        F_reac = v * D_reac(r * u, trial=u, args=(r, u)) * dx
         forms.append(F_reac)
     if not is_none(j):
         F_src = v * D_src(j, trial=u) * dx

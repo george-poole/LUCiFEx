@@ -108,7 +108,7 @@ parts:
           - file: demo/P4_flow/F32_navier_stokes_forced
       - file: demo/P4_flow/F40_darcy_brinkman_equations
         sections: 
-          - file: demo/P4_flow/F41_darcy_brinkman_lens
+          - file: demo/P4_flow/F41_darcy_brinkman_obstacle
 
   - caption: Convection 
     chapters:
@@ -145,7 +145,7 @@ parts:
           - file: demo/P6_applications/A13_darcy_fingering_annulus
       - file: demo/P6_applications/A20_darcy_abc_reaction_equations
         sections:
-          - file: demo/P6_applications/A21_darcy_abc_reaction_density
+          - file: demo/P6_applications/A21_darcy_abc_reaction_rectangle
 
   - caption: Benchmarks 
     chapters:

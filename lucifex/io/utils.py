@@ -72,13 +72,18 @@ def create_dir_path(
 def create_uid(
     namespace: dict[str, Any],
     digest_size: int = 8,
+    ignore_keys: bool = False,
 ) -> str:
     d = dict(sorted(namespace.items()))
+    if ignore_keys:
+        obj = tuple(d.values())
+    else:
+        obj = d
     try:
-        serialized = pickle.dumps(d)
+        serialized = pickle.dumps(obj)
     except pickle.PicklingError:
         import dill
-        serialized = dill.dumps(d)
+        serialized = dill.dumps(obj)
     return hashlib.blake2b(serialized, digest_size=digest_size).hexdigest()
 
 

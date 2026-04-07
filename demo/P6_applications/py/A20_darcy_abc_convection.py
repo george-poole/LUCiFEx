@@ -1,9 +1,12 @@
+from typing import Callable, TypeAlias
+
+import numpy as np
 import scipy.special as sp
 
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (
-    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, AB1, ConstantSeries, 
-    finite_difference_order, ExprSeries, advective_timestep,
+    FunctionSeries, FiniteDifference, FiniteDifferenceArgwise, AB1, Series, ConstantSeries, 
+    finite_difference_order, ExprSeries, adr_timestep,
 )
 from lucifex.fem import Constant,  SpatialPerturbation, cubic_noise
 from lucifex.solver import(
@@ -11,12 +14,28 @@ from lucifex.solver import(
     interpolation, ibvp, bvp, evaluation,
 )
 from lucifex.sim import configure_simulation
-from lucifex.utils.fenicsx_utils import CellType
+from lucifex.utils.fenicsx_utils import CellType, limits_corrector
 
 from lucifex.pde.advection_diffusion import advection_diffusion_reaction
-from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
+from lucifex.pde.darcy import darcy_streamfunction
+from lucifex.pde.streamfunction_vorticity import velocity_from_streamfunction
+from lucifex.pde.scaling import ScalingOptions
 
 
+DARCY_ABC_SCALINGS = ScalingOptions(
+    ('Ad', 'Di', 'Ki', 'Bu', 'X'),
+    lambda Ra, Da: {
+        'advective': (1, 1/Ra, Da, 1, 1),
+        'diffusive': (1, 1, Ra * Da, Ra, 1),
+        'advective_diffusive': (1, 1, Da/Ra, 1, Ra),
+        'reactive': (1, 1, 1, np.sqrt(Ra / Da), np.sqrt(Ra * Da)),
+    }
+)
+
+
+A: TypeAlias = FunctionSeries
+B: TypeAlias = FunctionSeries
+C: TypeAlias = FunctionSeries
 @configure_simulation(
     store_delta=1,
     write_delta=None,
@@ -24,38 +43,54 @@ from lucifex.pde.darcy import darcy_streamfunction, velocity_from_streamfunction
 )
 def darcy_abc_convection_rectangle(
     # domain
-    Lx: float = 2.0,
-    Ly: float = 1.0,
+    aspect: float = 2.0, 
     Nx: int = 100,
     Ny: int = 100,
     cell: str = CellType.QUADRILATERAL,
     # physical
-    Lmbda: float = 100,
-    delta_b: float = 1.0,
-    delta_c: float = 1.0,
-    beta: float = 1.0,
-    gamma: float = 2.0,
+    scaling: str = 'reactive',
+    Ra: float = 5e2,
+    Da: float = 1e2,
+    Le_b: float = 1.0,
+    Le_c: float = 1.0,
+    Lr_b: float = 1.0,
+    Lr_c: float = 1.0,
+    beta_a: float = 1.0,
+    beta_b: float = 1.0,
+    beta_c: float = 1.0,
+    reaction: Callable[[A, B, C], Series] = lambda a, b, _: a * b,
     # initial conditions
-    erf_eps: float = 1e-2,
-    a_eps: float = 1e-6,
+    a_ampl: float = 1e-6,
     a_freq: tuple[int, int] = (8, 8),
     a_seed: tuple[int, int] = (1234, 5678),
+    a_eps: float = 1e-2,
     b0: float = 1.0,
     c0: float = 0.0,
     # timestep
     dt_min: float = 0.0,
-    dt_max: float = 0.5,
+    dt_max: float = np.inf,
     dt_h: str | float = "hmin",
-    dt_courant: float | None = 0.75,
+    courant_adv: float | None = 1.0,
+    courant_diff: float | None = 1.0,
+    courant_reac: float | None = 1.0,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = AB1,
-    D_reac: FiniteDifference = AB1,
+    D_src_a: FiniteDifference = AB1,
+    D_src_b: FiniteDifference = AB1,
+    D_src_c: FiniteDifference = AB1,
     # linear algebra
     psi_petsc: OptionsPETSc = OptionsPETSc('cg', 'hypre'),
     abc_petsc: OptionsPETSc = OptionsPETSc('gmres', 'ilu'),
+    a_limits: tuple[float | None, float | None] | None = None,
+    b_limits: tuple[float | None, float | None] | None = None,
+    c_limits: tuple[float | None, float | None] | None = None,
 ):
     # space
+    scaling_map = DARCY_ABC_SCALINGS[scaling](Ra, Da)
+    X = scaling_map['X']
+    Lx = aspect * X
+    Ly = 1.0 * X
     Omega = rectangle_mesh(Lx, Ly, Nx, Ny, cell=cell)
     dOmega = mesh_boundary(
         Omega, 
@@ -66,42 +101,43 @@ def darcy_abc_convection_rectangle(
             "upper": lambda x: x[1] - Ly,
         },
     )
-
     # time
     order = finite_difference_order(
-        D_adv, D_diff, D_reac,
+        D_adv, D_diff, D_src_a, D_src_b, D_src_c,
     )
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
-
     # constants
-    Lmbda = Constant(Omega, Lmbda, 'Lmbda')
-    beta = Constant(Omega, beta, 'beta')
-    gamma = Constant(Omega, gamma, 'gamma')
-    delta_b = Constant(Omega, delta_b, 'delta_b')
-    delta_c = Constant(Omega, delta_c, 'delta_c')
-
+    Di, Ki, Bu = scaling_map[Omega, 'Di', 'Ki', 'Bu']
+    Ra = Constant(Omega, Ra, 'Ra')
+    Da = Constant(Omega, Da, 'Da')
+    Le_b = Constant(Omega, Le_b, 'Leb')
+    Le_c = Constant(Omega, Le_c, 'Lec')
+    Lr_b = Constant(Omega, Le_b, 'Lrb')
+    Lr_c = Constant(Omega, Le_c, 'Lrc')
+    beta_a = Constant(Omega, beta_a, 'beta_a')
+    beta_b = Constant(Omega, beta_b, 'beta_b')
+    beta_c = Constant(Omega, beta_c, 'beta_c')
     # initial and boundary conditions
     a_ics = SpatialPerturbation(
-        lambda x: 1 + sp.erf((x[1] - Ly) / (Ly * erf_eps)),
+        lambda x: 1 + sp.erf((x[1] - Ly) / (X * a_eps)),
         cubic_noise(['neumann', ('neumann', 'dirichlet')], [Lx, Ly], a_freq, a_seed),
         [Lx, Ly],
-        a_eps,
+        a_ampl,
     ) 
     a_bcs = BoundaryConditions(
         ('dirichlet', dOmega['upper'], 1.0),
-        ('neummann', dOmega['left', 'right', 'lower'], 0.0),
+        ('neumann', dOmega['left', 'right', 'lower'], 0.0),
     )
     b_bcs = BoundaryConditions(
-        ('neummann', dOmega.union, 0.0),
+        ('neumann', dOmega.union, 0.0),
     )
     c_bcs = BoundaryConditions(
-        ('neummann', dOmega.union, 0.0),
+        ('neumann', dOmega.union, 0.0),
     )
     psi_bcs = BoundaryConditions(
         ('dirichlet', dOmega.union, 0.0),
     )
-
     # flow
     psi_deg = 2
     psi = FunctionSeries((Omega, 'P', psi_deg), 'psi')
@@ -111,28 +147,41 @@ def darcy_abc_convection_rectangle(
     b = FunctionSeries((Omega, 'P', 1), 'b', order, ics=b0)
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c0)
     # constitutive
-    rho = Lmbda * ExprSeries(a + beta * b + gamma * c, 'rho')
-    r = ExprSeries(a * b, 'r')
-
+    rho = ExprSeries(beta_a * a + beta_b * b + beta_c * c, 'rho')
+    Sigma = ExprSeries(reaction(a, b, c), 'Sigma')
+    mu = 1
+    phi = 1
+    k = 1
     # solvers
     psi_solver = bvp(darcy_streamfunction, psi_bcs, psi_petsc)(
-        psi, 1, 1, fy=-rho[0],
+        psi, k, mu, fy=-Bu * rho[0],
     )
     u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
-    dt_solver = evaluation(dt, advective_timestep)(
-            u[0], dt_h, dt_courant, dt_max, dt_min,
+    dt_solver = evaluation(dt, adr_timestep)(
+            u[0], Di, Sigma[0], dt_h, courant_adv, courant_diff, courant_reac, dt_max, dt_min,
         ) 
-
-    a_solver = ibvp(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc)(
-        a, dt, 1, u, 1, 1, 1, r, D_adv, D_diff, D_reac,
+    a_corrector = limits_corrector(*a_limits) if a_limits else None
+    a_solver = ibvp(advection_diffusion_reaction, bcs=a_bcs, petsc=abc_petsc, corrector=a_corrector)(
+        a, dt, u, Di, j=-Ki* Sigma, 
+        D_adv=D_adv, D_diff=D_diff, D_src=D_src_a, phi=phi,
     )
-    b_solver = ibvp(advection_diffusion_reaction, bcs=b_bcs, petsc=abc_petsc)(
-        a, dt, 1, u, 1, delta_b, 1, r, D_adv, D_diff, D_reac,
+    b_corrector = limits_corrector(*b_limits) if c_limits else None
+    b_solver = ibvp(advection_diffusion_reaction, bcs=b_bcs, petsc=abc_petsc, corrector=b_corrector)(
+        b, dt, u, Le_b * Di, j=-Lr_b * Ki* Sigma, 
+        D_adv=D_adv, D_diff=D_diff, D_src=D_src_b, phi=phi,
     )
-    c_solver = ibvp(advection_diffusion_reaction, bcs=c_bcs, petsc=abc_petsc)(
-        a, dt, 1, u, 1, delta_c, 1, r, D_adv, D_diff, D_reac,
+    c_limits = (0, 1) if c_limits is True else c_limits
+    c_corrector = limits_corrector(*c_limits) if c_limits else None
+    c_solver = ibvp(advection_diffusion_reaction, bcs=c_bcs, petsc=abc_petsc, corrector=c_corrector)(
+        c, dt, u, Le_c * Di, j=Lr_c * Ki * Sigma, 
+        D_adv=D_adv, D_diff=D_diff, D_src=D_src_c, phi=phi,
     )
-
-    solvers = [psi_solver, u_solver, dt_solver, a_solver, b_solver, c_solver]
-    auxiliary = [Lmbda, beta, gamma, delta_b, delta_c]
+    solvers = (psi_solver, u_solver, dt_solver, a_solver, b_solver, c_solver)
+    auxiliary = (
+        Di, Ki, Bu,
+        Ra, Da, 
+        Le_b, Le_c,
+        Lr_b, Lr_b,
+        rho, Sigma,
+    )
     return solvers, t, dt, auxiliary

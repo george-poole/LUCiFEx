@@ -4,6 +4,10 @@ execute:
   execute_notebooks: off
   allow_errors: true
 
-# sphinx:
-#   config:
-#     html_extra_path: ['./']
+repository:
+  url: https://github.com/george-poole/LUCiFEx
+  path_to_book: "book"
+  branch: main
+
+html:
+  use_repository_button: true
