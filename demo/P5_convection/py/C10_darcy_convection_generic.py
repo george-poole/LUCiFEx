@@ -131,7 +131,7 @@ def darcy_convection_generic(
     )
     # constitutive
     phi = Function((Omega, 'P', 1), porosity, 'phi')
-    k: Expr = permeability(phi)
+    k = permeability(phi)
     if arity(dispersion) == 2:
         d = ExprSeries(dispersion(phi, u), 'd')
     else:

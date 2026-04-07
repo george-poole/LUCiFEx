@@ -123,7 +123,7 @@ def darcy_pressure(
     p: Function | FunctionSeries,
     k: Expr | Function | Constant | float,
     mu: Expr | Function | Constant | float,
-    f: Expr | Function | Constant | float | None = None,
+    f: Expr | Function | Constant | float | tuple |  None = None,
     bcs: BoundaryConditions | None = None,
 ) -> list[Form]:
     """

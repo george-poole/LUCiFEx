@@ -41,7 +41,7 @@ $$
 | $\mu_{\text{ref}}$ | $\phi_{\text{ref}}$ |$K_{\text{ref}}$ | $D_{\text{ref}}$ | $G_{\text{ref}}$ | $\Delta R$ | $\Delta Q$ |
 
 
-### Abstract dimensionless numbers
+### Generic dimensionless numbers
 
 $$X=\frac{\mathcal{L}_\Omega}{\mathcal{L}}$$
 

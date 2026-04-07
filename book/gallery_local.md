@@ -5,8 +5,8 @@
 <table>
     <tr>
     <td>
-    <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_dirichlet.png" width="400"/>
-    <a href="./demo/P6_applications/A11_darcy_fingering_dirichlet.ipynb">Darcy fingering in a porous rectangle with Dirichlet boundary conditions</a> 
+    <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_neumann.png" width="400"/>
+    <a href="./demo/P6_applications/A11_darcy_fingering_neumann.ipynb">Darcy fingering in a porous rectangle with Neumann boundary conditions</a> 
     </td>
 <td>
     <img src="./demo/P6_applications/thumbnails/A12_darcy_fingering_periodic.png" width="400"/>
@@ -21,10 +21,6 @@
     <td>
     <img src="./demo/P6_applications/thumbnails/A21_darcy_abc_reaction_density.png" width="400"/>
     <a href="./demo/P6_applications/A21_darcy_abc_reaction_density.ipynb">ABC convection of a Darcy fluid with a destabilising reaction</a> 
-    </td>
-<td>
-    <img src="./demo/P6_applications/thumbnails/A22_darcy_abc_reaction_viscosity.png" width="400"/>
-    <a href="./demo/P6_applications/A22_darcy_abc_reaction_viscosity.ipynb">ABC convection of a Darcy fluid with a stabilizing reaction and destabilizing viscosity</a> 
     </td>
     </tr>
     </table>

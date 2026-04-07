@@ -66,6 +66,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $\{\cdot\}$ | cell facet average operator |
 | $\tau_{\text{SUPG}}$ | SUPG stabilization parameter | 
 | $\alpha_{\text{DG}}, \gamma_{\text{DG}}$ | DG penalty parameters | 
+| $\mathcal{E}$ | the error in the numerical solution | 
 | $\mathbb{F}_{u,w\dots}$ | sequence of weak forms solving for $u,w\dots$|
 | $~$ | |
 | *General mathematics*| |

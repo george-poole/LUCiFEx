@@ -154,7 +154,7 @@ def darcy_rayleigh_benard_annulus(
         radial_noise,
         Omega.geometry.x,
         c_ampl,
-        )  
+    )  
     c_bcs = BoundaryConditions(
         ("dirichlet", dOmega['inner'], 1.0),
         ("dirichlet", dOmega['outer'], 0.0),  

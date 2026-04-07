@@ -52,7 +52,7 @@ parts:
           - file: demo/P2_introductory/I83_bcs_periodic
           - file: demo/P2_introductory/I84_bcs_robin
           - file: demo/P2_introductory/I85_bcs_nitsche
-      - file: demo/P2_introductory/I90_mesh
+      - file: demo/P2_introductory/I90_resolution
         sections: 
           - file: demo/P2_introductory/I91_hp_refinement
           - file: demo/P2_introductory/I92_poisson_mms
@@ -140,12 +140,12 @@ parts:
     chapters:
       - file: demo/P6_applications/A10_darcy_fingering_equations
         sections:
-          - file: demo/P6_applications/A11_darcy_fingering_dirichlet
+          - file: demo/P6_applications/A11_darcy_fingering_neumann
           - file: demo/P6_applications/A12_darcy_fingering_periodic
+          - file: demo/P6_applications/A13_darcy_fingering_annulus
       - file: demo/P6_applications/A20_darcy_abc_reaction_equations
         sections:
           - file: demo/P6_applications/A21_darcy_abc_reaction_density
-          - file: demo/P6_applications/A22_darcy_abc_reaction_viscosity
 
   - caption: Benchmarks 
     chapters:
