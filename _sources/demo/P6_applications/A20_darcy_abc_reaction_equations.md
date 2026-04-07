@@ -14,9 +14,9 @@ $$
 &p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &\text{such that} \\
 &\mathbb{IBVP}_{\textbf{u},p,a,b,c}\begin{cases}
-\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R \\
-\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R \\
-\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
+\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - \Sigma \\
+\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - \Sigma \\
+\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + \Sigma \\
 \nabla\cdot\textbf{u}=0 \\
 \textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p - \rho g\,\textbf{e}_g\right) & \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
 w=w_0  & \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty)\quad\forall w\in\{a, b, c\}\\
@@ -35,7 +35,7 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} & \text{solutal initial conditions}\\
 \mathsf{D}_w(\phi, \textbf{u}) ~\forall w\in\{a,b,c\} & \text{solutal dispersions}\\ 
 \rho(a,b,c) \\
 \mu(a,b,c) \\
-R(a,b)
+\Sigma(a,b)
 \end{cases}
 \end{align*}
 $$
@@ -76,9 +76,9 @@ $$
 \begin{align*}
 &\text{Find}~a^{n+1}, b^{n+1}, c^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\
 &\begin{cases}
-\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\nabla\cdot\mathcal{D}_{\mathsf{D},a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki R(a,b) \\
-\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = \frac{Di}{Le_b}\nabla\cdot\mathcal{D}_{\mathsf{D},b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki R(a,b) \\
-\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \frac{Di}{Le_c}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki R(a,b) \\
+\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\nabla\cdot\mathcal{D}_{\mathsf{D},a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki\,\Sigma \\
+\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = \frac{Di}{Le_b}\nabla\cdot\mathcal{D}_{\mathsf{D},b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki\,\Sigma \\
+\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \frac{Di}{Le_c}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki\,\Sigma \\
 \nabla\cdot\textbf{u}^n=0 \\
 \textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n + Bu\,\rho^ng\,\textbf{e}_g\right) \\
 \end{cases}

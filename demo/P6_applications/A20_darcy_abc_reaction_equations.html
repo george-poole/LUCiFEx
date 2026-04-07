@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'demo/P6_applications/A20_darcy_abc_reaction_equations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ABC convection of a Darcy fluid with a destabilising reaction" href="A21_darcy_abc_reaction_density.html" />
+    <link rel="next" title="ABC convection of a Darcy fluid in a porous rectangle" href="A21_darcy_abc_reaction_rectangle.html" />
     <link rel="prev" title="Darcy fingering in a porous annulus" href="A13_darcy_fingering_annulus.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -288,7 +288,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P4_flow/F40_darcy_brinkman_equations.html">Darcy-Brinkman equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F41_darcy_brinkman_lens.html">Flow of a Darcy-Brinkman fluid past a permeable obstacle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P4_flow/F41_darcy_brinkman_obstacle.html">Flow of a Darcy-Brinkman fluid past a permeable obstacle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -318,7 +318,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../P5_convection/C40_darcy_brinkman_convection_equations.html">Darcy-Brinkman convection equations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Taylor instability of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../P5_convection/C41_darcy_brinkman_rayleigh_benard.html">Rayleigh-Bénard convection of a Darcy-Brinkman fluid in a partially porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -331,7 +331,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Darcy ABC convection-reaction equations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="A21_darcy_abc_reaction_density.html">ABC convection of a Darcy fluid with a destabilising reaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="A21_darcy_abc_reaction_rectangle.html">ABC convection of a Darcy fluid in a porous rectangle</a></li>
 </ul>
 </details></li>
 </ul>
@@ -380,6 +380,21 @@
         <div class="header-article-item">
 
 <div class="article-header-buttons">
+
+
+<a href="https://github.com/george-poole/LUCiFEx" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
 
 
 
@@ -526,9 +541,9 @@ document.write(`
 &amp;p(\textbf{x}, t): \Omega\times[0, \infty) \to \mathbb{R} \\
 &amp;\text{such that} \\
 &amp;\mathbb{IBVP}_{\textbf{u},p,a,b,c}\begin{cases}
-\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - R \\
-\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - R \\
-\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + R \\
+\phi\frac{\partial a}{\partial t} + \textbf{u}\cdot\nabla a = \nabla\cdot(\mathsf{D}_a(\phi, \textbf{u})\cdot \nabla a) - \Sigma \\
+\phi\frac{\partial b}{\partial t} + \textbf{u}\cdot\nabla b = \nabla\cdot(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - \Sigma \\
+\phi\frac{\partial c}{\partial t} + \textbf{u}\cdot\nabla c = \nabla\cdot(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + \Sigma \\
 \nabla\cdot\textbf{u}=0 \\
 \textbf{u}=-\frac{\mathsf{K}}{\mu}\cdot\left(\nabla p - \rho g\,\textbf{e}_g\right) &amp; \forall(\textbf{x}, t)\in\Omega\times[0,\infty)\\
 w=w_0  &amp; \forall(\textbf{x}, t)\in\partial\Omega_{\text{D},w} \times [0,\infty)\quad\forall w\in\{a, b, c\}\\
@@ -547,7 +562,7 @@ w_0(\textbf{x})~\forall w\in\{a,b,c\} &amp; \text{solutal initial conditions}\\
 \mathsf{D}_w(\phi, \textbf{u}) ~\forall w\in\{a,b,c\} &amp; \text{solutal dispersions}\\ 
 \rho(a,b,c) \\
 \mu(a,b,c) \\
-R(a,b)
+\Sigma(a,b)
 \end{cases}
 \end{align*}
 \end{split}\]</div>
@@ -635,9 +650,9 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
 \begin{align*}
 &amp;\text{Find}~a^{n+1}, b^{n+1}, c^{n+1},~\textbf{u}^n,~p^n~\text{such that}~\forall n\geq0 \\
 &amp;\begin{cases}
-\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\nabla\cdot\mathcal{D}_{\mathsf{D},a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki R(a,b) \\
-\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = \frac{Di}{Le_b}\nabla\cdot\mathcal{D}_{\mathsf{D},b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki R(a,b) \\
-\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \frac{Di}{Le_c}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki R(a,b) \\
+\phi\frac{a^{n+1}-a^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, a}(\textbf{u}\cdot\nabla a) = Di\nabla\cdot\mathcal{D}_{\mathsf{D},a}(\mathsf{D}_{a}(\phi, \textbf{u})\cdot \nabla a) - Ki\,\Sigma \\
+\phi\frac{b^{n+1}-b^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, b}(\textbf{u}\cdot\nabla b) = \frac{Di}{Le_b}\nabla\cdot\mathcal{D}_{\mathsf{D},b}(\mathsf{D}_b(\phi, \textbf{u})\cdot \nabla b) - Ki\,\Sigma \\
+\phi\frac{c^{n+1}-c^n}{\Delta t^n} + Ad\,\mathcal{D}_{\textbf{u}, c}(\textbf{u}\cdot\nabla c) = \frac{Di}{Le_c}\nabla\cdot\mathcal{D}_{\mathsf{D},c}(\mathsf{D}_c(\phi, \textbf{u})\cdot \nabla c) + Ki\,\Sigma \\
 \nabla\cdot\textbf{u}^n=0 \\
 \textbf{u}^n=-\frac{\mathsf{K}}{\mu^n}\cdot\left(\nabla p^n + Bu\,\rho^ng\,\textbf{e}_g\right) \\
 \end{cases}
@@ -693,11 +708,11 @@ Bu&amp;=\frac{K_{\text{ref}}\,g\Delta\rho}{\mu_{\text{ref}}\,\mathcal{U}} \\
       </div>
     </a>
     <a class="right-next"
-       href="A21_darcy_abc_reaction_density.html"
+       href="A21_darcy_abc_reaction_rectangle.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ABC convection of a Darcy fluid with a destabilising reaction</p>
+        <p class="prev-next-title">ABC convection of a Darcy fluid in a porous rectangle</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
