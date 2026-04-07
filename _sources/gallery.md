@@ -6,11 +6,11 @@
     <tr>
     <td>
     <img src="./demo/P6_applications/thumbnails/A11_darcy_fingering_neumann.png" width="400"/>
-    <a href="./demo/P6_applications/A11_darcy_fingering_neumann.html">Darcy fingering in a porous rectangle with Neumann boundary conditions</a> 
+    <a href="./demo/P6_applications/A11_darcy_fingering_neumann.html">Viscous fingering of a Darcy fluid in a porous rectangle with Neumann boundary conditions</a> 
     </td>
 <td>
     <img src="./demo/P6_applications/thumbnails/A12_darcy_fingering_periodic.png" width="400"/>
-    <a href="./demo/P6_applications/A12_darcy_fingering_periodic.html">Darcy fingering in a porous rectangle with periodic boundary conditions</a> 
+    <a href="./demo/P6_applications/A12_darcy_fingering_periodic.html">Viscous fingering of a Darcy fluid in a porous rectangle with periodic boundary conditions</a> 
     </td>
 <td>
     <img src="./demo/P6_applications/thumbnails/A13_darcy_fingering_annulus.png" width="400"/>
