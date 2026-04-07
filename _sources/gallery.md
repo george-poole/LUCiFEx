@@ -14,7 +14,7 @@
     </td>
 <td>
     <img src="./demo/P6_applications/thumbnails/A13_darcy_fingering_annulus.png" width="400"/>
-    <a href="./demo/P6_applications/A13_darcy_fingering_annulus.html">Darcy fingering in a porous annulus</a> 
+    <a href="./demo/P6_applications/A13_darcy_fingering_annulus.html">Viscous fingering of a Darcy fluid in a porous annulus</a> 
     </td>
     </tr>
 <tr>
