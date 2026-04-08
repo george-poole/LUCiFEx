@@ -268,7 +268,7 @@ def create_colorbar(
 
     if cbar_title:
         _kwargs = dict(
-            rotation=360, ha='left', legend_fontsizes=14,
+            rotation=360, ha='left', fontsizes=14,
         )
         # _kwargs.update(**kwargs) # FIXME
         cbar.set_label(cbar_title, **_kwargs)

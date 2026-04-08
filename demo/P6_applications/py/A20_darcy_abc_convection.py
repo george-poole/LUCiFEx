@@ -55,9 +55,9 @@ def darcy_abc_convection_rectangle(
     Le_c: float = 1.0,
     Lr_b: float = 1.0,
     Lr_c: float = 1.0,
-    beta_a: float = 1.0,
-    beta_b: float = 1.0,
-    beta_c: float = 1.0,
+    gamma_a: float = 1.0,
+    gamma_b: float = 1.0,
+    gamma_c: float = 1.0,
     reaction: Callable[[A, B, C], Series] = lambda a, b, _: a * b,
     # initial conditions
     a_ampl: float = 1e-6,
@@ -115,9 +115,9 @@ def darcy_abc_convection_rectangle(
     Le_c = Constant(Omega, Le_c, 'Lec')
     Lr_b = Constant(Omega, Le_b, 'Lrb')
     Lr_c = Constant(Omega, Le_c, 'Lrc')
-    beta_a = Constant(Omega, beta_a, 'beta_a')
-    beta_b = Constant(Omega, beta_b, 'beta_b')
-    beta_c = Constant(Omega, beta_c, 'beta_c')
+    gamma_a = Constant(Omega, gamma_a, 'gamma_a')
+    gamma_b = Constant(Omega, gamma_b, 'gamma_b')
+    gamma_c = Constant(Omega, gamma_c, 'gamma_c')
     # initial and boundary conditions
     a_ics = SpatialPerturbation(
         lambda x: 1 + sp.erf((x[1] - Ly) / (X * a_eps)),
@@ -147,7 +147,7 @@ def darcy_abc_convection_rectangle(
     b = FunctionSeries((Omega, 'P', 1), 'b', order, ics=b0)
     c = FunctionSeries((Omega, 'P', 1), 'c', order, ics=c0)
     # constitutive
-    rho = ExprSeries(beta_a * a + beta_b * b + beta_c * c, 'rho')
+    rho = ExprSeries(gamma_a * a + gamma_b * b + gamma_c * c, 'rho')
     Sigma = ExprSeries(reaction(a, b, c), 'Sigma')
     mu = 1
     phi = 1

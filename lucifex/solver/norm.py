@@ -1,16 +1,16 @@
-from typing import Literal
+from typing import Literal, Callable
 
 import numpy as np
 from ufl.core.expr import Expr
-from ufl import inner, div, grad
+from ufl import inner, div, grad, SpatialCoordinate
 from dolfinx.mesh import Mesh
 from dolfinx.fem import Function, FunctionSpace
 
-from ..utils.fenicsx_utils import dofs, mesh_integral
+from ..utils.fenicsx_utils import dofs, mesh_integral, set_function_interpolate, set_function
 
 
 def l_norm(
-    u:  Function,
+    u: Function,
     p: float | Literal['inf'],
 ) -> float:
     """
@@ -101,3 +101,43 @@ def maximum(
     `maxₓ(u(𝐱))` or `maxₓ|𝐮(𝐱)|`
     """
     return extrema(u, elem)[1]
+
+
+def error_norms(
+    u_numerical: Function,
+    u_exact: Callable[[SpatialCoordinate], Expr],
+    degree_raise: int = 0,
+    norm_factory: Callable[[Function | Expr], float] | None = None,
+) -> tuple[float, float, float, float]:
+    """
+    Computes norm of error as an `Expr`, norm of error as a `Function` 
+    and `ℓₚ` norms with `p ∈ {2, ∞}`.
+    
+    Default `norm_factory` is the `ℒ₂`-norm.
+    """
+    fs = u_numerical.function_space
+    if degree_raise:
+        family = fs.ufl_element().family()
+        degree = fs.ufl_element().degree()
+        fs = FunctionSpace(fs.mesh, (family, degree + degree_raise))
+
+    if norm_factory is None:
+        p = 2.0
+        normalize = lambda e: e ** (1/p)
+        norm_factory = lambda u: L_norm('dx', normalize=normalize)(u, p)
+    
+    x = SpatialCoordinate(fs.mesh) # TODO or fs_old.mesh ?
+    ue_expr = u_exact(x)
+    u_func = Function(fs)
+    set_function_interpolate(u_func, u_numerical)
+    ue_func = Function(fs)
+    set_function_interpolate(ue_func, ue_expr)
+    e_func = Function(fs)
+    set_function(e_func, ue_func.x.array - u_func.x.array, ':')
+
+    norm_expr = norm_factory(ue_expr - u_func)
+    norm_func = norm_factory(e_func)
+    l2_norm = l_norm(e_func, 2.0)
+    linf_norm = l_norm(e_func, 'inf')
+
+    return norm_expr, norm_func, l2_norm, linf_norm

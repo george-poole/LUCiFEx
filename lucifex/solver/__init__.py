@@ -28,7 +28,7 @@ from .norm import (
     extrema,
     maximum,
     minimum,
-
+    error_norms,
 )
 
 

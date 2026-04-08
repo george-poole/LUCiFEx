@@ -265,7 +265,7 @@ class Integration(Evaluation[Constant, ConstantSeries]):
         future: bool = False,
         overwrite: bool = False,
         facet_side: Literal['+', '-'] | None = None,
-        norm: float | Callable[[float], float] | None = None,
+        normalize: float | Callable[[float], float] | None = None,
         **measure_kwargs,
     ):
         if measure is None:
@@ -278,17 +278,23 @@ class Integration(Evaluation[Constant, ConstantSeries]):
             **measure_kwargs,
             )
         
-        if isinstance(norm, (float, int)):
-            p = norm
-            norm = lambda i: i**(1/p)
-        if norm is None:
-            norm = lambda i: i
+        if isinstance(normalize, (float, int)):
+            p = normalize
+            normalize = lambda i: i ** (1/p)
+        if normalize is None:
+            normalize = lambda _: _
 
         def _create(
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> Self:
-            return cls(solution, lambda: norm(_func(*args, **kwargs)), corrector, future, overwrite)
+            return cls(
+                solution, 
+                lambda: normalize(_func(*args, **kwargs)), 
+                corrector, 
+                future, 
+                overwrite,
+            )
         
         return _create
     

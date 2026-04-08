@@ -4,7 +4,7 @@ from functools import wraps
 
 import numpy as np
 import ufl.geometry
-from ufl import Measure
+from ufl import Measure, Form
 from ufl.core.expr import Expr
 from dolfinx.fem import assemble_scalar, form, FunctionSpace
 from dolfinx.cpp.mesh import entities_to_geometry
@@ -129,6 +129,7 @@ def mesh_integral(
         *markers: MarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
+        normalize: Callable[[float], float] | None = None,
         **measure_kwargs,
     ) -> Callable[P, float | np.ndarray]:
         ...
@@ -139,6 +140,7 @@ def mesh_integral(
         *markers: MarkerAlias,
         facet_side: Literal['+', '-'] | None = None,
         fs: FunctionSpace | tuple[str, int] | tuple[str, int, int] | None = None,
+        normalize: Callable[[float], float] | None = None,
         **measure_kwargs,
     ):
         """
@@ -150,6 +152,9 @@ def mesh_integral(
             _facet_side = lambda expr: expr(facet_side)
         else:
             _facet_side = lambda expr: expr
+
+        if normalize is None:
+            normalize = lambda _: _
 
         def _inner(*a, **k):
             integrand = integrand_factory(*a, **k)
@@ -183,17 +188,20 @@ def mesh_integral(
                 dx = dx_tagged(0)
             else:
                 dx = [dx_tagged(i) for i in range(n_subdomains)]
+
+            _integral: Callable[[Form], float]
+            _integral = lambda f: normalize(assemble_scalar(form(f)))
             
             if isinstance(dx, Measure):
                 if isinstance(integrand, tuple):
-                    return np.array([assemble_scalar(form(i * dx)) for i in integrand])
+                    return np.array([_integral(i * dx) for i in integrand])
                 else:
-                    return assemble_scalar(form(integrand * dx))
+                    return _integral(integrand * dx)
             else:
                 if isinstance(integrand, tuple):
-                    return np.array([[assemble_scalar(form(i * _dx)) for i in integrand] for _dx in dx])
+                    return np.array([[_integral(i * _dx) for i in integrand] for _dx in dx])
                 else:
-                    return np.array([assemble_scalar(form(integrand * _dx)) for _dx in dx])
+                    return np.array([_integral(integrand * _dx) for _dx in dx])
                 
         return _inner
 

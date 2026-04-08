@@ -42,8 +42,9 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $u_\text{N}$ | Neumann or natural boundary condition on $u$ |
 | $u_\text{S}$ | strong boundary condition on $u$ |
 | $u_\text{W}$ | weak boundary condition on $u$ |
-| $u_\text{I}$ | inflow boundary condition on $u$ |
 | $u_\text{R}$ | Robin boundary condition on $u$ |
+| $u_\text{I}$ | inflow boundary condition on $u$ |
+| $u_\text{O}$ | outflow boundary condition on $u$ |
 | $~$ | |
 | *Finite element method*| |
 | $\mathscr{T}$ | tesselation of the domain | 

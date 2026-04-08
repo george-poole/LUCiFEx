@@ -102,7 +102,7 @@ class BoundaryConditions:
     def create_strong_bcs(
         self,
         fs: FunctionSpace,
-        strong_types: Iterable[BoundaryType] = (
+        bc_types: Iterable[BoundaryType] = (
             BoundaryType.DIRICHLET, BoundaryType.ESSENTIAL, BoundaryType.STRONG,
         ),
         facet_locator: FacetLocatorType = FacetLocatorType.BOUNDARY,
@@ -111,32 +111,32 @@ class BoundaryConditions:
         """
         Strongly enforced boundary condition `u = uE` on `∂Ω`
         """
-        dirichlet = []
+        bcs = []
 
         for uD, b, m, i, d in zip(
             self._values, self._btypes, self._markers, self._subindices, self._dofs_locator,
             strict=True,
         ):
-            if b in strong_types:
+            if b in bc_types:
                 if fs_sub is None:
                     dofs = dofs_indices(fs, m, i, d, facet_locator)
                 else:
                     dofs = dofs_indices(fs_sub[i], m, dofs_locator=d, facet_locator=facet_locator, collapsed=True)
                 if isinstance(uD, Constant):
                     if fs_sub is None:
-                        dbc = dirichletbc(uD, dofs, fs if i is None else fs.sub(i))
+                        bc = dirichletbc(uD, dofs, fs if i is None else fs.sub(i))
                     else:
-                        dbc = dirichletbc(uD, dofs, fs_sub[i]) # TODO check this
+                        bc = dirichletbc(uD, dofs, fs_sub[i]) # TODO check this
                 else:
                     if fs_sub is None:
                         uD = as_function(fs, uD, i, strict=True)
-                        dbc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
+                        bc = dirichletbc(uD, dofs, None if i is None else fs.sub(i))
                     else:
                         uD = as_function(fs_sub[i], uD, strict=True)
-                        dbc = dirichletbc(uD, dofs)
-                dirichlet.append(dbc)
+                        bc = dirichletbc(uD, dofs)
+                bcs.append(bc)
                 
-        return dirichlet
+        return bcs
 
     def create_periodic_mpc(
         self,
@@ -178,7 +178,7 @@ class BoundaryConditions:
     def create_weak_bcs(
         self,
         fs_or_u: Function | FunctionSeries | FunctionSpace,
-        weak_types: Iterable[BoundaryType] = (
+        bc_types: Iterable[BoundaryType] = (
             BoundaryType.NEUMANN, BoundaryType.ROBIN, 
             BoundaryType.NATURAL, BoundaryType.WEAK,
         )
@@ -186,12 +186,12 @@ class BoundaryConditions:
         fs = extract_function_space(fs_or_u)
         v = TestFunction(fs)
 
-        ds, *u_weaks = self.boundary_values(fs_or_u, *weak_types)
+        ds, *u_weaks = self.boundary_values(fs_or_u, *bc_types)
         forms = []
         
-        for u_weak, tp in zip(u_weaks, weak_types, strict=True):
+        for u_weak, bc_type in zip(u_weaks, bc_types, strict=True):
             if u_weak:
-                expr = self._auto_exprs[tp]
+                expr = self._auto_exprs[bc_type]
                 F_weak = sum([expr(v, uW) * ds(i) for i, uW in u_weak])
                 forms.append(F_weak)
 
@@ -200,7 +200,7 @@ class BoundaryConditions:
     def boundary_values(
         self,
         fs_or_u: FunctionSpace | Function | FunctionSeries | Argument,
-        *boundary_types: BoundaryType,
+        *bc_types: BoundaryType,
         strict: bool = False,
     ) -> tuple[Measure, Unpack[tuple[list[tuple[int, Constant | Function | Expr]], ...]]]:
         """
@@ -216,15 +216,15 @@ class BoundaryConditions:
         where no boundary conditions are applied.
         """
         fs = extract_function_space(fs_or_u) 
-        boundary_types = [BoundaryType(i) for i in boundary_types]
+        bc_types = [BoundaryType(i) for i in bc_types]
 
-        if strict and not all(b in boundary_types for b in self._btypes):
+        if strict and not all(b in bc_types for b in self._btypes):
             raise ValueError
 
         tag = 0
-        tags = {b: [] for b in boundary_types}
-        markers = {b: [] for b in boundary_types}
-        values = {b: [] for b in boundary_types}
+        tags = {b: [] for b in bc_types}
+        markers = {b: [] for b in bc_types}
+        values = {b: [] for b in bc_types}
 
         for b, m, uB, i in zip(
             self._btypes, self._markers, self._values, self._subindices, 
@@ -232,7 +232,7 @@ class BoundaryConditions:
         ):
             if b == BoundaryType.ROBIN and isinstance(fs_or_u, (Function, FunctionSeries)):
                 uB = self.robin_auto_expr(uB, fs_or_u, future=True)
-            if b in boundary_types:
+            if b in bc_types:
                 if isinstance(uB, (Function, Expr, Constant)):
                     _uB = uB
                 elif isinstance(uB, Iterable):
@@ -252,7 +252,7 @@ class BoundaryConditions:
         tags_all = [t for _tags in tags.values() for t in _tags]
         markers_all = [m for _markers in markers.values() for m in _markers]
         ds = create_tagged_measure('ds', fs.mesh, markers_all, tags_all)
-        tags_values = [[(t, e) for t, e in zip(tags[b], values[b])] for b in boundary_types]
+        tags_values = [[(t, e) for t, e in zip(tags[b], values[b])] for b in bc_types]
 
         return ds, *tags_values
     

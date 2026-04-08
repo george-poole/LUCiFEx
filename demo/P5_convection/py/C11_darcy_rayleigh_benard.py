@@ -31,7 +31,7 @@ def darcy_rayleigh_benard_rectangle(
     # timestep
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",
-    dt_courant: float = 0.75,
+    dt_Cu: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -90,7 +90,7 @@ def darcy_rayleigh_benard_rectangle(
         density=density, 
         dt_max=dt_max, 
         dt_h=dt_h, 
-        dt_courant=dt_courant,
+        dt_courant=dt_Cu,
         D_adv=D_adv, 
         D_diff=D_diff, 
         psi_petsc=psi_petsc, 
