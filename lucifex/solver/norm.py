@@ -110,7 +110,7 @@ def error_norms(
     norm_factory: Callable[[Function | Expr], float] | None = None,
 ) -> tuple[float, float, float, float]:
     """
-    Computes norm of error as an `Expr`, norm of error as a `Function` 
+    Computes norm of error as `Expr`, norm of error as `Function` 
     and `ℓₚ` norms with `p ∈ {2, ∞}`.
     
     Default `norm_factory` is the `ℒ₂`-norm.

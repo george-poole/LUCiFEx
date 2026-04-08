@@ -248,6 +248,7 @@ def create_colorbar(
     cbar_ax: Axes | None,
     cax: bool = True,
     cbar_title: str | None = None,
+    cbar_title_kws: dict | None = None,
     **kwargs,
 ) -> Colorbar:
     if cbar_ax is None:
@@ -267,11 +268,12 @@ def create_colorbar(
         mappable.set_clim(*limits)
 
     if cbar_title:
-        _kwargs = dict(
-            rotation=360, ha='left', fontsizes=14,
+        cbar_title_kws = {} if cbar_title_kws is None else cbar_title_kws
+        _kws = dict(
+            rotation=360, ha='left', fontsize=14,
         )
-        # _kwargs.update(**kwargs) # FIXME
-        cbar.set_label(cbar_title, **_kwargs)
+        _kws.update(**cbar_title_kws) 
+        cbar.set_label(cbar_title, **_kws)
  
     return cbar
 
@@ -304,10 +306,10 @@ def create_multifigure(
         if suptitle_kws is None:
             suptitle_kws = {}
         if suptitle_index is None:
-            if cbars is False:
-                suptitle_index = n_cols - 1
-            else:
+            if cbars is True:
                 suptitle_index = n_cols - 2
+            else:
+                suptitle_index = n_cols - 1
         axs_sup: Axes = fig.axes[suptitle_index]
         _suptitle_kws = dict(
             x=1.0,

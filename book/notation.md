@@ -48,7 +48,7 @@ Throughout these notebooks a consistent notation shall be used as far as possibl
 | $~$ | |
 | *Finite element method*| |
 | $\mathscr{T}$ | tesselation of the domain | 
-| $\bigcup_{\mathcal{K}} \mathcal{K}$ | union of cells forming the mesh | 
+| $\bigcup_{\mathcal{K}\in\mathscr{T}} \mathcal{K}$ | union of cells forming the mesh | 
 | $h$ | local cell size |
 | $\mathcal{F}$ | set of cell facets |
 | $\mathcal{V}$ | set of cell vertices |

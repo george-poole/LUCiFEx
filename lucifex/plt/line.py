@@ -54,7 +54,7 @@ def plot_line(
                 cbar_ax=cbar_ax, 
                 cax=cax,
                 cbar_title=legend_title,
-                **dict(shrink=0.5) if cax else {},
+                **(dict(shrink=0.5) if cax else {}),
             )
         
         cyc = create_cycler(cyc, len(f))
