@@ -12,9 +12,10 @@ from matplotlib.collections import Collection
 from matplotlib.tri.triangulation import Triangulation
 
 from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
-from ..utils.fenicsx_utils import is_scalar, is_grid, NonScalarError
+from ..utils.fenicsx_utils import (
+    is_scalar, is_grid, IsNotScalarError, IsNotGridOrSimplexMeshError,
+)
 from ..utils.py_utils import create_kws_filterer, OverloadTypeError
-from ..utils.npy_utils import as_index
 
 from .utils import (
     LW, set_axes, optional_ax, set_axes, create_colorbar,
@@ -90,7 +91,7 @@ def _(
     **kwargs,
 ):
     if not is_scalar(u):
-        raise NonScalarError(u)
+        raise IsNotScalarError(u)
     u_npy = as_npy_function(u, grid, use_cache, mesh)
     return _plot_colormap(
         u_npy, fig, ax, colorbar, grid, **kwargs
@@ -133,11 +134,15 @@ def _(
     fig: Figure,
     ax: Axes,
     colorbar: bool | tuple[float, float] = True,
+    grid: bool | None = None,
     cbar_ax: Axes | None = None,
     cax: bool = True,
     cbar_title: str | None = None,
     **kwargs,
 ):
+    if grid:
+        raise ValueError('Cannot plot a `QuadFunction` as a grid.')
+
     _poly_kwargs = dict(cmap='hot', edgecolors='face')
     _axs_kwargs = dict(
         x_lims=u.mesh.x_coordinates, 
@@ -296,6 +301,14 @@ def _(
 ) -> None:
     xyz = (u.mesh.x_coordinates, u.mesh.y_coordinates, u.value)
     return _plot_contours(xyz, ax, levels, grid, u.mesh.triangulation, **kwargs)
+
+
+@_plot_contours.register(QuadFunction)
+def _(
+    *_,
+    **__,
+) -> None:
+    raise IsNotGridOrSimplexMeshError
 
 
 @_plot_contours.register(tuple)

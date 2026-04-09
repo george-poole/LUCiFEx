@@ -248,7 +248,7 @@ def mesh_axes(
     Unique and ordered `([x₀, x₁, x₂, ...], [y₀, y₁, y₂, ...], [z₀, z₁, z₂, ...])`
     """
     if strict and not is_grid(use_cache=use_grid_cache)(mesh):
-        raise NonGridMeshError
+        raise IsNotGridMeshError
     return tuple(np.sort(np.unique(i)) for i in mesh_coordinates(mesh))
 
 
@@ -260,7 +260,7 @@ def mesh_vertices_tensor(
     Tensor `v` such that `v[i, j]` returns the `(i, j)`th vertex of a structuted mesh. 
     """
     if strict and not is_grid(mesh):
-        raise NonGridMeshError('Vertices tensor')
+        raise IsNotGridMeshError('Vertices tensor')
     mesh_axes = mesh_axes(mesh)
     if len(mesh_axes) == 2:
         x, y = mesh_axes
@@ -278,7 +278,7 @@ def mesh_axes_spacing(
 ) -> tuple[np.ndarray, ...]:
     """`([dx₀, dx₁, dx₂, ...], [dy₀, dy₁, dy₂, ...], [dz₀, dz₁, dz₂, ...])`"""
     if strict and not is_grid(mesh):
-        raise NonGridMeshError('Axes spacing')
+        raise IsNotGridMeshError('Axes spacing')
     return tuple(np.diff(i) for i in mesh_axes(mesh))
 
 
@@ -398,7 +398,10 @@ def cell_size_quantity(mesh: Mesh, h: str) -> GeometricCellQuantity:
             raise ValueError(f"Invalid option '{h}' for the cell size quantity.")
     
 
-class NonSimplexMeshError(NotImplementedError):
+class IsNotSimplexMeshError(NotImplementedError):
+    """
+    Error to raise if a non-simplicial mesh is used.
+    """
     def __init__(
         self, 
         unsupported: str | None = None,
@@ -410,7 +413,10 @@ class NonSimplexMeshError(NotImplementedError):
         super().__init__(f'{msg} on a non-simplicial mesh.')
 
 
-class NonGridMeshError(NotImplementedError):
+class IsNotGridMeshError(NotImplementedError):
+    """
+    Error to raise if a non-grid mesh is used.
+    """
     def __init__(
         self, 
         unsupported: str | None = None,
@@ -422,7 +428,10 @@ class NonGridMeshError(NotImplementedError):
         super().__init__(f'{msg} on a non-grid mesh.')
 
 
-class QuadNonGridMeshError(NotImplementedError):
+class IsNotGridOrSimplexMeshError(NotImplementedError):
+    """
+    Error to raise if a non-grid mesh of quadrilateral cells is used.
+    """
     def __init__(
         self, 
         unsupported: str | None = None,

@@ -13,8 +13,8 @@ from ..mesh.mesh2npy import (
 )
 from ..utils.py_utils import optional_lru_cache, replicate_callable
 from ..utils.fenicsx_utils import (
-    dofs, dofs_grid, extract_component_functions, NonScalarError,
-    NonScalarVectorError, extract_mesh,
+    dofs, dofs_grid, extract_component_functions, IsNotScalarError,
+    IsNotScalarOrVectorError, extract_mesh,
 )
 from .function import Function
 from .constant import Constant
@@ -133,7 +133,7 @@ class NPyConstant(NPyNameValueAttr[float | int | np.ndarray]):
         if self.ufl_shape == ():
             return float(self.value)
         else:
-            raise NonScalarError(self.value)
+            raise IsNotScalarError(self.value)
 
 
 M = TypeVar('M', bound=NPyMesh)
@@ -192,7 +192,7 @@ class NPyFunction(NPyNameValueAttr[np.ndarray | tuple[np.ndarray, ...]], Generic
             case ():
                 values = get_values(u)
             case _:
-                raise NonScalarVectorError(u)
+                raise IsNotScalarOrVectorError(u)
             
         msh = convert_mesh(extract_mesh(u))
         return cls(

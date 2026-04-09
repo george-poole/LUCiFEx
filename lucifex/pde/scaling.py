@@ -1,5 +1,4 @@
 from typing import Callable, ParamSpec, Generic, TypeVar, overload
-from typing_extensions import Self
 
 from dolfinx.mesh import Mesh
 from lucifex.fem import Constant
@@ -15,7 +14,7 @@ class ScalingMap(
     
     @overload
     def __init__(
-        self: Self[AnyNumber], 
+        self: 'ScalingMap[AnyNumber]', 
         d: dict[str, AnyNumber],
         name: str | None = None,
     ):
@@ -23,7 +22,7 @@ class ScalingMap(
 
     @overload  
     def __init__(
-        self: Self[Constant], 
+        self: 'ScalingMap[Constant]', 
         d: dict[str, AnyNumber],
         name: str | None = None,
         *,
@@ -60,7 +59,7 @@ class ScalingMap(
         self, 
         arg: str,
     ):
-        if self._mesh is not None:
+        if self._mesh is None:
             return self._d[arg]
         else:
             return Constant(self._mesh, self._d[arg], arg)

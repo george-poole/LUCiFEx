@@ -9,7 +9,7 @@ from ..py_utils import optional_lru_cache
 from .dofs_utils import dofs
 from .function_utils import create_function
 from .mesh_utils import mesh_vertices, mesh_axes
-from .expr_utils import is_scalar, NonScalarError
+from .expr_utils import is_scalar, IsNotScalarError
 
 
 def dofs_grid(
@@ -29,7 +29,7 @@ def dofs_grid(
     vertex values as a grid-like array.
     """
     if not is_scalar(f):
-        raise NonScalarError(f)
+        raise IsNotScalarError(f)
     
     if not isinstance(f, Function):
         if mesh is not None:

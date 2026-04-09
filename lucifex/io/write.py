@@ -21,7 +21,7 @@ from ..utils.fenicsx_utils import (
     is_mixed_space,
 )
 from ..utils.py_utils import OverloadTypeError, StrSlice, as_slice
-from ..utils.fenicsx_utils import NonScalarVectorError, is_tensor, is_vector
+from ..utils.fenicsx_utils import IsNotScalarOrVectorError, is_tensor, is_vector
 from ..fdm import (
     FunctionSeries, ConstantSeries, GridFunctionSeries, 
     NPyConstantSeries, TriFunctionSeries, QuadFunctionSeries,
@@ -317,7 +317,7 @@ def _(
     name='expression',
 ):
     if is_tensor(u):
-        raise NonScalarVectorError(u)
+        raise IsNotScalarOrVectorError(u)
 
     if mesh is None:
         mesh = extract_mesh(u)

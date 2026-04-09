@@ -15,7 +15,7 @@ from .elem_utils import is_equivalent_element
 from .expr_utils import ( 
     is_scalar,
     is_vector, 
-    NonVectorError,
+    IsNotVectorError,
     ShapeError
 )
 from .function_space_utils import (
@@ -162,7 +162,7 @@ def extract_component_functions(
     """
     
     if not is_vector(u):
-        raise NonVectorError(u)
+        raise IsNotVectorError(u)
     
     if not isinstance(fs[0], Mesh):
         fs = fs_from_elem(fs, u)

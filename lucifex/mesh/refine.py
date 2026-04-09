@@ -4,7 +4,7 @@ import numpy as np
 from dolfinx.mesh import Mesh, locate_entities, refine, create_mesh
 
 from ..utils.fenicsx_utils import (
-    as_boolean_marker, is_simplicial, NonSimplexMeshError,
+    as_boolean_marker, is_simplicial, IsNotSimplexMeshError,
     BooleanMarker, MarkerAlias,
 )
 
@@ -21,7 +21,7 @@ def refine_mesh(
     For simplicial meshes only.
     """
     if not is_simplicial(mesh):
-        raise NonSimplexMeshError('Refinement')
+        raise IsNotSimplexMeshError('Refinement')
     
     marker = as_boolean_marker(marker)
 

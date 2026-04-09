@@ -11,7 +11,7 @@ from natsort import natsorted
 from dolfinx.fem import Function, FunctionSpace
 
 from ..fdm import FunctionSeries
-from ..utils.fenicsx_utils import NonScalarVectorError, is_discontinuous_lagrange
+from ..utils.fenicsx_utils import IsNotScalarOrVectorError, is_discontinuous_lagrange
 
 
 def create_dir_path(
@@ -240,4 +240,4 @@ def xdmf_element(
         case (dim, ):
             return (*elem, dim)
         case _:
-            raise NonScalarVectorError(u)
+            raise IsNotScalarOrVectorError(u)

@@ -20,7 +20,7 @@ from .function_utils import (
     extract_component_functions, 
     set_function_dofs,
 )
-from .expr_utils import is_scalar, is_vector, NonScalarVectorError
+from .expr_utils import is_scalar, is_vector, IsNotScalarOrVectorError
 
 
 ZeroMarker: TypeAlias = Callable[[np.ndarray], np.ndarray]
@@ -137,7 +137,7 @@ def dofs(
         )
         return np.linalg.norm(component_dofs, axis=1, ord=2)
     else:
-        raise NonScalarVectorError(u)
+        raise IsNotScalarOrVectorError(u)
     
 
 def as_boolean_marker(

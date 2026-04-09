@@ -61,7 +61,7 @@ class ShapeError(ValueError):
         super().__init__(f'Shapes {u.ufl_shape} and {shape} do not match.')
 
 
-class NonScalarError(ShapeError):
+class IsNotScalarError(ShapeError):
     def __init__(self, u):
         """
         Error to raise if non-scalar provided.
@@ -69,7 +69,7 @@ class NonScalarError(ShapeError):
         super().__init__(u, "'scalar'")
 
 
-class NonVectorError(ShapeError):
+class IsNotVectorError(ShapeError):
     def __init__(self, u):
         """
         Error to raise if non-vector provided.
@@ -77,7 +77,7 @@ class NonVectorError(ShapeError):
         super().__init__(u, "'vector'")
 
 
-class NonScalarVectorError(ShapeError):
+class IsNotScalarOrVectorError(ShapeError):
     def __init__(self, u):
         """
         Error to raise if tensor provided.
