@@ -48,7 +48,7 @@ def darcy_convection_elder_rectangle(
         },
     )
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     # initial and boundary conditions
     c_bcs = BoundaryConditions(

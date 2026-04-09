@@ -8,14 +8,14 @@ parts:
       title: Table
     - file: notation
 
-  # - caption: User Guide
+  # - caption: Tutorial
   #   chapters:
-  #     - file: demo/P1_user_guide/U00_introduction
-  #     - file: demo/P1_user_guide/U11_time_series
-  #     - file: demo/P1_user_guide/U12_time_fdm
-  #     - file: demo/P1_user_guide/U13_time_perturbations
-      # - file: demo/P1_user_guide/Uxx_bcs_time_dependent
-      # - file: demo/P1_user_guide/Uxx_bcs_periodic
+  #     - file: demo/P1_tutorial/TU00_introduction
+  #     - file: demo/P1_tutorial/TU11_time_series
+  #     - file: demo/P1_tutorial/TU12_time_fdm
+  #     - file: demo/P1_tutorial/TU13_time_perturbations
+      # - file: demo/P1_tutorial/TUxx_bcs_time_dependent
+      # - file: demo/P1_tutorial/TUxx_bcs_periodic
 
   - caption: Introductory
     chapters:

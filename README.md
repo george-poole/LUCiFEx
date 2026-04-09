@@ -2,7 +2,7 @@
 
 Welcome to the *&nbsp;**L**inearized **U**nderground **C**onvection **i**n **FE**niCS**x**&nbsp;* package! 
 
-LUCiFEx is a flexible and user-friendly package for the applied mathematician to solve time-dependent PDEs numerically by the finite element method using [FEniCSx](https://github.com/FEniCS/dolfinx). To get started with LUCiFEx, refer to the [user guide](https://george-poole.github.io/LUCiFEx/notebooks/P01_user_guide/U00_introduction.html).
+LUCiFEx is a flexible and user-friendly package for the applied mathematician to solve time-dependent PDEs numerically by the finite element method using [FEniCSx](https://github.com/FEniCS/dolfinx). To get started with LUCiFEx, refer to the [user guide](https://george-poole.github.io/LUCiFEx/notebooks/P01_tutorial/U00_introduction.html).
 
 Development has primarily been motivated by the numerical study of two-dimensional convection in porous media, however the tools developed are general-purpose and widely-applicable. For any queries, comments or feedback do not hesitate to email `grp39@cantab.ac.uk`.
 
@@ -21,8 +21,8 @@ These short notebooks are primarily for quick, inexpensive demonstration purpose
 ## What does LUCiFEx do?
 
 In addition to what can be achieved with FEniCSx, LUCiFEx provides abstractions and utilities for
-+ [time-dependent functions, constants and expressions](demo/notebooks/P01_user_guide/U01_time_dependence.ipynb)
-+ [finite difference operators for the discretization of time-dependent functions, constants and expressions](demo/notebooks/P01_user_guide/U02_finite_differences.ipynb)
++ [time-dependent functions, constants and expressions](demo/notebooks/P01_tutorial/U01_time_dependence.ipynb)
++ [finite difference operators for the discretization of time-dependent functions, constants and expressions](demo/notebooks/P01_tutorial/U02_finite_differences.ipynb)
 + setting initial conditions with optional perturbations
 + imposing (possibly time-dependent) essential, natural and periodic boundary conditions via a unified interface
 + solving boundary-value, initial-value, eigenvalue and evaluation problems via a unified interface

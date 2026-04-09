@@ -64,7 +64,7 @@ def darcy_rayleigh_benard_rectangle(
         },
     )
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     # initial and boundary conditions
     c_ics = SpatialPerturbation(
@@ -145,7 +145,7 @@ def darcy_rayleigh_benard_annulus(
         },
     )
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     # initial and boundary conditions
     radial_noise = lambda x: c_ampl * np.sin(c_freq * np.pi * (r(x, np.sqrt) - Rinner) / (Router - Rinner))
@@ -225,7 +225,7 @@ def darcy_rayleigh_benard_semicircle(
             "upper": lambda x: r2(x) - radius**2,
         },
     )
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
 
     radial_noise = lambda x: c_ampl * np.sin(c_freq * np.pi * (r(x, np.sqrt)) / radius)

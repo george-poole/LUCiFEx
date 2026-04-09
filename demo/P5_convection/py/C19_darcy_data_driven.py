@@ -63,7 +63,7 @@ def darcy_convection_data_driven(
         },
     )
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     # boundary conditions
     order = finite_difference_order(D_adv, D_diff)

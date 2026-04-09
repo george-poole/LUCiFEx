@@ -66,7 +66,7 @@ def darcy_convection_evolving_rectangle(
         },
     )
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     kappa = Constant(Omega, kappa, name='kappa')
     vartheta = Constant(Omega, np.radians(vartheta), name='vartheta')

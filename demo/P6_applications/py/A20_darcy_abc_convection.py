@@ -108,7 +108,7 @@ def darcy_abc_convection_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Di, Ki, Bu = scaling_map[Omega, 'Di', 'Ki', 'Bu']
+    Di, Ki, Bu = scaling_map(Omega)['Di', 'Ki', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     Da = Constant(Omega, Da, 'Da')
     Le_b = Constant(Omega, Le_b, 'Leb')

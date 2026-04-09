@@ -100,7 +100,7 @@ def navier_stokes_thermosolutal_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
+    Di, Vi, Bu = scaling_map(Omega)['Di', 'Vi', 'Bu']
     Le = Constant(Omega, Le, 'Le')  
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')

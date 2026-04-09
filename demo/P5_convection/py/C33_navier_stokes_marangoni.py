@@ -78,7 +78,7 @@ def navier_stokes_marangoni(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Di, Vi, Bu = scaling_map[Omega, 'Di', 'Vi', 'Bu']
+    Di, Vi, Bu = scaling_map(Omega)['Di', 'Vi', 'Bu']
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     Ma = Constant(Omega, Ma, 'Ma')

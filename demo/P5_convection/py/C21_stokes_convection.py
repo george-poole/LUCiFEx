@@ -95,7 +95,7 @@ def stokes_rayleigh_benard_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Di, Bu = scaling_map[Omega, 'Di', 'Bu']
+    Di, Bu = scaling_map(Omega)['Di', 'Bu']
     Ra = Constant(Omega, Ra, 'Ra')
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')
     u_zero = [0.0] * dim

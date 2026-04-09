@@ -94,7 +94,7 @@ def darcy_brinkman_rayleigh_benard_rectangle(
     t = ConstantSeries(Omega, 't', ics=0.0)
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Ad, Di, Vi, Bu, Pm = scaling_map[Omega, 'Ad', 'Di', 'Vi', 'Bu', 'Pm']
+    Ad, Di, Vi, Bu, Pm = scaling_map(Omega)['Ad', 'Di', 'Vi', 'Bu', 'Pm']
     Pr = Constant(Omega, Pr, 'Pr')
     Ra = Constant(Omega, Ra, 'Ra')
     Dr = Constant(Omega, Dr, 'Da')

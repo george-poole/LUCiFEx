@@ -107,7 +107,7 @@ def darcy_fingering_rectangle(
         },
     )
     # constants
-    Di, In = scaling_map[Omega, 'Di', 'In']
+    Di, In = scaling_map(Omega)['Di', 'In']
     Pe = Constant(Omega, Pe, 'Pe')
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')
     # initial and boundary conditions
@@ -233,7 +233,7 @@ def darcy_fingering_annulus(
     t = ConstantSeries(Omega, "t", order, ics=0.0) 
     dt = ConstantSeries(Omega, 'dt')
     # constants
-    Di = scaling_map[Omega, 'Di']
+    Di = scaling_map(Omega)['Di']
     Pe = Constant(Omega, Pe, 'Pe')
     Lmbda = Constant(Omega, Lmbda, 'Lmbda')
     # initial and boundary conditions
