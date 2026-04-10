@@ -9,7 +9,7 @@ from lucifex.fdm import (
     FiniteDifference, FiniteDifferenceArgwise, 
     FiniteDifferenceDerivative, DT, AB1, DT2,
 )
-from lucifex.fdm.ufl_operators import inner, grad, div
+from lucifex.fdm.ufl_overloads import inner, grad, div
 from lucifex.fem import Function, Constant
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import is_none, extract_function_space

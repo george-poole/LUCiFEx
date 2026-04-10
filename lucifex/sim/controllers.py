@@ -1,6 +1,9 @@
 from collections.abc import Callable
-from inspect import Signature, signature
-from typing import Concatenate, ParamSpec, overload, TypeVar, TypeAlias
+from inspect import Signature, signature, Parameter
+from typing import (
+    Concatenate, ParamSpec, 
+    overload, TypeVar, TypeAlias,
+)
 
 from ..fem import Constant, Function
 from ..fdm import FunctionSeries, ConstantSeries
@@ -9,28 +12,31 @@ from ..utils.py_utils.deferred import Stopper, Writer, create_lazy_evaluator, La
 from .simulation import Simulation
 
 
-T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
-P = ParamSpec('P')
-CreateStopper: TypeAlias = Callable[[Simulation], Stopper]
+StopperFactory: TypeAlias = Callable[[Simulation], Stopper]
 
+StopperMetaFactory: TypeAlias = Callable[..., StopperFactory]
+
+
+U = TypeVar('U', FunctionSeries, ConstantSeries, Function, Constant)
+P = ParamSpec('P')
 @overload
 def stopper(
-    u: T,
-    condition: Callable[Concatenate[T, P], bool],
+    u: U,
+    condition: Callable[Concatenate[U, P], bool],
 ) -> Callable[P, Stopper]:
     ...
 
 @overload
 def stopper(
     u: str,
-    condition: Callable[Concatenate[T, P], bool],
-) -> Callable[P, CreateStopper]:
+    condition: Callable[Concatenate[U, P], bool],
+) -> Callable[P, StopperFactory]:
     ...
 
 
 def stopper(
-    u: str | T,
-    condition: Callable[Concatenate[T, P], bool],
+    u: str | U,
+    condition: Callable[Concatenate[U, P], bool],
 ):  
     paramspec_params = list(signature(condition).parameters.values())[1:]
 
@@ -46,26 +52,32 @@ def stopper(
             
 
 def as_stopper(
-    arg: Stopper | LazyEvaluator[bool] | CreateStopper,
+    arg: Stopper | LazyEvaluator[bool] | StopperFactory,
     sim: Simulation,
 ) -> Stopper:
     if isinstance(arg, Stopper):
         return arg
-    elif has_simulation_arg(arg):
-        return arg(sim)
+    elif is_controller_factory(arg):
+        _stopper = arg(sim)
+        if not isinstance(_stopper, Stopper):
+            raise TypeError(f'{_stopper} is not a `Stopper`.')
+        return _stopper
     else:
         return Stopper(arg)
 
 
-T = TypeVar('T', FunctionSeries, ConstantSeries, Function, Constant)
-P = ParamSpec('P')
-CreateWriter: TypeAlias = Callable[[Simulation], Writer]
+WriterFactory: TypeAlias = Callable[[Simulation], Writer]
 
+WriterMetaFactory: TypeAlias = Callable[..., WriterFactory]
+
+
+U = TypeVar('U', FunctionSeries, ConstantSeries, Function, Constant)
+P = ParamSpec('P')
 @overload
 def writer(
-    u: T,
-    condition: Callable[Concatenate[T, P], bool],
-    routine: Callable[[float, T], None] | None = None,
+    u: U,
+    condition: Callable[Concatenate[U, P], bool],
+    routine: Callable[[float, U], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
 ) -> Callable[P, Writer]:
@@ -73,9 +85,9 @@ def writer(
 
 @overload
 def writer(
-    u: T,
+    u: U,
     condition: int | float | None = None,
-    routine: Callable[[float, T], None] | None = None,
+    routine: Callable[[float, U], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
 ) -> Writer:
@@ -84,28 +96,28 @@ def writer(
 @overload
 def writer(
     u: str,
-    condition: Callable[Concatenate[T, P], bool],
-    routine: Callable[[float, T], None] | None = None,
+    condition: Callable[Concatenate[U, P], bool],
+    routine: Callable[[float, U], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
-) -> Callable[P, CreateWriter]:
+) -> Callable[P, WriterFactory]:
     ...
 
 @overload
 def writer(
     u: str,
     condition: int | float | None = None,
-    routine: Callable[[float, T], None] | None = None,
+    routine: Callable[[float, U], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
-) -> CreateWriter:
+) -> WriterFactory:
     ...
 
 
 def writer(
-    u: str | T,
-    condition: Callable[Concatenate[T, P], bool] | int | float |  None = None,
-    routine: Callable[[float, T], None] | None = None,
+    u: str | U,
+    condition: Callable[Concatenate[U, P], bool] | int | float |  None = None,
+    routine: Callable[[float, U], None] | None = None,
     dir_path: str | None = None,
     file_name: str | None = None,
 ):
@@ -152,19 +164,45 @@ def writer(
 
 
 def as_writer(
-    arg: Writer | LazyEvaluator[bool] | CreateWriter,
+    arg: Writer | LazyEvaluator[bool] | WriterFactory,
     sim: Simulation,
 ) -> Writer:
     if isinstance(arg, Writer):
         return arg
-    elif has_simulation_arg(arg):
-        return arg(sim)
+    elif is_controller_factory(arg):
+        _writer = arg(sim)
+        if not isinstance(_writer, Writer):
+            raise TypeError(f'{_writer} is not a `Writer`.')
+        return _writer
     else:
         return Writer(arg)
     
 
-def has_simulation_arg(func: Callable) -> bool:
-    assert callable(func)
-    if len(signature(func).parameters) != 1:
+Controller: TypeAlias = Stopper | Writer
+ControllerFactory: TypeAlias = StopperFactory | WriterFactory
+
+
+def is_controller(
+    obj: Controller | None,
+):
+    return isinstance(obj, Controller)
+
+
+def is_controller_factory(
+    clbl: Callable | ControllerFactory,
+    variadic: bool = False,
+) -> bool:
+    """
+    Returns `True` if the callable's first and only argument is of type `Simulation`.
+    """
+    if not callable(clbl):
+        raise TypeError(f'{clbl} is not callable.')
+
+    if not variadic and len(signature(clbl).parameters) != 1:
         return False
-    return list(signature(func).parameters.values())[0].annotation is Simulation
+    annt = list(signature(clbl).parameters.values())[0].annotation
+
+    if annt is Parameter.empty:
+        raise TypeError(f'Type hint cannot be empty.')
+
+    return list(signature(clbl).parameters.values())[0].annotation is Simulation

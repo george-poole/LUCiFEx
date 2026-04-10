@@ -2,10 +2,12 @@ from ufl.core.expr import Expr
 from ufl import Form, as_matrix, as_vector, grad, curl, Dx, split
 
 from lucifex.fem import Function
+from lucifex.fdm.ufl_overloads import unary_overload
 from lucifex.solver import BoundaryConditions
 from .poisson import poisson
 
 
+@unary_overload
 def velocity_from_streamfunction(
     psi: Function,
     neg: bool = False,
@@ -21,6 +23,7 @@ def velocity_from_streamfunction(
     return as_matrix(mat) * grad(psi)
 
 
+@unary_overload
 def vorticity_from_velocity(
     u: Function | Expr | tuple[Function | Expr, ...],
     d2: bool = False,

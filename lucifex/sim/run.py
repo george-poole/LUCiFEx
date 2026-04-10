@@ -1,7 +1,7 @@
 import argparse 
 from collections.abc import Iterable
 from types import GenericAlias, UnionType
-from typing import Callable, Any, Hashable, TypeAlias, Protocol, Mapping
+from typing import Callable, Any, Hashable, TypeAlias, Mapping
 import time
 from inspect import signature, Parameter, Signature
 
@@ -14,17 +14,18 @@ from ..solver import Solver, IBVP, IVP
 from ..io import write, write_checkpoint, read_checkpoint, reset_directory
 from ..utils.py_utils import Writer, Stopper, log_timing, LazyEvaluator
 from .controllers import (
-    CreateStopper, CreateWriter, 
-    as_stopper, as_writer, has_simulation_arg,
+    StopperFactory, WriterFactory,
+    StopperMetaFactory, WriterMetaFactory,
+    as_stopper, as_writer, is_controller_factory,
 )
 from .simulation import configure_simulation, Simulation
 from .utils import write_timing, arg_name_collisions, ArgNameCollisionError
 
 
-TIME: TypeAlias = ConstantSeries
-TIMESTEP: TypeAlias = ConstantSeries | Constant
+T: TypeAlias = ConstantSeries
+DT: TypeAlias = ConstantSeries | Constant
 def run(
-    simulation: Simulation | tuple[Solver | Iterable[Solver], TIME, TIMESTEP],
+    simulation: Simulation | tuple[Solver | Iterable[Solver], T, DT],
     n_stop: int | None = None,
     t_stop: float | None = None,
     dt_init: float | None = None,
@@ -32,8 +33,10 @@ def run(
     resume: bool = False, 
     overwrite: bool | None = None,
     timing: bool | dict[Hashable, list[float]] = False,
-    stoppers: Iterable[Stopper | LazyEvaluator[bool] | CreateStopper] = (),
-    writers: Iterable[Writer | LazyEvaluator[None] | CreateWriter] = (),
+    prehook: Callable[[Simulation], None] | None = None,
+    posthook: Callable[[Simulation], None] | None = None,
+    stoppers: Iterable[Stopper | LazyEvaluator[bool] | StopperFactory] = (),
+    writers: Iterable[Writer | LazyEvaluator[None] | WriterFactory] = (),
     show_progress: bool = False,
 ) -> None:    
     if not isinstance(simulation, Simulation):
@@ -96,6 +99,9 @@ def run(
             w.write = log_timing(w.write, _timings, f'{w.name}_{w.write.__name__}')
         _timings[run.__name__] = []
 
+    if prehook is not None:
+        prehook(simulation)
+
     prog = None
     if show_progress and n_stop:
         from tqdm.notebook import tqdm
@@ -131,23 +137,18 @@ def run(
         if _timings:
             write_timing(_timings, simulation.dir_path, simulation.timing_file)
 
+    if posthook is not None:
+        posthook(simulation)
 
-class SimulationHook(Protocol):
-    def __call__(
-        self, 
-        simulation: Simulation, 
-        *args: Any, 
-        **kwargs: Any,
-    ) -> None:
-        ...
+from typing import Concatenate, ParamSpec
 
-
+_ = ParamSpec('_')
 def run_from_cli(
-    simulation_func: Callable[..., Simulation] | Callable[..., Callable[..., Simulation]],
-    prehook: Callable[[Simulation], None] | SimulationHook | None = None,
-    posthook: Callable[[Simulation], None] | SimulationHook | None = None,
-    stoppers: Iterable[CreateStopper | Callable[..., CreateStopper]] = (),
-    writers: Iterable[CreateWriter | Callable[..., CreateWriter]] = (),
+    simulation_factory: Callable[..., Simulation] | Callable[..., Callable[..., Simulation]],
+    prehook: Callable[[Simulation], None] | Callable[Concatenate[Simulation, _], None] | None = None,
+    posthook: Callable[[Simulation], None] | Callable[Concatenate[Simulation, _], None] | None = None,
+    stoppers: Iterable[StopperFactory | StopperMetaFactory] = (),
+    writers: Iterable[WriterFactory | WriterMetaFactory] = (),
     eval_locals: dict[str, Any] | None = None,
     description: str = 'Run a simulation from the command line',
 ) -> None:
@@ -158,16 +159,16 @@ def run_from_cli(
     
     e.g. `--parameter_name '{1: "one"}'` or `--parameter_name "{1: 'one'}"`
     """
-
+    
     if eval_locals is None:
         eval_locals = locals_from_lucifex()
 
-    stoppers_from_sim: list[CreateStopper] =  [s for s in stoppers if has_simulation_arg(s)]
-    stoppers_from_cli: list[Callable[..., CreateStopper]] = [s for s in stoppers if not has_simulation_arg(s)]
-    writers_from_sim: list[CreateWriter] =  [w for w in writers if has_simulation_arg(w)]
-    writers_from_cli: list[Callable[..., CreateWriter]]= [w for w in writers if not has_simulation_arg(w)]
+    stoppers_from_sim: list[StopperFactory] =  [s for s in stoppers if is_controller_factory(s)]
+    stoppers_from_cli: list[Callable[..., StopperFactory]] = [s for s in stoppers if not is_controller_factory(s)]
+    writers_from_sim: list[WriterFactory] =  [w for w in writers if is_controller_factory(w)]
+    writers_from_cli: list[Callable[..., WriterFactory]]= [w for w in writers if not is_controller_factory(w)]
 
-    _collisions = arg_name_collisions(simulation_func, run, *stoppers_from_cli, *writers_from_cli)
+    _collisions = arg_name_collisions(simulation_factory, run, *stoppers_from_cli, *writers_from_cli)
     if _collisions:
         raise ArgNameCollisionError(_collisions)
 
@@ -176,13 +177,16 @@ def run_from_cli(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    if hasattr(configure_simulation, simulation_func.__name__):
-        sig_config: Signature = getattr(configure_simulation, simulation_func.__name__)
+    if hasattr(configure_simulation, simulation_factory.__name__):
+        sig_config: Signature = getattr(configure_simulation, simulation_factory.__name__)
         params_config = sig_config.parameters
     else:
         params_config = signature(configure_simulation).parameters
-    params_simulation = signature(simulation_func).parameters
-    params_run = {k: v for k, v in list(signature(run).parameters.items())[1:8]}
+    params_simulation = signature(simulation_factory).parameters
+    ARG_INDEX_N_STOP = 1
+    ARG_INDEX_TIMING = 7
+    ARG_SLC = slice(ARG_INDEX_N_STOP, ARG_INDEX_TIMING + 1)
+    params_run = {k: v for k, v in list(signature(run).parameters.items())[ARG_SLC]}
     params_stoppers = [signature(s).parameters for s in stoppers_from_cli]
     params_writers = [signature(w).parameters for w in writers_from_cli]
     if prehook is not None:
@@ -231,23 +235,33 @@ def run_from_cli(
     kwargs_posthook = get_subset(params_posthook)
 
     if kwargs_config:
-        simulation = simulation_func(**kwargs_config)(**kwargs_simulation)
+        simulation = simulation_factory(**kwargs_config)(**kwargs_simulation)
     else:
-        simulation = simulation_func(**kwargs_simulation)
+        simulation = simulation_factory(**kwargs_simulation)
 
-    stoppers: list[CreateStopper] = [s(**k) for s, k in zip(stoppers_from_cli, kwargs_stop)]
+    stoppers: list[StopperFactory] = [s(**k) for s, k in zip(stoppers_from_cli, kwargs_stop)]
     stoppers.extend([s(simulation) for s in stoppers_from_sim])
-    writers: list[CreateWriter] = [s(**k) for s, k in zip(writers_from_cli, kwargs_write)]
+    writers: list[WriterFactory] = [s(**k) for s, k in zip(writers_from_cli, kwargs_write)]
     writers.extend([w(simulation) for w in writers_from_sim])
 
     if prehook is not None:
-        prehook(simulation, **kwargs_prehook)
-
-    run(simulation, **kwargs_run, stoppers=stoppers, writers=writers)
+        _prehook = lambda sim: prehook(sim, **kwargs_prehook)
+    else:
+        _prehook = None
 
     if posthook is not None:
-        posthook(simulation, **kwargs_posthook)
+        _posthook = lambda sim: posthook(sim, **kwargs_posthook)
+    else:
+        _posthook = None
 
+    run(
+        simulation, 
+        **kwargs_run, 
+        stoppers=stoppers, 
+        writers=writers,
+        prehook=_prehook,
+        posthook=_posthook,
+    )
 
 def cli_type_conversion(
     default: Any,

@@ -11,7 +11,7 @@ from lucifex.fdm import (
     FiniteDifference, FiniteDifferenceArgwise, AB2, CN, 
     advective_timestep, finite_difference_order, FunctionSeries, ConstantSeries,
 )
-from lucifex.fdm.ufl_operators import exp
+from lucifex.fdm.ufl_overloads import exp
 from lucifex.fem import Constant, Function, SpatialPerturbation, sinusoid_noise
 from lucifex.solver import (
     BoundaryConditions, OptionsJIT, OptionsPETSc, bvp, ibvp,

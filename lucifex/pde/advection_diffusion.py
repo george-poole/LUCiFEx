@@ -11,7 +11,7 @@ from lucifex.fem import Function, Constant
 from lucifex.fdm import (
     DT, FE, BE, FiniteDifference, FunctionSeries, ConstantSeries, 
     Series, FiniteDifferenceArgwise)
-from lucifex.fdm.ufl_operators import inner, grad
+from lucifex.fdm.ufl_overloads import inner, grad
 from lucifex.solver import BoundaryConditions
 from lucifex.utils.fenicsx_utils import mesh_integral
 

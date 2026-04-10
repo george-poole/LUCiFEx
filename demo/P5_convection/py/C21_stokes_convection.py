@@ -3,7 +3,7 @@ from typing import Callable
 from ufl import as_vector
 
 from lucifex.fdm import FiniteDifference, AB2, CN
-from lucifex.fdm.ufl_operators import exp
+from lucifex.fdm.ufl_overloads import exp
 from lucifex.fem import Constant, SpatialPerturbation, cubic_noise
 from lucifex.mesh import rectangle_mesh, mesh_boundary
 from lucifex.fdm import (

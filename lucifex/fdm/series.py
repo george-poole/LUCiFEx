@@ -619,7 +619,7 @@ class SubFunctionSeries(Series[Expr]):
     def clear_series(self) -> None:
         self._series = None
 
-    def get_series_item(self, time_index: int) -> Function:
+    def get_from_series(self, time_index: int) -> Function:
         return self._sup_series.series[time_index].sub(self._subspace_index, self.name, collapse=True)
     
     @property

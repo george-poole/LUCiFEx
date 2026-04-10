@@ -101,9 +101,12 @@ def log_timing(
     return _
 
 
-P = ParamSpec("P")
-R = TypeVar('R')
-def replicate_callable(clbl: Callable[P, R]) -> Callable[[Callable], Callable[P, R]]:
+# P = ParamSpec("P")
+# R = TypeVar('R')
+T = TypeVar('T')
+def replicate_callable(
+    clbl: T,
+) -> Callable[[Callable[[], None]], T]:
     """
     For example, to replicate the callable `clbl` into the function `replica`
 
@@ -120,7 +123,8 @@ def replicate_callable(clbl: Callable[P, R]) -> Callable[[Callable], Callable[P,
     ```
     """
     def _decorator(dummy: Callable[[], None]):
-        assert dummy() is None
+        if dummy() is not None:
+            raise TypeError
         def _wrapper(*args, **kwargs):
             return clbl(*args, **kwargs)
         assigned = ["__annotations__"]

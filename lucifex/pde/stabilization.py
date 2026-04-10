@@ -10,7 +10,7 @@ from lucifex.fdm import (
     BE, DT, FiniteDifference, FiniteDifferenceArgwise, Series, 
     ConstantSeries, ExplicitDiscretizationError, peclet,
 )
-from lucifex.fdm.ufl_operators import inner, grad
+from lucifex.fdm.ufl_overloads import inner, grad
 from lucifex.utils.fenicsx_utils import (
     is_tensor, is_vector, extract_mesh, 
     MeshExtractionError, cell_size_quantity,

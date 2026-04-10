@@ -28,7 +28,7 @@ from ..fdm import (
     FiniteDifference, FiniteDifferenceArgwise, 
     FunctionSeries, finite_difference_order,
 )
-from ..fdm.ufl_operators import inner
+from ..fdm.ufl_overloads import inner
 from ..fem import Function, Constant, Perturbation, is_unsolved
 from .bcs import BoundaryConditions, Value, SubspaceIndex
 from .options import (

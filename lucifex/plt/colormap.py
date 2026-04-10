@@ -15,7 +15,7 @@ from ..fem import GridFunction, TriFunction, QuadFunction, as_npy_function
 from ..utils.fenicsx_utils import (
     is_scalar, is_grid, IsNotScalarError, IsNotGridOrSimplexMeshError,
 )
-from ..utils.py_utils import create_kws_filterer, OverloadTypeError
+from ..utils.py_utils import create_kws_filterer, replicate_callable, OverloadTypeError
 
 from .utils import (
     LW, set_axes, optional_ax, set_axes, create_colorbar,
@@ -208,7 +208,8 @@ def _(
         create_colorbar(fig, ax, cmap, limits, cbar_ax, cax, cbar_title)
 
 
-plot_colormap = optional_fig_ax(_plot_colormap)
+@replicate_callable(optional_fig_ax(_plot_colormap))
+def plot_colormap(): pass
 
 
 @overload
@@ -340,7 +341,8 @@ def _(
             create_kws_filterer(ax.tricontour, ContourSet)(x, y, z, levels=levels, **_kwargs)
                 
 
-plot_contours = optional_ax(_plot_contours)
+@replicate_callable(optional_ax(_plot_contours))
+def plot_contours(): pass
 
 
 @optional_multifig_ax
