@@ -119,7 +119,6 @@ class DofsPerturbation:
         if n_freq is None:
             noise_fine = self._rng.uniform(*self._amplitude, len(f.x.array))
         else:
-            method = 'linear' if method is None else method
             vs = mesh_vertices(fs.mesh)
             xs = mesh_coordinates(fs.mesh)
             x_lims = [(np.min(i), np.max(i)) for i in xs]

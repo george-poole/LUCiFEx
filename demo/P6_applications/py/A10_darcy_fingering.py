@@ -74,7 +74,7 @@ def darcy_fingering_rectangle(
     # timestep
     dt_max: float = 0.25,
     dt_h: str | float = "hmin",
-    dt_courant: float = 0.25,
+    dt_Cu: float = 0.25,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -163,7 +163,7 @@ def darcy_fingering_rectangle(
         psi_bcs=psi_bcs,
         dt_max=dt_max, 
         dt_h=dt_h, 
-        dt_courant=dt_courant,
+        dt_Cu=dt_Cu,
         D_adv=D_adv,
         D_diff=D_diff,
         c_limits=c_limits,
@@ -197,7 +197,7 @@ def darcy_fingering_annulus(
     dt_min: float = 0.0,
     dt_max: float = 0.5,
     dt_h: str | float = "hmin",
-    dt_courant: float | None = 0.75,
+    dt_Cu: float | None = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -281,7 +281,7 @@ def darcy_fingering_annulus(
         p[0], k, mu[0],
     )
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], dt_h, dt_courant, dt_max, dt_min,
+        u[0], dt_h, dt_Cu, dt_max, dt_min,
     ) 
     c_limits = (0, 1) if c_limits is True else c_limits
     c_corrector = limits_corrector(*c_limits) if c_limits else None

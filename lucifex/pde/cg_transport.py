@@ -93,7 +93,7 @@ def diffusion_forms(
     by_parts: bool = True,
 ) -> list[Form | Expr]:
     """
-    `∫dx v∇·(D·∇u) = - ∫dx ... + ∫dS ... `
+    `∫dx v∇·(D·∇u) = - ∫dx ... + ∫ds ... `
     """
     if not by_parts:
         # diff = v * ExprSeries(div(d * grad(u)), args=(d, u)) 

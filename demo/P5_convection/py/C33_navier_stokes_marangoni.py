@@ -44,7 +44,7 @@ def navier_stokes_marangoni(
     # timestep
     dt_max: float = 0.1,
     dt_min: float = 0.0,
-    dt_courant: float = 0.75,
+    dt_Cu: float = 0.75,
     # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
@@ -110,7 +110,7 @@ def navier_stokes_marangoni(
     )
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', dt_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_Cu, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], deviatoric_stress, D_adv_ns, D_visc_ns, D_buoy_ns, 

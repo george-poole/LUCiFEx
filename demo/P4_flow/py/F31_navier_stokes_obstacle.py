@@ -32,7 +32,7 @@ def navier_stokes_circle_obstacle(
     # timestep
     dt_max: float,
     dt_min: float,
-    dt_courant: float,
+    dt_Cu: float,
     ns_scheme: str,
     # time discretization
     D_adv: FiniteDifference,
@@ -78,7 +78,7 @@ def navier_stokes_circle_obstacle(
     p = FunctionSeries((Omega, 'P', 1), 'p', order, ics=0.0)
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', dt_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_Cu, dt_max, dt_min,
     )
     ns_solvers = navier_stokes_solvers(
         ns_scheme, u, p, dt[0], stress, D_adv, D_visc, u_bcs=u_bcs, p_bcs=p_bcs,

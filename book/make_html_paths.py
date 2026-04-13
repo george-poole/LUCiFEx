@@ -25,6 +25,5 @@ if __name__ == "__main__":
             s,
             os.path.join(DEST_DIR, s),
             ignore=shutil.ignore_patterns(*IGNORE),
-            symlinks=True,
             dirs_exist_ok=True,   
         )

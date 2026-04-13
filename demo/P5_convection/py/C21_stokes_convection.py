@@ -57,7 +57,7 @@ def stokes_rayleigh_benard_rectangle(
     # timestep
     dt_min: float = 0.0,
     dt_max: float = 0.5,
-    dt_courant: float = 0.75,
+    dt_Cu: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,
@@ -134,7 +134,7 @@ def stokes_rayleigh_benard_rectangle(
     # solvers
     up_solver = bvp(stokes_incompressible, u_bcs, petsc=up_petsc)(up, stress, f[0])
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', dt_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_Cu, dt_max, dt_min,
     )
     c_corrector = ('cCorr', limits_corrector(0, 1)) if c_limits else None
     c_solver = ibvp(advection_diffusion, bcs=c_bcs, petsc=c_petsc, corrector=c_corrector)(

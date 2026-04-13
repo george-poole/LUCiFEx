@@ -32,7 +32,7 @@ def navier_stokes_forced(
     # timestep
     dt_max: float = 0.1,
     dt_min: float = 0.0,
-    dt_courant: float = 0.75,
+    dt_Cu: float = 0.75,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = AB1,
     D_diff: FiniteDifference = CN,
@@ -68,7 +68,7 @@ def navier_stokes_forced(
     psi_solver = bvp(streamfunction_from_vorticity, psi_bcs)(psi, omega[0])
     u_solver = interpolation(u, velocity_from_streamfunction)(psi[0])
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', dt_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_Cu, dt_max, dt_min,
     )
     omega_bcs = BoundaryConditions(("dirichlet", boundary.union, 0.0))
     omega_solver = ibvp(navier_stokes_vorticity, bcs=omega_bcs)(

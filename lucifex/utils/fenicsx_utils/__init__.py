@@ -7,6 +7,7 @@ from .dofs_utils import (
     dofs,
     as_boolean_marker,
     limits_corrector,
+    dirichlet_corrector,
     DofsLocatorType,
     FacetLocatorType,
 )

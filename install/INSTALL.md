@@ -4,7 +4,7 @@ Please note that LUCiFEx is a research code still under active development.
 
 `git clone https://github.com/george-poole/LUCiFEx.git`
 
-`./conda/` contains files to recreate Conda environment. To create a Conda environment named `lucifex`, either do 
+`./install/` contains files to recreate Conda environment. To create a Conda environment named `lucifex`, either do 
 
 
 * `conda create -n lucifex` followed `conda activate lucifex` and then one of

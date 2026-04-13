@@ -56,7 +56,7 @@ def darcy_brinkman_rayleigh_benard_rectangle(
     # timestep
     dt_max: float = 0.5,
     dt_min: float = 0.0,
-    dt_courant: float = 0.5,
+    dt_Cu: float = 0.5,
     # time discretization
     D_adv_ns: FiniteDifference = FE,
     D_visc_ns: FiniteDifference = CN,
@@ -135,7 +135,7 @@ def darcy_brinkman_rayleigh_benard_rectangle(
     stress = lambda u: Vi * newtonian_stress(u, mu) # FIXME efffect of phi on stress and bcs
     # solvers
     dt_solver = evaluation(dt, advective_timestep)(
-        u[0], 'hmin', dt_courant, dt_max, dt_min,
+        u[0], 'hmin', dt_Cu, dt_max, dt_min,
     )
     ns_solvers = ipcs_solvers(
         u, p, dt[0], stress, D_adv_ns, D_visc_ns, 
