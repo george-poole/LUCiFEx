@@ -27,4 +27,7 @@ Finally `pip install .` (or `pip install -e .` for editable mode).
 
 To build the book of examples and test that everything is working, do `cd book` and `bash build_all.sh`. Errors will be logged in `build_all.log`.
 
-To prevent unnecessary diffs from the notebooks, ensure that `git` has been configured with `nbdime` and `nbstripout` by doing `nbdime config-git --enable` and `nbstripout --install --keep-output`.
+To prevent unnecessary diffs from the notebooks, ensure that `git` has been configured with `nbdime` and `nbstripout` by doing 
+
++ `nbdime config-git --enable` 
++ `nbstripout --install --keep-output`
