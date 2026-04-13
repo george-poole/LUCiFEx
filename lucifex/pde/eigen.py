@@ -23,7 +23,7 @@ def helmholtz(
     `∇·(D·∇u) + k²u = f`
 
     If `k=None` and `f=None`, returns `tuple[Form, Form]` for the left
-    and right hand sides of the eigenvalue problem `∇²u = λu` where `λ = -k²`.
+    and right hand sides of the eigenvalue problem `∇·(D·∇u) = λu` where `λ = -k²`.
 
     Otherwise returns `list[Form]` for a boundary value problem.
     """
@@ -36,14 +36,14 @@ def helmholtz(
     u_trial = TrialFunction(fs)
 
     F_eig = v * u_trial * dx
-    F_lapl, *F_bcs = diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx)
+    F_diff, *F_bcs = diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx)
 
     if k is None and f is None and not F_bcs:
-        return F_lapl, F_eig
+        return F_diff, F_eig
     else:
         F_eig = k**2 * F_eig
         F_src = -v * f * dx
-        return [F_lapl, F_eig, F_src, *F_bcs]
+        return [F_diff, F_eig, F_src, *F_bcs]
 
 
 def mathieu(
