@@ -1,3 +1,4 @@
+from ast import Call
 from typing import (
     Callable,
     ParamSpec,
@@ -12,6 +13,8 @@ from collections.abc import (
 from functools import lru_cache, update_wrapper, wraps
 from inspect import signature
 import time
+
+from sqlalchemy import over
 
 
 P = ParamSpec('P')
@@ -101,12 +104,27 @@ def log_timing(
     return _
 
 
-# P = ParamSpec("P")
-# R = TypeVar('R')
+
+P = ParamSpec("P")
+R = TypeVar('R')
+@overload
+def replicate_callable(
+    clbl: Callable[P, R],
+) -> Callable[[Callable[[], None]], Callable[P, R]]:
+    ...
+
+
 T = TypeVar('T')
+@overload
 def replicate_callable(
     clbl: T,
 ) -> Callable[[Callable[[], None]], T]:
+    ...
+
+
+def replicate_callable(
+    clbl,
+):
     """
     For example, to replicate the callable `clbl` into the function `replica`
 

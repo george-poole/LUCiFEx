@@ -1,8 +1,7 @@
 from ufl.core.expr import Expr
 from ufl import (
     Form, inner, grad, Measure, TestFunction, TrialFunction,
-    inner, grad, TestFunction, TrialFunction, cos,
-    SpatialCoordinate,
+    cos, SpatialCoordinate,
 )
 
 from dolfinx.fem import FunctionSpace
@@ -23,10 +22,10 @@ def helmholtz(
     """
     `∇·(D·∇u) + k²u = f`
 
-    If `k=None` and `f=None`, returns forms for the left and right hand sides
-    of the eigenvalue problem `∇²u = λu` where `λ = -k²`.
+    If `k=None` and `f=None`, returns `tuple[Form, Form]` for the left
+    and right hand sides of the eigenvalue problem `∇²u = λu` where `λ = -k²`.
 
-    Otherwise returns forms for a boundary value problem.
+    Otherwise returns `list[Form]` for a boundary value problem.
     """
     if d is None:
         d = 1
@@ -37,15 +36,15 @@ def helmholtz(
     u_trial = TrialFunction(fs)
 
     F_eig = v * u_trial * dx
-    F_lapl, *F_bcs = diffusion_forms(v, u_trial, 1, bcs=bcs, dx=dx)
+    F_lapl, *F_bcs = diffusion_forms(v, u_trial, d, bcs=bcs, dx=dx)
 
     if k is None and f is None and not F_bcs:
         return F_lapl, F_eig
     else:
         F_eig = k**2 * F_eig
-        F_src =  -v * f * dx
+        F_src = -v * f * dx
         return [F_lapl, F_eig, F_src, *F_bcs]
-    
+
 
 def mathieu(
     u: Function | FunctionSpace,

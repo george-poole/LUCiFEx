@@ -827,6 +827,7 @@ class InitialValueProblem(InitialBoundaryValueProblem):
         )
 
 
+P = ParamSpec("P")
 class EigenvalueProblem:
 
     slepc_default = OptionsSLEPc.default()
@@ -900,28 +901,29 @@ class EigenvalueProblem:
         if isinstance(bcs, BoundaryConditions):
             forms_weak_bcs = bcs.create_weak_bcs(fs)
             self._bcs = bcs.create_strong_bcs(fs)        
-            mpcs = []
+            constraints = []
             mpc = bcs.create_periodic_mpc(fs)
             if mpc is not None:
-                mpcs.append(mpc)
+                constraints.append(mpc)
         else:
+            forms_weak_bcs = ()
             self._bcs = [i for i in bcs if isinstance(i, DirichletBCMetaClass)]
-            mpcs = [i for i in bcs if isinstance(i, MultiPointConstraint)]
+            constraints = [i for i in bcs if isinstance(i, MultiPointConstraint)]
 
-        for mpc in mpcs:
+        for mpc in constraints:
             if not mpc.finalized:
                 mpc.finalize()
 
         self._blocked = False # FIXME
         if self._blocked:
-            self._mpc = mpcs
+            self._mpc = constraints
         else:
-            if len(mpcs) > 1:
+            if len(constraints) > 1:
                 raise RuntimeError('Multiple multipoint constraints are for blocked solvers.')
-            if not mpcs:
+            if not constraints:
                 self._mpc = None
             else:
-                self._mpc = mpcs[0]
+                self._mpc = constraints[0]
 
         _create_form = partial(
             create_metaform,
@@ -959,7 +961,7 @@ class EigenvalueProblem:
         self._future = future
         self._overwrite = overwrite
 
-        self._slepcs = slepc
+        self._slepc = slepc
         self._jit = jit
         self._ffcx = ffcx
 
