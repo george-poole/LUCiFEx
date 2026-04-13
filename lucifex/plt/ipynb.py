@@ -110,7 +110,8 @@ def _save_figure(
             write(fig_or_anim, file_name, **_kwargs)
             if thumbnail:
                 _kwargs.update(file_ext='png')
-                write(fig_or_anim, os.path.join(thumbnail, ipynb_name), **_kwargs)
+                # write(fig_or_anim, os.path.join(thumbnail, ipynb_name), **_kwargs)
+                write(fig_or_anim, ipynb_name, thumbnail, **_kwargs)
             if return_path:
                 return file_name
         return __

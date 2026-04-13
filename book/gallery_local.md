@@ -219,11 +219,11 @@
 <tr>
     <td>
     <img src="./demo/P3_transport/thumbnails/T61_splitting_advection_reaction.png" width="400"/>
-    <a href="./demo/P3_transport/T61_splitting_advection_reaction.ipynb">Splitting method for the advection-reaction equation</a> 
+    <a href="./demo/P3_transport/T61_splitting_advection_reaction.ipynb">Splitting methods for the advection-reaction equation</a> 
     </td>
 <td>
     <img src="./demo/P3_transport/thumbnails/T71_predictor_corrector_advection_diffusion.png" width="400"/>
-    <a href="./demo/P3_transport/T71_predictor_corrector_advection_diffusion.ipynb">Predictor-corrector method for the advection-diffusion equation</a> 
+    <a href="./demo/P3_transport/T71_predictor_corrector_advection_diffusion.ipynb">Predictor-corrector methods for the advection-diffusion equation</a> 
     </td>
     </tr>
     </table>
