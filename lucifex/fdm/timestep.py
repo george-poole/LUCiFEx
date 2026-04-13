@@ -24,7 +24,7 @@ def advective_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tA = cA minₓ(h(𝐱) / |𝐚(𝐱)|)` where `cA` is the advective Courant number.
+    `∆tₐ = Cₐ minₓ(h(𝐱) / |𝐚(𝐱)|)` where `Cₐ` is the advective Courant number.
     """
     ...
 
@@ -40,7 +40,7 @@ def advective_timestep(
     mesh: Mesh | None = None,
 )-> float:
     """
-    `∆tA = cA h / maxₓ|𝐚(𝐱)|)` where `cA` is the advective Courant number.
+    `∆tₐ = Cₐ h / maxₓ|𝐚(𝐱)|)` where `Cₐ` is the advective Courant number.
     """
     ...
 
@@ -55,7 +55,7 @@ def advective_timestep(
     tol: float = 1e-10,
 )-> float:
     """
-    `∆tA = cA h / a` where `cA` is the advective Courant number.
+    `∆tₐ = Cₐ h / a` where `Cₐ` is the advective Courant number.
     """
     ...
 
@@ -70,7 +70,7 @@ def advective_timestep(
     tol: float = 1e-10,
 ) -> float:
     """
-    `∆tA = cA minₓ(h(𝐱)) / u` where `cA` is the advective Courant number.
+    `∆tₐ = Cₐ minₓ(h(𝐱)) / u` where `Cₐ` is the advective Courant number.
     """
     ...
 
@@ -140,7 +140,7 @@ def diffusive_timestep(
     mesh: Mesh | None = None,
 ):
     """
-    `∆tD = cD minₓ(h²(𝐱) / 2|D(𝐱)|)` where `cD` is the diffusive Courant number.
+    `∆tᴅ = Cᴅ minₓ(h²(𝐱) / 2|D(𝐱)|)` where `Cᴅ` is the diffusive Courant number.
 
     If `D` is a tensor, then `|D| = tr(D) / dim(D)`.
     """
@@ -203,7 +203,7 @@ def reactive_timestep(
     tol: float = 1e-10,
 ): 
     """
-    `∆tR = cR / maxₓR(𝐱)` where `cR` is the reactive Courant number.
+    `∆tR = Cᵣ / maxₓR(𝐱)` where `Cᵣ` is the reactive Courant number.
     """
     ...
 
@@ -216,7 +216,7 @@ def reactive_timestep(
     tol: float = 1e-10,
 ): 
     """
-    `∆tR = cR / R` where `cR` is the reactive Courant number.
+    `∆tR = Cᵣ / R` where `Cᵣ` is the reactive Courant number.
     """
     ...
 
@@ -301,7 +301,7 @@ def advective_diffusive_timestep(
     """
     Calculates a timestep combining advective and diffusive constraints.
 
-    `∆tAD = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cD minₓ(h²(𝐱) / |D(𝐱)|)}` 
+    `∆tₐᴅ = min{Cₐ minₓ(h(𝐱) / |𝐚(𝐱)|), Cᴅ minₓ(h²(𝐱) / |D(𝐱)|)}` 
     """
     if a_courant is None and d_courant is not None:
         return diffusive_timestep(d, h, d_courant, dt_max, dt_min, tol, mesh)
@@ -333,7 +333,7 @@ def advective_reactive_timestep(
     """
     Calculates a timestep combining advective and reactive constraints.
 
-    `∆tAR = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cR minₓ(1 / R(𝐱))}` 
+    `∆tₐᵣ = min{Cₐ minₓ(h(𝐱) / |𝐚(𝐱)|), Cᵣ minₓ(1 / R(𝐱))}` 
     """
     if a_courant is None and r_courant is not None:
         return reactive_timestep(r, r_courant, dt_max, dt_min, tol, mesh)
@@ -366,7 +366,7 @@ def adr_timestep(
     """
     Calculates a timestep combining advective, diffusive and reactive constraints.
 
-    `∆tADR = min{cA minₓ(h(𝐱) / |𝐚(𝐱)|), cD minₓ(h²(𝐱) / D(𝐱)), cR minₓ(1 / R(𝐱))}` 
+    `∆tₐᴅᵣ = min{Cₐ minₓ(h(𝐱) / |𝐚(𝐱)|), Cᴅ minₓ(h²(𝐱) / D(𝐱)), Cᵣ minₓ(1 / R(𝐱))}` 
     """
     match a_courant, d_courant, r_courant:
         case None, None, None:

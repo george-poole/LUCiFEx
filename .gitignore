@@ -23,6 +23,7 @@ profile_default/
 ipython_config.py
 
 # compiled
+*.mod
 *.com
 *.class
 *.dll
@@ -31,8 +32,6 @@ ipython_config.py
 *.so
 *.py[cdox]
 *__pycache__/
-*__jit__/
-*__ffcx__/
 
 # distribution
 bin/
