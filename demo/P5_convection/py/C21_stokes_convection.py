@@ -56,8 +56,8 @@ def stokes_rayleigh_benard_rectangle(
     density: Callable[[FunctionSeries], Series] = lambda c: -c, 
     # timestep
     dt_min: float = 0.0,
-    dt_max: float = 0.5,
-    dt_Cu: float = 0.75,
+    dt_max: float = 0.1,
+    dt_Cu: float = 0.1,
     # time discretization
     D_adv: FiniteDifference | FiniteDifferenceArgwise = (AB2 @ CN),
     D_diff: FiniteDifference = CN,

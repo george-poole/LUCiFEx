@@ -269,26 +269,30 @@
     <a href="./demo/P2_introductory/I42_advection_diffusion_rectangle.ipynb">Advection-diffusion of a Gaussian in a rectangle</a> 
     </td>
 <td>
-    <img src="./demo/P2_introductory/thumbnails/I51_helmholtz_evp.png" width="400"/>
-    <a href="./demo/P2_introductory/I51_helmholtz_evp.ipynb">Helmholtz eigenvalue problem in a rectangle</a> 
+    <img src="./demo/P2_introductory/thumbnails/I51_helmholtz_evp_rectangle.png" width="400"/>
+    <a href="./demo/P2_introductory/I51_helmholtz_evp_rectangle.ipynb">Helmholtz eigenvalue problem in a rectangle</a> 
     </td>
     </tr>
 <tr>
     <td>
-    <img src="./demo/P2_introductory/thumbnails/I52_helmholtz_bvp.png" width="400"/>
-    <a href="./demo/P2_introductory/I52_helmholtz_bvp.ipynb">Helmholtz boundary value problem in a rectangle</a> 
+    <img src="./demo/P2_introductory/thumbnails/I52_helmholtz_evp_circle.png" width="400"/>
+    <a href="./demo/P2_introductory/I52_helmholtz_evp_circle.ipynb">Helmholtz eigenvalue problem in a rectangle</a> 
+    </td>
+<td>
+    <img src="./demo/P2_introductory/thumbnails/I53_helmholtz_bvp.png" width="400"/>
+    <a href="./demo/P2_introductory/I53_helmholtz_bvp.ipynb">Helmholtz boundary value problem in a rectangle</a> 
     </td>
 <td>
     <img src="./demo/P2_introductory/thumbnails/I61_mathieu_evp.png" width="400"/>
     <a href="./demo/P2_introductory/I61_mathieu_evp.ipynb">Mathieu eigenvalue problem in an interval</a> 
     </td>
-<td>
-    <img src="./demo/P2_introductory/thumbnails/I71_wave_interval.png" width="400"/>
-    <a href="./demo/P2_introductory/I71_wave_interval.ipynb">Wave equation in an interval</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P2_introductory/thumbnails/I71_wave_interval.png" width="400"/>
+    <a href="./demo/P2_introductory/I71_wave_interval.ipynb">Wave equation in an interval</a> 
+    </td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I81_bcs_dirichlet_time.png" width="400"/>
     <a href="./demo/P2_introductory/I81_bcs_dirichlet_time.ipynb">Diffusion-reaction equation with time-dependent Dirichlet boundary conditions</a> 
     </td>
@@ -296,13 +300,13 @@
     <img src="./demo/P2_introductory/thumbnails/I82_bcs_neumann_time.png" width="400"/>
     <a href="./demo/P2_introductory/I82_bcs_neumann_time.ipynb">Diffusion equation with time-dependent Neumann boundary conditions</a> 
     </td>
-<td>
-    <img src="./demo/P2_introductory/thumbnails/I83_bcs_periodic.png" width="400"/>
-    <a href="./demo/P2_introductory/I83_bcs_periodic.ipynb">Poisson equation with periodic boundary conditions</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P2_introductory/thumbnails/I83_bcs_periodic.png" width="400"/>
+    <a href="./demo/P2_introductory/I83_bcs_periodic.ipynb">Poisson equation with periodic boundary conditions</a> 
+    </td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I84_bcs_robin.png" width="400"/>
     <a href="./demo/P2_introductory/I84_bcs_robin.ipynb">Diffusion equation with Robin boundary conditions</a> 
     </td>
@@ -310,13 +314,13 @@
     <img src="./demo/P2_introductory/thumbnails/I85_bcs_nitsche.png" width="400"/>
     <a href="./demo/P2_introductory/I85_bcs_nitsche.ipynb">Poisson equation with Nitsche boundary conditions</a> 
     </td>
-<td>
-    <img src="./demo/P2_introductory/thumbnails/I91_hp_refinement.png" width="400"/>
-    <a href="./demo/P2_introductory/I91_hp_refinement.ipynb">Steady diffusion-reaction with mesh refinement</a> 
-    </td>
     </tr>
 <tr>
     <td>
+    <img src="./demo/P2_introductory/thumbnails/I91_hp_refinement.png" width="400"/>
+    <a href="./demo/P2_introductory/I91_hp_refinement.ipynb">Steady diffusion-reaction with mesh refinement</a> 
+    </td>
+<td>
     <img src="./demo/P2_introductory/thumbnails/I92_poisson_mms.png" width="400"/>
     <a href="./demo/P2_introductory/I92_poisson_mms.ipynb">Poisson equation with method of manufactured solutions</a> 
     </td>

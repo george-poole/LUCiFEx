@@ -37,8 +37,9 @@ parts:
           - file: demo/P2_introductory/I42_advection_diffusion_rectangle
       - file: demo/P2_introductory/I50_helmholtz_equation
         sections: 
-          - file: demo/P2_introductory/I51_helmholtz_evp
-          - file: demo/P2_introductory/I52_helmholtz_bvp
+          - file: demo/P2_introductory/I51_helmholtz_evp_rectangle
+          - file: demo/P2_introductory/I52_helmholtz_evp_circle
+          - file: demo/P2_introductory/I53_helmholtz_bvp
       - file: demo/P2_introductory/I60_mathieu_equation
         sections: 
           - file: demo/P2_introductory/I61_mathieu_evp

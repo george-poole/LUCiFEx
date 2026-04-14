@@ -31,3 +31,4 @@ To prevent unnecessary diffs from the notebooks, ensure that `git` has been conf
 
 + `nbdime config-git --enable` 
 + `nbstripout --install --keep-output`
++ `git add --renormalize .`
